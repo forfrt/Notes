@@ -1,0 +1,12 @@
+
+___
+##ShortCut
+
+###Zooming
+* z
+* ctrl+shift+'+'
+* ctrl+shift+'-'
+* ctrl+1 100%比例
+* ctrl+2 fix
+
+###Swap and Duplicate Symbol

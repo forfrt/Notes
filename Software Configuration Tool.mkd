@@ -1,0 +1,99 @@
+
+
+软件配置工具
+##软件配置管理工具的功能
+
+1. 配置支持
+1. 版本控制
+
+    版本控制也是支持并行开发的基石
+
+1. 变更控制
+1. 构造支持
+1. 过程支持
+1. 团队支持
+1. 报告/查询
+1. 审计控制
+1. 其他功能
+
+##软件配置管理工具的分类
+1. 版本控制工具，是入门级的工具，例如：CVS、VSS。 
+1. 项目级配置管理工具，适合管理中小型的项目，在版本管理的基础上增加变更控制、状态统计的功能，例如：ClearCase、PVCS。 
+1. 企业级配置管理工具，在实现传统意义的配置管理的基础上又具有比较强的过程管理功能，例如：ALLFUSIONHarvest。在建立自己的配置管理实施方案时，一定要根据自己的管理需要，选择适合自己的工具，从而搭建一个最适合自己的管理平台。
+
+##CVS与Subversion
+SVN和CVS同为开源的*集中式版本控制工具*.随着CVS的一天一天老去，越来越多的缺陷被暴露，SVN正是被设计用于替代CVS的
+
+##Hg/Mercurial
+> Hg是*分布式版本控制工具*
+> Hg简单，并且使用习惯和Subversion非常相似
+
+##Rational ClearCase
+> ClearCase提供了比较全面的配置管理支持，其中包括版本控制、工作空间管理、Build管理等，而且开发人员无需针对其改变现有的环境、工具和工作方式。
+
+1.版本控制
+
+    ClearCase不仅可以对文件、目录、链接进行版本控制，同时还提供了先进的版本分支和归本功能用于支持并行开发。另外，它还支持广泛的文件类型。
+
+2.工作空间管理
+
+    可以为开发人员提供私人存储区，同时可以实现成员之间的信息共享，从而为每一位开发人员提供一致、灵活、可重用的工作空间域。
+
+3.Build管理
+    
+    对ClearCase 控制的数据，既可以使用定制脚本，也可使用本机提供的make 程序。
+
+> ClearCase提供VSS,CVS，StarTeam所支持的功能，但不提供变更管理的功能。Rational另提供了ClearQuest工具提供对变更管理的功能
+> 与StarTeam不同，ClearCase后台的数据库是专有的结构。ClearCase对于windows和unix平台都提供支持。ClearCase通过多点复制支持多个服务器和多个点的可扩展性，并擅长设置复杂的开发过程。
+
+##Hansky Firefly
+> Firefly是一个功能完善、运行速度极快的软件配置管理系统，可以支持不同的操作系统和多种集成开发环境，因此它能在整个企业中的不同团队，不同项目中得以应用。
+> Firefly基于真正的*客户机/服务器体系结构*，不依赖于任何特殊的网络文件系统，可以平滑地运行在不同的LAN、WAN 环境中。
+
+##GIT
+> GIT是*分布式版本控制工具*
+
+###Github: git项目托管网站
+
+####安装：
+　　the last version of Git---msygit
+　　
+####创建项目：
+
+　　1. github页面创建 new respository
+　　2. 进行global setup：（global setup具体作用在？）
+
+　　1. 配置帐号：git config --global user.name "Your Name"
+　　2. 配置邮箱：git config --global user.email defnngj@gmail.com
+　　3. 本地提交初始化
+
+    　　* cd some_project
+　　    * git init//对该目录初始化
+　　    * git add /*./*或git add .//将当前更改或新增文件加入git索引，表示记入了版本历史，提交到了git的本地仓库
+　　    * git commit -m ‘first commit’//对你更新或修改了哪些内容做一个描述
+　　    * git remote add origin https://github.com/someone/some_project.git//添加远程仓库，origin为别名
+　　    * git remote -v//查看当前远程连接仓库地址
+　　    * git push -u origin master//推送远程仓库
+            
+            这里会要求passphrase,这是在设置ssh时要求输入的,可以不输入
+
+####复制到本地
+
+　　* git clone https://github.com/someone/some_project.git some_project//在git下面切换到想存放此项目的文件目录下，运行这条命令就可以将项目克隆下来
+
+####本地更新
+
+    * $ git fetch origin    //取得远程更新，这里可以看做是准备要取了
+    * $ git merge origin/master  //把更新的内容合并到本地分支/master
+
+####项目中删除了一些文件：
+
+　　* $ git status   //可以看到我们删除的哪些文件
+　　* $ git add .   //删除之后的文件提交git管理。
+　　* $ git rm   src/com/hzh/hibernate/dao/aaa.java    //移除我们删除的那个文件，不然git不允许我们往远程仓库提交。
+　　* Ps: 如果你想删除的是某个目录（java包），这里想移除整个目录的内容。
+　　* $ git rm  src/com/hzh/hibernate/bbb/ -r   // -r 会把bbb/目录下的所有内容一次性移动。
+　　
+
+　　
+

@@ -1,0 +1,1538 @@
+#*FiST--A Stackable File System Interface For Linux*
+
+()[http://www.cs.columbia.edu/~ezk/research/fist/]
+()[http://www.filesystem.org]
+
+#Introduction
+Most file systems fall into two categories: 
+1. kernel resident native file systems that interact directly with lower level media such as disks[11] and networks
+2. user-level file systems that are based on an NFS server such as the Amd automounter
+
+##The Stackable Vnode Interface
+
+Wrapfs is implemented as a stackable vnode interface.   
+
+A Virtual Node or vnode (known in Linux as a memory inode) is a data structure used within Unix-based operating systems to represent an open file, directory, device, or other entity (e.g., socket) that can appear in the file system name-space.  
+
+One notable improvement to the vnode concept is vnode stacking[8,14,18], a technique for modularizing file system functions by allowing one vnode interface to call another.  
+
+![A Vnode Stackable File System](../img/FiST/A_Vnode_Stackable_File_System)
+
+----
+
+##Importance 
+
+The FiST (File System Translator) system combines two methods to solve the above problems in a novel way: a set of stackable file system templates for each operating system, and a high-level language that can describe stackable file systems in a cross-platform portable fashion. Using FiST, stackable file systems need only be described once. FiST's code generation tool, fistgen, compiles a single file system description into loadable kernel modules for several operating systems (currently Solaris, Linux, and FreeBSD).  
+
+****
+
+#Design
+
+ The design of Wrapfs concentrated on the following:
+
+1. Simplifying the developer API so that it addresses most of the needs of users developing file systems using Wrapfs.
+
+2. Adding a stackable vnode interface to Linux with minimal changes to the kernel, and with no changes to other file systems.
+
+3. Keeping the performance overhead of Wrapfs as low as possible. 
+
+The basic function of a stackable file system is to pass an operation and its arguments to the lower-level file system.  For every VFS object (inode, dentry, file, superblock, etc.), Wrapfs keeps a one-to-one mapping of a Wrapfs-level object to the lower one.  We call the Wrapfs object the "upper" one, and the one below we call the "lower" one.  Wrapfs stores these mappings as simple pointers inside the private field of the existing VFS objects (e.g., dentry->d_fsdata, sb->s_fs_info, and a container for inodes) 
+
+[More detailed information](http://www.fsl.cs.sunysb.edu/docs/linux-stacking/linux.pdf)
+
+----
+
+##Developer API
+
+There are three parts of a file system that developers wish to manipulate: file data, file names, and file attributes.
+
+ These four functions address the manipulation of file data and file names:
+
+1. *encode_data*
+
+    takes a buffer of 4KB or 8KB size (typical page size), and returns another buffer. The returned buffer has the encoded data of the incoming buffer.This function also returns a status code indicating any possible error (negative integer) or the number of bytes successfully encoded. 
+
+2. *decode_data*:
+
+	 is the inverse function of encode_data and otherwise has the same behavior.
+
+3. *encode_filename*:
+
+	 takes a file name string as input and returns a newly allocated and encoded file name of any length. It also returns a status code indicating either an error (negative integer) or the number of bytes in the new string.  
+
+4. *decode_filename*:
+
+	 is the inverse function of encode_filename and otherwise has the same behavior.  
+
+----
+
+File system developers may also manipulate file attributes such as ownership and modes.
+
+>  Inspecting or changing file attributes in Linux is easy, as they are trivially available by dereferencing the inode structure's fields. Therefore, we decided not to create a special API for manipulating attributes, so as not to hinder performance for something that is easily accessible. 
+
+----
+
+2.2 Kernel Issues
+
+Wrapfs assumes a dual responsibility: it must appear to the layer above it (upper-1) as a native file system (lower-2), and at the same time it must treat the lower level native file system (lower-1) as a generic vnode layer (upper-2).  
+
+![File System Boundaries with Wrapfs](File_System_Boundaries_with_Wrapfs)
+
+> This dual role presents a serious challenge to the design of Wrapfs. A lot of state is exchanged and assumed by both the generic (upper) code and native (lower) file systems. These two parts must agree on who allocates and frees memory buffers, who creates and releases locks, who increases and decreases reference counts of various objects, and so on. This coordinated effort between the upper and lower halves of the file system must be perfectly maintained by Wrapfs in its interaction with them. 
+
+----
+
+###.1 Call Sequence and Existence 
+
+The Linux vnode interface contains several classes of functions:  
+
+1. Mandatory
+1. semi-optional
+1. optional
+1. dependent
+
+----
+
+###.2 Data Structures
+
+1. super_block: represents an instance of a mounted file system (also known as struct vfs in BSD).
+
+2. inode: represents a file object in memory (also known as struct vnode in BSD).
+
+3. dentry: represents an inode that is cached in the Directory Cache (dcache) and also includes its name. This structure is extended in Linux 2.1, and combines several older facilities that existed in Linux 2.0. A dentry is an abstraction that is higher than an inode. A negative dentry is one which does not (yet) contain a valid inode; otherwise, the dentry contains a pointer to its corresponding inode.
+
+4. file: represents an open file or directory object that is in use by a process. A file is an abstraction that is one level higher than the dentry. The file structure contains a valid pointer to a dentry.
+
+5. vm_area_struct: represents custom per-process virtual memory manager page-fault handlers. 
+
+> The key point that enables stacking is that each of the major data structures used in the file system contain a field into which file system specific data can be stored. Wrapfs uses that private field to store several pieces of information, especially a pointer to the corresponding lower level file system's object.  
+
+----
+
+###.3 Caching 
+
+Wrapfs keeps independent copies of its own data structures and objects. For example, each dentry contains the component name of the file it represents. (In an encryption file system, for example, the upper dentry will contain the cleartext name while the lower dentry contain the ciphertext name.) We pursued this independence and designed Wrapfs to be as separate as possible from the file system layers above and below it. This means that Wrapfs keeps its own copies of cached objects, reference counts, and memory mapped pages -- allocating and freeing these as necessary.  
+
+Such a design not only promotes greater independence, but also improves performance, as data is served off of a cache at the top of the stack. Cache incoherency could result if pages at different layers are modified independently. We therefore decided that higher layers would be more authoritative. For example, when writing to disk, cached pages for the same file in Wrapfs overwrite their EXT2 counterparts. This policy correlates with the most common case of cache access, through the uppermost layer.  
+
+****
+
+#Implementation
+
+ Each of the five primary data structures used in the Linux VFS contains an operations vector describing all of the functions that can be applied to an instance of that data structure. We describe the implementation of these operations not based on the data structure they belong to, but based on one of five implementation categories:
+
+1. mounting and unmounting a file system
+
+2. functions creating new objects
+
+3. data manipulation functions
+
+4. functions that use file names
+
+5. miscellaneous functions 
+
+There are two important auxiliary functions in Wrapfs. The first function, interpose, takes a lower level dentry and a wrapfs dentry, and *creates the links between them and their inodes*. When done, the Wrapfs dentry is said to be interposed on top of the dentry for the lower level file system. The interpose function also allocates a new Wrapfs inode, initializes it, and increases the reference counts of the dentries in use. The second important auxiliary function is called hidden_dentry and is the opposite of interpose. It retrieves the lower level (hidden) dentry from a Wrapfs dentry. The hidden dentry is stored in the private data field of struct dentry.  
+
+----
+
+##Mounting and Unmounting 
+
+The function *read_super* performs all of the important actions that occur when mounting Wrapfs. It sets the operations vector of the superblock to that of Wrapfs's, allocates a new root dentry (the root of the mounted file system), and finally calls interpose to link the root dentry to that of the mount point. This is vital for lookups since they are relative to a given directory (see Section 3.2). From that point on, every lookup within the Wrapfs file system will use Wrapfs's own operations.  
+
+----
+
+##Creating New Objects 
+
+Several inode functions result in the creation of new inodes and dentries: lookup, link, symlink, mkdir, and mknod. 
+
+The lookup function is the most complex in this group because it also has to handle negative dentries (ones that do not yet contain valid inodes). Lookup is given a directory inode to look in, and a dentry (containing the pathname) to look for. It proceeds as follows: 
+
+1. encode the file name it was given using encode_filename and get a new one.
+
+2. find the lower level (hidden) dentry from the Wrapfs dentry.
+
+3. call Linux's primary lookup function, called lookup_dentry, to locate the encoded file name in the hidden dentry. Return a new dentry (or one found in the directory cache, dcache) upon success.
+
+4. if the new dentry is negative, interpose it on top of the hidden dentry and return.
+
+5. if the new dentry is not negative, interpose it and the inodes it refers to, as seen in Figure 4. 
+
+----
+
+##Data Manipulation 
+File data can be manipulated in one of two ways:  
+
+1. the traditional read and write interface can be used to read or write any number of bytes starting at any given offset in a file
+2. the MMAP interface can be used to map pages of files into a process that can use them as normal data buffers. The MMAP interface can manipulate only whole pages and on page boundaries. Since MMAP support is vital for executing binaries, we decided to manipulate data in Wrapfs in whole pages.  
+
+Reading data turned out to be easy. We set the file read function to the general purpose generic_file_read function, and were subsequently required to implement only our version of the readpage inode operation.  
+
+Readpage is asked to retrieve one page in a given opened file. Our implementation looks for a page with the same offset in the hidden file. If it cannot find one, Wrapfs's readpage allocates a new one. It proceeds by calling the lower file system's readpage function to get the page's data, and then it decodes the data from the hidden page into the Wrapfs page.  
+
+Finally, Wrapfs's readpage function mimics some of the functionality that generic_file_read performs: it unlocks the page, marks it as referenced, and wakes up anyone who might be waiting for that page.  
+
+----
+
+##File Name Manipulation 
+
+As mentioned in Section 3.2, we use the call to encode_filename at every file system function that is given a file name and has to pass it to the lower level file system, such as rmdir.  
+
+There are only two places where file names are decoded:   
+
+1. readlink needs to decode the target of a symlink after having read it from the lower level file system  
+1. readdir needs to decode each file name read from a directory. Readdir is implemented in a similar fashion to other Linux file systems, by using a callback function called ``filldir'' that is used to process one file name at a time.   
+
+----
+
+##Miscellaneous Functions 
+
+In Section 3.3 we described some MMAP functions that handle file data. Other than those, we had to implement three MMAP-related functions that are part of the vm_area_struct, but only for shared memory-mapped pages: vm_open, vm_close, and vm_shared_unmap. We implemented them to properly support multiple (shared) mappings to the same page. Shared pages have increased reference counts and they must be handled carefully (see Figure 4 and Section 2.2.2). The rest of the vm_area_struct functions were left implemented or unimplemented as defined by the generic operations vectors of this structure.  
+
+This implementation underscored the only change, albeit a crucial one, that we had to make to the Linux kernel. The data structure vm_area_struct is the only one (as of kernel 2.1.129) that *does not contain a private data field* into which we can store a link from our Wrapfs vm_area object to the hidden one of the lower level file system. This change was necessary to support stacking.
+
+All other functions that had to be implemented reproduce the functionality of the generic (upper) level vnode code (see Section 2.2) and follow a similar procedure: for each object passed to the function, they find the corresponding object in the lower level file system, and repeat the same operation on the lower level objects.  
+
+****
+
+#Example
+
+ This section details the design and implementation of four sample file systems we wrote using Wrapfs:
+
+1. Lofs: is a loopback mount file system such as the one available in Solaris.
+
+2. Rot13fs: is a trivial encryption file system that encrypts file data.
+
+3. Cryptfs: is a strong encryption file system that also encrypts file names.
+
+4. Usenetfs: breaks large flat article directories, most often found in very active news spools, into deeper directory hierarchies, so as to improve access time to individual files.
+
+These examples are merely experimental file systems intended to illustrate the kinds of file systems that can be written using Wrapfs. We do not consider them to be complete solutions. There are many potential enhancements to our examples. 
+
+----
+
+##Lofs
+
+Lofs2 provides access to a directory of one file system from another, without using symbolic links. It is most often used by automounters to provide a consistent name space for all local and remote file systems, and by chroot-ed processes to access portions of a file system outside the chroot-ed environment  
+
+This trivial file system was actually implemented by removing unnecessary code from Wrapfs. A loopback file system does not need to manipulate data or file names. We removed all of the hooks that called encode_data, decode_data, encode_filename, and decode_filename. This was done to improve performance by avoiding unnecessary copying.  
+
+----
+
+##Rot13fs 
+
+Before we embarked on a strong encryption file system, described in the next section, we implemented one using a trivial encryption algorithm. We decided at this stage to encrypt only file data. The implementation was simple: we filled in encode_data and decode_data with the same rot13 algorithm (since the algorithm is symmetric).   
+
+----
+
+##Cryptfs 
+
+Cryptfs uses Blowfish] -- a 64 bit block cipher that is fast, compact, and simple. We used 128 bit keys. Cryptfs uses Blowfish in Cipher Block Chaining (CBC) mode, so we can encrypt whole blocks.That is, within each page, bytes depend on the preceding ones. To accomplish this part, we modified a free reference implementation (SSLeay) of Blowfish, and put the right calls to encrypt and decrypt a block of data into encode_data and decode_data, respectively.  
+
+Next, we decided to encrypt file names as well . Once again, we placed the right calls to encrypt and decrypt file names into the respective encode_filename and decode_filename functions. Applying encryption to file names may result in names containing characters that are illegal in Unix file names (such as nulls and forward slashes ``/''). To solve this, we also uuencode file names after encrypting them, and uudecode them before decrypting them. 　　
+
+Key management was the last important design and implementation issue for Cryptfs. We decided that only the root user will be allowed to mount an instance of Cryptfs, but could not automatically encrypt or decrypt files. We implemented a simple ioctl in Cryptfs for setting keys. A user tool prompts for a passphrase and using that ioctl, sends an MD5 hash of the passphrase to a mounted instance of Cryptfs. To thwart an attacker who gains access to a user's account or to root privileges, Cryptfs maintains keys in an in-memory data structure that associates keys not with UIDs alone but with the combination of UID and session ID. To succeed in acquiring or changing a user's key, an attacker would not only have to break into an account, but also arrange for his processes to have the same session ID as the process that originally received the user's passphrase. Since session IDs are set by login shells and inherited by forked processes, a user would normally have to authorize themselves only once in a shell. From this shell they could run most other programs that would work transparently and safely with the same encryption key.
+
+----
+
+##Usenetfs
+
+Busy traditional Usenet news servers could have large directories containing many thousands of articles in directories representing very active newsgroups such as control.cancel and misc.jobs.offered. Unix directory searches are linear and unsorted, resulting in significant delays processing articles in these large newsgroups. We found that over 88% of typical file system operations that our departmental news server performs are for looking up articles. Usenetfs improves the performance of looking up and manipulating files in such large flat directories, by breaking the structure into smaller directories.  
+
+Since article names are composed of sequential numbers, Usenetfs takes advantage of this to generate a simple hash function. After some experimentation, we decided to create a hierarchy consisting of one thousand directories as depicted  
+
+****
+
+#Performance
+
+##Wrapfs & Cryptfs
+Time to Build a Large Package (Sec):  
+
+    File System     SPARC 5     Intel P5/90
+    ext2             1097.0         524.2
+    lofs             1110.1         530.6
+    wrapfs           1148.4         559.8
+    cryptfs          1258.0         628.1
+    nfs              1440.1         772.3
+    cfs              1486.1         839.8
+    tcfs             2092.3         1307.4
+
+Lofs is only 1.1-1.2% slower than the native disk based file system. Wrapfs adds an overhead of 4.7-6.8%, but that is comparable to the 3-10% degradation previously reported for null-layer stackable file systems[8,18] and is the cost of copying data pages and file names.
+
+Wrapfs is the baseline for evaluating the performance impact of the encryption algorithm, because the only difference between Wrapfs and Cryptfs is that the latter encrypts and decrypts data and file names. Cryptfs adds an overhead of 9.5-12.2% over Wrapfs. That is a significant overhead but is unavoidable. It is the cost of the Blowfish encryption code, which, while designed as a fast software cipher, is still CPU intensive. 
+
+Next, we compare the three encryption file systems. Cryptfs is 40-52% faster than TCFS. Since TCFS uses DES and Cryptfs uses Blowfish, however, it is more proper to compare Cryptfs to CFS. Still, Cryptfs is 12-30% faster than CFS. Because both CFS and Cryptfs use the same encryption algorithm, most of the difference between them stems from the extra context switches that CFS incurs. 
+
+![microbenchmarks on the file systems](./img/FiST/Microbenchmarks_on_The_File_Systems.PNG)
+
+----
+
+
+##Usenetfs 
+略
+
+----
+
+##Portability 
+ Since the first ports were for Linux 2.0, they took longer as we were also learning our way around Linux and stackable file systems in general. The bulk of the time was spent initially on porting the Wrapfs template. Using this template, other filesystems were implemented faster.  
+
+this shows the overall estimated times that it took us to develop the file systems mentioned in this paper.
+
+    File Systems    Linux 2.0    Linux 2.1/2.2            
+    wrapfs          2 weeks      1 week            
+    lofs            1 hour       30 minutes            
+    rot13fs         2 hours      1 hour            
+    cryptfs         1 week       1 day            
+    usenetfs        2 days       1 day            
+
+****
+
+#Related Work
+
+##Other Stackable File Systems
+
+##Other Encryption File Systems
+
+CFS[3] is a portable user-level cryptographic file system based on NFS. It is used to encrypt any local or remote directory on a system, accessible via a different mount point and a user-attached directory. Users first create a secure directory and choose the encryption algorithm and key to use. A wide choice of ciphers is available and great care was taken to ensure a high degree of security. CFS's performance is limited by the number of context switches that must be performed and the encryption algorithm used.
+
+TCFS[4] is a modified client-side NFS kernel module that communicates with a remote NFS server. TCFS is available only for Linux systems, and both client and server must run on Linux. TCFS allows finer grained control over encryption; individual files or directories can be encrypted by turning on or off a special flag. 
+
+----
+
+****
+****
+****
+****
+
+
+#*FiST: A Language for Stackable File Systems*
+
+We propose a new language, FiST, to describe stackable file systems. FiST uses operations common to file system interfaces. From a single description, FiST's compiler produces file system modules for multiple platforms. The generated code handles many kernel details, freeing developers to concentrate on the main issues of their file systems.  
+
+****
+
+#Introduction
+
+##Traditional ways
+
+Modifying file systems became a popular method of extending new functionality to users. However, developing file systems is difficult and involved. Developers often use existing code for native in-kernel file systems as a starting point[15,23]. Such file systems are difficult to write and port because they depend on many operating system specifics, and they often contain many lines of complex operating systems code.  //开发文件系统的传统方式
+
+    Media            Common                 Avg. Code Size
+    Type             File System            (C lines)
+    Hard Disks       UFS, FFS, EXT2FS       5,000-20,000
+    Network          NFS                    6,000-30,000
+    CD-ROM           HSFS, ISO-9660         3,000-6,000
+    Floppy           PCFS, MS-DOS           5,000-6,000
+
+User-level file systems are easier to develop and port because they reside outside the kernel. However, their performance is poor due to the extra context switches these file systems must incur. These context switches can affect performance by as much as an order of magnitude.  //用户层文件系统,太慢了!
+
+----
+##Stackable file system
+
+Stackable file systems[19] promise to speed file system development by providing an extensible file system interface. This extensibility allows new features to be added incrementally. Several new extensible interfaces have been proposed and a few have been implemented[8,15,18,22]. To improve performance, these stackable file systems were designed to run in the kernel. Unfortunately, using these stackable interfaces often requires writing lots of complex C kernel code that is specific to a single operating system platform and also difficult to port.  //堆栈式的可增量添加与较高的开发门槛
+
+----
+
+##Wrapfs 
+
+More recently, we introduced a stackable template system called Wrapfs[27]. It eases up file system development by providing some built-in support for common file system activities. It also improves portability by providing kernel templates for several operating systems. While working with Wrapfs is easier than with other stackable file systems, developers still have to write kernel C code and port it using the platform-specific templates.  //Wrapfs的进步(提供内部支持与移植性)与局限(编程与安装门槛还是很高)
+
+----
+
+##FiST
+
+To ease the problems of developing and porting stackable file systems that perform well, we propose a high-level language to describe such file systems. There are three benefits to using a language:  //三个使用高级语言描述文件系统的好处
+
+1. Simplicity: A file system language can provide familiar higher-level primitives that simplify file system development. The language can also define suitable defaults automatically. These reduce the amount of code that developers need to write, and lessen their need for extensive knowledge of kernel internals, allowing even non-experts to develop file systems.
+
+2. Portability: A language can describe file systems using an interface abstraction that is common to operating systems. The language compiler can bridge the gaps among different systems' interfaces. From a single description of a file system, we could generate file system code for different platforms. This improves portability considerably. At the same time, however, the language should allow developers to take advantage of system-specific features.
+
+3. Specialization: A language allows developers to customize the file system to their needs. Instead of having one large and complex file system with many features that may be configured and turned on or off, the compiler can produce special-purpose file systems. This improves performance and memory footprint because specialized file systems include only necessary code. 
+
+With FiST, developers need only describe the core functionality of their file systems. The FiST language code generator, fistgen, generates kernel file system modules for several platforms using a single description.  
+
+----
+
+##Basefs
+
+To assist fistgen with generating stackable file systems, we created a minimal stackable file system template called Basefs. Basefs adds stacking functionality missing from systems and relieves fistgen from dealing with many platform-dependent aspects of file systems.  //最小堆栈式模版:Basefs
+
+Basefs provides simple hooks for fistgen to insert code that performs common tasks desired by file system developers, such as modifying file data or inspecting file names. That way, fistgen can produce file system code for any platform we port Basefs to. The hooks also allow fistgen to include only necessary code, improving performance and reducing kernel memory usage.  //Basefs如何工作(提供为fistgen专用的钩子)
+
+----
+
+##The Fist Language
+
+The FiST language is a high-level language that uses file system features common to several operating systems. It provides file system specific language constructs for simplifying file system development.  //简介
+
+In addition, FiST language constructs can be used in conjunction with additional C code to offer the full flexibility of a system programming language familiar to file system developers.  //与C的结合
+
+The ability to integrate C and FiST code is reflected in the general structure of FiST input files  
+
+![FiST Grammar Outline](./img/FiST/FiST Grammar Outline.PNG)
+
+----
+
+The FiST grammar was modeled after yacc[9] input files, because yacc is familiar to programmers and the purpose for each of its four sections (delimited by ``%%'') matches with four different subdivisions of desired file system code: raw included header declarations, declarations that affect the produced code globally, actions to perform when matching vnode operations, and additional code.  //FiST语法分为四部分
+
+1. C Declarations *(enclosed in ``{% %}'')* are used to include additional C headers, define macros or typedefs, list forward function prototypes, etc. These declarations are used throughout the rest of the code.  //C声明,包含其他C头文件,定义宏与typedef,列出函数原型.作用于为其余全部代码
+
+1. FiST Declarations define global file system properties that affect the overall semantics of the produced code and how a mounted file system will behave. These properties are useful because they allow developers to make common global changes in a simple manner. In this section we declare if the file system will be read-only or not, whether or not to include debugging code, if fan-in is allowed or not, and what level (if any) of fan-out is used. FiST Declarations can also define special data structures used by the rest of the code for this file system. We can define mount-time data that can be passed with the mount(2) system call. A versioning file system, for example, can be passed a number indicating the maximum number of versions to allow per file. FiST can also define new error codes that can be returned to user processes, for the latter to understand additional modes of failure. For example, an encryption file system can return a new error code indicating that the cipher key in use has expired.  //FiST声明，定义参数与特殊数据结构
+
+1. FiST Rules define actions that generally determine the behavior for individual files. **A FiST rule is a piece of code that executes for a selected set of vnode operations**, for one operation, or even a portion of a vnode operation. Rules allow developers to control the behavior of one or more file system functions in a portable manner. **The FiST rules section is the primary section, where most of the actions for the produced code are written**. In this section, for example, we can choose to change the behavior of unlink to rename the target file, so it might be restored later. We separated the declarations and rules sections for programming ease: developers know that global declarations go in the former, and actions that affect vnode operations go in the latter.  //FiST规则部分，定义行为
+
+1. Additional C Code includes additional C functions that might be referenced by code in the rest of the file system. We separated this section from the rules section for code modularity: FiST rules are actions to take for a given vnode function, while the additional C code may contain arbitrary code that could be called from anywhere. This section provides a flexible extension mechanism for FiST-based file systems. Code in this section may use any basic FiST primitives .We also allow developers to write code that takes advantage of system-specific features; this flexibility, however, may result in non-portable code.  //附加C代码段
+
+----
+
+###FiST Syntax
+
+FiST syntax allows referencing mounted file systems and files, accessing attributes, and calling FiST functions. Mount references begin with $vfs, while file references use a shorter ``$`` syntax because we expect them to appear more often in FiST code. References may be followed by a name or number that distinguishes among multiple instances (e.g., $1, $2, etc.) especially useful when fan-out is used (Figure 4). Attributes of mounts and files are specified by appending a dot and the attribute name to the reference (e.g., $vfs.blocksize, $1.name, $2.owner, etc.) The scope of these references is the current vnode function in which they are executing.  //挂载参照以$vfs开头，文件用$开头，接数字或字母
+
+----
+####Read-Only Variables
+
+There is only one instance of a running operating system. Similarly, there is only one process context executing that the file system has to be concerned with. Therefore FiST need only refer to their attributes. These read-only attributes are summarized in Table 2. The scope of all read-only ``%'' attributes is global.  //只读变量,全局可用
+
+![Global Read-Only FiST Variables](./img/FiST/Global_Read_Only_FiST_Variables.PNG)
+
+----
+####Global functions
+
+FiST code can call FiST functions from anywhere in the file system, some of which are shown in Table 3. The scope of FiST functions is global in the mounted file system. These functions form a comprehensive library of portable routines useful in writing file systems. The names of these functions begin with ''fist.'' FiST functions can take a variable number of arguments, omit some arguments where suitable defaults exist, and use different types for each argument. These are true functions that can be nested and may return any single value.  //全局函数在挂载文件系统全局可用，以fist开头
+
+Each mount and file has attributes associated with it. FiST recognizes common attributes of mounted file systems and files that are defined by the system, such as the name, owner, last modification time, or protection modes. FiST also allows developers to define new attributes and optionally store them persistently. Attributes are accessed by appending the name of the attribute to the mount or file reference, with a single dot in between, much the same way that C dereferences structure field names. For example, the native block size of a mounted file system is accessed as `$vfs.blocksize` and the name of a file is `$0.name.`  //使用'.'号来访问属性
+
+----
+
+####New attributes
+
+*FiST allows users to create new file attributes*. For example, an ACL file system may wish to add timed access to certain files. The following FiST Declaration can define the new file attributes in such a file system:  
+
+`per_vnode {`
+`int user; /* extra user */`
+`int group; /* extra group */`
+`time_t expire; /* access expiration time */`
+`};`
+
+> With the above definition in place, a FiST file system may refer to the additional user and group who are allowed to access the file as `$0.user` and `$0.group`, respectively. The expiration time is accessed as `$0.expire`.
+
+> The per_vnode declaration defines new attributes for files, but those attributes are only kept in memory. FiST also provides different methods to define, store, and access additional attributes persistently. This way, a file system developer has the flexibility of deciding if new attributes need only remain in memory or saved more permanently.  //默认情况只把新属性存储在内存中
+
+----
+
+####example about save new attributes permanently
+
+ For example, an encrypting file system may want to store an encryption key, cipher ID, and Initialization Vector (IV) for each file. This can be declared in FiST using:
+
+`fileformat SECDAT {`
+`char key[16]; /* cipher key */`
+`int cipher; /* cipher ID */`
+`char iv[16]; /* initialization vector */`
+`};`
+
+Two FiST functions exist for handling file formats: fistSetFileData and fistGetFileData. These two routines can store persistently and retrieve (respectively) additional file system and file attributes, as well as any other arbitrary data. For example, to save the cipher ID in a file called .key, use:
+
+`int cid;`
+`/* set cipher ID */`
+`fistSetFileData(".key", SECDAT, cipher, cid);`
+
+The above FiST function will produce kernel code to open the file named ''.key'' and write the value of the ''cid'' variable into the ''cipher'' field of the ''SECDAT'' file format, as if the latter had been a data structure stored in the ''.key'' file.  //写入文件
+
+Finally, the mechanism for adding new attributes to mounts is similar. For files, the declaration is per_vnode while for mounts it is per_vfs. The routines fistSetFileData and fistGetFileData can be used to access any arbitrary persistent data, for both mounts and files. 
+
+----
+
+
+###Rules for Controlling Execution and Information Flow 
+
+FiST does not change the interfaces that call it, because such changes will not be portable across operating systems and may require changing many user applications. FiST therefore only exchanges information with applications using existing APIs (e.g., ioctls) and those specific applications can then affect change.  //通过调用API传递消息
+
+The most control FiST file systems have is over the file system (vnode) operations that execute in a normal stackable setting.  
+
+a typical stackable vnode operation does: (1) find the vnode of the lower level mount, and (2) repeat the same operation on the lower vnode.  //典型堆栈式vnode操作：获得下层vnode，使用下层vnode进行该操作
+
+----
+
+![Skeleton_of_Typical_Kernel_C_Code](./img/FiST/Skeleton_of_Typical_Kernel_C_Code.PNG)
+
+The example vnode function receives a pointer to the vnode on which to apply the operation, and other arguments. 
+
+First, the function finds the corresponding vnode at the lower level mount.  
+
+Next, the function actually calls the lower level mounted file system through a standard VOP_* macro that applies the same operation, but on the file system corresponding to the type of the lower vnode. The macro uses the lower level vnode, and the rest of the arguments unchanged.  
+
+Finally, the function returns to the caller the status code which the lower level mount passed to the function.  
+
+----
+
+There are three key parts in any stackable function that FiST can control:  
+
+1. the code that may run before calling the lower level mount (pre-call)
+1. the code that may run afterwards (post-call) 
+1. the actual call to the lower level mount. FiST can insert arbitrary code in the pre-call and post-call sections, as well as replace the call part itself with anything else.  
+
+By default, the pre-call and post-call sections are empty, and the call section contains code to pass the operation to the lower level file system. These defaults produce a file system that stacks on another but does not change behavior, and that was designed so developers do not have to worry about the basic stacking behavior--only about their changes.  //默认情况,pre-call和post-call是空的,调用部分包括了到下层操作的消息传递
+
+----
+
+For example, a useful pre-call code in an encryption file system would be to verify the validity of cipher keys. A replication file system may insert post-call code to repeat the same vnode operation on other replicas. A versioning file system could replace the actual call to remove a file with a call to rename it; an example FiST code for the latter might be:  
+
+`%op:unlink:call {`
+`fistRename($name, fistStrAdd($name, ".unrm"));  //版本控制fs的pre-call`
+`}`
+
+
+----
+
+> The general form for a FiST rule is: 
+> `%callset:optype:part {code}`
+
+![Possible_Value_in_FiST_Rule](./img/FiST/Possible_Value_in_FiST_Rule.PNG)
+
+Callset defines a collection of operations to operate on. 
+
+Optype further defines the call set to a subset of operations or a single operation. 
+
+Part defines the part of the call that the following code refers to: *pre-call, call, post-call, or the name of a newly defined ioctl*.  
+
+Finally, code contains any C code enclosed in braces.  
+
+----
+
+###Filter Declarations and Filter Functions 
+
+FiST file systems can perform arbitrary manipulations of the data they exchange between layers. The most useful and at the same time most complex data manipulations in a stackable file system involve *file data and file names*. To manipulate them consistently without FiST or Wrapfs, developers must make careful changes in many places. For example, file data is manipulated in read, write, and all of the MMAP functions; file names also appear in many places: lookup, create, unlink, readdir, mkdir, etc.  //关键部分--操纵文件数据与文件名
+
+FiST simplifies the task of manipulating file data or file names using two types of filters. A filter is a function like Unix shell filters such as sed or sort: they take some input, and produce possibly modified output.  //使用filter完成操纵
+
+If developers declare filter:data in their FiST file, fistgen looks for two data coding functions in the Additional C Code section of the FiST File:` encode_data and decode_data`. These functions take an input data page, and an allocated output page of the same size. Developers are expected to implement these coding functions in the Additional C Code section of the FiST file. The two functions must fill in the output page by encoding or decoding it appropriately and return a success or failure status code. Our encryption file system uses a data filter to encrypt and decrypt data  //如何操纵文件数据
+
+With the FiST declaration filter:name, fistgen inserts code and calls to encode or decode strings representing file names. The file name coding functions (`encode_name and decode_name`) take an input file name string and its length. They must allocate a new string and encode or decode the file name appropriately. Finally, the coding functions return the number of bytes in the newly allocated string, or a negative error code. Fistgen inserts code at the caller's level to free the memory allocated by file name coding functions.  //如何操纵文件名
+
+Using FiST filters, developers can easily produce file systems that perform complex manipulations of data or names exchanged between file system layers. 
+
+----
+
+##Fistgen
+
+*Fistgen is the FiST language code generator.* Fistgen reads in an input FiST file, and using the right Basefs templates, produces all the files necessary to build a new file system described in the FiST input file. These output files include C file system source files, headers, sources for user level utilities, and a Makefile to compile them on the given platform.  //fistgen概述
+
+Fistgen implements a subset of the C language parser and a subset of the C preprocessor. It handles conditional macros (such as #ifdef and #endif). It recognizes the beginning of functions after the first set of declarations and the ending of functions. It parses FiST tags inserted in Basefs (explained in the next section) used to mark special places in the templates. Finally, fistgen handles FiST variables (beginning with $ or %) and FiST functions (such as fistLookup) and their arguments.  //fistgen怎样工作
+
+After parsing an input file, fistgen builds internal data structures and symbol tables for all the keywords it must handle. Fistgen then reads the templates, and generates output files for each file in the template directory. For each such file, fistgen inserts needed code, excludes unused code, or replaces existing code. **In particular, fistgen conditionally includes large portions of code that support FiST filters: code to manipulate file data or file names**. It also produces several new files (including comments) useful in the compilation for the new file system: a header file for common definitions, and two source files containing auxiliary code.  //fistgen如何生成文件
+
+----
+
+The code generated by fistgen may contain automatically generated functions that are necessary to support proper FiST function semantics.**Each FiST function is replaced with one true C function--not a macro, inlined code, a block of code statements, or any feature** that may not be portable across operating systems and compilers. While it might have been possible to use other mechanisms such as C macros to handle some of the FiST language, it would have resulted in unmaintainable and unreadable code. One of the advantages of the FiST system is that it produces highly readable code. Developers can even edit that code and add more features by hand, if they so choose.  //使用函数带来的可读性提高
+
+Fistgen also produces real C functions for specialized FiST syntax that cannot be trivially handled in C. For example, the fistGetIoctlData function takes arguments that **represent names of data structures and names of fields within**. **A C function cannot pass such arguments; C++ templates would be needed**, but we opted against C++ to avoid requiring developers to know another language, because modern Unix kernels are still written in C, and to avoid interoperability problems between C++ produced code and C produced code in a running kernel. Preprocessor macros can handle data structure names and names of fields, but they do not have exact or portable C function semantics. **To solve this problem, fistgen replaces calls to functions such as fistGetIoctlData with automatically generated specially named C functions that hard-code the names of the data structures and fields to manipulate**. Fistgen generates these functions only if needed and only once.  //针对特殊FiST语法的hard-code C函数
+
+----
+
+##Basefs 
+
+Basefs is a template system which was derived from Wrapfs[27]. It provides basic stacking functionality without changing other file systems or the kernel. To achieve this functionality, the kernel must support three features. 
+
+First, in each of the VFS data structures, Basefs requires a field to store pointers to data structures at the layer below. 
+
+Second, new file systems should be able to call VFS functions. 
+
+Third, the kernel should export all symbols that may be needed by new loadable kernel modules.  
+
+The last two requirements are needed only for loadable kernel modules.  
+
+![where Basefs fits inside the kernel](./img/FiST/Basefs.PNG)
+
+Basefs handles many of the internal details of operating systems, thus freeing developers from dealing with kernel specifics. Basefs provides a stacking layer that is independent from the layers above and below it  //内核中地位
+
+----
+
+Basefs performs all data reading and writing on whole pages. This simplifies mixing regular reads and writes with memory-mapped operations, and gives developers a single paged-based interface to work with. Currently, file systems derived from Basefs manipulate data in whole pages and may not change the data size  //简化读写函数修改
+
+To improve performance, Basefs copies and caches data pages in its layer and the layers below it.Basefs saves memory by caching at the lower layer only if file data is manipulated and fan-in was used; these are the usual conditions that require caching at each layer.  //缓存数据页
+
+----
+###What's difference between Wrapfs and Basefs
+
+Basefs is different from Wrapfs in four ways.
+
+First, substantial portions of code to manipulate file data and file names, as well as debugging code are not included in Basefs by default. These are included only if the file system needs them. By including only code that is necessary we generate output code that is more readable than code with multi-nested #ifdef/#endif pairs. Conditionally including this code also resulted in improved performance. Matching or exceeding the performance of other layered file systems was one of the design goals for Basefs.  //简化不必要代码
+
+Second, Basefs adds support for fan-out file systems natively. This code is also conditionally included, because it is more complex than single-stack file systems, adds more performance overhead, and consumes more memory. A complete discussion of the implementation and behavior of fan-out file systems is beyond the scope of this paper.  //支持扇出
+
+Third, Basefs includes (conditionally compiled) support for many other features that had to be written by hand in Wrapfs. This added support can be thought of as a library of common functions: opening, reading or writing, and then closing arbitrary files; storing extended attributes persistently; user-level utilities to mount and unmount file systems, as well as manipulate ioctls; inspecting and modifying file attributes, and more.  //新特征支持
+
+Fourth, Basefs includes special tags that help fistgen locate the proper places to insert certain code. Inserting code at the beginning or the end of functions is simple, but in some cases the code to add has to go elsewhere. For example, handling newly defined ioctls is done (in the basefs_ioctl vnode function) at the end of a C ``switch'' statement, right before the ``default:'' case.  //特殊标签以便于插入代码
+
+****
+
+#Implementation
+
+We implemented the FiST system in Solaris, Linux, and FreeBSD because these three operating systems span the most popular modern Unix platforms and they are sufficiently different from each other. This forced us to understand the generic problems in addition to the system-specific problems. Also, we had access to kernel sources for all three platforms, which proved valuable during the development of our templates. Finally, all three platforms support loadable kernel modules, which sped up the development and debugging process. Loadable kernel modules are a convenience in implementing FiST; they are not required.  //为何是Solaris,Linux,FreeBSD这三个系统
+
+The implementation of Basefs was simple and improved on previously reported efforts[27]. No changes were required to either Solaris or FreeBSD. No changes to Linux were required if using statically linked modules. To use dynamically loadable kernel modules under Linux, only three lines of code were changed in a header file. This change was passive and did not have any impact on the Linux kernel.  //轻松编译
+
+We implemented read-only execution environment variables (Section 2.3.1) such as %uid by looking for them in one of the fields from struct cred in Solaris or struct ucred in FreeBSD. The VFS passes these structures to vnode functions. The Linux VFS simplifies access to credentials by reading that information from the disk inode and into the in-memory vnode structure, struct inode. So on Linux we find UID and other credentials by referencing a field directly in the inode which the VFS passes to us.  //read-only变量实现
+
+ On Linux they are part of the main vnode structure. On Solaris and FreeBSD, however, we first perform a VOP_GETATTR vnode operation to find them, and then return the appropriate field from the structure that the getattr function fills.  
+
+The vnode attribute ``name'' was more complex to implement, because most kernels do not store file names after the initial name lookup routine translates the name to a vnode. On Linux, implementing the vnode name attribute was simple, because it is part of a standard directory entry structure, dentry. On Solaris and FreeBSD, however, we add code to the lookup vnode function that stores the initial file name in the private data of the vnode. That way we can access it as any other vnode attribute, or any other per-vnode attribute added using the per_vnode declaration. We implemented all other fields defined using the per_vfs FiST declaration in a similar fashion.  //文件名存储实现
+
+The FiST declarations affect the overall behavior of the generated file system. We implemented the read-only access mode by replacing the call part of every file system function that modifies state (such as unlink and mkdir) to return the error code ``read-only file system.'' We implemented the fan-in mount style by excluding code that uses the mounted directory's vnode also as the mount point.  //FiST声明部分的实现
+
+The only difficult part of implementing the ioctl declaration and its associated functions, fistGetIoctlData and fistSetIoctlData , was finding how to copy data between user space and kernel space. Solaris and FreeBSD use the routines copyin and copyout; Linux 2.3 uses copy_from_user and copy_to_user.  //ioctl的实现
+
+ The last complex feature we implemented was the fileformat FiST declaration and the functions used with it: fistGetFileData and fistSetFileData . Consider this small code excerpt:
+
+`fileformat fmt { data structure;}`
+`fistGetFileData(file, fmt, field, out);`
+
+First, we generate a C data structure named *fmt*. To implement fistGetFileData, we open *file*, read as many bytes from it as the size of the data structure, map these bytes onto a temporary variable of the same data structure type, copy the desired *field* within that data structure into *out*, close the file, and finally return a error/success status value from the function. To improve performance, if fileformat related functions are called several times inside a vnode function, we keep the file they refer to open until the last call that uses it.  //fileformat的实现
+
+Fistgen itself (excluding the templates) is highly portable, and can be compiled on any Unix system. The total number of source lines for fistgen is 4813  
+
+****
+
+#Evaluation
+
+We evaluate the effectiveness of FiST using three criteria: code size, development time, and performance. We report results based on the four example file systems described in this paper: Snoopfs, Cryptfs, Aclfs, and Unionfs. These were tested on three different platforms: Linux 2.3, Solaris 2.6, and FreeBSD 3.3.  
+
+----
+
+##Code Size
+
+Code size is one measure of the development effort necessary for a file system.  
+
+To demonstrate the savings in code size achieved using FiST, we compare the number of lines of code that need to be written to implement the four examplefile systems in FiST versus three other implementation approaches: writing C code using a stand-alone version of Basefs, writing C code using Wrapfs, and writing the file systems from scratch as kernel modules using C.In particular, we first wrote all four of the example file systems from scratch before writing them using FiST. For these example file systems, the C code generated from FiST was *identical* in size (modulo white-spaces and comments) to the hand-written code. We chose to include results for both Basefs and Wrapfs because the latter was released last year, and includes code that makes writing some file systems easier with Wrapfs than Basefs directly.  //比较方式
+
+When counting lines of code, we excluded comments, empty lines, and %% separators. For Cryptfs we excluded 627 lines of C code of the Blowfish encryption algorithm, since we did not write it. When counting lines of code for implementing the example file systems using the Basefs and Wrapfs stackable templates, we exclude code that is part of the templates and only count code that is specific to the given example file system. We then averaged the code sizes for the three platforms we implemented the file systems on: Linux 2.3, Solaris 2.6, and FreeBSD 3.3. These results are shown as below. For reference, we include the code sizes of Basefs and Wrapfs and also show the number of lines of code required to implement Wrapfs in FiST and Basefs.  //只计算实现的特定代码行数
+
+![Average_Code_Size_in_Comparsion.PNG](./img/FiST/Average_Code_Size_in_Comparsion.PNG)
+
+----
+
+This figure shows large reductions in code size when comparing FiST versus code hand-written from scratch--generally writing tens of lines instead of thousands. We also include results for the two templates. Size reductions for the four example file systems range from a factor of 40 to 691, with an average of 255. We focus though on the comparison of FiST versus stackable template systems. As Wrapfs represents the most conservative comparison, the figure shows for each file system the additional number of lines of code written using Wrapfs. The smallest average code size reduction in using FiST versus Wrapfs or Basefs across all four file systems ranges from a factor of 1.3 to 31.1; the average reduction rate is 10.5.  //比较结果
+
+First, moderate (5-6 times) savings are achieved for Snoopfs, Cryptfs, and Aclfs. The reason for this is that some lines of FiST code for these file systems produce ten or more lines of C code, while others result in almost a one-to-one translation in terms of number of lines.  
+
+Second, the largest savings appeared for Unionfs, a factor of 28-33 times. The reason for this is that fan-out file systems produce C code that affects all vnode operations; each vnode operation must handle more than one lower vnode. This additional code was not part of the original Wrapfs implementation, and it is not used unless fan-outs of two or more are defined (to save memory and improve performance). If we exclude the code to handle fan-outs, Unionfs's added C code is still over 100 lines producing savings of a factor of 7-10. FreeBSD's Unionfs is 4863 lines long, which is 50% larger than our Unionfs (3232 lines). FreeBSD's Unionfs is 2221 lines longer than their Nullfs, while ours is only 481 lines longer than our Basefs.  
+
+Figure shows the code sizes for each platform. The savings gained by FiST are multiplied with each port. If we sum up the savings for the above three platforms, we reach reduction factors ranging from 4 to over 100 times when comparing FiST to code written using the templates. This aggregated reduction factor exceeds 750 times when comparing FiST to C code written from scratch. The more ports of Basefs exist, the better these cumulative savings would be.
+
+----
+
+##Development Time 
+
+Estimating the time to develop kernel software is very difficult. Developers' experience can affect this time significantly, and this time is generally reduced with each port. In this section we report our own personal experiences given these file system examples and the three platforms we worked with; these figures do not represent a controlled study. Figure as below shows the number of days we spent developing various file systems and porting them to three different platforms.  //开发者本人开发时间
+
+![Average_Development_Time_in_Comparsion.PNG](./img/FiST/Average_Development_Time_in_Comparsion.PNG)
+
+> We estimated the incremental time spent designing, developing, and debugging each file system, assuming 8 hour work days, and using our source commit logs and change logs. We estimated the time it took us to develop Wrapfs, Basefs, and the example file systems. Then we measured the time it took us to develop each of these file systems using the FiST language.  //计量规则
+
+For most file systems, incremental time savings are a factor of 5-15 because hand writing C code for each platform can be time consuming, while FiST provides this as part of the base templates and the additional library code that comes with Basefs. For Cryptfs, however, there are no time savings per platform, because the vast majority of the code for Cryptfs is in implementing the four encoding and decoding functions, which are implemented in C code in the Additional C Code section of the FiST file; the rest of the support for Cryptfs is already in Wrapfs.  //使用FiST开发提高的效率及特殊情况原因
+
+The average per platform reduction in development time across the four file systems is *a factor of seven* in using FiST versus the Wrapfs templates. If we assume that development time correlates directly to productivity, we can corroborate our results with Brooks's report that high-level languages are responsible for at least a factor of five in improved productivity[3].  
+
+----
+
+##Performance 
+
+To evaluate the performance of file systems written using FiST, we tested each of the example file systems by mounting it on top of a disk based native file system and running benchmarks in the mounted file system. We conducted measurements for Linux 2.3, Solaris 2.6, and FreeBSD 3.3. The native file systems used were EXT2, UFS, and FFS, respectively. We measured the performance of our file systems by building a large package: am-utils-6.0, which contains about 50,000 lines of C code in several dozen small files and builds eight binaries; the build process contains a large number of reads, writes, and file lookups, as well as a fair mix of most other file system operations. Each benchmark was run once to warm up the cache for executables, libraries, and header files which are outside the tested file system; this result was discarded. Afterwards, we took 10 new measurements and averaged them. In between each test, we unmounted the tested file system and the one below it, and then remounted them; this ensured that we started each test on a cold cache for that file system. The standard deviations for our measurements were less than 2% of the mean. We ran all tests on the same machine: a P5/90, 64MB RAM, and a Quantum Fireball 4.35GB IDE hard disk.  //测试方法与条件
+
+
+Figure shows the performance overhead of each file system compared to the one it was based on. The intent of these figures is two-fold: (1) to show that the basic stacking overhead is small, and (2) to show the performance benefits of conditionally including code for manipulating file names and file data in Basefs. Basefs+ refers to Basefs with code for manipulating file names and file data.  //
+
+The most important performance metric is the basic overhead imposed by our templates. The overhead of Basefs over the file systems it mounts on is just 0.8-2.1%. This minimum overhead is below the 3-10% degradation previously reported for null-layer stacking. In addition, the overhead of the example file systems due to new file system functionality is greater than the basic stacking overhead imposed by our templates in all cases, even for very simple file systems. With regard to performance, developers who extend file system functionality using FiST primarily need to be concerned with the performance cost of new file system functionality as opposed to the cost of the FiST stacking infrastructure. For instance, the overhead of Cryptfs is the largest of all the file systems shown due to the cost of the Blowfish cipher. Note that the performance of individual file systems can vary greatly depending on the operating system in question.  //比较结果:FiST负载比其他堆栈式还要小,开发者只需要考虑算法负载即可
+
+Figure also shows the benefits of having FiST customize the generated file system infrastructure based on the file system functionality required. The comparison of Basefs+ versus Basefs shows that the overhead of including code for manipulating file names and file data is 4.2-4.9% over Basefs. This added overhead is not incurred in Basefs unless the file systems derived from it requires file data or file name manipulations. While Cryptfs requires Basefs+ functionality, Snoopfs, Aclfs, and Unionfs do not. Compared to a stackable file system such as Wrapfs, *FiST's ability to conditionally include file system infrastructure* code saves an additional 4% of performance overhead for Snoopfs, Aclfs, and Unionfs.  //因为Basefs+ vs Basefs的负载大约为4%,因此对于不使用操纵文件数据与文件名的文件系统,使用FiST可以节省4%的负载(FiST只生成对特定开发的文件系统有用的基础代码)
+
+Finally, since we did not change the VFS, and all of our stacking work is in the templates, there is no overhead on the rest of the system; performance of native file systems (NFS, FFS, etc.) is unaffected when our stacking is not used.  
+
+****
+
+#Related Work 
+
+Rosenthal first implemented stacking in SunOS 4.1 in the early 1990s[19]. A few other projects followed his, including further prototypes for extensible file systems in SunOS[22], and the Ficus layered file system[5,7]. Webber implemented file system interface extensions that allow user-level file servers[25]. Unfortunately, these implementations required modifications to either existing file systems or the rest of the kernel, limiting their portability significantly, and affecting the performance of native file systems. FiST achieves portability using a minimal stackable base file system, Basefs, which can be ported to another platform in 1-3 weeks. No changes need to be made to existing kernels or file systems, and there is no performance penalty for native file systems.  //堆栈式的历史与发展
+
+Newer operating systems, such as the HURD[4], Spring[13], and the Exokernel[10] have an extensible file system interface.  
+
+The HURD is a set of servers running under the Mach 3.0 microkernel[1] that collectively provide a Unix-like environment. HURD translators are programs that can be attached to a pathname and perform specialized services when that pathname is accessed. Writing translators entails implementing a well defined file access interface and filling in stub operations for reading files, creating directories, listing directory contents, etc.  //HURD
+
+Sun Microsystems Laboratories built Spring, an object-oriented research operating system[13]. Spring was designed as *a set of cooperating servers on top of a microkernel*. It provides generic modules that offer services useful for a file system: caching, coherency, I/O, memory mapping, object naming, and security. Writing a file system for Spring involves defining the operations to be applied on the objects. Operations not defined are inherited from their parent object. One work that resulted from Spring is the **Solaris MC (Multi-Computer) File System**[12]. It borrowed the object-oriented interfaces from Spring and integrated them with the existing Solaris vnode interface to provide a distributed file system infrastructure through a special Proxy File System. Solaris MC provides all of Spring's benefits, while requiring little or no change to existing file systems; those can be ported gradually over time. Solaris MC was designed to perform well in a closely coupled cluster environment (not a general network) and requires high performance networks and nodes.  //Spring
+
+The Exokernel is an extensible operating system that comes with XN, a low-level in-kernel stable storage system[10]. XN allows users to describe the on-disk data structures and the methods to implement them (along with file system libraries called libFSes). The Exokernel requires significant porting work to each new platform, but then it can run many unmodified applications.  //Exokernal
+
+The main disadvantages of the HURD, Spring, and the Exokernel are that they are not portable enough, not sufficiently developed or stable, or they are not available for general use. In comparison, FiST provides portable stacking on widely available operating systems. Finally, none of the related extensible file systems come with a high-level language that developers can use to describe file systems.  //移植性不强,不稳定,等等--最关键,木有高级语言描述
+
+High level languages have seldom been used to generate code for operating system components. FiST is the first major language to describe a large component of the operating system, the file system. Previous work in the area of operating system component languages includes a language to describe video device drivers  //FiST的里程碑作用
+
+****
+
+#Conclusions
+
+The main contribution of this work is the FiST language which can describe stackable file systems. This is a first time a high-level language has been used to describe stackable file systems. From a single FiST description we generate code for different platforms. We achieved this portability because FiST uses an API that combines common features from several vnode interfaces. FiST saves its developers from dealing with many kernel internals, and lets developers concentrate on the core issues of the file system they are developing. FiST reduces the learning curve involved in writing file systems, by enabling non-experts to write file systems more easily.  //最大的亮点在于:FiST
+
+The most significant savings FiST offers is in reduced development and porting time. The average time it took us to develop a stackable file system using FiST was about seven times faster than when we wrote the code using Basefs. We showed how FiST descriptions are more concise than hand-written C code: 5-8 times smaller for average stackable file systems, and as much as 33 times smaller for more complex ones. FiST generates file system modules that run in the kernel, thus benefiting from increased performance over user level file servers. The minimum overhead imposed by our stacking infrastructure is 1-2%.  //最大的作用在于减少开发与安装时间
+
+FiST can be ported to other Unix platforms in 1-3 weeks, assuming the developers have access to kernel sources. The benefits of FiST are multiplied each time it is ported to a new platform: existing file systems described with FiST can be used on the new platform without modification.  
+
+##Future Work
+
+We are developing support for file systems that change sizes such as for compression. The main complexity with supporting compression is that the file offsets at the upper and lower layers are no longer identical, and some form of efficient mapping is needed for operations such as appending to a file or writing in the middle. This code complicates the templates, but makes no change to the language.  //可变大小文件系统
+
+We are also exploring layer collapsing in FiST: a method to generate one file system that merges the functionality from several FiST descriptions, thus saving the per-layer stacking overheads.  
+
+We plan to port our system to Windows NT. NT has a different file system interface than Unix's vnode interface. NT's I/O subsystem defines its file system interface. NT Filter Drivers are optional software modules that can be inserted above or below existing file systems[14]. Their task is to intercept and possibly extend file system functionality. One example of an NT filter driver is its virus signature detector. It is possible to emulate file system stacking under NT. We estimate that porting Basefs to NT will take 2-3 months, not 1-3 weeks as we predict for Unix ports.  //NT的可移植性
+
+****
+
+#Acknowledgments
+
+> We would like to thank the anonymous USENIX reviewers and our shepherd Keith Smith, for their helpful comments in reviewing this paper. This work was partially made possible by NSF infrastructure grants numbers CDA-90-24735 and CDA-96-25374.  
+
+
+****
+****
+****
+
+#*A File System Component Compiler*
+
+##FiST Vnode Attributes
+
+Each vnode has a set of attributes that apply to it. **FiST refers to vnode attributes by prefixing their standard names with a % character**.  //vnode属性
+
+	Attribute 	Meaning
+
+	%type 	    regular files, directories, block devices, character devices, symbolic links, Unix pipes, etc. Operations in FiST could apply to one or more of these vnode types (defined in system headers).
+	%mode 	    a file has several mode bits that determine if that file can be read, written, or executed by the owner, members of the group, or all others. Also includes ``set'' bits (setuid, setgid, etc).
+	%owner 	    The user ID who owns the file.
+	%group 	    The group ID that owns the file.
+	%size 	    The size of the file in bytes or blocks.
+	%time 	    ``Creation,'' modification, and last access times of the file -- referred to as %ctime, %mtime, and %atime, respectively. Defaults to modification time.
+	%data 	    The actual data blocks of the file.
+	%name 	    The (path) name of the file. This is the first name that a vnode was opened with (in case a file has multiple names). Since usually Unix does not keep file names stored in the kernel, FiST will arrange for them to be stored in the private data of a vnode if this attribute is used.
+	%fid 	    The ``File ID'' of the file (as computed by vn_fid).
+	%misc 	    Miscellaneous information about a file that would rarely need to be modified.
+
+----
+
+FiST also includes attributes for certain universal Unix kernel concepts that might be useful in specifying file system operations.  //一些特定文件系统操作属性
+
+	Attribute 	    Meaning
+	%cur_uid 	    The user ID of the currently accessing process.
+	%cur_gid 	    The group ID of the currently accessing process.
+	%cur_pid 	    The process ID currently running.
+	%cur_time 	    The current time in seconds since the Unix epoch.
+	%from_host 	    The IP address of the host from where access to this vnode has been initiated. Use 127.0.0.1 for the local host, and 0.0.0.0 if the address could not be found.
+
+----
+
+##FiST Vnode Functions 
+
+Each vnode or VFS has a set of operations that can be applied to it. The most obvious are %vn_op and %vfs_op. Here, op refers to the respective Vnode and VFS operations. For example, %vn_getattr refers to the vnode operation ``get attributes,'' and %vfs_statvfs refers to the VFS operation ``get file system statistics.''  //
+
+It is often useful to refer to a group of vnode operations as a whole. Generally, a user who wants to perform an operation on one type of data will want that operation to be applied everywhere the same type of data object is used. For example, in Envfs environment variables in pathnames should be expanded everywhere pathnames are used, not just, say, in the vn_open function. FiST provides meta-function operators that start with %vn_op and %vfs_op. These meta-functions are listed in Table tab-fist-func-meta.  //FiST元函数
+
+
+
+****
+****
+****
+
+
+#*FiST: A System for Stackable File-System Code Generation*
+
+#Chapter 1 Introduction
+
+****
+
+#Chapter 2 Background
+
+##2.1 Evolution of File System Development
+
+File: A file is a stoage data object along with its attributes. For example,the list of user names and their passwords is the data of an object. One attribute of such an object can be its owner: root; another attribute can be its size in bytes.  //文件是一个包含其属性的存储数据结构
+
+File System: A file system is a collection of file objects with the operations that can be performed on these files. For example, a file system knows how to arrange a collection of files on a media such as a hard disk or a floppy. The file system also knows how to apply file operations to those objects, such as reading a file, listing the names of files, deleting a file, etc.  //w文件系统是文件对象与对应操作的集合
+
+###2.1.1 Native File System
+
+Native file systems are part of the operating system and call device drivers directly.  //作为操作系统的一部分,本地操作系统可以直接调用硬件驱动
+
+----
+
+###2.1.2 User-Level File Systems
+
+----
+
+###2.1.3 The Vnode Interface
+
+![Vnode Interface](./img/FiST/Vnode_Interface.PNG)
+> In Vnode-based file systems, a system call is translated first to a generic Virtual File System (VFS) call, and the VFS in turn makes the call to the specific file system.  //VFS将调用传递给特定文件系统
+
+There is a generic section of file-system code in the (Unix) kernel, called the Virtual File System (VFS)  
+
+The VFS is also often called the upper-level file-system code because it is a layer of abstraction above the file-system–specific code.  //VFS是文件系统的抽象
+
+----
+
+A Virtual Node (Vnode) is a handle to a file maintained by a running kernel. This handle is a data structure that contains useful information associated with the file object. The vnode object also contains a list of functions that can be applied to the file object itself. These functions form a vector of operations that are defined by the file system to which the file belongs.  //Vnode是内核中包含相关信息和相关函数的文件对象句柄.其中函数定义于对应文件系统
+
+Vnodes are the primary objects manipulated by the VFS. The VFS creates and destroys vnodes. It fills them withpertinent information, some of which is gathered from specific file systems by handing the vnode object to a lower levelfile system. The VFS treats vnodes generically without knowing exactly which file system they belong to.  //Vnode是VFS操纵主要对象
+
+----
+
+The Vnode Interface is an API that defines all of the possible operations that a file system implements. This interface is often internal to the kernel, and resides in between the VFS and lower-level file systems.  Since the VFS implements generic functionality , it does not know of the specifics of any one file system. Therefore, new file systems must adhere to the conventions set by the VFS; these conventions specify the names, prototypes, return values, and expected behavior from all functions that a file system can implement.  //Vnode Interface是VFS与底层文件系统间的API
+
+Vnode-based file systems are hard to write, port, and maintain. However, they perform well because they reside in the kernel. Such file systems are often written from scratch because they interact with many operating-system specifics.  //Vnode-base文件系统开发困难,但是表现较好.
+
+----
+
+###2.1.4 A Stackable Vnode Interface
+
+One notable impro vement to the vnode concept is vnode stacking [31, 63, 69], a technique for modularizing filesystem functions. Stacking is the idea that a vnode object that normally relates—or points—to low-level file system code, may in fact point to another vnode, perhaps even more than one vnode. This idea allows one vnode interface to call another . However, to support stacking, all vendors had to change their original vnode interface significantly . This work often in volved major changes to the rest of the operating system to support stacking, and included rewriting existing file systems to a newer stackable interface.  //Stacking Vnode可以使Vnode指向另一个Vnode,不过为了支持Stacking,要对操作系统做出大量修改
+
+----
+
+Before stacking existed, there was only a single vnode interface. Higher-level operating-systems code called the vnode interface which in turn called code for a specific file system. With vnode stacking, serveral vnode interfaces may exist and they may call each other in sequence;  //操作系统通过vnode interface调用特定文件系统api.在堆栈式后,存在多层vnode interface的依次调用
+
+----
+
+A stackable file system is one that stacks its vnodes on the top of another file system.  //堆栈式在另外文件系统之上
+
+A regular VFS defines a file system API defining the operations that it expects file systems to implement, calling conventions, and more.  //常规VFS定义文件系统API操作
+
+A stackable VFS denfines a symmetric file system API: the operations and conventions of the file system's callers and callees are identical. In other words, stackable file systems are said to be transparent above and below them.  //堆栈式VFS定义对称式文件系统API,即堆栈式文件系统对其上和其下的文件系统是透明的
+
+----
+
+More generally than a single stack, vnode can be composed. That is, vnodes need not form a simple linear order, but can branch.This branching is provided by a single vnode calling, or being called from, multiple vnodes. These configurations are called *fan-out* and *fan-in*. Composition creates an *directed acyclic graph(DAG)* of file systems.  //vnode可被多个vnode操作构成.这样的配置称为fan-out&fan-in,DAG
+
+----
+
+![Cachefs](./img/FiST/Cachefs.PNG)
+
+1. files are accessed from a compressed(Gzipfs), replicated (Replicfs), file system and cached in an encrypted (Cryptfs), compressed file system.
+
+2. One of replicas of the source file system is itself encrypted, presumably with a key different from that of the encrypted cache.
+
+3. The cache is stored in a UFS physical file system
+
+4. Each of the three replicas is stored in a different type of physical file system, UFS, NFS, and PCFS.
+
+This file system could decomposed into a set of components:
+
+1. a caching file system
+1. a cryptgraphic file system
+1. a compressing file system
+1. a replicated file system
+
+----
+
+#### First stacking interfaces
+
+
+****
+
+#Chapter 3 Design Overview
+
+###3.3.1 Developing From Scratch
+1. locate an operating system with avavilable sources for any one file system
+1. read and understand the code for that file system and any associated kernel code
+1. write a new file system that includes the desired functionality, loosely basing the overall implementation on another file system that was already written
+1. compile the sources into a new file system, possibly rebuilding a new kernel and rebooting the system
+1. mount the new file system, test, and debug as needed
+
+> After completing this, the developer is left with one modified file system for one operating system. The amount of code that has to be written is in the range of thousands of lines.
+----
+
+###3.3.2 Developing Using Existing Stacking
+
+----
+
+###3.3.3 Developing Using FiST
+
+1. write the code in FiST once
+1. run fistgen on the input file
+1. compile the produced sources into a loadable kernel module, and load it into a running system
+1. mount the new file system, test, and debug as needed
+
+----
+
+##3.4 The FiST Programming Model
+
+In previous systems, developers had to locate by hand all of the places where they wanted to insert their code or modify existing code. FiST allows you to add or modify code more accurately.  //FiST帮助准确修改局部代码
+
+FiST file systems can insert pre-call, post-call, and call actions as follows:  
+
+- pre-call
+
+    Before calling the lower-level file system
+
+- post-call
+
+    After returning from the call to lower-level file system
+
+- call
+
+    You can also replace the actual call to the lower level file system with any other call.
+
+Together, the above three calling forms allow developers full control over stacked operations. Developers can change any part of an operation, but they do not have to change anything by default.  //可对任何部分进行修改,或完全不改
+
+To change one of these parts, you declare it with its associated code in the *FiST input file*. Fistgen, the FiST code generator, reads the FiST input file and the appropriate templates. It parses the templates, replacing, removing, and adding code as a result of various declarations in the FiST input file.  //Fistgen使用Fist input file与恰当模版
+
+The FiST language allows several directives to affect the same vnode operation. In that case, additional pre-call code is inserted in front of existing pre-call code, and additional post-call code is inserted after existing post-call code. This is done in a recursive-like manner to provide proper nesting of code context  //允许多个指令影响vnode操作(pre-call&post-call)
+
+the call part can be replaced only once, because stackable file systems have only one type of call they make. if additional calls are needed, they can be inserted in the pre-call or post-call parts.  //call只能被复写一次
+
+----
+
+##3.5 The File-System Model
+
+FiST-produced file systems run in the kernel to provide the best performance possible. FiST file system mirror the vnode interface both above and below. The interface to user processes is the system-call interface. FiST can change information passed and returned through these tow interfaces.  //FiST文件系统运行于内核,可以处理系统调用接口与vnode接口的传入返回信息
+
+In FiST, we model a file system as a collection of mounts, files, and user processes, all running under one system. Several mounts, mounted instances of file systems, can exist at any time. A FiST-produced file system can access and manipulate various mounts and files, data associated with them, and their attributes--as well as access the function that operate on them. Furthermore, the file system can access attributes that correspond to the run-time execution environment;  //FiST文件系统可操作关于文件系统的文件,数据,属性,函数甚至运行时环境属性
+
+Information generally flows between user processes and the mounted file system through the system-call interface. In addition, mounted file systems may return arbitrary error codes back to user processes.  //信息通过系统调用借口传递,返回任意错误代码
+
+Since a FiST-produced stackable file system is the caller of other file systems, it has a lot of control over what transpires, between it and the ones below, through the vnode interface. FiST allows access to multiple mounts and files. Each mount or file may have multiple attributes that FiST can access. Also, FiST can determine how to apply vnode functions on each file. For maximum flexibility, FiST allows the developer full control over mounts and files, their data, their attributes, and the functions that operate on them.  //FiST文件系统作为调用者,可操作多个mount或file的属性,函数
+
+Ioctls(I/O Controls) have been used as an operating-system extension mechanism as they can exchange arbitrary information between user processes and the kernel, as well as in between file-system layers, without changing interfaces. FiST allows developers to define new ioctls and define the actions to take when they are used; this can be used to create application-specific file systems. FiST also provides functions for portable copying of ioctl data between user and kernel spaces.  //ioctls可以在文件系统间任意交换信息.FiST允许定义新ioctl
+
+****
+
+#Chapter 4 The FiST Language
+
+The FiST language is the first of the three main components of the FiST system.
+
+##4.1 Overview of the FiST Input File
+The FiST language is a high-level language that uses file-system features common to several operting systems. It provides file-system-specific language constructs for simplifying file-system development. In addition, FiST language constructs can be used in conjunction with addtional C code to offer the full fledxibility of a system programming language familiar to file-system developers. The ability to integrate C and FiST code is reflected in the general structure of FiST input file.  //FiST是用来描述文件系统特征的高级语言,同时可以起到连接C代码的作用
+
+!(Four_Main_Sections_of_A_FiST_Input_File.PNG)[./img/FiST/Four_Main_Sections_of_A_FiST_Input_File.PNG]
+
+----
+
+The FiST grammar was modeled after YACC input files.
+
+1. YACC is familiar to programmers
+1. its four sections in YACC matches the four differnt subdivisions of desired file system code:
+
+    1. raw included header declarations
+    1. declarations that globally affect the produced code
+    1. actions to perform when matching vnode operations
+    1. additional code
+
+----
+
+1. C Declarations
+1. FiST Declarations
+1. FiST Rules
+1. Additional C Code
+
+
+The sections of the FiST input file relate to the programming model as follows. The FiST declarations section defines data structures used by the FiST Rules section. The latter section is where per-vnode actions are defined: pre-call, call, and post-call  //FiST声明为FiST规则定义数据结构,FiST规则定义per-vnode动作
+
+The FiST input file also relates to the file-system model described in Section 3.5. In the last three sections of the input file, you can freely refer to mounts, files, and their attributes.  you use these new ioctls in the FiST Rules and Additional C Code sections. Also, you declare fan-in and fan-out in the FiST Declarations section, and use refer to multiple objects accordingly in the rest of the FiST input file.  //FiST input file同时与文件系统模型有关,后三个部分可随意引用mount,file及他们的属性.FiST声明可定义新ioctls与fan-in,fan-out
+
+----
+
+##4.2 FiST Syntax
+
+FiST syntax allows referencing mounted file systems and files, accessing attributes, and calling FiST functions. Mountreferences begin with $vfs, while file references use a shorter “$” syntax because we expect them to appear often in FiSTcode. References may be followed by a name or number that distinguishes among multiple instances (e.g., $1, $2, etc.)This is especially useful when fan-out is used (Figure 2.8). Attributes of mounts and files are specified by appending adot and the attribute name to the reference (e.g., $vfs.blocksize, $1.name, $2.owner, etc.) The scope of thesereferences is the current vnode function in which they are executing.  //$vfs开头的Mount引用与$开头的文件引用
+
+There is only one instance of a running operating system. Similarly, there is only one process context that the file system has to be concerned with. Therefore FiST need only refer to these attributes.The scope of all read-only “%” attributes is global.  //以%开头的只读属性
+
+![All read-only attributes](./img/FiST/All_Read_Only_Attributes.PNG)
+
+----
+
+The scope of FiST functions is global in the mounted file system. These functions form a comprehensive library of portable routines useful in writing file systems. The names of these functions begin with “fist” and they have the following features:  //FiST函数作用域为全局,以fist开头
+
+1. FiST functions can take a variable number of arguments.  
+1. FiST functions can omit some arguments where suitable defaults exist  
+1. FiST functions can use different types for each argument  
+1. FiST functions can be nested and may return any single value.  
+
+![FiST Functions](./img/FiST/FiST_Functions.PNG)
+
+----
+
+Each mount and file has attributes associated with it. FiST recognizes common attributes of mounted file systemsand files that are defined by the system, such as the name, owner, last modification time, or protection modes. FiST alsoallows developers to define new attributes and optionally store them persistently . Attributes are accessed by appending thename of the attribute to the mount or file reference, with a single dot in between, much the same way that C dereferencesstructure field names. For example, the native block size of a mounted file system is accessed as `$vfs.blocksize` and the name of a file is `$0.name`.  //FiST可新定义属性,并可选择永久存储.属性以.号访问
+
+FiST allows users to create new file attributes.  
+
+    per_vnode {
+        int     user;    /*extra user */
+        Int     group;   /* extra group */
+        time_t  expire;  /* access expiration time */
+
+FiST also provides different methods to define, store, and access additional attributes persistently .  
+
+    fileformat SECDAT {
+    char key[16]; /* cipher key */
+    int cipher; /* cipher ID */
+    char iv[16]; /* initialization vector */
+    };
+
+Two FiST functions exist for handling file formats: fistSetFileData and fistGetFileData. These two routines can store persistently and retrieve (respectively) additional file system and file attributes, as well as any other arbitrary data.  //fistSetFileData&fistGetFileData可永久存储或读取
+
+    int cid;
+    fistSetFileData(".key", SECDAT, cipher, cid); /* set cipher ID */
+
+Finally, the mechanism for adding new attributes to mounts is similar . For files, the declaration is *per_vnode* whereas, for mounts, it is *per_vfs*. The routines fistSetFileData and fistGetFileData can be used to access any arbitrary persistent data, for both mounts and files.  //向mount添加属性是类似的,fistSetFileData&fistGetFileData可访问任何持久数据
+
+----
+
+##4.3 Rules for Controlling Execution and Information Flow
+
+FiST does not change the interfaces that call it, because such changes will not be portable across operating systems and may require changing many user applications. FiST therefore only exchanges information with applications using existing APIs (e.g., ioctls) and those specific applications can then affect change.  //FiST为可移植性,只使用现有API传递信息
+
+![Skeleton_of_Typical_Kernel_C_Code](./img/FiST/Skeleton_of_Typical_Kernel_C_Code.PNG)
+
+----
+
+The general form for a FiST rule is:
+
+    %callset : optype : part { code }
+
+The format for each FiST rule was designed so that a single statement can identify the exact location or locations where code should be inserted, and the actual code to insert.  //这样的语法格式帮助定位代码
+
+1. The first component, callset, selects operations based on their type (all, reading,or writing operations). 
+1. The second component, optype, further refines the selection to a single vnode operation or a set ofoperations based on the data they manipulate. 
+1. The last component, part, further refines the selection to a portion of a singlevnode operation (pre-call, call, or post-call).
+
+![Possible_Value_in_FiST_Rule](./img/FiST/Possible_Value_in_FiST_Rule.PNG)
+
+----
+
+##4.4 Filter Declarations and Filter Functions
+
+----
+
+##4.5 Fistgen: The FiST Language Code Generator
+
+****
+
+#Chapter 5 Stackable Templates
+
+Basefs is the template file system used in FiST , and is the third and last of the three main components of the FiST system (the other two being the FiST language and the fistgen code generator)  
+
+##5.1 Overview of the Basefs T emplates
+
+Basefs provides basic stacking functionality without changing other file systems or the kernel. This functionality is useful because it improves portability of the system. T o achieve this functionality , the kernel must support three features:  
+
+1. In each of the VFS data structures, Basefs requires a field to store pointers to data structures at the layer below . Thisis needed to link data structures in one layer to the corresponding data structures in the layer immediately below.This linkage of upper to lower objects is what enables stacking: code in one layer can follow a pointer and then callcode in a lower layer , passing it a corresponding object  //Basefs需要存储下层数据结构的指针以实现消息传递,即stacking
+
+1. New file systems should be able to call VFS functions. This is needed so that newly added kernel code can callfunctions that already exist in the rest of the kernel. For dynamically-linked modules, a kernel file system may haveto be partially linked and refer to symbols that can be resolved only after the file system is loaded into the kernel.  //新文件系统应该能够调用VFS函数以使新内核代码调用其他内核部分
+
+1.  The kernel should export all symbols that may be needed by a new file system module. This is needed so that new in-k ernel file system code is allowed to execute functions that exist in the rest of the kernel  //内核能够输出所有新文件系统模块可能用到的符号以使新文件系统可执行内核函数
+
+----
+
+There are two key points that allow FiST to support portable stacking. First, we were able to abstract seeminglydifferent vnode interfaces and find a common set of functionality that is useful to users and that all of the operating systemscan use. This common functionality formed the basis for our templates. Second, we were able to fill in any missingfunctionality or one deemed useful to developers, by adding code to the templates; this was done without changing the coreoperating system code.  //FiST应当抽象不同操作系统不同vnode接口,以及应当在不改变内核源码情况下插入新功能
+
+****
+
+#Chapter 6
+
+****
+
+#Chapter 7 Implementation
+
+In this chapter we discuss some of the important aspects of our implementation of the FiST system.
+
+##7.1 Templates
+
+In order to achieve portability at the FiST language level, the templates had to export a fixed API to fistgen, the FiSTlanguage code generator . This API includes the four encoding and decoding functions (Section 5.2). Also needed werehooks for fistgen to insert certain code (Section 3.2), and finally, the ability to link objects between layers.  //API包括四种处理函数,插入代码的hook以及层间对象的链接
+
+----
+
+###7.1.1 Stacking 
+
+![File-system_Boundaries_with_Basefs.PNG](./img/FiST/File-system_Boundaries_with_Basefs.PNG)
+
+Basefs assumes a dual responsibility: it must appear to the layer above it (upper-1) as a native file system (lower-2), and at the same time it must treat the lower-level native file system (lower-1) as a generic vnode layer (upper-2).  
+
+----
+
+###7.1.2 FreeBSD
+
+----
+
+###7.1.3 Linux
+
+Linux supports many more different file systems than either Solaris or FreeBSD. Because different file systems requiredifferent services from the rest of the kernel, the Linux VFS is more complex than Solaris and FreeBSD. This complexity ,however, results in more flexibility for file system designers, as the VFS offloads much of the functionality traditionallyimplemented by file-system developers.  //Linux由于VFS的复杂度远高于FreeBSD与Solaris,因此更加灵活支持了更多不同文件系统
+
+----
+
+####7.1.3.1 Call Sequence and Existence
+
+The Linux vnode interf ace contains several classes of functions:
+
+1. mandatory: 
+
+    these are functions that must be implemented by each file system. 
+
+1. semi-optional
+
+    functions that must either be implemented specifically by the file system, or set to use a generic version offered for all common file systems. 
+
+1. optinal
+
+    functions that can be safely left unimplemented
+
+1. dependent
+
+    these are functions whose implementation or existence depends on other functions.  
+
+
+> Basefs was designed to accurately reproduce the aforementioned call sequence and existence checking of the various classes of file-system functions.  
+
+----
+
+####7.1.3.2 Data Structures
+
+1. super_block
+
+	 : represents an instance of a mounted file system (also known as struct vfs in BSD).  //挂载的文件系统实例
+
+1. inode
+
+	: represents a file object in memory (also known as struct vnode in BSD).  //内存中文件对象
+
+1. file
+
+	: represents an open file or directory object that is in use by a process. A file is an abstraction that is one level higherthan the dentry . The file structure contains a valid pointer to a directory entry (dentry).  //进程中文件或目录对象,抽象高于dentry
+
+1. dentry
+
+	: represents an inode that is cached in the *Directory Cache (dcache)* and also includes its name. A native formof this data structure existed in 2.0, but we did not have to use it. This structure was extended in Linux 2.1, andcombines several older facilities that existed in Linux 2.0. A dentry is an abstraction that is higher than an inode.
+
+    > *A negative dentry* is one which does not (yet) contain a valid inode; otherwise, the dentry contains a pointer to its corresponding inode.  //dcache中innode对象,抽象高于inode
+
+----
+
+1. vm_area_struct
+
+	: represents custom per-process virtual memory manager page-fault handlers. Multiple such page-fault handlers can exist for different pages of the same file.  More recently , Linux 2.3 and 2.4 added two more data structures which we also support:  //虚拟内存管理器page-fault句柄
+
+1. vfsmount
+
+	: is to a super block what a dentry is to an inode, a higher-level abstraction. The vfsmount data structure contains fields, data, and operations that are common to all super block data structures. The latter contain file-system–specific data and operations. With the vfsmount data structure, for example, a single mount point can contain a list of physical file systems mounted at that point, opening the door to device-level file-system features such as unification and fail over .  //对super_block的高级抽象,包括super_block通用属性
+
+1. address_space
+
+	 : is a data structure that contains paging operations related to vm area struct. One address space can contain a list of vm area struct structures (custom page-fault handlers). This data structure contains some operations that used to be in other data structures, but also newer operations intended to support a transaction-like interf ace to page data synchronization.  //包括与vm_area_struct相关的数据结构的页操作
+
+----
+
+The key point that enables stacking is that each of the major data structures used in the file system contains a fieldinto which file system specific data can be stored. Basefs uses that private field to store several pieces of information,especially a pointer to the corresponding lower-le vel file system’ s object.  //关键在于,每个主要数据结构,都包含一个文件系统数据的private field
+
+![Connections_Between_Basefs_and_The_Stacked_on_File _System.PNG](Connections_Between_Basefs_and_The_Stacked_on_File _System.PNG)
+
+shows the connections between some objects in Basefs and the corresponding objects in the stacked-on file system, as well as the regular connections between the objects within the same layer  //上下左右通信
+
+also suggests one additional complication that Basefs must deal with carefully—reference counts.  Whenever more than one file-system object refers to a single instance of another object, Linux employs a traditional reference counter in the referred-to object (possibly with a corresponding mutex lock variable to guarantee atomic updates to the reference counter).  //在referred-to对象保留计数器
+
+These additional pointers between objects are ironically necessary to keep Basefs as independent from other layers as possible. The horizontal arrows in Figure 7.3 represent links that are part of the Linux file system interface and cannot be avoided. The vertical arrows represent those that are necessary for stacking. The higher reference counts ensure that the lower-level file system and its objects could not disappear and leave Basefs’s objects pointing to in valid objects.  //计数器确保Basefs独立正常运行
+
+----
+
+##7.2 Size-Changing Algorithms
+
+----
+
+##7.3 Fistgen
+
+Fistgen translates FiST code into C code which implements the file system described in the FiST input file. The code can be compiled as a dynamically loadable kernel module or statically linked with a kernel.  //Fistgen将FiST代码转换为可编译为LKM的C代码
+
+****
+
+#Chapter 8 File Systems Developed Using FiST
+
+1. Snoopfs: is a file system that detects simple unauthorized attempts to access files. We described this file system in detail in Section 3.3.
+2. Cryptfs: is an encryption file system.
+3. Aclfs: adds simple access control lists.
+4. Unionfs: joins the contents of two file systems.
+
+Since we also improved our templates by adding support for SCAs, we are including a few examples of file systems built using this special support  
+
+1. Copyfs: a baseline file system that copies the data without changing it or its size.
+2. Uuencodefs: a file system that increases data sizes.
+3. Gzipfs: a compression file system which generally shrinks data sizes.
+3. 
+
+----
+
+##8.1 Cryptfs
+
+Cryptfs is a strong encryption file system. It uses the Blowfish encryption algorithm in Cipher Feedback (CFB) mode.  This algorithm does not change the data size of the input. We used one fixed Initialization V ector (IV) and one 128-bit key per mounted instance of Cryptfs. Cryptfs encrypts both file data and file names. After encrypting file names, Cryptfs also uuencodes them to avoid characters that are illegal in file names. Additional design and important details are available elsewhere  //使用IV与128位的密钥,CFB模式的Blowfish,加密文件名与文件数据,最后使用uuencode确保可以合法打印
+
+The FiST implementation of Cryptfs shows three additional features: file data encoding, ioctl calls, and per-VFS data.  
+
+
+
+
+****
+
+#Chapter 9 Evaluation
+
+****
+
+#Chapter 10 Conclusion
+
+****
+
+#Appendix A FiST Language Specification
+
+##A.1 Input File
+
+The FiST input file has four sections. Each section is optional. 
+
+- C Declaration
+- FiST Declaration
+- FiST Rules
+- Additional C Code
+
+> In the last three sections, blank lines are generally ignored. C style comments are copied verbatim to the output.  C++ style comments are used as FiST language comments: their text is ignored.  
+
+----
+
+##A.2 Primitives
+
+FiST primitives include variables and their attributes. There are global read-only variables, global file-system variables, and file-system variables local to each file system operation. These primitives may appear anywhere in the last three sections of the FiST input file.  //FiST primitives包括全局可读变量,全局文件系统变量,以及文件系统特定变量
+
+----
+
+###A.2.1 Global Read-Only Variables
+
+These variables represent operating-system state that cannot be changed by the FiST developer , but may change from call to call
+
+Such variables begin with a “%”:
+
+- %blocksize: native disk block size
+- %gid: effective group ID of calling process
+- %pagesize: native page size
+- %pid: process ID of calling process
+- %time: current time (seconds since epoch)
+- %uid: effective user ID of calling process
+
+----
+
+###A.2.2 File-System Variables and Their Attributes
+
+File-system variables are references to a whole file system and to its attributes. The general syntax for such a reference is:  
+
+    $vfs : N.attribute
+
+> The context of file-system variables is the mounted file-system instance currently running. The values of these variables is not likely to change while the same file system is mounted.  //文件系统变量内容是当前挂载的文件系统实例,其值很少变化
+
+----
+
+File-system variables begin with a `$`. There is currently only one such variable: $vfs. The variable’ s name may be followed by a colon and a non-negative integer N that describes the stacking branch to refer this VFS object to:  //文件系统变量
+
+- `$vfs:0` refers to the VFS object of this file system and is synonymous to $vfs.
+- `$vfs:1` refers to the first file system on the lower level. If no fan-out is used, then this refers to the only lower-level file system VFS object.
+- `$vfs:2` refers to the second file system on the lower level, assuming a fan-out of 2 or more was used.
+- `$vfs:N` refers to the N-th file system on the lower level, assuming a fan-out of N or more was used.
+
+----
+
+The list of allowed attributes are:
+- bitsize: the bit-size of the file system (32 or 64)
+- blocksize: the block size of the file system
+- fstype: the name of the file system being defined
+- user-defined: any other pre-defined attribute name as specified in Section A.3.2.2 
+
+----
+
+###A.2.3 File Variables and Their Attributes
+
+File variables are references to individual files and to their attributes. The general syntax for such a reference is:  
+
+    $name : N.attribute
+
+The context of file variables is the file-system function currently executing. The values of these variables change from each in vocation of even the same function on the same mounted file system, since file objects correspond to user processes making system calls for different files.  //同样文件系统下同一文件每次调用的变量值都不同
+
+----
+
+Therefore, there are several possible names for these file references:
+
+- `$this`: refers to the primary file object of the function. This is synonymous to $0  //主要文件引用
+- `$dir`: refers to the vnode of the directory object for operations that use a directory object. For example, the remove file operation specifies a file to remove and a directory to remove the file from.  //文件夹引用
+- `$from`: refers to the source file in a rename operation that renames a file from a given name to another .  //重命名操作的原始文件引用
+- `$to`: refers to the target file in a rename operation that renames a file from a given name to another .  //重命名操作的目标文件引用
+- `$fromdir`: refers to the source directory in a rename operation that renames a file within a given directory to another directory .  //重命名操作中源文件夹引用
+- `$todir`: refers to the target directory in a rename operation that renames a file within a given directory to another directory .  //重命名操作中目标文件夹引用
+
+----
+
+File variables’ names may be followed by a colon and a non-negative integer N that describes the stacking-branch number of this file object.
+
+- `$this:0`: refers to the file object of this file and is synonymous to `$0` and to `$this`.
+- `$dir:`1: refers to the first lower-level directory . If no fan-out is used, then this refers to the only lower-level directory .  //低级目录
+- `$from:`2: refers to the source file in the second lower-level file system, for a rename operation, assuming a fan-out of 2 or more was used.  //重命名操作中第二低级文件系统的源文件
+- `$todir:`N: refers to the target directory in a rename operation, of the N-th lower-level file system, assuming a fan-out of N or more was used.  //重命名操作中第N低级文件系统的源目录
+
+----
+
+To refer to an attribute of a specific file object, append a dot and the attribute name to it. The list of allowed attributes is:
+
+- ext: file’s extension (string component after the last dot)
+- name: full name of the file
+- symlinkval: string value of the target of a symbolic link, defaults to NULL for non-symlinks
+- type: the type of file (directory , socket, block/character device, symlink, etc.)
+- atime: access time, same as for the stat(2) system call
+- blocks: number of blocks, same as for the stat(2) system call
+- ctime: creation (or last chmod) time, same as for the stat(2) system call
+- group: group owner, same as for the stat(2) system call
+- mode: file access mode bits, same as for the stat(2) system call
+- mtime: last modification time, same as for the stat(2) system call
+- nlink: number of links, same as for the stat(2) system call
+- size: file size in bytes, same as for the stat(2) system call
+- owner: user who owns the file, same as for the stat(2) system call
+- user-defined: any other pre-defined attribute name as specified in Section A.3.2.3
+
+----
+
+##A.3 FiST Declarations
+
+FiST declarations affect the overall behavior of the produced code. A declaration has at least one word and ends with a semi-colon. The words of declarations with multiple words are separated by whitespace.  //FiST声明至少一个词,以分号结尾.中间用空白符分割
+
+###A.3.1 Simple Declarations
+
+1. accessmode (readonly|writeonly|readwrite): 
+1. debug (on|off): turn on/off debugging (off by default). 
+
+    If on, debugging support is compiled in and the level of debugging can be set between 1 and 18 by the user-level tool fist ioctl. For example, running fist ioctl 18 turns on the most verbose debugging level. Debugging output is printed by the kernel on the console.  //调试可被设置为1-18级
+
+1. filter (data|name|sca): 
+
+    Turn on filter support for fix-sized data pages (data), for file names (name), or for size-changing algorithms (sca). All three filters may be defined, but no more than one per line.  //打开过滤器,每行最多定义一个.
+
+1. mntstyle (regular|overlay):
+
+	 defines the file system's mount style. Regular (the default) leaves the mounted directory exposed and available for direct access. Overlay mounts hide the mounted directory with the mount point.  //文件系统挂载类型.常规可以直接访问,Overlay mounts会隐藏挂载点目录
+
+1. errorcode ARG :
+
+	 defines a new error code. This declaration may be used multiple times to define additional error codes.  Error code names must not conflict with system-defined or previously defined error codes. Newly defined error codes may be used anywhere in the last two sections of the FiST input file.  //新的错误码,可定义多次,不可与已定义错误码冲突,可被FiST input file后两部分使用
+
+1. fsname ARG:
+
+	 set the name of the file system being defined. If not specified, it defaults to the name of the FiST input file name.  //文件系统名,默认为FiST input file名
+
+1. mntflag ARG:
+
+	 defines additional mount(2) flags to allow user processes mounting this file system to pass to the kernel.  This declaration may be used multiple times to define additional mount flags. Mount flag names must not conflict with system-defined or previously defined ones. Newly defined mount flags may be used anywhere in the last two sections of the FiST input file.  //挂载flag,可定义多次,不能与已定义flag冲突,在FiST input file后两部分使用
+
+1. fanout N:
+
+	 define the fan-out level of the file system. Defaults to 1 (no fan-out).  
+
+1. fanin (yes|no):
+
+	 allow (“yes”) or disallow fan-in (allowed by default). If fan-in is disallowed, the file system will overlay itself on top of the mounted directory , thus hiding the directory mounted on.  
+
+----
+
+####A.3.1.1 Functions about Filters
+
+Turning on the *data or SCA filters* requires the developer to write two functions in the Additional C Code section
+
+1. encode data(inpage, inlen, outpage, outlen): a function to encode a data page. The function takes an input page and input length, and must fill in the output page and the output length integer with the number of bytes encoded. The function must return an integer status/error code: a 0 indicates success and a negative number indicates the error number (complies with standard errno values listed in /usr/include/sys/errno.h).  //编码一个数据页.需要一个输入页与输入长度,完成输出页与输出长度.返回状态码
+2. decode data(inpage, inlen, outpage, outlen): a function to decode a data page, otherwise behaves the same as encode data.
+
+----
+
+Turning on the *name filter* requires the developer to write two functions in the Additional C Code section:
+
+1. encode name(inname, inlen, outname, outlen): a function to encode a file name. The function takes an input name and input length, and must fill in the output name and the output length integer with the number of bytes encoded. The function must also allocate the output name string using fistMalloc (described below).  The function must return an integer status/error code: a 0 indicates success and a negative number indicates the error number (complies with standard errno values listed in /usr/include/sys/errno.h).  //编码文件名,需要输入名与输入长度,完成输出名与输出长度,返回状态码
+2. decode name(inname, inlen, outname, outlen): a function to decode a file name, otherwise behaves the same as encode name.
+
+----
+
+###A.3.2 Complex Declarations
+
+Complex FiST declarations are those that take a *Basic Data Type (BDT)* as an argument.
+
+A BDT is a C data structure that includes only simple data types in each field of the data structure
+
+    {
+    int cipher;
+    char key[16];
+    }
+
+----
+
+####A.3.2.1 Additional Mount Data
+
+Additional mount data may be passed from a user-level process performing a mount(2). This data is passed only once during the mount. This declaration may be defined only once.  //额外挂载数据,一般由用户层进程传递给mount,只传递一次,只定义一次
+
+    mntdata {
+    int zip_level;
+    time_t expire;
+    };
+
+> Typical uses for this include data and flags that dynamically affect the overall behavior of the file system.
+
+----
+
+####A.3.2.2 New File-System Attributes
+
+You may define additional attributes for file-system objects as explained in Section A.2.2. The fields of the BDT automatically become new attribute names. New attribute names may not conflict with existing ones. This declaration may be defined only once  //定义新文件系统属性,不可与已有属性冲突,只定义一次
+
+    pervfs {
+    int max_vers;
+    char extension[4];
+    };
+
+----
+
+####A.3.2.3 New File Attributes
+
+You may define additional attributes for file objects as explained in Section A.2.3. The fields of the BDT automatically become new attribute names. New attribute names may not conflict with existing ones.  This declaration may be defined only once.  //定义新文件属性,不可与已有属性冲突,只可定义一次
+
+    pervnode {
+    int cipher;
+    char key[128];
+    };
+
+----
+
+####A.3.2.4 Persistent Attributes
+
+The pervfs and pervnode declarations above define volatile attributes: their values remain in memory until the file system is unmounted. If you wish to store attributes or any other data persistently , use the file format declaration.  //前面的pervfs与pervnode都会在结束挂载后从内存中消失,定义file format声明可永久保存数据
+
+The declaration defines a data structure that can be formatted on top of a file: the bits of the data structure are serialized onto a file. This declaration is used in conjunction with two FiST functions: fistSetFileData and fistGetFileData, described below in Section A.4.2.  //定义一个序列化在文件头的数据结构,与fistSetFileData和fistGetFileData一同使用
+
+` fileformat NAME BDT`
+
+    fileformat SECDAT {
+    char key[16]; /* cipher key */
+    int cipher; /* cipher ID */
+    char iv[16]; /* initialization vector */
+    };
+
+----
+
+####A.3.2.5 New I/O Controls
+
+This declaration defines a new I/O control—ioctl, and an optional data structure that can be used with that data structure.  This declaration is used in conjunction with two FiST functions: fistSetIoctlData and fistGetIoctlData, described below in Section A.4.3.  //定义一个新的I/O控制和一个与之相关的可选的数据结构,与fistSetIoctlData和fistGetIoctlData一同使用
+
+`ioctl[:(formuser|touser|both|none)] NAME BDT`
+
+    ioctl:fromuser SETKEY{
+        char  ukey[16];
+    }
+
+1. fromuser: the ioctl can only copy data from a user process to the kernel
+1. touser: the ioctl can only copy data from the kernel to a user process
+1. both: the ioctl can exchange data between the kernel and a user process bidirectionally (default)
+1. none: the ioctl exchanges no data
+
+----
+
+###A.3.3 Makefile Support
+
+
+- mod_src FILE ...:
+
+	 declares a list of additional files that must be compiled and linked with the loadable kernel modules for this file system. This is useful for example to list the C sources for your cipher of choice, if defining an encryption file system.  //声明一系列与LKM链接编译在一起的附加文件(source),在列出不同加密算法的C源码情境下很有用
+
+- mod_hdr FILE ...:
+
+	 declares a list of additional files that the kernel module must depend on when compiling the loadable kernel module for this file system. This is useful for example to list the C headers for your compression algorithm of choice, if defining a compression file system.  //声明一系列将于LKM链接编译在一起的附加文件(header),在列出压缩算法的C header方面很有用
+
+- user_src FILE ...:
+
+	 declares a list of additional files, each of which represents a stand-alone user-level program. These programs get compiled in addition to the file-system kernel-loadable module. This declaration can be used to list additional utilities that developers write. For example, our compression file system uses this to define a utility that can recover an index file from a compressed data file (see Section 6.3.2.2).  //声明一系列代表独立用户层程序的附加文件,列出附加功能
+
+- add_mk FILE ...:
+
+	 defines the names of files defining additional custom Makefile rules that the developer wants to include in the master Makefile used to build the file system. This can be used as a flexible extension mechanism to add any arbitrary Makefile rules to process.  //定义声明附加个人Makefile rules的文件名,这可以被当作灵活扩展机制使用
+
+----
+
+##A.4 FiST Functions
+
+FiST functions may be called anywhere in the last two sections of the FiST input file.  
+
+###A.4.1 Basic Functions
+
+These functions are simple. Their arguments are similar to other user-level (C library) functions. They are FiST functions because their usage on different operating systems is different and does not match the same usage as their user-level equivalents.  //FiST函数与C库文件中函数的变量很类似,唯一不同的在于他们在不同操作系统下的作用不同,且与库文件对应函数不完全一致
+
+
+- fistMemCpy:
+
+	 copies one buffer to another, same as memcpy(3).
+
+- fistMalloc:
+
+	 allocates kernel memory, same as malloc(3).
+
+- fistFree:
+
+	 frees kernel memory , same as free(3).
+
+- fistStrEq:
+
+	 compares two strings. Returns 1 (TRUE) if the strings are equal, and 0 otherwise.
+
+- fistStrAdd(A, B):
+
+	 appends string B to string A, same as strcat(3).
+
+- fistPrintf:
+
+	 print a formatted string, same as printf(3).
+
+- fistSetErr(E):
+
+	 set the current error status to E. If not changed, that error is returned back from the file-system function to its caller .
+
+- fistLastErr:
+
+	 this function returns the last error that was explicitly set by fistSetErr or occurred as a result of calling the lower level file system or any other function that may have failed. If the last such action did not fail, this function returns 0.  //返回可能由fistSetErr设置,低级文件系统调用返回,或者函数运行失败返回的错误,如果没有错误,返回0
+
+- fistReturnErr(E):
+
+	 immediately returns from this function with the error code E. If E is omitted, returns the last error (or 0 if there was none).
+
+----
+
+###A.4.2 File Format Functions
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

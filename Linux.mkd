@@ -1,0 +1,887 @@
+[[#Linux]] 内核修炼之道
+
+##概述
+
+Linux内核的版本以X.Y.Z来设定的.偶数Y代表稳定版,奇数Y代表不稳定的开发版  
+Z的递增代表个别的修正版发布  
+
+###选择发行版
+1. 发行版排行榜:[distrowatch](http://distrowatch.com/ "")
+1. 发行版比较:[polishlinux](http://polishlinux.org/choose/comparison/)
+1. [Linux Distribution Chooser](www.zegeniestudios.net/ldc/index.php?firsttime=true)
+
+****
+
+###Linux命令
+
+####进程相关
+pgrep   通过程序名字查询进程
+
+****
+
+##配置与编译内核
+
+###配置内核
+
+####配置内核的几种方式
+
+1. make config
+
+    最为传统最为枯燥的一种配置方式,可以适应任何情况
+
+1. make oldconfig
+
+    作用是在现有内核设置文件基础上建立一个新的设置文件;在内核升级的过程中,make oldconfig非常有用.可以将现有内核的设置文件.config复制到新内核的远吗目录中,执行make oldconfig
+
+1. make menuconfig
+
+    基于终端的一种配置方式,提供文本模式的图形用户界面,但必须已经安装有ncurses库
+
+1. make xconfig
+
+    基于X Windows的一种配置方式，提供了漂亮的配置窗口，只有在X Server上使用root用户运行X应用程序时，才可以使用。依赖QT...
+
+1. make gconfig
+
+    与make xconfig类似，不同的是依赖GTK
+
+1. make defconfig
+
+    按照默认的配置文件arch/i386/defconfig对内核进行配置，生成的.config可以用作出事配置，然后使用make menuconfig进行定制化配置
+
+1. make allyesconfig
+
+    尽可能多使用yes设置内核选项值
+
+1. make allmodconfig
+
+    尽可能多使用m设置内核选项值
+
+----
+
+####.config文件
+
+不论使用何种方式配置内核，最终目的都是为了生成.config文件。.config文件位于内核源码树的顶层目录  
+
+1. 找一个旧的.config文件参考
+
+    - 使用make defconfig得到参考.config文件，它其实利用了arch/i386/defconfig文件
+    - 利用系统中/lib/modules/<kernel-version>/build目录下的.config文件
+    - 使用当前系统的配置文件，一般位于/boot目录中
+    - 到网上搜索别人配置好的.config文件
+    - 使用某个发行版的.config
+
+1. 直接修改.config文件
+1. 备份，重用.config文件
+
+----
+
+####配置选项详解
+1. General setup
+
+    - Local version - append to kernel release: 在内核版本后面加上自定义的版本字符串
+    - Automatically append version information to the version string: 自动在版本字符串后面添加版本信息
+    - Support for paging of anonymous memory(swap): 允许使用交换分区或者交换文件作为虚拟内存
+
+1. Loadable module support
+1. Block Layer
+1. Processor type and features
+
+    - Symmetric multi-processing support: 对称多处理器支持
+    - Generic x86 support: 通用x86支持
+
+1. Power management options
+1. Bus options
+1. Executable file formats
+1. Networking
+1. Device Drivers
+1. File systems
+1. Instrumentation Support
+1. Kernel hacking
+1. Security options
+1. Cryptographic API
+
+----
+
+###编译内核
+
+####准备工作
+1. 基础知识
+
+    - /boot/vmlinuz-<version>: 用于启动的压缩内核镜像
+    - /boot/system.map-<version>: 存储内核符号表
+    - /boot/initrd.img-<version>: 一个镜像文件，类似ramdisk，将一些驱动程序和命令工具打包到img里，然后在开机的时候在内存里开辟一段区域，释放到那里运行;作用时，在mount根分区（/）前，系统要执行一些操作，于是将initrd释放到内存中作为一个虚拟的/，然后执行其根目录下的脚本，运行insmod等命令加载模块
+    - /boot/grub/menu.lst： GRUB的配置文件
+    - /lib/modules/: 该区域包含了内核模块以及其他文档
+    - /lib/modules/<kernel-version>/build/： 存放编译新模块所需的文件，包括Makefile,.config
+    - /lib/module/<kernel-version>/kernel/: 存放模块的ko文件
+    - /lib/modules/<kernel-version>/modules.alias: 模块别名定义，模块加载工具使用它来加载相应的模块
+    - /lib/modules/<kernel-version>/modules.dep: 定义了模块间的依赖关系
+    - /lib/modules/<kernel-version>/modules.symbols: 标示符号属于哪个模块
+
+1. 下载内核源码压缩包
+1. 获取相关补丁
+1. 构建编译环境
+1. 备份
+
+----
+
+####打内核补丁
+1. 补丁是文本文档，由diff工具创建，存放了两个不同版本的源代码之间的差距
+1. patch工具可以用于打补丁和卸载补丁
+
+    `patch -pl < ../patch-x.y.z` 去掉补丁文件中路径的第一个分量
+    `patch -R -pl < ../patch-x.y.z` 卸载一个以前打上的补丁
+
+1. patch的替代工具有interdiff,ketchup
+
+----
+
+####编译步骤
+1. 下载源码并解压
+
+    `# cd /usr/src`
+    `# wget ftp.kernel.org/pub/linux/kernel/v2.6/linux-2.6.23.tar.bz2`
+    `# tar -jxvf linux-2.6.23.tar.bz2`
+
+1. 如果需要的话，下载补丁
+1. 进入刚解压的内核源码目录
+1. 如果需要的话，为内核打补丁
+1. 配置内核
+
+    `make menuconfig`
+
+1. 编译内核
+
+    `make`
+
+1. 安装内核模块，*将所有编译得到的内核模块复制到/lib/modules/<kernel-version>下面*
+
+    `make  module_install`
+
+1. 安装内核
+
+    `make install`
+    - 复制生成的内核映像到/boot目录
+    - 生成initrd-<kernel-version>.img文件
+    - 配置引导文件
+
+1. 重启进入新内核
+
+----
+
+####文档的编译
+内核源码树Documentation/目录下存放文档  
+
+1. `make htmldocs`
+1. `make pdfdocs`
+1. `make psdocs`
+1. `make mandocs`
+1. `make installmandocs`
+
+----
+
+####编译技巧
+1. 屏蔽编译信息
+
+    `make > /dev/null`
+
+1. 加速编译过程
+
+    使用“-j<n>”参数,n=2*CPU个数  
+    `make -j2 > /dev/null`  
+
+1. 使用verbose模式
+
+    `make V=1 > ~/bak.txt`
+
+1. 使用ccache提高编译速度
+
+----
+
+###自由软件的编译安装
+
+####组织结构
+- INSTALL文件，描述安装步骤
+- README文件，包含软件一般信息
+- COPYING or LICENSE文件，包含许可证或发布软件的情形
+- CONTRIB or CREDITS文件
+- CHANGES or NEWS文件
+- Makefile文件，控制编译
+- src目录
+- doc文档
+- configure or Imakefile 文件
+
+----
+
+####配置
+1. AutoConf
+
+    会对软件环境进行测试
+
+1. imake
+1. 根据INSTALL运行shell脚本
+
+----
+
+####编译
+1. make不加参数仅编译
+1. make install编译并安装
+1. make clean清除编译产生的所有临时文件
+
+----
+
+####安装
+1. 复制可执行文件到/usr/local/bin
+1. 复制库文件到/usr/local/lib
+1. 复制头文件到/usr/local/include
+1. 复制数据文件到/usr/local/share
+1. 复制man文件(如echo.1)到/usr/local/man/man<n>目录;复制info文件到/usr/info或/usr/local/info目录
+
+****
+
+##内核学习
+
+###体系结构
+1. 系统调用接口
+1. 进程管理
+1. 内存管理
+1. 虚拟文件系统
+1. 网络功能
+1. 设备驱动程序
+1. 依赖体系结构的代码
+
+----
+
+###目录结构
+1. Documentation
+1. arch
+
+    体系结构相关的代码
+
+1. drivers
+1. fs
+
+    虚拟文件系统。Linux下所有支持的文件系统都会在fs下有对应子目录。同时也可能有虚拟文件系统比如proc
+
+1. include
+
+    包括了内核中大部分头文件
+
+1. init
+
+    内核的初始化代码
+
+1. ipc
+
+    进程间通信
+
+1. kernel
+
+    内核中最核心的部分
+
+1. lib
+
+    库代码，实现了一个标准C库的通用子集
+
+1. mm
+
+    包含体系结构无关的内存管理代码
+
+1. net
+
+    网络相关代码
+
+1. script
+
+    配置内核的脚本文件
+
+1. block
+
+    block层的实现
+
+1. crypto
+
+    内核本身所用的API
+
+1. security
+
+    不同的Linux安全模型代码
+
+1. sound
+
+    声卡驱动
+
+1. usr
+
+    实现了打包和枷锁的cpio等
+
+----
+
+###内核代码特点
+
+####GCC扩展
+
+1. 语句表达式
+
+    GCC把包含在括号中的符合语句看做是一个表达式，称为语句表达式，它允许在一个表达式内使用循环，跳转，局部变量，并可以出现在任何允许表达式出现的地方
+
+1. 零长度数组
+
+    可变长数组，不占用结构的空间，但它意味着这个结构的长度充满了变数。创建该结构对象时，可以根据实际需求制定这个可变长数组的长度，并分配相应空间
+    `struct usb_host_interface altsetting[0];`
+
+1. 可变参数宏
+
+    `#define debug(format,args...) fprintf (stderr,format,args)`//...表示可变参数
+    `#define pr_info(fmt,arg...) fprintf (stderr,format,##args)`//##主要针对参数为空的情况
+
+1. 标号元素
+
+    通过制定索引或结构域名，允许初始化值以任意顺序出现(数组或结构变量)
+    `int platform_intr_list[ACPI_MAX_PLATFORM_INTERRUPTS]={`
+    `   [0 ... ACPI_MAX_PLATFORM_INTERRUPTS -1]=-1 };`
+
+1. 特殊属性
+
+    `__attribute__((ATTRIBUTE))`
+
+1. 内建函数
+
+----
+
+###Kconfig与Makefile
+
+####Kconfig结构
+
+1. 菜单项
+
+    config关键字定义一个新菜单项  
+
+    - 类型包括bool,tristate,string,hex和int   
+    - 依赖关系通过'depends on'和'requires'定义  
+    - 帮助信息需要使用'help'或'--help--'指出
+    
+1. 菜单组织结构
+> 通过两种方式组成树状结构  
+
+- 使用关键字'menu'显式声明为菜单
+- 通过依赖关系确定菜单结构
+
+----
+
+####利用Kconfig和Makefile寻找目标代码
+1. 首先阅读Kconfig文件，找到真正需要关注的
+1. 阅读Makefile文件
+
+
+****
+
+##内存惯例
+
+###OOM(Out-of-Memory) Killer
+
+OOM Killer 就是一层保护机制，用于避免 Linux 在内存不足的时候不至于出太严重的问题，把无关紧要的进程杀掉，有些壮士断腕的意思
+
+
+----
+
+****
+
+****
+
+##文件
+
+我们知道文件都有文件名与数据，这在 Linux 上被分成两个部分：用户数据 (user data) 与元数据 (metadata)。用户数据，即文件数据块 (data block)，数据块是记录文件真实内容的地方；而元数据则是文件的附加属性，如文件大小、创建时间、所有者等信息。在 Linux 中，元数据中的 inode 号（inode 是文件元数据的一部分但其并不包含文件名，inode 号即索引节点号）才是文件的唯一标识而非文件名。文件名仅是为了方便人们的记忆和使用，系统或程序通过 inode 号寻找正确的文件数据块
+
+###软链接
+也叫符号连接,他只是对源文件在新的位置建立一个“快捷（借用一下wondows常用词）”，所以，当源文件删除时，符号连接的文件将成为无源之水->仅仅剩下个文件名了，当然删除这个连接，也不会影响到源文件，但对连接文件的使用、引用都是直接调用源文件的。  
+
+----
+
+####硬链接
+是给文件一个副本，同时建立两者之间的连接关系。修改其中一个，与其连接的文件同时被修改。如果删除其中任意一个,其余的文件将不受影响。
+
+----
+
+####区别
+1. 硬链接原文件和新文件的inode编号一致。而软链接不一样。
+2. 对原文件删除，会导致软链接不可用，而硬链接不受影响。
+3. 对原文件的修改，软、硬链接文件内容也一样的修改，因为都是指向同一个文件内容的。
+
+----
+
+###文件读写
+
+![Files_Read&Write](./img/Linux/Read&Write.jpg)
+
+----
+
+####VFS
+
+虚拟文件系统
+
+----
+
+####Disk Caches
+
+将磁盘上的数据缓存在内存中，加速文件的读写。实际上，在一般情况下，read/write是只跟缓存打交道的。（当然，存在特殊情况。下面会说到。）
+read就直接从缓存读数据。如果要读的数据还不在缓存中，则触发一次读盘操作，然后等待磁盘上的数据被更新到磁盘高速缓存中；write也是直接写到缓存里去，然后就不用管了。后续内核会负责将数据写回磁盘。  
+
+为了实现这样的缓存，每个文件的inode内嵌了一个address_space结构，通过inode->i_mapping来访问。address_space结构中维护了一棵radix树，用于磁盘高速缓存的内存页面就挂在这棵树上。而既然磁盘高速缓存是跟文件的inode关联上的，则打开这个文件的每个进程都共用同一份缓存。  
+
+- inode被载入内存的时候，对应的磁盘高速缓存是空的（radix树上没有页面）。随着文件的读写，磁盘上的数据被载入内存，相应的内存页被挂到radix树的相应位置上。
+- 如果文件被写，则仅仅是对应inode的radix树上的对应页上的内容被更新，并不会直接写回磁盘。这样被写过，但还没有更新到磁盘的页称为脏页。
+
+> 内核线程pdflush定期将每个inode上的脏页更新到磁盘，也会适时地将radix上的页面回收
+
+当需要读写的文件内容尚未载入到对应的radix树时，read/write的执行过程会向底层的“通用块层”发起读请求，以便将数据读入。
+
+而如果文件打开时指定了O_DIRECT选项，则表示绕开磁盘高速缓存，直接与“通用块层”打交道。
+
+既然磁盘高速缓存提供了有利于提高读写效率的缓存机制，为什么又要使用O_DIRECT选项来绕开它呢？一般情况下，这样做的应用程序会自己在用户态维护一套更利于应用程序使用的专用的缓存机制，用以取代内核提供的磁盘高速缓存这种通用的缓存机制。（数据库程序通常就会这么干。）
+
+既然使用O_DIRECT选项后，文件的缓存从内核提供的磁盘高速缓存变成了用户态的缓存，那么打开同一文件的不同进程将无法共享这些缓存（除非这些进程再创建一个共享内存什么的）。而如果对于同一个文件，某些进程使用了O_DIRECT选项，而某些又没有呢？没有使用O_DIRECT选项的进程读写这个文件时，会在磁盘高速缓存中留下相应的内容；而使用了O_DIRECT选项的进程读写这个文件时，需要先将磁盘高速缓存里面对应本次读写的脏数据写回磁盘，然后再对磁盘进行直接读写。  
+
+----
+
+####Generic Block Layer
+
+linux内核为块设备抽象了统一的模型，把块设备看作是由若干个扇区组成的数组空间。扇区是磁盘设备读写的最小单位，通过扇区号可以指定要访问的磁盘扇区。  
+
+上层的读写请求在通用块层被构造成一个或多个bio结构，这个结构里面描述了一次请求--访问的起始扇区号？访问多少个扇区？是读还是写？相应的内存页有哪些、页偏移和数据长度是多少？等等……  
+
+  
+
+这里面主要有两个问题：要访问的扇区号从哪里来？内存是怎么组织的？  
+
+前面说过，上层的读写请求通过文件pos可以定位到要访问的是相应的磁盘高速缓存的第几个页，而通过这个页index就可以知道要访问的是文件的第几个扇区，得到扇区的index。  
+
+但是，文件的第几个扇区并不等同于磁盘上的第几个扇区，得到的扇区index还需要由特定文件系统提供的函数来转换成磁盘的扇区号。文件系统会记载当前磁盘上的扇区使用情况，并且对于每一个inode，它依次使用了哪些扇区。（参见《linux文件系统实现浅析》）  
+
+于是，通过文件系统提供的特定函数，上层请求的文件pos最终被对应到了磁盘上的扇区号。  
+
+可见，上层的一次请求可能跨多个扇区，可能形成多个非连续的扇区段。对应于每个扇区段，一个bio结构被构造出来。而由于块设备一般都支持一次性访问若干个连续的扇区，所以一个扇区段（不止一个扇区）可以包含在代表一次块设备IO请求的一个bio结构中。  
+
+接下来谈谈内存的组织。既然上层的一次读写请求可能跨多个扇区，它也可能跨越磁盘高速缓存上的多个页。于是，一个bio里面包含的扇区请求可能会对应一组内存页。而这些页是单独分配的，内存地址很可能不连续。  
+
+那么，既然bio描述的是一次块设备请求，块设备能够一次性访问一组连续的扇区，但是能够一次性对一组非连续的内存地址进行存取吗？  
+
+块设备一般是通过DMA，将块设备上一组连续的扇区上的数据拷贝到一组连续的内存页面上（或将一组连续的内存页面上的数据拷贝到块设备上一组连续的扇区），DMA本身一般是不支持一次性访问非连续的内存页面的。  
+
+但是某些体系结构包含了io-mmu。就像通过mmu可以将一组非连续的物理页面映射成连续的虚拟地址一样，对io-mmu进行编程，可以让DMA将一组非连续的物理内存看作连续的。所以，即使一个bio包含了非连续的多段内存，它也是有可能可以在一次DMA中完成的。当然，不是所有的体系结构都支持io-mmu，所以一个bio也可能在后面的设备驱动程序中被拆分成多个设备请求。  
+
+每个被构造的bio结构都会分别被提交，提交到底层的IO调度器中。  
+
+----
+
+####I/O SchedulerLayer
+
+我们知道，磁盘是通过磁头来读写数据的，磁头在定位扇区的过程中需要做机械的移动。相比于电和磁的传递，机械运动是非常慢速的，这也就是磁盘为什么那么慢的主要原因。  
+
+IO调度器要做的事情就是在完成现有请求的前提下，让磁头尽可能少移动，从而提高磁盘的读写效率。最有名的就是“电梯算法”。  
+
+在IO调度器中，上层提交的bio被构造成request结构，一个request结构包含了一组顺序的bio。而每个物理设备会对应一个request_queue，里面顺序存放着相关的request。  
+
+新的bio可能被合并到request_queue中已有的request结构中（甚至合并到已有的bio中），也可能生成新的request结构并插入到request_queue的适当位置上。具体怎么合并、怎么插入，取决于设备驱动程序选择的IO调度算法。大体上可以把IO调度算法就想象成“电梯算法”，尽管实际的IO调度算法有所改进。  
+
+除了类似“电梯算法”的IO调度算法，还有“none”算法，这实际上是没有算法，也可以说是“先来先服务算法”。因为现在很多块设备已经能够很好地支持随机访问了（比如固态磁盘、flash闪存），使用“电梯算法”对于它们没有什么意义。  
+
+IO调度器除了改变请求的顺序，还可能延迟触发对请求的处理。因为只有当请求队列有一定数目的请求时，“电梯算法”才能发挥其功效，否则极端情况下它将退化成“先来先服务算法”。  
+
+这是通过对request_queue的plug/unplug来实现的，plug相当于停用，unplug相当于恢复。请求少时将request_queue停用，当请求达到一定数目，或者request_queue里最“老”的请求已经等待很长一段时间了，这时候才将request_queue恢复。  
+
+在request_queue恢复的时候，驱动程序提供的回调函数将被调用，于是驱动程序开始处理request_queue。  
+
+一般来说，read/write系统调用到这里就返回了。返回之后可能等待（同步）或是继续干其他事（异步）。而返回之前会在任务队列里面添加一个任务，而处理该任务队列的内核线程将来会执行request_queue的unplug操作，以触发驱动程序处理请求。  
+
+----
+
+####Device Driver
+
+到了这里，设备驱动程序要做的事情就是从request_queue里面取出请求，然后操作硬件设备，逐个去执行这些请求。
+
+除了处理请求，设备驱动程序还要选择IO调度算法，因为设备驱动程序最知道设备的属性，知道用什么样的IO调度算法最合适。甚至于，设备驱动程序可以将IO调度器屏蔽掉，而直接对上层的bio进行处理。（当然，设备驱动程序也可实现自己的IO调度算法。）  
+
+可以说，IO调度器是内核提供给设备驱动程序的一组方法。用与不用、使用怎样的方法，选择权在于设备驱动程序。  
+
+于是，对于支持随机访问的块设备，驱动程序除了选择“none”算法，还有一种更直接的做法，就是注册自己的bio提交函数。这样，bio生成后，并不会使用通用的提交函数，被提交到IO调度器，而是直接被驱动程序处理。  
+
+但是，如果设备比较慢的话，bio的提交可能会阻塞较长时间。所以这种做法一般被基于内存的“块设备”驱动使用（当然，这样的块设备是由驱动程序虚拟的）。  
+
+----
+
+###磁盘
+
+####磁盘与分区
+
+每次安装系统的时候我们都会进行分区，Linux下磁盘分区和目录的关系如下：
+
+- 任何一个分区都必须挂载到某个目录上。
+- 目录是逻辑上的区分。分区是物理上的区分。
+- 磁盘Linux分区都必须挂载到目录树中的某个具体的目录上才能进行读写操作。
+- 根目录是所有Linux的文件和目录所在的地方，需要挂载上一个磁盘分区。
+
+
+
+****
+
+##文件系统
+
+> A simple description of the UNIX system, also applicable to Linux, is this:
+> **"On a UNIX system, everything is a file; if something is not a file, it is a process."**
+
+
+###文件与目录的区别
+
+对于普通文件来说，其内容就是用户能够看到的文件内容。当用户程序通过系统调用读写文件时，需要通过某种索引结构来知道文件中某个offset的数据应该在哪个磁盘块上，然后转换成对该块的读写请求。当文件的内容很小时，文件内容的索引信息可以完全存放在inode结点中；如果文件很大，索引也会很大，inode结点可能装不下，就需要分配新的块来存放这些索引信息。而文件的内容则多半是放在inode结点之外的，依靠inode里面的索引信息来找到它们。  
+
+文件内容小于12个块的部分，其块号直接存放在inode中的i_block结构中；从第13块开始，使用一级间接索引，之后随偏移的增大又扩展到二级、三级间接索引。 
+
+![i_block](../img/i_block.jpg)
+
+----
+
+对于目录，其内容一般是结构化的信息，描述了该目录下的文件的情况（主要包括每个文件的名字、inode号、等）。这是需要由具体的文件系统来解释的，用户看到这些原始内容是没有意义的。只有由具体文件系统将其解释为文件列表后，对用户才有意义。当用户程序寻找一个文件路径时，通过当前目录的inode，就能遍历到目录中的每一个结点（文件名+inode号）。匹配了下一级文件的名字以后，就能得到其对应的inode号，从而找到下一级文件的inode。这些下一级文件的信息也是因为其信息大小的不同，而直接存放在inode结点中，或另外的块中。  
+
+![ext2_目录信息结构](../img/Linux/ext2_目录信息结构.jpg)
+
+----
+
+符号链接是一种特殊的文件。作为对另一个文件的代指，符号链接文件的内容就是它所代指的文件的路径。这个文件路径信息保存在inode或被inode引用的块中。具体的文件系统类型会实现其特定的读符号链接的方法。用户也可以通过readlink系统调用读到符号链接指向的文件路径  
+
+在打开一个符号链接时，它代指的文件路径（也就是符号链接文件的内容）一般并不被用户程序所关心。内核会对此做一层包装，让用户程序自动访问到它所代指的文件的路径上去。  
+
+说了符号链接，也顺便提一下硬链接。硬链接并不会生成新的inode，而是同一个inode被包含在多个目录结点中，从而存在多个文件路径可以找到该文件。
+
+
+###概述
+Linux中使用树来组织文件系统。整个文件系统构成了一颗树，这棵树以/为根。整个系统有且只有这一颗文件树。这棵树描述了文件系统的拓扑结构，没有任何文件系统的类型信息。  
+
+linux使用mount机制扩展文件系统，使不同类型的文件系统可以挂载在系统的文件树的任何位置。mount机制使文件树有了类型属性，支持了不同类型的文件系统的挂载。  
+
+可以看到如果不考虑挂载点，整个文件系统就是一棵树，如果考虑了挂载点，这棵树原来是嫁接而成的，可以包含各种不同种类的文件系统  
+
+----
+
+####Mount机制
+
+mount可以屏蔽文件系统的类型，所有类型的文件系统共享一棵树，但是实现却可以不相同。用户进程可以使用相同的系统调用接口访问所有的文件系统，而不必在意访问的文件是什么类型的。mount机制使一棵文件树得以多样化，然而又可以向用户屏蔽这种多样化。这种多样化是通过vfs实现的。  
+
+Linux的文件系统和磁盘并不绑定，文件系统就是一棵树，是一个虚拟的概念，没有介质，没有容量，没有读写规则，只有在挂载(mount)发生的时候，也就是具体的文件系统挂载的时候，某个挂载点才和介质建立联系，然而此时对于文件系统来讲仍然没有容量的概念，容量仅仅是挂载于此目录的磁盘设备的属性，如果磁盘空间满了，仍然可以通过在此磁盘的一个目录上mount一个新的文件系统来解决，而新的文件系统在一块新的磁盘上。
+
+----
+
+####高层体系结构
+
+![Linux文件系统组件的体系结构](../img/Linux/Linux文件系统组件的体系结构)
+
+用户空间包含一些应用程序（例如，文件系统的使用者）和 GNU C 库（glibc），它们为文件系统调用（打开、读取、写和关闭）提供用户接口。系统调用接口的作用就像是交换器，它将系统调用从用户空间发送到内核空间中的适当端点。  
+
+VFS 是底层文件系统的主要接口。这个组件导出一组接口，然后将它们抽象到各个文件系统，各个文件系统的行为可能差异很大。有两个针对文件系统对象的缓存（inode 和 dentry）。它们缓存最近使用过的文件系统对象。  
+
+----
+
+####文件
+- 普通文件 `-`
+- 目录文件 `d`
+- 链接文件 `l`
+- 设备文件 `b`
+- Socket文件 `s`
+- 管道文件 `p`
+- 特殊文件 `c`
+
+----
+
+####文件系统
+
+> 是一种对存储设备上的文件，数据进行存储与组织的机制  
+- 磁盘文件系统
+- 网络文件系统
+- 特殊文件系统
+
+- V9FS Plan9 9P的远程文件系统协议
+- EcryptFS 层叠在其他文件系统之上的功能强大的企业加密文件系统
+- Ext4
+- NFS Sun开发的网络文件系统
+- NTFS NT的文件系统
+
+----
+
+####VFS
+
+![VFS](../img/Linux/VFS.jpeg)
+
+> VFS通过在各种具体的文件系统上建立一个抽象层，屏蔽了不同文件系统的差距
+> VFS通用文件系统模型在黑河中具体表现为一系列的抽象接口和数据结构.
+
+####VFS重要性
+
+VFS屏蔽了具体文件的实现细节，向上提供统一的操作接口。通过VFS可以实现任意的文件系统，这些文件系统通过文件访问系统调用都可以访问。在操作系统内核中，vfs是对离用户态最近的一层，因为它的存在，linux的使用才变得方便。实际上，正是vfs实现了树形的文件系统组织，然而vfs的作用还不止这些，设备的文件抽象也是通过vfs来实现的。  
+
+
+----
+
+####VFS对象:  
+
+1. 超级块
+
+    代表一个已安装的文件系统，存储该文件系统相关信息;通常存放在磁盘特定扇区，对于并非基于磁盘的文件系统，会现场创建超级块对象  
+
+1. 索引节点
+
+    代表一个实际的物理文件,文件的物理属性
+
+1. 目录项
+
+    描述了文件系统的层次结构,文件的逻辑属性
+
+1. 文件
+
+    代表被进程打开的文件
+
+----
+
+####文件存储结构
+
+Linux正统的文件系统(如ext2、3等)将硬盘分区时会划分出目录块、inode Table区块和data block数据区域。一个文件由一个目录项、inode和数据区域块组成。Inode包含文件的属性(如读写属性、owner等，以及指向数据块的指针)，数据区域块则是文件内容。当查看某个文件时，会先从inode table中查出文件属性及数据存放点，再从数据块中读取数据。
+
+![文件存储结构](./img/Linux/文件存储结构.png)
+
+----
+
+####再详细些
+
+![Overall layout of a disk(ext2 fs)](./img/Linux/Overall_Layout_of_A_Disk.gif)
+
+The unlabeled initial portion of the disk is the boot block. We will confine ourselves to diskettes. On a diskette there is just one block group. So a diskette has a boot block followed by the structure shown in the lower bar. Note that "every file in the EXT2 file system is described by a single inode and each inode has a single unique number identifying it. The inodes for the file system are all kept together in [an inode table (depicted above)]. EXT2 directories are simply special files (themselves described by inodes) which contain pointers to the inodes of their directory entries." In order to make sense of inodes and directory entries you need to know their internal structure too. That is described below. Given this overall layout however, let's look at the step-by-step file-fetch procedure.
+
+
+
+#####super_block
+每一个文件系统的实例中都有一个super_block（超级块），这就是该文件系统实例的源头。super_block里面主要有如下信息：根目录inode结点的结点号、inode号与块的对应信息、块的分配信息（总共有多少块、哪些已使用、等等）。  
+
+----
+
+
+
+####VFS对象之间的关系
+
+> 一个文件被打开的时候，它的file对象是使用dentry，inode，vfsmount对象中的信息填充的
+
+
+****
+
+
+####VFS详述
+VFS 作为文件系统接口的根层。VFS 记录当前支持的文件系统以及当前挂装的文件系统。
+
+可以使用一组注册函数在 Linux 中动态地添加或删除文件系统。内核保存当前支持的文件系统的列表，可以通过 /proc 文件系统在用户空间中查看这个列表。这个虚拟文件还显示当前与这些文件系统相关联的设备。在 Linux 中添加新文件系统的方法是调用 register_filesystem。这个函数的参数定义一个文件系统结构（file_system_type）的引用，这个结构定义文件系统的名称、一组属性和两个超级块函数。也可以注销文件系统。
+
+在注册新的文件系统时，会把这个文件系统和它的相关信息添加到 file_systems 列表中）。这个列表定义可以支持的文件系统。在命令行上输入 cat /proc/filesystems，就可以查看这个列表.
+
+    `struct file_system_type定义于/include/linux/fs.h(V3.10.28)`
+
+VFS中维护的另一个结构是挂装的文件系统。
+
+    `struct vfsmount定义于/include/linux/fs.h(V3.10.28)`
+
+
+
+
+
+
+
+
+
+
+
+****
+
+#Linux 命令
+
+##netstat
+
+----
+
+##ulimit
+
+    控制shell程序的资源。
+    `ulimit -c unlimited`
+
+----
+
+
+****
+
+#Linux源码
+
+##`<dirent.h>
+
+###DIR结构体
+
+    struct __dirstream   
+       {   
+        void *__fd;    
+        char *__data;    
+        int __entry_data;    
+        char *__ptr;    
+        int __entry_ptr;    
+        size_t __allocation;    
+        size_t __size;    
+        __libc_lock_define (, __lock)    
+       };   
+    typedef struct __dirstream DIR;  
+
+----
+
+###dirent结构体
+
+    struct dirent {
+        ino_t          d_ino;       /* inode number */
+        off_t          d_off;       /* offset to the next dirent */
+        unsigned short d_reclen;    /* length of this record */
+        unsigned char  d_type;      /* type of file */
+        char           d_name[256]; /* filename */
+    };
+
+----
+
+##<sys/stat.h>
+
+int stat(const char *restrict pathname, struct stat *restrict buf);
+
+提供文件名字，获取文件对应属性。感觉一般是文件没有打开的时候这样操作。
+
+int fstat(int filedes, struct stat *buf);
+
+通过文件描述符获取文件对应的属性。文件打开后这样操作
+
+int lstat(const char *restrict pathname, struct stat *restrict buf);
+
+连接文件 
+
+> stat和lstat的区别：当文件是一个符号链接时，lstat返回的是该符号链接本身的信息；而stat返回的是该链接指向的文件的信息
+
+----
+
+###stat结构体
+
+    struct stat {
+        dev_t         st_dev;       //文件的设备编号
+        ino_t         st_ino;       //节点
+        mode_t        st_mode;      //文件的类型和存取的权限
+        nlink_t       st_nlink;     //连到该文件的硬连接数目，刚建立的文件值为1
+        uid_t         st_uid;       //用户ID
+        gid_t         st_gid;       //组ID
+        dev_t         st_rdev;      //(设备类型)若此文件为设备文件，则为其设备编号
+        off_t         st_size;      //文件字节数(文件大小)
+        unsigned long st_blksize;   //块大小(文件系统的I/O 缓冲区大小)
+        unsigned long st_blocks;    //块数
+        time_t        st_atime;     //最后一次访问时间
+        time_t        st_mtime;     //最后一次修改时间
+        time_t        st_ctime;     //最后一次改变时间(指属性)
+    };
+
+----
+
+先前所描述的st_mode 则定义了下列数种情况：
+
+    S_IFMT   0170000    文件类型的位遮罩
+    S_IFSOCK 0140000    scoket
+    S_IFLNK 0120000     符号连接
+    S_IFREG 0100000     一般文件
+    S_IFBLK 0060000     区块装置
+    S_IFDIR 0040000     目录
+    S_IFCHR 0020000     字符装置
+    S_IFIFO 0010000     先进先出
+
+    S_ISUID 04000     文件的(set user-id on execution)位
+    S_ISGID 02000     文件的(set group-id on execution)位
+    S_ISVTX 01000     文件的sticky位
+
+>  若一目录具有sticky位(S_ISVTX)，则表示在此目录下的文件只能被该文件所有者、此目录所有者或root来删除或改名。
+
+    S_IRUSR(S_IREAD) 00400     文件所有者具可读取权限
+    S_IWUSR(S_IWRITE)00200     文件所有者具可写入权限
+    S_IXUSR(S_IEXEC) 00100     文件所有者具可执行权限
+
+    S_IRGRP 00040             用户组具可读取权限
+    S_IWGRP 00020             用户组具可写入权限
+    S_IXGRP 00010             用户组具可执行权限
+
+    S_IROTH 00004             其他用户具可读取权限
+    S_IWOTH 00002             其他用户具可写入权限
+    S_IXOTH 00001             其他用户具可执行权限
+
+----
+
+    上述的文件类型在POSIX中定义了检查这些类型的宏定义：
+    S_ISLNK (st_mode)    判断是否为符号连接
+    S_ISREG (st_mode)    是否为一般文件
+    S_ISDIR (st_mode)    是否为目录
+    S_ISCHR (st_mode)    是否为字符装置文件
+    S_ISBLK (s3e)        是否为先进先出
+    S_ISSOCK (st_mode)   是否为socket
+
+----
+
+###statfs结构体
+
+    struct statfs {
+        long    f_type;          //文件系统类型
+        long    f_bsize;         //块大小
+        long    f_blocks;        //块多少
+        long    f_bfree;         //空闲的块
+        long    f_bavail;        //可用块
+        long    f_files;         //总文件节点
+        long    f_ffree;         //空闲文件节点
+        fsid_t f_fsid;           //文件系统id
+        long    f_namelen;       //文件名的最大长度
+        long    f_spare[6];      //spare for later
+    };
+
+----
+
+#include<sys/types.h>
+
+
+#附录A 基本系统数据类型
+
+caddr_t                内存地址
+clock_t                 时钟滴答计数器(进程时间)
+comp_t                 压缩的时钟滴答
+dev_t                    设备号(主和次) 
+fd_set                   文件描述符集
+fpos_t                   文件位置
+gid_t                     数值组ID
+ino_t i                   节点编号
+mode_t                 文件类型,文件创建方式
+n1ink_t                目录项的连接计数
+off_t                      文件长度和位移量(带符号的)
+pid_t                     进程ID和进程组ID(带符号的) 
+ptrdiff_t                 两个指针相减的结果(带符号的)
+r1im_t                   资源限制
+sig_atomic_t        能原子地存取的数据类型
+sigset_t                 信号集
+size_t                    对象(例如字符串)长度(不带符号的)
+ssize_t                  返回字节计数的函数(带符号的)
+time_t                   日历时间的秒计数器( 1.10节)
+uid_t                     数值用户ID
+
+wchar_t                能表示所有不同的字符码
+
+
+*****
+
+#no idea where to put
+
+##/tmp
+
+关于linux下tmp文件夹，正如tmp temporary file 临时文件夹。
+
+linux 的开发规范里没有明确指出/tmp 目录的清理规则，但是指定了，系统必须要有/tmp 目录。
+
+各个发行版本都不一致，大体通行的做法是主机重启就会清空/tmp目录
+
+根据 man  tmpwatch 这个命令就知道了。   会清理30天没有访问的/tmp 目录下面的文件。

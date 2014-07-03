@@ -1,0 +1,103 @@
+#Linux Shell脚本攻略
+##小试牛刀
+
+shell脚本通常是一个以#!起始的文本文件，是以这样一个被成为shebang的特殊行作为起始的.#!被置于解释器路劲之前，/bin/bash是Bash的路径  
+
+1. 每个命令或命令序列是以;或换行符来分隔的
+1. 字符#指明注视的开始
+
+----
+
+###终端打印
+- `echo 'Hello world !'`
+
+- `echo Hello world !`
+- `printf "-5s %-10s %-4.2f\n" 2 James 90.9909`
+
+----
+
+####What's more?
+1. echo中转义字符
+
+    `echo -e "1\t2\t3"`
+
+1. 打印彩色输出
+
+    `echo -e "\e[1;31m This is red text \e[0em"`
+
+----
+
+###变量与环境变量
+1. pgrep #获得进程号
+1. cat /proc/<PID>/environ #获得与该进程相关的环境变量  
+1. cat /proc/<PID>/environ | tr '\0' '\n' #变量键值对之间用\0分隔  
+
+`var=value #赋值操作`
+`var = value #相等操作`
+`echo "We have $count ${fruit} (s)"`
+
+----
+
+> 环境变量是未在当前进程中定义,而是从父进程中继承而来的变量
+`export HTTP_PROXY` #export命令用来设置环境变量
+
+----
+
+####Anything Else
+1. 获取字符串长度
+
+    `length=${#var}`
+
+1. 识别当前的shell版本
+
+    `echo $SHELL` or `echo $0`
+
+1. 检查是否是超级用户
+
+    root用户的UID为0
+
+1. 修改Bash提示字符串
+
+    修改.bashrc中的PS1参数
+    `PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '`
+
+###通过shell进行数学计算
+1. `let result=no1+no2` #使用let时不用添加$
+1. `let no1++` & `let no2-=6`
+1. `result=$[no1 + no2]`
+1. `result=$[$no + 5]`
+1. `result=$((no1 + 50))`
+1. `result='expr 3 + 4'`
+1. `result=$(expr $no1 + 5)`
+1. `echo "scale=2;ibase=10;obase=2;4*1.354" | bc`
+1. `echo "sqrt(100" | bc`
+1. `echo "10^10" | bc`
+
+----
+
+###文件描述符&重定向
+文件描述符是与一个打开的文件或数据相关联的整数，0,1,2是系统预留的  
+
+- 0 stdin
+- 1 stdout
+- 2 stderr
+
+----
+
+- `echo "This is sample text 1" > temp.txt` #将输出写入文件前，内容首先会被清空
+- `echo "This is sample text 2" >> temp.txt` #将文本追加在文件后
+- `echo "This is sample text 3" 2>> temp.txt` #想使用特定文件描述符，就必须将描述符放在操作符之前
+- `cmd 2>stderr.txt 1>stdout.txt` #cmd不是可执行命令,错误会输出到stderr中
+- `cmd 2>&1 output.txt` or `cmd &> output.txt` #将stderr转换为stdout，都重定向到一个文件中
+- `cat a* | tee out.txt | cat -n` #将std一个副本写入out.txt，另一份作为后续的stdin
+- `cat a* | tee -a out.txt | cat -n` #追加到out.txt
+
+----
+
+####自定义文件描述符
+
+1. 只读模式
+1. 截断模式
+1. 追加模式
+
+

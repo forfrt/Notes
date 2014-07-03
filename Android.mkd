@@ -1,0 +1,43 @@
+
+
+#使用Android模拟器的技巧
+
+Eclipse选择AVD时会同时考虑程序使用的Android版本和minSdkVersion属性的设置值，当存在运行AVD时选用运行AVD。  
+
+*把实体手机或平板电脑当成模拟器*
+1. 安装USB驱动
+1. 将手机或平板电脑以USB连接到PC
+1. 设置》应用程序 启动调试相关功能
+1. 启动Eclipse，切换到DDMS界面，在左上的Devices窗口显示特殊模拟器就是实体手机或平板电脑
+1. 运行项目，则程序就会安装到实体设备中运行。
+
+#Activity
+活动是最基本的 Android 应用程序组件，应用程序中，一个活动通常就是一个单独的屏幕。每一个活动都被实现为一个独立的类，并且从活动基类中继承而来，活动类将会显示由视图控件组成的用户接口，并对事件做出响应  
+
+当一个新的屏幕打开后，前一个屏幕将会暂停，并保存在历史堆栈中。用户可以返回到历史堆栈中的前一个屏幕。当屏幕不再使用时，还可以从历史堆栈中删除。默认情况下，Android 将会保留从主屏幕到每一个应用的运行屏幕。  
+
+简单理解 Activity 代表一个用户所能看到的屏幕， Activity 主要是处理一个应用的整体性工作
+
+#Intent
+调用 Android 专有类 Intent 进行架构屏幕之间的切换。Intent 是描述应用想要做什么。Intent 数据结构两个最重要的部分是**动作**和**动作对应的数据**  
+
+##InterFilter
+相对于 intent 是一个有效的做某事的请求，一个 intentfilter 则用于描述一个 activity （或者 IntentReceiver ）能够操作哪些 intent  
+
+##IntentReceiver:
+虽然 IntentReceiver 在感兴趣的事件发生时，会使用 NotificationManager通知用户，但它并不能生成一个 UI。IntentReceiver 在 AndroidManifest.xml 中注册，但也可以在代码中使用Context.registerReceiver()进行注册  
+
+#Service
+一个 Service 是一段长生命周期的，没有用户界面的程序  
+
+
+#Fragment
+Fragment类让程序界面分割成多个区域。这种Fragment程序接口具有以下特性：  
+
+1. 程序的运行界面可以由多个Fragment组成
+1. 每一个Fragment都有各自独立的运行状态，并且接受各自的处理事件
+1. 在程序运行的过程中，Fragment可以动态加入和移除。
+
+
+
+

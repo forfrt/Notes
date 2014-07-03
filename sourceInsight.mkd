@@ -1,0 +1,23 @@
+到单词左边(也就是到一个单词的开始)   : Ctrl+Left
+到单词右边(到该单词的结束)           : Ctrl+Right
+选择左边单词                         : Ctrl+Shift+Left
+选择右边单词                         : Ctrl+Shift+Right
+跳到匹配                             : Alt+]
+书签                                 : Ctrl+M
+激活语法窗口                         : Alt+L
+显示文件状态                         : Shift+F10
+插入新行                             : Ctrl+Enter
+重画屏幕                             : Ctrl+Alt+Space
+
+跳到基本类型(即跳到原型)             : Alt+0
+跳到定义出(也就是声明)               : Ctrl+=, Ctrl+L Click (select), Ctrl+Double L Click
+检查引用                             : Ctrl+/
+语法信息(弹出该语法的信息)           : Alt+/, Ctrl+R Click (select)
+
+本文件查找结果的上一个。             : F3
+本文件查找结果的下一个。             : F4
+
+Jump backword                        : Alt+,
+Jump forward                         : Alt+.
+
+

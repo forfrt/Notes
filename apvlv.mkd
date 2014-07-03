@@ -1,0 +1,12 @@
+- m: Mark
+
+    Mark the read position and name it by pr3essing a character.  
+    press `ma` to mark the current position to a.  
+
+- ': Goto the Marked position
+
+    press `'a` to go to the position a.  
+
+- ": Return to the previous position
+
+

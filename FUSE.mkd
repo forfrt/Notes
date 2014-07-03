@@ -1,0 +1,336 @@
+##How does it work
+
+![FUSE Structure](./img/FUSE/FUSE_Structure)
+
+The FUSE kernel module and the FUSE library communicate via a special file descriptor which is obtained by opening `/dev/fuse`.  This file can be opened multiple times, and the obtained file descriptor is passed to the mount syscall, to match up the descriptor with the mounted filesystem.  //FUSE内核模块与FUSE库文件使用一个通过/dev/fuse获得的特殊文件描述符交流.这个文件可以被多次打开...
+
+****
+
+#How Fuse-1.3 works(官方文档)
+
+##The fuse library
+
+When your user mode program calls fuse_main() (lib/helper.c), fuse_main() parses the arguments passed to your user mode program, then calls fuse_mount() (lib/mount.c).  //当用户模式程序调用fuse_main()时,fuse_main()解释传递给用户程序的参数,并调用fuse_mount()
+
+fuse_mount() creates a UNIX domain socket pair, then forks and execs fusermount (util/fusermount.c) passing it one end of the socket in the FUSE_COMMFD_ENV environment variable.  //fuse_mount创建UNIX域套接字,并传递FUSE_COMMFD_ENV环境变量中套接字的一端到fusermount
+
+fusermount (util/fusermount.c) makes sure that the fuse module is loaded. fusermount then open `/dev/fuse` and send the file handle over a UNIX domain socket back to fuse_mount().  //fusermount确保fuse模块被正确加载后,打开/dev/fuse,将句柄以UNIX域套接字形式发回fuse mount
+
+fuse_mount() returns the filehandle for `/dev/fuse` to fuse_main().  //fuse_mount将文件句柄返回fuse_main()
+
+fuse_main() calls fuse_new() (lib/fuse.c) which allocates the struct fuse datastructure that stores and maintains a cached image of the filesystem data.  //fuse_mina调用fuse_new()来分配存储文件系统数据缓存镜像的数据结构
+
+Lastly, fuse_main() calls either fuse_loop() (lib/fuse.c) or fuse_loop_mt() (lib/fuse_mt.c) which both start to read the filesystem system calls from the `/dev/fuse`, call the usermode functions stored in struct fuse_operations datastructure before calling fuse_main(). The results of those calls are then written back to the `/dev/fuse` file where they can be forwarded back to the system calls.  //fuse_main调用fuse_loop()或fuse_loop_mt()来启动读取/dev/fuse的文件系统调用,在调用fuse_main()前调用存储在fuse_operations中的用户模式函数.这些调用结果会被写回/dev/fuse文件
+
+----
+
+##The kernel module
+The kernel module consists of two parts. 
+
+First the proc filesystem component in kernel/dev.c 
+
+second the filesystem system calls kernel/file.c, kernel/inode.c, and kernel/dir.c  
+
+----
+
+All the system calls in kernel/file.c, kernel/inode.c, and kernel/dir.c make calls to either request_send(), request_send_noreply(), or request_send_nonblock(). Most of the calls (*all but 2*) are to request_send(). request_send() adds the request to, "list of requests" structure (fc->pending), then waits for a response.  request_send_noreply() and request_send_nonblock() are both similar in function to request_send() except that one is non-blocking, and the other does not respond with a reply.  //所有的file.c,inode.c,dir.c中的系统调用都会调用request_send(),request_send_noreply()或者request_send_nonblock().request_send将添加request到request列表中,然后等待响应.request_send_noreply与request_send_nonblock则是一个部响应请求,一个non-blocking
+
+The proc filesystem component in kernel/dev.c responds to file io requests to the file `/dev/fuse`. fuse_dev_read() handles the file reads and returns commands from the "list of requests" structure to the calling program. fuse_dev_write() handles file writes and takes the data written and places them into the req->out datastructure where they can be returned to the system call through the "list of requests" structure and request_send().  //dev.c中proc文件系统部分响应对/dev/fuse的文件读取请求.fuse_dev_read()处理文件读请求并返回request列表中的命令.fuse_dev_write处理文件写请求并将写入数据放置在req->out数据,以便在request列表结构中通过request_send返回到系统调用
+
+****
+
+#Kernel
+
+##Definition
+
+1. Userspace filesystem:
+
+    A filesystem in which data and metadata are provided by an ordinary userspace process. The filesystem can be accessed normally through the kernel interface.  //数据与元数据由普通用户空间进程提供的文件系统.一般通过内核接口访问
+
+1. Filesystem daemon:
+
+    The process(es) providing the data and metadata of the filesystem.
+
+1. Non-privileged mount (or user mount):
+
+    A userspace filesystem mounted by a non-privileged (non-root) user.  The filesystem daemon is running with the privileges of the mounting user. NOTE: this is not the same as mounts allowed with the "user" option in /etc/fstab, which is not discussed here.  //杯非特权用户挂载的用户空间文件系统.守护进程...
+
+1. Filesystem connection:
+
+A connection between the filesystem daemon and the kernel. The connection exists until either the daemon dies, or the filesystem is umounted. Note that detaching (or lazy umounting) the filesystem does _not_ break the connection, in this case it will exist until the last reference to the filesystem is released.  //文件系统守护进程与内核的连接.生命周期为直到守护进程死亡或文件系统umounted.主意detaching不会切断连接,会存货到下个引用释放
+
+1. Mount owner
+
+    The user who does the mounting.
+
+1. User
+
+    The user who is performing filesystem operations.
+
+    
+
+#What is FUSE?
+
+FUSE is a userspace filesystem framework. It consists of a kernel module (fuse.ko), a userspace library (libfuse.*) and a mount utility (fusermount).  //FUSE由内核模块,用户空间库与挂载工具组成
+
+One of the most important features of FUSE is allowing secure, non-privileged mounts. This opens up new possibilities for the use of filesystems. A good example is sshfs: a secure network filesystem using the sftp protocol.  //最重要的特性之一是允许安全非特权挂载.打开了一个使用文件系统的新方式.sshfs(使用sftp协议的网络安全文件系统)是个好例子
+
+----
+
+##Filesystem type
+
+The filesystem type given to mount can be one of the following:
+
+1. 'fuse'
+
+    This is the usual way to mount a FUSE filesystem. The first argument of the mount system call may contain an arbitrary string, which is not interpreted by the kernel.  //挂载FUSE文件系统的一般方法.挂载系统调用的第一个参数可能包括一个不被内核解释的随机字符串
+
+1. 'fuseblk'
+
+
+    The filesystem is block device based. The first argument of the mount system call is interpreted as the name of the device.  //基于块设备的文件系统.挂载系统调用的第一个参数被理解为设备名
+
+
+****
+
+#使用FUSE编写文件系统 1
+
+                       +----------------+
+                       | myfs /tmp/fuse |
+                       +----------------+
+                              |   ^
+    +--------------+          v   |
+    | ls /tmp/fuse |    +--------------+
+    +--------------+    |    libfuse   |
+          ^  |          +--------------+
+          |  v                |   |
+    +--------------+    +--------------+
+    |     glibc    |    |     glibc    |
+    +--------------+    +--------------+
+          ^  |                |   ^
+    ~.~.~.|.~|~.~.~.~.~.~.~.~.|.~.|.~.~.~.~.~.~.~.~.
+          |  v                v   |
+    +--------------+    +--------------+
+    |              |----|     FUSE     |
+    |              |    +--------------+
+    |      VFS     |           ...
+    |              |    +--------------+
+    |              |----|     Ext3     |
+    +--------------+    +--------------+
+
+从图中可以看到，FUSE和ext3一样，是内核里的一个文件系统模块。例如我们用FUSE实现了一个文件系统并挂载在/tmp/fuse，当我们对该目录执行ls时，内核里的FUSE从VFS获得参数，然后调用我们自己实现的myfs中相应的函数，得到结果后再通过VFS返回给ls。  
+
+----
+
+##实例代码-oufs.c
+
+    #define FUSE_USE_VERSION 26
+     
+    #include <stdio.h>
+    #include <string.h>
+    #include <fuse.h>
+     
+    static int ou_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
+                          off_t offset, struct fuse_file_info* fi)
+    {
+        return filler(buf, "hello-world", NULL, 0);
+    }
+     
+    static int ou_getattr(const char* path, struct stat* st)
+    {
+        memset(st, 0, sizeof(struct stat));
+     
+        if (strcmp(path, "/") == 0)
+            st->st_mode = 0755 | S_IFDIR;
+        else
+            st->st_mode = 0644 | S_IFREG;
+     
+        return 0;
+    }
+     
+    static struct fuse_operations oufs_ops = {
+        .readdir    =   ou_readdir,
+        .getattr    =   ou_getattr,
+    };
+     
+    int main(int argc, char* argv[])
+    {
+        return fuse_main(argc, argv, &oufs_ops, NULL);
+    }
+
+----
+
+##实现代码-Makefile
+
+    CC := gcc
+    CFLAGS := -g -Wall
+    OBJS := $(patsubst %.c, %.o, $(wildcard *.c))
+     
+    TARGET := oufs
+     
+    .PHONY: all clean
+     
+    all: $(TARGET)
+     
+    oufs: $(OBJS)
+    	$(CC) $(CFLAGS) `pkg-config --libs fuse` -o $@ $^
+     
+    .c.o:
+    	$(CC) $(CFLAGS) `pkg-config --cflags fuse` -c $<
+     
+    clean:
+    	rm -f $(TARGET) $(OBJS)
+
+----
+
+##实例代码-运行结果
+
+编译成功后会看到生成的可执行文件oufs。建立一个挂载点/tmp/mnt，然后运行
+
+`./oufs /tmp/mnt`
+
+成功后试试”ls /tmp/mnt”，就能看到一个文件hello-world。要调试的时候可以加上-d选项，这样就能看到FUSE和自己printf的调试输出。
+
+代码第一行指定了要使用的FUSE API版本。这里使用的是2.6版本。
+
+----
+
+##oufs.c_1.0-代码分析
+
+要实现ls的功能，FUSE需要提供两个函数：readdir()和getattr()，这两个接口是struct fuse_operations里的两个函数指针：  
+
+    int (*getattr) (const char *, struct stat *);
+    int (*readdir) (const char *, void *, fuse_fill_dir_t, off_t,
+                            struct fuse_file_info *); 
+
+----
+
+这里要实现getattr()是因为我们要遍历根目录的内容，要通过getattr()获取根目录权限等信息。getattr()实现类似stat()的功能，返回相关的信息如文件权限，类型，uid等。参数里的path有可能是文件或目录或软链接或其它，因此除了权限外还要填充类型信息。  
+
+程序里除了根目录就只有一个文件hello-world，因此只有目录(S_IFDIR)和普通文件(S_IFREG)两种情况。使用”ls -l”查看/tmp/mnt下的内容可以发现，hello-world的link数，修改时间等都是错误的，那是因为ou_getattr()实现中没有填充这些信息。查看manpage可以知道stat都有哪些字段。
+
+----
+
+readdir()的参数fuse_fill_dir_t是一个函数指针，每次往buf中填充一个entry的信息。程序中的ou_readdir()采用了注释中的第一种模式，即把所有的entry一次性放到buffer中。如果entry较多，把readdir()中的offset传给filler即可，buffer满了filler返回1。
+
+----
+
+最后在main函数中调用的是fuse_main()，把文件系统的操作函数和参数(如这里的挂载点/tmp/mnt)传给FUSE。  //oufs_ops
+
+----
+
+##oufs.c_2.0_代码分析
+
+新增了两个函数ou_create()和ou_unlink()，分别用于创建和删除文件；
+
+增加了一个全局变量entries用于保存所有的entry；
+
+由于这些函数相当于实现VFS中的接口，因此不能在错误时返回-1了事，而是要根据不同的错误类型返回不同的值
+
+值和含义在/usr/include/asm-generic/errno-base.h和/usr/include/asm-generic/errno.h有定义。
+
+----
+
+##oufs.c_3.0_代码分析
+
+一个全局缓冲区content用来记录hello-world的内容，content_size用来记录缓冲区长度。函数ou_read()和ou_write()分别用来读写hello-world的内容，ou_truncate()用来改变文件大小。这些函数的功能不具体描述了，manpage里面说得很详细。
+
+----
+
+##oufs.c_4.0_代码分析
+
+为了防止对新建的目录执行ls得到错误的结果，程序里把所有函数的执行目录都*限定在根目录下*。和创建/删除文件的程序比较一下，除了把create()/unlink()分别替换成mkdir()/rmdir()外其它内容基本没有变化，使用的还是同样的数据结构。在linux vfs的实现中目录的确是被作为一个特殊的文件对待，只是普通文件使用read()/write()访问，而目录使用readdir()/mkdir()访问。
+
+----
+
+##oufs.c_5.0_代码分析
+
+----
+
+##数据结构分析
+
+###struct fuse_file_info
+
+
+##API分析
+
+1. `int (*getattr) (const char *, struct stat *);`
+
+    与stat()相似.得到path填充stat.忽略st_dev与st_blksize字段.如果use_ino挂载选项没有提供,st_ino不可忽略
+
+1. `int (*fgetattr) (const char *, struct stat *, struct fuse_file_info *);`
+
+    This method is called instead of the getattr() method if the file information is available.
+    只会在create()方法后被调用
+
+1. `int (*access) (const char *path, int mode);`
+
+    Check file access permissions
+    会被系统调用access()调用.如果提供了'default_permissions'挂载选项,则不调用这个方法
+
+1. `int (*readlink) (const char *path, char *buf, size_t size);`
+
+    Read the target of a symbolic link
+    buff参数应当以null terminated string填充.size参数包括terminating null character空间.如path对于buffer太长,将会删减到适合buffer.
+
+1. `int (*opendir) (const char *, struct fuse_file_info *);`
+
+    Open directory
+    除非提供了'default_permissions'挂载选项,否则此方法将检查是否有权打开这个目录.opendir可能会返回fuse_file_info中的任意filehandle,来传递给readdir和closedir和fsyncdir
+
+1. `int (*readdir) (const char *, void *, fuse_fill_dir_t, off_t,struct fuse_file_info *);`
+
+    替代了getdir接口,使用fuse_fill_dir_t函数指针,将entry添加到buf中,有两种使用方式
+
+    1. 实现完全忽略offset参数,直接将0传给filler函数的offset参数.整个目录在一次readdir操作中完成读取,filler除非出现错误否则部返回1.这种方式与就得getdir()一样
+
+    2. 不忽略offset参数,使用offset参数传递给filler函数.当buffer满了就返回1.
+
+1. `int (*releasedir) (const char *, struct fuse_file_info *);`
+
+    Realse directory
+
+1. `int (*mknod) (const char *, mode_t, dev_t);`
+
+    Create a file node
+    This is called for creation of all non-directory, non-symlink nodes. If the filesystem defines a create() method, then for regular files that will be called instead.
+
+1. `int (*ftruncate) (const char *, off_t, struct fuse_file_info *):`
+
+    Change the size of an open file
+    当truncation由ftruncate系统调用调用时,这个方法将替代truncate
+
+
+1. `int (*fsync) (const char *, int, struct fuse_file_info *);`
+
+    Synchronize file contents
+    若datasync参数不为零,则只有用户数据被flushed,元数据不变
+1. `int (*create) (const char *, mode_t, struct fuse_file_info *);`
+
+    创建并打开一个文件
+    如果文件不存在,第一次会使用特定模式创建,然后打开
+
+1. `int (*unlink) (const char *);`
+
+    删除一个文件
+
+1. `int (*read) (const char *, char *, size_t, off_t,struct fuse_file_info *);`
+
+    从一个打开文件中读取数据
+    返回除EOF外读取数据bytes或错误.否则剩余内容会被0替换.
+
+1. `int (*write) (const char *, const char *, size_t, off_t,struct fuse_file_info *);`
+
+    向一个打开文件写入数据
+    返回除EOF外读取数据bytes或错误.否则剩余内容会被0替换.
+
+1. `int (*mkdir) (const char *, mode_t);`
+
+    创建目录
+
+1. `int (*rmdir) (const char *);`
+
+    删除目录
+
+
+   

@@ -1,0 +1,121 @@
+#定义
+DHTML
+> DHTML结合了HTML、层叠样式表（Cascading Style Sheets，CSS）、JavaScript和DOM。这些技术的结合使得开发人员可以动态地修改Web页面的内容和结构。
+
+#XML
+基于SGML衍生出了W3C的可扩展标记语言（eXtensible Markup Language，XML）
+
+　　XUL：XUL（读作“zool”）代表XML用户界面语言（XML User Interface Language）
+　　XAML：XAML（读作“zammel”）是Microsoft即将推出的操作系统（名为Windows Vista）的一个组件
+　　MXML：Macromedia创建了MXML，作为与其Flex技术一同使用的一种标记语言。
+　　XAMJ：让人欣喜的是，开源社区又向有关界面设计的XML衍生语言领域增加了新的成员。
+　　XForms设计为支持更丰富的用户界面，而且能够将数据与表示解耦合。
+　　
+#Ajax
+　　这种方法的一大优势就是开发人员不需要学习一种新的语言，也不必完全丢掉他们原先掌握的服务器端技术
+　　尽管原来把Ajax认为是Asynchronous JavaScript + XML（异步JavaScript + XML）的缩写，但如今，这个词的覆盖面有所扩展，把允许浏览器与服务器通信而无需刷新当前页面的技术都涵盖在内。
+　　Ajax是一个客户端技术，不论你现在使用何种服务器端技术，都能使用Ajax，而不管使用的是Java、.NET、Ruby、PHP还是CGI。
+
+##远程脚本
+　　远程脚本是一种远程过程调用类型。
+　　实现远程脚本的通常做法包括将脚本与一个IFRAME（隐藏或不隐藏）结合，以及由服务器返回JavaScript，然后再在浏览器中运行这个JavaScript。
+　　
+　　
+#使用AJAX
+传统的web页面：
+
+　　1. 用户点击网页某一部分
+    1. 浏览器向服务器发出一个请求
+    1. 服务器发出一个完整的新页面，包括所有已修改信息
+    1. 用户点击另一部分
+    1. 浏览器向服务器发出请求
+    1. 服务器再次发送完整的页面
+
+　　缺点：有可能只改变很少一部分，却也要完整页面刷新
+　　
+改进后web页面：
+
+　　1. 用户点击网页某一部分---&gt;页面代码创建特殊请求对象， 由浏览器发送给服务器---&gt;服务器更新该对象---&gt;代码告诉浏览器只更新已改变部分
+　　2. 用户点击网页某一部分---&gt;脚本告诉浏览器如何刷新页面---&gt;浏览器调用脚本文件中一个函数
+
+　　AJAX是设计构建页面的一种方法，使web应用具有像桌面应用一样的交互性和响应性。
+　　异步请求：后台发生一个请求，处理请求时用户可以继续完成他的操作。
+　　注意：浏览器是异步的，不过标准页面需要从服务器得到某些信息时，一切都会停滞不动，知道服务器响应。
+　　
+##使用Ajax的五个步骤
+
+1. 修改xhtml web页面
+1. 编写一个函数初始化页面
+1. 编写一个函数创建请求对象
+1. XMLHttpRequest浏览器请求对象
+1. ActiveXOject是Microsoft特定的编程对象
+
+
+如:从服务器得到一个商品的详细信息
+1. 得到一个请求对象
+1. 配置请求对象的属性
+1. 告诉请求对象当服务器响应时做什么
+1. 发送请求
+1. 显示商品的详细信息
+1. Ajxa中回调函数是服务器对一个请求对象request作出响应时调用的函数
+1. 每次服务器响应请求时由浏览器调用回调函数，服务器作出响应
+1. 服务器响应请求时将请求对象request的readyState设置为不同的值。
+
+request对象
+　　1. XMLHTTPRequest可以用于Firefox、Safari、Mozilla和Opera和大多数
+　　2. ActiveXObject("Msxml2.XMLHTTP")大多数ie版本都支持这种语法
+　　3. ActiveXObject("Miscrosoft.XMLHTTP")有些ie版本需要不同的库
+
+　　不论用何种语法来得到请求对象的一个实例，这个对象本身的表现都是一样的。
+
+属性：
+
+　　* readyState
+
+        * uninitalized:0
+        * open:1
+        * sent:2
+        * receive:3
+        * loaded:4        
+
+    * status//http状态码
+　　
+方法：
+　　* abort()//停止当前请求--open("GET",url,true//请求异步)//建立对服务器的调用--send()//向服务器发送请求
+    * getAllResponseHeaders()
+　　
+##Get与post
+　　一般使用get从服务器获取数据
+　　改变服务器数据状态时当使用post，不同于GET，需要设置XMLHttpRequest对象的Content-Type首部
+
+##JSP、Servlet with AJAX
+JS:
+
+    1. 通过XMLHttpRequest.responseText获取servlet端的getPrintWriter().write()输出的响应。得到的值是 一个String类型数据。
+
+JSP/Servlet:
+
+    1. 首先要设置浏览器不进行AJAX处理页面的缓存
+    1. 通过Request.getParameter("")获取AJAX传递参数
+    1. 通过response.getWriter().write()向Ajax输出参数，在Ajax一端通过XMLHttpRequest.responseText获取参数值。
+
+#我的Ajax设计原则
+永远不要惹恼用户
+将页面的内容和行为分离(unobtrusive javascript)
+
+　　1. Xhtml描述的是页面的内容和结构
+　　1. Css定义了页面的表示
+　　1. Javascript和事件处理程序完成页面的行为
+
+#书评
+1. Head first ajax[Rebecca M. Riordan]
+　　遵循了head first一贯原则，文字图像合一，易读且能帮助大脑思考，great！
+　　美中不足的是，我在看head first ajax时，只了解了Django和jsp，而书中多以php为例，使我理解上造成些许困难。不过，我很喜欢其中这一句：
+　　另外我们还相信你应该足够聪明，能把从使用php的例子中学到的知识应用到Ruby on Rails或java servlet的应用中。
+
+1. 
+　　
+　　
+　　
+　　
+

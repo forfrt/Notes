@@ -1,0 +1,45 @@
+#Welcome to my personal wiki
+
+##[[Introduce]]
+
+##Coding
+1. [[LibGDX]]
+1. [[JUnit]]
+1. [[Android]]
+1. [[Markdown]]
+1. [[Software Configuration Tool]]
+1. [[Makefile]]
+1. [[Cpp]]
+1. [[Beautiful Codes]]
+1. [[truecrypt]]
+1. [[FiST]]
+1. [[Kconfig]]
+1. [[ecryptfs]]
+1. [[FUSE]]
+1. [[Best Practice]]
+
+##Theory
+1. [[Watermaking]]
+1. [[Design Pattern]]
+1. [[File Filter]]
+1. [[Linux]]
+1. [[Linux Shell]]
+1. [[HTTP权威指南]]
+1. [[Japanese]]
+1. [[Modern Cryptography]]
+
+##Books
+1. [[Linux网络编程]]
+1. 
+
+##Articles
+1. 
+
+
+##Tools Hotkeys
+1. [[eclipse]]
+1. [[vim]]
+1. [[sourceInsight]]
+1. [[apvlv]]
+
+2014-02-22 08:48 PM
