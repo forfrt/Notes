@@ -1,0 +1,49 @@
+#FREE OPEN-SOURCE ON-THE-FLY ENCRYPTION
+
+##Documentation
+
+###System Encryption
+
+####Operating Systems Supported for System Encryption
+* Win7
+* Win Vista
+* Wind XP
+* ...
+
+####Hidden Operating System
+TrueCrypt allows you to create a hidden operating system hwose existence should be impossible to prove.
+
+####Rescue Disk
+* TrueCrypt Boot Loader may be damaged
+* TrueCrypt Boot Loader is frequently damaged or if you do not want the TrueCrypt boot loader to reside on the hard drive.
+* master key or other critical data are damaged
+* Windows is damaged and cannot start
+* backup of the original content of the first drive track.
+
+> Be Careful!If an old TrueCrypt Resuce Disk and the responding password are found by your adversary,then he/she will be able to access your encrypted volume.
+
+###Plausible Deniability
+1. Hidden volumes and hidden operating systems.  
+1. Until decrypted, a TrueCrypt partition/device appears to consist of nothing more than random data  
+
+####Hidden Volume
+
+> Even when the outer volume is mounted,it should be impossible to prove wheter there is a hidden volume within in or not,because free space on any TrueCrypt volume is always filled with random data when the volume is created and no part of the hidden volume can be distinguished form random data.
+
+> Wheter the hidden or the outer voume will be mounted is determined by the entered password.
+
+####Protection of Hidden Volume
+> if you need to save data to the outer volume,there is a risk that the hidden volume will get damaged(overwritten).To solve this,there is a 'Hidden Volume Protection' option,type the password for hidden volume to enable it.
+
+###Security Requirements and Precautions Pertaining to Hidden Volumes
+
+1. Not able to provide Plausible Explanations for why sectors contained in hidden Volume changed if an adversary has access to a TrueCrypt Volume may indicate the existence of a hidden volume.
+    
+    similar issues as follow:
+
+    * 
+
+
+##Analysis
+
+

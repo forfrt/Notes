@@ -1,0 +1,19 @@
+Ctrl+D: 删除当前行 
+Ctrl+Alt+↓ 复制当前行到下一行(复制增加)
+Ctrl+Alt+↑ 复制当前行到上一行(复制增加)
+Ctrl+Q 定位到最后编辑的地方
+Ctrl+L 定位在某行 (对于程序超过100的人就有福音了)
+Ctrl+M 最大化当前的Edit或View (再按则反之)
+Ctrl+E 快速显示当前Editer的下拉列表(如果当前页面没有显示的用黑体表示)
+Ctrl+/(小键盘) 折叠当前类中的所有代码
+Ctrl+×(小键盘) 展开当前类中的所有代码
+Ctrl+O 快速显示 OutLine
+Ctrl+T 快速显示当前类的继承结构
+Ctrl+W 关闭当前Editer
+Ctrl+K 参照选中的Word快速定位到下一个
+Ctrl+1 快速修复(最经典的快捷键,就不用多说了)
+
+导包， 自动import类ctrl+shift+o或者ctrl+1再选择 
+当前单词大写：Ctrl+Shift+x
+当前单词小写  Ctrl+Shift+y
+自动添加注释 通过“Alt+Shift+j”自动添加注释

@@ -1,0 +1,90 @@
+[[#Basic]]
+
+#CPP
+
+----
+
+##`#define`
+
+    #define list_for_each_safe(p, n, head) \
+        for ((p) = (head)->next, (n) = (p)->next; \
+             (p) != (head); \
+             (p) = (n), (n) = (p)->next)
+
+    //防止p在循环中被释放
+
+----
+
+    #define min(x,y)({  \
+       typeof(x) _x=(x);  \
+       typeof(y) _y=(y);  \
+       (void) (&_x==&_y);  \
+       _x<_y ? _x : _y;  \
+    })
+
+----
+
+    #define offset_of(type, member) \
+        ((unsigned long)(&(((type*)0)->member)))
+    #define container_of(ptr, type, member) \
+        ((type*)((unsigned long)(ptr) - offset_of(type, member)))
+    #define list_entry(ptr, type, member) container_of(ptr, type, member)
+    struct ou_entry* o = list_entry(n, struct ou_entry, node);
+    //通过offset得到含有list_node属性的特定node的对应结构体实例
+    //从一个结构的成员指针找到其容器的指针。
+
+    1. (type*)0
+
+        将地址0转换为type类型的指针。
+        不同进程看到的地址空间是不一样的，具体类型取决于进程访问的方式。前面我们提到类型强制性转换，就是可以将任何地址强制性转换为某种数据类型。对于进程来说，不一定能够访问0地址（访问0地址是违法的），但只要不去访问0地址，我们把地址转换为任何类型都是没问题的。怎样想与怎样去做是两回事，可以把地址0想象为任何数据类型，但只要不去做（访问地址0），那就没有任何问题。  
+
+    1. offsetof(TYPE,MEMBER)
+
+        `#define offsetof(TYPE,  MEMBER)((size_t)&((TYPE*)0)->MEMBER)`
+        因为每个结构体在编译时，已知道其大小和各个成员变量大小，就可以简洁方便地计算偏移量。这个偏移量在程序编译时便可确定。
+
+        这个地址类型是member的，为了以后的计算，我们需将这个地址转换为无符号长整型(size_t)。
+
+    1. typeof
+
+        关键字typeof返回的是表达式的类型，使用上类似于关键字sizeof，但它的返回值是类型
+
+    1. const typeof((type *)0)->member)* __mptr
+
+        定义一个常量指针__mptr，指针类型是和结构体type中成员变量member数据类型一致。
+
+    1. (type *)( (char *)__mptr – offsetof(type,member) )
+
+        我们已经得到type类型数据结构（这个结构有个成员变量是member）变量的起始地址，结果是无符号整型的，为了真正能使用这个数据结构，还需最后一步，将其强制性转换为type指针类型。
+
+----
+
+
+    b_offset = offsetof(struct mystruct, member_b);
+    char *sc = (char *)s;
+    *(int *)(sc + b_offset)
+
+    //通过offset访问或修改结构体成员变量
+
+----
+
+    #define offsetof(TYPE,  MEMBER)((size_t)&((TYPE*)0)->MEMBER)
+
+    //著名的offsetof函数,计算成员member在type数据结构中的偏移量
+
+----
+
+****
+
+##struct
+
+    struct MyData {
+        int nLen;
+        char data[0];
+    };
+    struct MyData *p = (struct MyData *)malloc(sizeof(struct MyData )+strlen(str))
+    free(p)
+
+    //变长数组
+
+----

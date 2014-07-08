@@ -1,0 +1,563 @@
+#IPSec
+> 互联网体系结构委员会(IAB)总结出认证和加密是下一代IP包括的内容
+> 所有使用IP协议进行数据传输的应用系统和服务都可以使用IPsec，由于IPSec工作在OSI的第3层(网络层)，低于应用程序直接涉及的层级
+
+##IPSec的应用
+* 通过互联网安全分支机构接入
+* 通过互联网进行安全远程访问
+* 与合作者建立企业间联网和企业内联网接入
+* 加强电子商务安全性
+
+基本特性是:在IP层对所有流量进行加密和/或认证
+
+##IPSec的好处
+* 对用户透明
+* 对应用透明
+* 对通过路由器或防火墙边界的所有通信流提供了强安全性
+* 防火墙内IPSec在所有外部流量必须使用IP时阻止旁路
+
+##IPSec文档
+* RFC2401
+* RFC2402
+* RFC2406
+* RFC2408
+
+安全特性均是在主IP报头后的扩展报头实现的.  
+
+1. 用于认证的扩展报头是认证报头AH
+1. 用于加密的扩展报头是封装安全载荷ESP报头
+
+##安全关联(SA)
+> SA是两个IPSec建立的*单向*逻辑连接
+
+三个参数唯一确定  
+
+1. 安全参数索引SPI
+1. IP目的地址
+1. 安全协议标识
+
+> SA是具有生存周期的，且只对通过IKE协商建立的SA有效，手工方式建立的SA永不老化
+
+只通过SPI即可从SAD中获取相应SA而推出*`SA由三个参数唯一标识`是错误的*这一命题的真实情况应该是这样的(拿目的地址收到IPSec包为例):
+
+1. 目的地址从ESP/AH报头中获取得到SPI,根据SPI查找SPD,从而获取得到协议种类
+
+    这里的问题就是:SPI在SPD中必须是主键地位(唯一标识,否则不成立)
+
+1. 获取得到协议种类后,SPI+协议种类+目的地址都已知,因此三个参数唯一确定SA,从而从SAD中取出相对应SA
+
+> IKE协商建立的SA的生存周期有两种定义方式：
+> 1. 基于时间的生存周期，定义了一个SA从建立到失效的时间；
+> 1. 基于流量的生存周期，定义了一个SA允许处理的最大流量
+> 生存周期到达指定的时间或指定的流量，SA就会失效。SA失效前，IKE将为IPsec协商建立新的SA，这样，在旧的SA失效前新的SA就已经准备好。在新的SA开始协商而没有协商好之前，继续使用旧的SA保护通信。在新的SA协商好之后，则立即采用新的SA保护通信。
+
+##SAD安全关联数据库
+SAD定义了与每个SA相关的参数
+
+* 序列号计数器
+* 序列号计数器溢出
+* 反重放窗口
+* AH信息
+* ESP信息
+* 此安全关联的生存期
+* IPSec协议模式(隧道or传输)
+* 最大传输单位路径
+
+    其中SPI（Security ParameterIndex，索引值）是两部VPN 主机之间以随机数或手动指定的唯一值，其目的是要作为数据库的索引值
+
+###SPD安全策略数据库
+    SP决定了对IP数据提供何种保护,并以何种方式实施保护  
+    IP流与特定SA关联方法名义上是**安全策略数据库SPD**,保存SA建立所需的安全需求和策略需求
+    每个SPD入口由一个IP集和上层协议的域值定义,称为**选择器**  
+
+
+SPD入口由一下选择器决定  
+
+* 目的IP地址
+* 源IP地址
+* 用户标识
+* 数据敏感性级别
+* 传输层协议
+* 源端口和目的端口
+
+> 当VPN 主机有数据封包要送出时，这个封包会由SPD进行匹配，如果封包的来源端及目的端IP不等于SPD 所记载的内容，那么这个封包就不会交由AH或ESP 协议来处理;
+> 反之，封包就会被送交给AH或ESP协议来处埋，至于会送给谁来处理，就由SPD的'执行协议'这个字段的内容来决定。
+
+
+    
+##SPD,SA,SAD间的关系
+SAD包括每个活动SA的参数。IKE协议是在SAD中自动封装的。SA建立后，SA信息将被存储在SAD中。-12显示了SA、SPD以及SAD之间的关系。对数据包进行IPsec处理时，要查询SPD和SAD。为了提高速度，SPD的每一条记录都应有指向SAD中相应记录的指针，反之亦然。对于外出处理，先查询SPD，获得指向SA的指针，再在SAD查询进行处理所需参数。如SA未建立，则应使用IKE协商，并建立SPD和SAD间的指针。对于进入处理，先查询SAD，对IPsec包进行还原，取出指向SPD的指针，然后验证该包应用的策略与SPD中规定的是否相符。
+
+
+##IPSec运行流程
+1. 假设主机A 要送数据给主机B，当数据送达网络层的较下端时，IPSec的Filter会将封包的特征与SPD 数据库的内容匹配
+
+        1.1.1 如果封包特征与SPD 数据库的内容都没有符合，这个封包就会直接通过网络传送给主机B   
+        1.1.2 在这个封包进入到主机B 之后，主机B 的IPSec Filter 会将这个封包的特征与其SPD 数据库的内容匹配  
+        1.1.3 如果匹配的结果不符合，那么封包就直接往上层传送。  
+
+
+        1.2.1 但如果主机A送给主机B 的封包特征有符合主机A上SPD 数据库内容，封包就会被送入到IPSec的AH及ESP机制中  
+        1.2.2 接着，AH、ESP 就会到SAD 数据库中找到处理这个封包的参数  
+        1.2.3 完成处理后的封包随即被送往主机B   
+        1.2.4 在主机B 找到这个封包之后，就把这个封包的特征与其SPD 数据库的内容进行匹配  
+        1.2.5 如果匹配的结果符合，这个封包就会送入AH 及ESP 机制处理  
+        1.2.6 接着，AH、ESP 就会从SAD 数据库中找到处理这个封包的参数，最后，将处理完成的数据往上层传递。  
+
+
+##传输模式和隧道模式(工作模式)
+1. 传输模式(Transport)
+
+    作用:保护IP包载荷(对IP报头进行部分认证(除可变字段外),对IP数据完全认证  
+> 传输模式应用在两台主机之间的通讯，或一台主机和一个安全网关之间的通讯 
+    
+1. 隧道模式(Tunnel)
+
+    作用:保护的是整个IP包(对源IP包进行认证,对New IP Hdr部分认证)
+> 隧道模式应用在两个安全网关之间的通讯。
+
+##协议
+1. AH协议(IP协议号为51)
+ 
+    * 数据完整性
+    * 数据源认证
+    * 防重放攻击  
+
+> 它能保护通信免受篡改，但不能防止窃听，适合用于传输非机密数据
+###两种工作模式
+    
+    1. 传输模式
+    
+        IP头部分认证,数据全部认证
+
+    1. 隧道模式
+    
+        New IP Hdr部分认证,原IP全部认证
+
+###反重放服务
+    * 序列号域
+    * 反重放窗口
+
+###完整性校验值
+    认证数据域中包含完整性校验值ICV
+    * HMAC-MD5-96
+    * HMAC-SHA-1-96
+
+    MAC根据以下部分进行计算:
+
+    * IP报头域中*不会改变*或*可被预测*的值
+    * AH报头中除认证数据外的其他域
+    * 整个上层协议数据 
+
+        
+1. ESP协议(IP协议号为50)
+    相对AH协议多了加密功能
+###两种工作模式
+    
+    1. 传输模式
+    
+        加密不包括ESP头、认证数据、IP头
+        认证完全不包括IP头
+
+    1. 隧道模式
+    
+        加密包括整个数据包,对New IP Hdr完全不加密
+        认证完全不认证New IP Hdr
+
+###加密和认证算法
+    1. 认证算法
+
+        与AH协议一致
+
+    1. 加密算法
+
+        * 三密钥3DES(AES>3DES>DES)
+        * RC5
+        * IDEA
+        * 三密钥三重IDEA
+        * CAST
+        * Blowfish
+
+
+评价:ESP协议较AH协议多了加密功能,但是认证功能不如AH协议强大
+
+##安全关联组合
+`安全关联束`:一系列SA,在这些SA上必须处理流量来提供一组期望的IPSec服务.
+
+* 传输邻接(单层组合)
+        
+    1. 内部 ESP Tunnel SA
+        没有认证选项,加密仅作用于IP载荷,最后得到由IP报头和接在其后的ESP组成的包
+    1. 外部 AH Transport SA
+        认证作用于ESP和除了可变域外的源IP报头
+
+* 隧道迭代(多层嵌套)
+
+##IPSec工作
+1. 兴趣流
+
+    IPSec是需要消耗资源的保护措施，并非所有流量都需要IPSec进行处理，而需要IPSec进行保护的流量就称为兴趣流，最后协商出来的兴趣流是由发起方和响应方所指定兴趣流的交集，如发起方指定兴趣流为192.168.1.0/24à10.0.0.0/8，而响应方的兴趣流为10.0.0.0/8à192.168.0.0/16，那么其交集是192.168.1.0/24?à10.0.0.0/8，这就是最后会被IPSec所保护的兴趣流。
+
+1. 发起方
+
+    Initiator，IPSec会话协商的触发方，IPSec会话通常是由指定兴趣流触发协商，触发的过程通常是将数据包中的源、目的地址、协议以及源、目的端口号与提前指定的IPSec兴趣流匹配模板如ACL进行匹配，如果匹配成功则属于指定兴趣流。指定兴趣流只是用于触发协商，至于是否会被IPSec保护要看是否匹配协商兴趣流，但是在通常实施方案过程中，通常会设计成发起方指定兴趣流属于协商兴趣流。
+
+1. 响应方
+
+    Responder，IPSec会话协商的接收方，响应方是被动协商，响应方可以指定兴趣流，也可以不指定（完全由发起方指定）。
+
+1. 发起方和响应方协商的内容主要包括：双方身份的确认和密钥种子刷新周期、AH/ESP的组合方式及各自使用的算法，还包括兴趣流、封装模式等。
+
+1. SA：发起方、响应方协商的结果就是曝光率很高的SA，SA通常是包括密钥及密钥生存期、算法、封装模式、发起方、响应方地址、兴趣流等内容。
+
+##IKE(Internet Key Exchange,因特网密钥交换)密钥管理
+> 简单的讲IKE是一种安全机制，它提供端与端之间的动态认证
+> IKE为IPsec提供了自动协商交换密钥、建立SA的服务，这能够简化IPsec的使用和管理，大大简化IPsec的配置和维护工作
+> 原生IPSec并无身份确认等协商过程，在方案上存在诸多缺陷，如无法支持发起方地址动态变化情况下的身份确认、密钥动态更新等。伴随IPSec出现的IKE（Internet Key Exchange）协议专门用来弥补这些不足
+
+###IKE使用算法
+1. Oakley
+    
+    Oakley是DH算法的细化,有5个重要特性
+
+    1. *运用cookie机制*来防止拥塞攻击
+
+        拥塞攻击:通过发送公钥使主机浪费资源在模幂计算上
+
+        要求**each side**在*初识消息*发送伪随机数cookie,确认必须在DH密钥交换的第一条消息中重复
+
+    1. 允许双方协商得到一个组,详细列出DH密钥交换的全局参数
+        
+        * 768比特模的模幂运算
+        * 1024比特模的模幂运算
+        * 1536比特模的模幂运算
+        * ...
+
+    1. *使用现时值*来阻止重放攻击
+        
+        本地产生的伪随机数,在应答中出现,在交换的特定部分被加密以保护它的可用性
+
+    1. 允许交换DH的公钥值
+    1. *认证了DH交换*,以此阻止中间人攻击
+        
+        三种认证方法:
+        
+        * 数字签名
+    
+            先做hash运算后用私钥加密
+
+        * 公钥加密
+
+            直接用私钥加密
+
+        * 对称密钥加密
+
+###IKEv2 Echanges
+1. initial exchanges
+
+    First:exchange cryptographic algorithms and other security parameters;  
+    set up a IKE SA which defines parameters for a secure channel.
+
+    Second:authenticate one another and set up a first IPSec SA to be palced in the SADB;
+    take palce in IKE SA
+
+也就是说:
+1. 加入发起方定义的兴趣流是源192.168.1.0/24目的10.0.0.0/8，所以在接口发送发起方内网PC发给响应方内网PC的数据包，能够得以匹配。
+
+2. 满足兴趣流条件，在转发接口上检查SA不存在、过期或不可用，都会进行协商，否则使用当前SA对数据包进行处理。
+
+3. 协商的过程通常分为两个阶段，第一阶段是为第二阶段服务，第二阶段是真正的为兴趣流服务的SA，两个阶段协商的侧重有所不同，第一阶段主要确认双方身份的正确性，第二阶段则是为兴趣流创建一个指定的安全套件，其最显著的结果就是第二阶段中的兴趣流在会话中是密文。
+
+> IPSec中安全性还体现在第二阶段SA永远是单向的 
+
+###IKEV1与IKEV2的区别
+> IKE was introduced in 1998 and was later superseded by version 2 roughly 7 years later
+
+1. IKEV2需要带宽更少
+1. IKEV2包含了EAP认证与MOBIKE
+    
+    IKEV1在认证方面智能选择预共享密钥或其他IKEV2也支持的认证
+
+1. IKEV2具有内置NAT遍历功能(significant advantage over IKEV1)
+1. IKEV2能够检测到隧道是否存活,若发现隧道崩溃则能够自动重建
+
+####ISAKMP
+1. ISAKMP
+    
+    IKE message由IKE header与若干payload构成.规格说明书中指出:传输层中必须支持UDP
+
+    1. Header and Payload Formats
+        * Initiator SPI
+        * Responder SPI
+        * Next Payload
+        * Major Version
+        * Minor Version
+        * Exchange Type
+        * Flags
+        * Message ID
+        * Length
+
+    1. IKE Payload Types
+
+        由相同payload header开始
+        
+        1. Next Payload field
+        1. critical bit
+        1. reserved
+        1. Payload Length          
+        >   
+        
+        payload has a complex, hierarchical structure:  
+        
+            proposals;  
+                protocols;
+                    transforms;
+                    define cryptographic algorithms;
+                        attributes;
+        
+        
+        * Key Exchange payload
+        * Indetificatin payload
+        * Certificate payload
+        * Authentication payload
+        * Nonce payload
+        * Notify payload
+        * Delete payload
+        * Vendor ID payload
+        * Traffic Selector payload
+        * Encrypted payload
+        * Configuration payload
+        * Extensible Authentication Protocol(EAP) payload
+
+##CRYPTOGRAPHIC SUITES
+> RFC 4308 defines tow cryptographic suites for establishing virtual private networks
+
+1. VPN-A
+
+    VPN-A relies on 3DES and HMAC
+
+1. VPN-B
+    
+    VPN-B relies exclusively on AES
+
+1. Encryption:
+
+    CBC
+
+1. Message authenticaiton:
+
+    VPN-A relies on HMAC with SHA-1  
+    VPN-B relies on variant of CMAC
+
+1. Pseudorandom function:
+
+    repeated use of the MAC
+        
+> RFC 4869 defines four optional cryptographic suites that are compatible with the United States National Security Agency's Sute B specification.
+
+
+1. Encryption:
+
+    ESP:GCM mode with either 128-bit or 256-bit AES keys;  
+    IKE:CBC;
+
+1. Message Authentication
+
+    ESP:GMAC
+    IKE:HMAC with one of the SHA-3 hash functions.
+
+1. Pseudorandom function
+
+    repeated use of the MAC
+
+##配置IPSec安全策略
+
+###Windows
+
+####启用IPSec安全策略
+
+    1. MMC控制台
+        
+        1. 运行-MMC
+        1. 文件-添加/删除管理单元-IP策略管理
+        1. 添加-本地计算机-完成
+
+    1. 本地安全策略
+
+        1. 管理工具-本地安全设置-IP安全设置,在本地计算机
+
+####IPSec安全策略组成
+    一个IPSec安全策略由IP筛选器和筛选器操作两部分构成，其中IP筛选器决定哪些报文应当引起IPSec安全策略的关注，筛选器操作是指“允许”还是“拒绝”报文的通过。
+
+
+####IPSec安全策略应用实例
+
+1. General
+
+    1. IP安全策略，在本地计算机”，选择“创建IP安全策略”选项 
+    1. 为该策略创建一个筛选器
+    1. 新建一个阻止操作
+    1. 将安全策略与筛选器与阻止操作关联
+    1. 完成了创建IPSec安全策略后，还要进行指派
+
+1. 禁用ICMP(ping)
+
+    筛选器中添加IP筛选器时:协议选择ICMP,源到目的为:任意到本机
+    操作:阻止
+
+1. 关闭端口
+    
+    IP筛选器时:协议选择TCP,端口选择指定端口,源到目的地址为:任意到本机
+    操作:阻止
+
+1. 建立预共享密钥
+
+    对所有IP通讯量，在规则选择Kerberos中预先设定密钥
+
+####IPSec安全策略验证
+1. cmd-gpupdate/force 强制刷新IPSec安全策略
+1. cmd-netsh ipsec dynamic show ALL 验证指派的IPSec安全策略
+
+####使用netsh命令配置IPSec
+1. Windows 2000,use IPSecPol.exe,which is provided with the Windows 2000 Server Resource Kit;
+1. Windows XP,use IPsecCmd.exe, which is provided on the Windows XP CD, in the \Support\Tools folder.
+
+鉴于前两种系统环境在目前较为罕见,因此这里只考虑Win 7情况,Win 7下常用两种方式,分别是netsh ipsec与netsh advfirewall
+
+#####NETSH IPSEC
+The ipsec context of the netsh command-line tool is provided for backwards-compatibility with Windows 2000, Windows XP, and Windows Server 2003. 
+Applies To: Windows 7, Windows Server 2008, Windows Server 2008 R2, Windows Vista
+
+1. 建立一个新的策略 
+    1. 首先建立一个空的安全策略[Michael's安全策略]
+    
+        `Netsh ipsec static add policy name = Michael's安全策略 `  
+
+    1. 建立一个筛选器操作”阻止” 
+    
+        `Netsh ipsec static add filteraction name = 阻止 action =block `  
+        
+    1. 建立一个筛选器列表“可访问的终端列表” 
+    
+        `Netsh ipsec static add filterlist name =可访问的终端列表 `  
+        `Netsh ipsec static add filter filterlist = 可访问的终端列表 srcaddr=203.86.32.248 dstaddr = me dstport = 3389 description = 部门1访问 protocol =TCP mirrored = yes `  
+        `Netsh ipsec static add filter filterlist = 可访问的终端列表 Srcaddr = 203.86.31.0 srcmask=255.255.255.0 dstaddr = 60.190.145.9 dstport = 0 description = 部门2访问 protocol =any mirrored = yes `  
+        
+    1. 建立策略规则 
+    
+        `Netsh ipsec static add rule name =可访问的终端策略规则 Policy = Michael's安全策略 filterlist =可访问的终端列表 filteraction = 阻止 `  
+        
+2. 修改策略 
+
+    `netsh ipsec static set filter filterlist = 可访问的终端列表 srcaddr = 220.207.31.249 dstaddr = Me dstport=3389 protocol=TCP `  
+    
+3. 删除策略 
+
+    `netsh ipsec static delete rule name = 可访问的终端策略规则 policy = Michael's安全策略 `  
+    `netsh ipsec static delete filterlist name = 可访问的终端列表 `  
+    
+4. 最最重要的一步是激活； 
+
+    `netsh ipsec static set policy name = Michael's安全策略 assign = y `  
+
+5. 导入与导出
+    1. 导出IPsec安全策略
+    
+        `Netsh ipsec static exportpolicy file = d:\ExportSecurity.ipsec`  
+
+    1. 导入IPsec安全策略
+    
+        `Netsh ipsec static importpolicy file = d:\ImportSecurity.ipsec`  
+        
+
+> 当然,也可以写成.bak格式,一键执行
+
+#####例子
+    REM =================开始咯================
+    netsh ipsec static ^
+    delete policy name=Haishion
+    
+    netsh ipsec static ^
+    add policy name=Haishion
+    
+    REM 添加2个动作，禁止和允许
+    netsh ipsec static ^
+    add filteraction name=Perm action=permit
+    netsh ipsec static ^
+    add filteraction name=Block action=block
+    
+    REM 首先干掉所有访问
+    netsh ipsec static ^
+    add filterlist name=AllAccess
+    netsh ipsec static ^
+    add filter filterlist=AllAccess srcaddr=Me dstaddr=Any
+    netsh ipsec static ^
+    add rule name=BlockAllAccess policy=Haishion filterlist=AllAccess filteraction=Block
+    
+    REM 开放某些IP无限制访问
+    netsh ipsec static ^
+    add filterlist name=UnLimitedIP
+    netsh ipsec static ^
+    add filter filterlist=UnLimitedIP srcaddr=210.34.0.1 dstaddr=Me
+    netsh ipsec static ^
+    add filter filterlist=UnLimitedIP srcaddr=210.34.0.2 dstaddr=Me
+    netsh ipsec static ^
+    add rule name=AllowUnLimitedIP policy=Haishion filterlist=UnLimitedIP filteraction=Permit
+    
+    REM 开放某些端口
+    netsh ipsec static ^
+    add filterlist name=OpenSomePort
+    netsh ipsec static ^
+    add filter filterlist=OpenSomePort srcaddr=Any dstaddr=Me dstport=20 protocol=TCP
+    netsh ipsec static ^
+    add filter filterlist=OpenSomePort srcaddr=Any dstaddr=Me dstport=21 protocol=TCP
+    netsh ipsec static ^
+    add filter filterlist=OpenSomePort srcaddr=Any dstaddr=Me dstport=80 protocol=TCP
+    netsh ipsec static ^
+    add rule name=AllowOpenSomePort policy=Haishion filterlist=OpenSomePort filteraction=Permit
+    
+    REM 开放某些ip可以访问某些端口
+    netsh ipsec static ^
+    add filterlist name=SomeIPSomePort
+    netsh ipsec static ^
+    add filter filterlist=SomeIPSomePort srcaddr=Me dstaddr=Any dstport=53 protocol=UDP
+    netsh ipsec static ^
+    add filter filterlist=SomeIPSomePort srcaddr=Me dstaddr=Any dstport=80 protocol=TCP
+    netsh ipsec static ^
+    add filter filterlist=SomeIPSomePort srcaddr=210.34.0.3 dstaddr=Me dstport=8080 protocol=TCP
+    netsh ipsec static ^
+    add rule name=AllowSomeIPSomePort policy=Haishion filterlist=SomeIPSomePort filteraction=Permit
+
+####NETSH ADVFIREWALL
+
+
+
+
+#VPN
+> 虚拟私人网络，亦称为虚拟专用网络（英语：Virtual Private Network，简称VPN），是一种常用于连接中、大型企业或团体与团体间的私人网络的通讯方法
+> 它利用已加密的通道协议（Tunneling Protocol）来达到保密、传送端认证、信息准确性等私人信息安全效果
+> 这种技术可以用不安全的网络（例如：互联网）来传送可靠、安全的信息。
+
+常用VPN协议有:
+
+* L2F
+* L2TP
+* PPTP
+* IPsec
+* SSL VPN
+* Cisco VPN
+* OpenVPN
+
+##IPSec VPN的应用场景
+1. Site-to-Site(站点到站点或者网关到网关)
+    
+    如弯曲评论的3个机构分布在互联网的3个不同的地方，各使用一个商务领航网关相互建立VPN隧道，企业内网（若干PC）之间的数据通过这些网关建立的IPSec隧道实现安全互联。
+
+2. End-to-End(端到端或者PC到PC)
+
+    两个PC之间的通信由两个PC之间的IPSec会话保护，而不是网关。
+    
+3. End-to-Site(端到站点或者PC到网关)
+
+    两个PC之间的通信由网关和异地PC之间的IPSec进行保护。
+

@@ -1,0 +1,20 @@
+#Request
+    Request = Request-Line * ( general-header | request-header | entity-header ) CRLF) CRLF [ message-body ]        
+
+##Request-Line
+    Request-Line   = Method SP Request-URI SP HTTP-Version CRLF
+    > SP = US-ASCII SP, space (32)
+
+###Method
+ Method         = "OPTIONS"                
+                      | "GET"              
+                      | "HEAD"             
+                      | "POST"             
+                      | "PUT"              
+                      | "DELETE"           
+                      | "TRACE"            
+                      | "CONNECT"          
+                      | extension-method
+       extension-method = token
+
+

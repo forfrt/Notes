@@ -1,0 +1,802 @@
+#C99
+
+##intptr_t,uintptr_t
+
+表示当前平台下能够安全地对指针进行转型的整型变量
+
+    float* p=new float[...];  
+    //.........................  
+    intptr_t a=(intptr_t)p;  
+    uintptr_t a2=(uintptr_t)p;  
+
+
+##**Pointer**
+
+###Dangling Pointer&Wild Pointer
+
+迷途指针与野指针指的是不指向任何合法的对象的指针。
+
+1. 当所指向的对象被释放或者收回，但是对该指针没有作任何的修改，以至于该指针仍旧指向已经回收的内存地址，此情况下该指针便称迷途指针
+
+    若操作系统将这部分已经释放的内存重新分配给另外一个进程，而原来的程序重新引用现在的迷途指针，则将产生无法预料的后果。
+
+1. 某些编程语言允许未初始化的指针的存在，而这类指针即为野指针
+
+####Wild Pointer成因
+1. 指针变量没有被初始化。任何指针变量刚被创建时不会自动成为NULL 指针，它 的缺省值是随机的，它会乱指一气。所以，指针变量在创建的同时应当被初始化，要么 将指针设置为NULL，要么让它指向合法的内存。例如
+
+    char *p = NULL;
+    char *str = (char *) malloc(100);
+
+2. 指针p 被free 或者delete 之后，没有置为NULL，让人误以为p 是个合法的指针。
+3. 指针操作超越了变量的作用范围
+
+
+
+****
+
+##析构函数
+
+ “析构函数”功能是构造函数的反向操作。 它们调用，当销毁对象时 (释放)。 指定某个函数作为类的析构函数通过在类名用代字号 (~)
+
+多个规则管理析构函数的声明。 析构函数：
+
+1. 不接受参数。
+1. 无法指定任何返回类型（包括 void）。
+1. 无法使用 return 语句返回值。
+1. 无法声明为 const、volatile 或 static。 但是，可以为声明为 const、volatile 或 static 的对象的析构调用它们。
+1. 可以声明为 virtual。 通过使用虚拟析构函数，无需知道对象的类型即可销毁对象 - 使用虚函数机制调用该对象的正确析构函数。 请注意，析构函数也可以声明为抽象类的纯虚函数。
+
+----
+
+当发生以下事件之一时，将调用析构函数：
+
+1. 对象分配空间使用`new`,显式释放使用`delete`.当对象使用`delete`,空间作为"派生程度最大对象" 或非基本数据类型子类的对象被释放或对象，这样的"首选派生对象"释放,只有当有虚拟析构函数时菜确保工作.当多重继承且类型信息与实际对象underlying类型不符时,Deallocation可能失败。
+
+1. 块范围内的本地 （自动） 对象超出范围时。
+
+1. 临时对象的生存期结束。
+
+1. 程序结束时全局或静态对象存在。
+
+1. 使用析构函数的完全限定的名称显式调用析构函数
+
+----
+
+析构函数可以自由调用类成员函数和访问的类成员数据.如果从析构函数调用虚函数时，调用的函数为即将被销毁类型的函数实现
+
+1. 无法获得析构函数的地址
+1. 派生类无法继承基类的析构函数.相反,派生类的析构函数会override基类析构函数
+
+----
+
+###析构函数调用次序
+
+1. The class's destructor is called, and the body of the destructor function is executed.
+1. Destructors for nonstatic member objects are called in the reverse order in which they appear in the class declaration. The optional member initialization list used in construction of these members does not affect the order of (construction or) destruction  //! 声明中出现的非静态成员会以相反的顺序依次销毁.构造函数中optional member initialization并不对销毁顺序造成影响
+1. Destructors for nonvirtual base classes are called in the reverse order of declaration.
+1. Destructors for virtual base classes are called in the reverse order of declaration.
+
+----
+
+###显式析构函数调用
+
+如果你用placement new在内存中建立对象，你应该避免在该内存中用delete操作符。因为delete操作符调用operator delete来释放内存，但是包含对象的内存最初不是被operator new分配的，placement new只是返回转递给它的指针。谁知道这个指针来自何方？而你应该显式调用对象的析构函数来解除构造函数的影响
+
+    s.String::~String();     // Nonvirtual call
+    ps->String::~String();   // Nonvirtual call
+    
+    s.~String();       // Virtual call
+    ps->~String();     // Virtual call
+
+----
+
+###Virtual Destructor
+
+using namespace std;  
+  
+    class Base  
+    {  
+        public:  
+            Base(){ cout<<"Constructing Base\n";}  
+      
+         // this is a destructor:  
+      
+            ~Base(){ cout<<"Destroying Base\n";}  
+    };  
+      
+    class Derive: public Base  
+    {  
+            public:  
+            Derive(){ cout<<"Constructing Derive\n";}  
+      
+            ~Derive(){ cout<<"Destroying Derive\n";}  
+     };  
+      
+    int main()  
+    {  
+            Base *basePtr = new Derive();  
+      
+            delete basePtr;  
+            return 0;  
+    }  
+
+> 当我们删除指向Deriver 的基类指针时， Deriver类中的析构函数没有调用。这里调用的是Base的析构函数（静态联编）
+
+----
+
+将基类析构函数生命为虚析构函数，
+
+我们需要做的就是修改Base 类中的析构函数，在～前面加上virtual
+
+我们在基类中将析构函数标明为虚函数，就表示在使用析构函数时，是采用动态联编的。那么delete basePtr的时候不再是采用静态联编直接在编译的时候确定basePtr指向的析构函数，而是在运行的时候根据 指向的类型来调用析构函数。
+
+> 如果你在 派生类中 分配了 内存空间的话，没有将基类的析构函数声明为虚析构函数，很容易发生内存泄漏事件
+
+> 当你的基类的析构函数不为虚的话，其子类中所有的成员变量的类中分配的内存也将可能泄漏
+
+> 将基类的析构函数设为virtual型，则所有的基类的派生类对象的析构函数都会自动设置为virtual型，这保证了任何情况下，不会出现由于析构函数没有被调用而导致的内存泄漏。 
+
+****
+
+##new,delete operator
+
+> 使用 new 得来的空间，必须用 delete 来释放；使用 new [] 得来的空间，必须用 delete [] 来释放。彼此之间不能混用
+
+###new operator
+
+它要完成的功能分成两部分。第一部分是分配足够的内存以便容纳所需类型的对象。第二部分是它调用构造函数初始化内存中的对象。new操作符总是做这两件事情，你不能以任何方式改变它的行为。  
+
+    int *p1 = (int *)malloc(sizeof(int) * length);
+    int *p2 = new int[length];
+
+----
+
+##delete operator
+
+`delete []objects;`
+
+****
+
+##operator new
+
+你所能改变的是如何为对象分配内存。new操作符调用一个函数来完成必需的内存分配，你能够重写或重载这个函数来改变它的行为。new操作符为分配内存所调用函数的名字是operator new。  
+
+`void * operator new(size_t size);`
+
+返回值类型是void*，因为这个函数返回一个未经处理（raw）的指针，未初始化的内存。（如果你喜欢，你能写一种operator new函数，在返回一个指针之前能够初始化内存以存储一些数值，但是一般不这么做。）参数size_t确定分配多少内存。你能增加额外的参数重载函数operator new，但是第一个参数类型必须是size_t。  
+
+----
+
+你一般不会直接调用operator new，但是一旦这么做，你可以象调用其它函数一样调用它：
+
+`void *rawMemory = operator new(sizeof(string));`
+
+****
+
+##Placement new
+
+有时你有一些已经被分配但是尚未处理的的(raw)内存，你需要在这些内存中构造一个对象。你可以使用一个特殊的operator new ，它被称为placement new。
+
+    class Widget {
+    　public:
+    　　Widget(int widgetSize);
+    　　...
+    };
+
+placement new是标准C++库的一部分。为了使用placement new，你必须使用语句#include <new>  
+
+> 如果用placement new建立对象,应避免使用delete operator,而是显式调用对象的析构函数解除构造函数的影响
+
+    
+
+    Widget * constructWidgetInBuffer(void *buffer,int widgetSize)
+    {
+    　return new (buffer) Widget(widgetSize);
+    }
+
+> 这个函数返回一个指针，指向一个Widget对象，对象在转递给函数的buffer里分配。当程序使用共享内存或memory-mapped I/O时这个函数可能有用，因为在这样程序里对象必须被放置在一个确定地址上或一块被例程分配的内存里  
+
+这初看上去有些陌生，但是它是new操作符的一个用法，需要使用一个额外的变量（buffer），当new操作符隐含调用operator new函数时，把这个变量传递给它。被调用的operator new函数除了待有强制的参数size_t外，还必须接受void*指针参数，指向构造对象占用的内存空间。  
+
+----
+
+##operator delete
+
+`void operator delete(void *memoryToBeDeallocated);`
+
+----
+
+这有一个隐含的意思是如果你只想处理未被初始化的内存，你应该绕过new和delete操作符，而调用operator new 获得内存和operator delete释放内存给系统：
+
+    void *buffer = // 分配足够的
+    operator new(50*sizeof(char)); // 内存以容纳50个char
+    //没有调用构造函数
+    ...
+    operator delete(buffer); // 释放内存
+    // 没有调用析构函数
+
+> 这与在C中调用malloc和free等同
+
+----
+
+###operator new[]
+
+`string *ps = new string[10];`
+
+被使用的new仍然是new操作符，但是建立数组时new操作符的行为与单个对象建立有少许不同。第一是内存不再用operator new分配，代替以等同的数组分配函数，叫做operator new[]（经常被称为array new）。它与operator new一样能被重载。这就允许你控制数组的内存分配，就象你能控制单个对象内存分配一样  
+
+----
+
+###operator delete[]
+
+同样当delete操作符用于数组时，它为每个数组元素调用析构函数，然后调用operator delete来释放内存  
+
+就象你能替换或重载operator delete一样，你也替换或重载operator delete[]。  
+
+----
+
+###与malloc&free
+
+malloc()到底从哪里得到了内存空间？答案是从堆里面获得空间。也就是说函数返回的指针是指向堆里面的一块内存。操作系统中有一个记录空闲内存地址的链表。当操作系统收到程序的申请时，就会遍历该链表，然后就寻找第一个空间大于所申请空间的堆结点，然后就将该结点从空闲结点链表中删除，并将该结点的空间分配给程序。  
+
+free()释放的是指针指向的内存！注意！释放的是内存，不是指针！这点非常非常重要！指针是一个变量，只有程序结束时才被销毁。释放了内存空间后，原来指向这块空间的指针还是存在！只不过现在指针指向的内容的垃圾，是未定义的，所以说是垃圾。因此，前面我已经说过了，释放内存后把指针指向NULL，防止指针在后面不小心又被解引用了。
+
+****
+
+##explicit
+
+> 总结：explicit   只对构造函数起作用，用来抑制隐式转换。
+
+按照默认规定，只有一个参数的构造函数也定义了一个隐式转换，将该构造函数对应数据类型的数据转换为该类对象
+
+    class String {
+    String ( const char* p ); // 用C风格的字符串p作为初始化值
+    //…
+    }
+    String s1 = “hello”; //OK 隐式转换，等价于String s1 = String（“hello”）;
+
+但是有的时候可能会不需要这种隐式转换，如下：
+
+    class String {
+           String ( int n ); //本意是预先分配n个字节给字符串
+    String ( const char* p ); // 用C风格的字符串p作为初始化值
+    //…
+    }
+
+    String s4 = 10; //编译通过，也是分配10个字节的空字符串
+    String s5 = ‘a’; //编译通过，分配int（‘a’）个字节的空字符串
+
+> s4 和s5 分别把一个int型和char型，隐式转换成了分配若干字节的空字符串，容易令人误解。
+
+----
+
+为了避免这种错误的发生，我们可以声明显示的转换，使用explicit 关键字：
+
+    class String {
+           explicit String ( int n ); //本意是预先分配n个字节给字符串
+    String ( const char* p ); // 用C风格的字符串p作为初始化值
+    //…
+    }
+
+下面两种写法仍然正确：
+
+    String s2 ( 10 );   //OK 分配10个字节的空字符串
+    String s3 = String ( 10 ); //OK 分配10个字节的空字符串
+ 
+下面两种写法就不允许了：
+
+    String s4 = 10; //编译不通过，不允许隐式的转换
+    String s5 = ‘a’; //编译不通过，不允许隐式的转换
+
+
+
+
+****
+
+##Virtual
+
+##动态联编与静态联编
+
+将源代码中的函数调用解释为执行特定的函数代码被称为函数名联编(binding).
+
+1. 在编译过程中进行联编被称为静态联编(static binding),又称早期联编(early binding).它对函数的选择是根据基于对象的 指针或者引用来确定的。（即指针或者引用 指向哪个对象就调用哪个对象的相应的函数）
+1. 编译器必须生成能够在程序运行时选择正确的虚方法的代码,这被称为动态联编(dynamic binding), 又称为晚期联编(late binding).
+
+为使程序能够在运行阶段进行决策,必须采取一些方法来跟踪实际运行中基类指针或引用指向的对象类型,这增加了额外的开销.
+
+例如,如果类不会用作基类,则不需要动态联编.同样,如果派生类不重新定义基类的任何方法,也不需要使用动态联编.
+
+在这些情况下,使用静态联编更合理,效率也更高.由于静态联编的效率更高,因此被设置为C++的默认选择.
+
+仅当程序设计确实 需要虚函数时,才使用它们.
+
+> Strousstrup说,C++的指导原则之一是, 不要为不使用的我付出代价(内存或者处理时间).
+
+----
+
+##Virtual Function
+
+编译器处理虚函数的方法是:给每一个对象添加一个隐藏成员.隐藏成员中保存了一个指向函数地址数组的指针.这种数组称为虚函数表(virtual function table, vtbl).虚函数表中存储了为类对象进行声明的虚函数的地址  
+
+基类对象包含一个指针,访指针指向基类中所有虚函数地址表.派生类对象将包含一个指向独立地址表的指针.如果派生类提供了虚岁函数的新定义,访虚函数表将保存新函数的地址;如果派生类没有重新定义虚函数.该vtbl将保存函数原始版本的地址.如果派生类定义了新的虚函数,则该函数的地址也将被添加到vtbl中.注意,无论类中包含的虚函数是1还是10 个,都只需要在对象中添加1个地址成员,只是表的大小不同而已.  
+
+调用虚函数时,程序将查看存储在对象中的vtbl地址,然后转向相应的函数地址表.如果使用类声明中定义的第一个虚函数,则程序将使用数组中的第一个函数地址,并执行具有该地址的函数.如果使用类声明中的第三个虚函数,程序将使用地址为数组中第三个元素的函数.  
+
+简而言之,使用虚函数时, 在内存和执行速度方面有一定成本,包括:
+
+1. 每个对象都将增大,增大量为存储地址的空间.
+1. 对每个类,编译器都创建一个虚岁函数地址表.
+1. 每个函数调用都有需要执行一步额外的操作,即到表中查找地址.
+
+虽然非虚函数的效率比虚函数稍高,但不具备动态联编功能.
+
+****
+
+##struct
+
+    struct tagMyStruct   
+    {   
+    　int iNum;   
+    　long lLength;   
+    };   
+
+
+tagMyStruct称为“tag”，即“标签”，实际上是一个临时名字，struct 关键字和tagMyStruct一起，构成了这个结构类型
+
+我们可以用struct tagMyStruct varName来定义变量，但要注意，使用tagMyStruct varName来定义变量是不对的，因为struct 和tagMyStruct合在一起才能表示一个结构类型。 
+
+
+##extern
+
+在C语言中，修饰符extern用在变量或者函数的声明前，用来说明“此变量/函数是在别处定义的，要在此处引用”。  
+
+另外，extern也可用来进行链接指定。  
+
+##extern "C"
+
+C++语言在编译的时候为了解决函数的多态问题，会将函数名和参数联合起来生成一个中间的函数名称，而C语言则不会，因此会造成链接时找不到对应函数的情况，此时C函数就需要用extern “C”进行链接指定，这告诉编译器，请保持我的名称，不要给我生成用于链接的中间函数名。  
+
+###extern "C" 使用要点
+1. 可以是单一语句
+
+        extern "C" double sqrt(double);
+
+2. 可以是复合语句, 相当于复合语句中的声明都加了extern "C"
+
+        extern "C"
+        {
+            double sqrt(double);
+            int min(int, int);
+        }
+
+3.可以包含头文件，相当于头文件中的声明都加了extern "C"
+
+        extern "C"
+        {
+            #include <cmath>
+        }
+
+4. 不可以将extern "C" 添加在函数内部
+5. 如果函数有多个声明，可以都加extern "C", 也可以只出现在第一次声明中，后面的声明会接受第一个链接指示符的规则。
+6. 除extern "C", 还有extern "FORTRAN" 等。
+
+
+##extern 函数
+
+如果函数的声明中带有关键字extern，仅仅是暗示这个函数可能在别的源文件里定义，没有其它作用。即下述两个函数声明没有明显的区别：
+
+当然，这样的用处还是有的，就是在程序中取代include “*.h”来声明函数，在一些复杂的项目中，我比较习惯在所有的函数声明前添加extern修饰。
+
+----
+
+##inline
+
+在c++中，为了解决一些频繁调用的小函数大量消耗栈空间或者是叫栈内存的问题，特别的引入了inline修饰符，表示为内联函数。  
+
+当编译器内联展开一个函数调用时，该函数的代码会被插入到调用代码流中（概念上类似于展开#define宏）。这能够改善性能（当然还有很多其它因素），因为优化器能够顺序集成(procedurally integrate)被调用代码，即将被调用代码直接优化进调用代码中。  
+
+inline的使用是有所限制的，inline只适合函数体内代码简单的函数使用，不能包含复杂的结构控制语句例如while switch，并且不能内联函数本身不能是直接递归函数(自己内部还调用自己的函数)。 
+
+###关于`#define`
+
+说到这里我们不得不说一下在c语言中广泛被使用的#define语句，是的define的确也可以做到inline的这些工作，但是define是会产生副作用的，尤其是不同类型参数所导致的错误，由此可见inline有更强的约束性和能够让编译器检查出更多错误的特性，在c++中是不推荐使用define的。  
+
+----
+
+和 #define 宏不同的是，内联函数总是对参数只精确地进行一次求值，从而避免了那声名狼藉的宏错误。换句话说，调用内联函数和调用正规函数是等价的，差别仅仅是更快  
+
+和宏不同的，还有内联函数的参数类型被检查，并且被正确地进行必要的转换。  
+
+###如何告诉编译器使非成员函数成为内联函数？
+
+    inline
+    void f(int i, char c)
+    {
+        // ...
+    } 
+
+
+----
+
+###如何告诉编译器使一个成员函数成为内联函数？
+
+    inline
+    void Fred::f(int i, char c)
+    {
+        // ...
+    } 
+
+----
+
+注意：将函数的定义（{...}之间的部分）放在头文件中是强制的，除非该函数仅仅被单个 .cpp 文件使用。尤其是，如果你将内联函数的定义放在 .cpp 文件中并且在其他 .cpp文件中调用它，连接器将给出 “unresolved external” 错误。  
+
+----
+
+###其它方法告诉编译器使成员函数成为内联
+
+在类体内定义成员函数：
+
+    class Fred {
+    public:
+        void f(int i, char c)
+            {
+              // ...
+            }
+    }; 
+
+尽管这对于写类的人来说很容易，但由于它将类是“什么”(what)和类“如何”(how)工作混在一起，给阅读的人带来了困难。我们通常更愿意在类体外使用 inline 关键字定义成员函数来避免这种混合。  
+
+----
+
+###在定义于类外部的内联函数中，以下哪种方法最好：是把inline关键字放在类内部的成员函数声明前呢，还是放到类外部函数的定义前呢，还是两个地方都写？
+
+最佳实践是：仅放在类外部函数的定义前。 
+
+    class Foo {
+    public:
+        void method();  ← best practice: don't put the inline keyword here
+        ...
+    };
+    
+    inline void Foo::method()  ← best practice: put the inline keyword here
+        { ... } 
+
+这里是基本的想法：
+
+- 类的public部分是你描述类的可见语义的地方，包含公有成员函数、友元函数和任何其它暴露给外部的内容。不要提供在调用者代码中看不到的细节。
+- 类的其它部分，包括非公有部分、成员定义和友元函数声明等等，这些纯粹是实现细节。如果还没有在类的公有部分描述，那么不要提供相关可见语义。
+
+回到内联上来：*一个函数是否内联只是实现细节*，不会改变函数调用的可见语义（即含义）。因此inline关键字应该和函数定义放在一起，而不是在类的public声明区。  
+
+----
+
+例1   #define   N   2+2
+void main()
+{
+   int   a=N*N;
+   printf(“%d”,a);
+}
+(1) 出现问题：在此程序中存在着宏定义命令，宏N代表的字符串是2+2，在程序中有对宏N的使用，一般同学在读该程序时，容易产生的问题是先求解N为2＋2＝4，然后在程序中计算a时使用乘法，即N*N=4*4=16,其实该题的结果为8，为什么结果有这么大的偏差?
+(2)问题解析：如1节所述，宏展开是在预处理阶段完成的，这个阶段把替换文本只是看作一个字符串，并不会有任何的计算发生，在展开时是在宏N出现的地方 只是简单地使用串2＋2来代替N，并不会增添任何的符号，所以对该程序展开后的结果是a=2+2*2+2，计算后=8，这就是宏替换的实质，如何写程序才 能完成结果为16的运算呢？
+(3)解决办法：将宏定义写成如下形式
+#define   N   (2+2)
+这样就可替换成(2+2)*(2+2)=16
+2.2 带参数的宏定义出现的问题
+在带参数的宏定义的使用中，极易引起误解。例如我们需要做个宏替换能求任何数的平方，这就需要使用参数，以便在程序中用实际参数来替换宏定义中的参数。一般学生容易写成如下形式：
+#define   area(x)   x*x
+这在使用中是很容易出现问题的，看如下的程序
+void main()
+{
+int   y=area(2+2);
+printf(“%d”,y);
+    }
+按理说给的参数是2+2，所得的结果应该为4*4=16，但是错了，因为该程序的实际结果为8，仍然是没能遵循纯粹的简单替换的规则，又是先计算再替换 了，在这道程序里，2+2即为area宏中的参数，应该由它来替换宏定义中的x，即替换成2+2*2+2=8了。那如果遵循(1)中的解决办法，把2+2 括起来，即把宏体中的x括起来，是否可以呢？#define   area(x) (x)*(x)，对于area(2+2)，替换为(2+2)*(2+2)=16，可以解决，但是对于area(2+2)/area(2+2)又会怎么样 呢，有的学生一看到这道题马上给出结果，因为分子分母一样，又错了，还是忘了遵循先替换再计算的规则了，这道题替换后会变为 (2+2)*(2+2)/(2+2)*(2+2)即4*4/4*4按照乘除运算规则，结果为16/4*4=4*4=16，那应该怎么呢？解决方法是在整个 宏体上再加一个括号，即#define   area(x) ((x)*(x))，不要觉得这没必要，没有它，是不行的。
+
+----
+
+##RAII
+
+RAII(Resource acquisition is initialization)资源获取即初始化,它是一项很简单的技术,利用C++对象生命周期的概念来控制程序的资源,最简单的RAII形式是,创建这样一个对象:其构造函数获取一份资源,而析构函数则释放这份资源:
+
+    Class Resource {……};
+    Class ResourceHandle {
+    Public:
+    Explicit Resourcehandle (Resource * aResource ):r_( aResource ) //获取资源
+    ~ ResourceHandle() {delete r_;} //释放资源
+    Resource *get()    {return r_ ;} //访问资源
+       Private:
+         ResourceHandle (const ResourceHandle &);
+    ResourceHandle & operator = (const ResourceHandle &);
+         Resource * r_;
+    }
+
+----
+
+ResourceHandle对象的最美妙之处在于,若它被声明为一个函数的局部变量,或作为函数的参数,或是一个静态对象,我们都可以保证析构函数会得到调用,从而释放对象所引用的资源.
+
+----
+
+###RAII与STL容器
+
+STL容器是基于值语义的，在容器内部，对象是常被复制的。如果RAII类型需要存入STL容器，需要作一些处理  
+
+    class Resource   
+    {   
+    public:   
+    Resource() {/*分配资源*/}   
+    ~ Resource() {/*释放资源*/}   
+    private:   
+    int handle;   
+    };   
+    std::map< Identifier, Resource > resourceMap;  
+
+> 以上代码中STL容器对Resource的复制将导致运行期错误.
+
+----
+
+
+最好的方法是让RAII类型继承于boost::noncopyable[2]，而后在容器中使用引用计数的指针  
+
+    class Resource : public boost::noncopyable   
+    {   
+    public:   
+    Resource() {/*分配资源*/}   
+    ~ Resource() {/*释放资源*/}   
+    private:   
+    int handle;   
+    };   
+    typedef boost::shared_ptr<Resource> PointerToResourceType;   
+    typedef std::map< Identifier, PointerToResourceType> ResourceMapType;   
+    ResourceMapType resourceMap;  
+
+> 作为替代，还可以使用非拷贝行为的容器：boost::ptr_map<Identifier,Resource> map;
+
+****
+
+##预处理
+
+###`#define`
+
+`#define`命令是C语言中的一个宏定义命令，它用来将一个标识符定义为一个字符串，该标识符被称为宏名，被定义的字符串称为替换文本。
+该命令有两种格式：一种是简单的宏定义，另一种是带参数的宏定义。
+1. 简单的宏定义：
+    `#define`   <宏名>　　<字符串>
+    `#define` PI 3.1415926
+1. 带参数的宏定义
+    `#define`   <宏名> (<参数表>)   <宏体>
+    `#define`   A(x) x
+
+一个标识符被宏定义后，该标识符便是一个宏名。这时，在程序中出现的是宏名，在该程序被编译前，先将宏名用被定义的字符串替换，这称为宏替换，替换后才进行编译，宏替换是简单的替换。
+
+----
+
+####特殊的`#define`
+
+1. `#define Conn(x,y) x##y`
+
+    `x##y`表示什么？表示x连接y
+    `int n = Conn(123,456);`    结果就是n=123456;
+
+1. `#define ToChar(x) #@x`
+
+    `#@x`，其实就是给x加上单引号，结果返回是一个const char
+    `char a = ToChar(1);`   结果就是a='1';
+
+    > 但是如果你的参数超过四个字符，编译器就给给你报错了！error C2015: too many characters in constant   ：P
+
+1. `#define ToString(x) #x`
+
+    `char* str = ToString(123132);就成了str="123132";`
+
+----
+
+- #define xxx() {} 
+
+    标准C支持的
+
+- #define xxx() ({})
+
+    GCC新增的功能，主要为了防止宏展开出现问题，默认展开时是要加上一个;的，容易出问题。
+    > 最后一个式子的返回值作为宏函数的返回值。
+
+----
+
+###`#undef`
+
+#undef 是在后面取消以前定义的宏定义
+该指令的形式为
+#undef 标识符
+
+----
+
+###`#typedef`
+
+Typedef 声明有助于创建平台无关类型，甚至能隐藏复杂和难以理解的语法。不管怎样，使用 typedef 能为代码带来意想不到的好处，通过本文你可以学习用 typedef 避免缺欠，从而使代码更健壮
+
+typedef 声明，简称 typedef，为现有类型创建一个新的名字
+
+　typedef 使用最多的地方是创建易于记忆的类型名，用它来归档程序员的意图。类型出现在所声明的变量名字中，位于 ''typedef'' 关键字右边。例如：`typedef int size;`   
+
+----
+
+记住：不管什么时候，只要为指针声明 typedef，那么都要在最终的 typedef 名称中加一个 const，以使得该指针本身是常量，而不是对象
+
+    typedef const char * cpstr;   
+    int mystrcmp(cpstr, cpstr); // 现在是正确的  
+
+----
+
+#GCC
+
+##简介
+通常所说的GCC是GUN Compiler Collection的简称  
+
+##程序的编译过程
+1. 预处理
+
+    预处理阶段，输入的通常为C语言源文件*.c，它们通常带有包含*.h的包含文件。这阶段通常用来处理`#define`,`#typedef`,`include`命令，会生成*.i中间文件
+    `gcc -E test.c test.i`
+
+1. 编译
+
+    输入的是中间文件*.i，编译形成的汇编文件*.s
+    `gcc -S test.i test.s`
+
+1. 汇编
+
+    将输入的汇编语言文件*.s转换为机器语言文件*.o
+    `gcc -c test.s test.o`
+
+1. 连接
+
+    最后，将输入的机器语言文件*.o与其他机器语言文件和库文件汇集成一个可以执行的二进制代码文件
+    `gcc test.o test`
+
+##常用模式
+* `gcc  test.c` 将test.c预处理、汇编、编译并链接形成可执行文件
+* `gcc test.c -o test` 将test.c预处理、汇编、编译并链接形成可执行文件test,-o选项用来指定输出文件的文件名。
+* `gcc test.o -o test` 将编译输出文件test.o链接成最终可执行文件test。
+
+多源文件的编译方法
+* `gcc testfun.c test.c -o test` 将testfun.c和test.c分别编译后链接成test可执行文件。
+* 分别编译各个源文件，之后对编译后输出的目标文件链接: `gcc -c testfun.c`,`gcc -c test.c`,`gcc -o testfun.o test.o -o test`
+
+
+****
+
+#C Standard library:STL
+
+##<errno.h>/<cerrno>
+
+errno.h 是C语言C标准函式库里的标头档，定义了通过错误码来回报错误资讯的宏：  
+errno宏定义为一个int型态的左值, 包含任何函式使用errno功能所产生的上一个错误码。  
+
+----
+
+##<stdio.h>/<cstdio>
+
+###printf
+
+####转换说明符 
+
+- `%a`      浮点数、十六进制数字和p-记数法（Ｃ９９）  
+- `%A`　　　浮点数、十六进制数字和p-记法（Ｃ９９）  
+- `%c`　　　一个字符　  
+- `%d`　　　有符号十进制整数　  
+- `%e`　　　浮点数、e-记数法  
+- `%E`　　　浮点数、Ｅ-记数法  
+- `%f`　　　浮点数、十进制记数法　　  
+- `%g`　　　根据数值不同自动选择％f或％e．  
+- `%G`　　　根据数值不同自动选择％f或％e.  
+- `%i`      有符号十进制数（与％d相同）  
+- `%o`　　　无符号八进制整数  
+- `%p`　　　指针　　　　  
+- `%s`　　　字符串  
+- `%u`　　　无符号十进制整数  
+- `%x`　　　使用十六进制数字０f的无符号十六进制整数　  
+- `%X`　　　使用十六进制数字０f的无符号十六进制整数  
+- `%%`　　　打印一个百分号  
+
+----
+
+####长度修饰符 
+
+常用的长度修饰符有两种：
+
+1. l（长）表示按长整型量输出
+1. h（短）表示按短整型量输出。
+
+> 可以和输出转换说明符d、f、u等连用
+
+----
+
+####宽度修饰符和精度修饰符 
+
+宽度修饰符用来指定printf（）函数输出数据的占位宽度，用一个十进制整数表示输出数据的位数，插在百分号%与转换说明符之间，其作用是控制打印数据的宽度，也称为“域宽”。
+
+也可以在prinf函数中指定输出数据的精度。以一个小数点开始，后紧跟着一个十进制整数表示精度，插在百分号%与转换说明符之间。对于不同数据类型，精度的含义也不相同：在使用%d时，精度表示最少要打印的数字的个数。在使用%f、%e、%E时，精度是小数点后面显示的数字个数。在使用%s时，精度表示输出的字符串中字符的个数。
+
+
+1. %md
+
+    以宽度m输出整型数，不足m位数时左侧补以空格。 
+
+1. %0md
+
+    以宽度m输出整型数，不足m位数时左侧补以0（零）。 
+
+1. %m.nf
+
+    以宽度m输出实型数，小数位数为n位。 
+
+1. %ms
+
+    以宽度m输出字符串，不足m位数时左侧补以空格。 
+
+1. %m.ns
+
+    以宽度m输出字符串左侧的n个字符，不足m位数时左侧补以空格。
+
+----
+
+####标志修饰符 
+
+在printf 函数中，可以使用标志修饰符控制输出格式。
+
+- `-`
+
+    “左对齐”方式：输出数据左对齐，右侧补空格。缺省时输出数据则为右对齐，左补格。 
+
+- `+`
+
+    输出数据为正时，在数据之前显示一个+号，为负时，在数据之前显示一个-号。 
+
+- `#`
+
+    输出数据为八进制时加前缀0，为十六进制时前缀0x。 
+
+- `空格`
+
+    输出数据为正值时，在数据之前打印空格，为负时，数据之前显示一个-号。
+
+----
+
+
+
+
+##<memory>
+
+###auto_ptr
+
+auto_ptr是这样一种指针：它是“它所指向的对象”的拥有者。这种拥有具有唯一性，即一个对象只能有一个拥有者，严禁一物二主。当auto_ptr指针被摧毁时，它所指向的对象也将被隐式销毁，即使程序中有异常发生，auto_ptr所指向的对象也将被销毁。
+
+----
+
+关于auto_ptr的几种注意事项：
+
+1. auto_ptr不能共享所有权。
+2. auto_ptr不能指向数组
+3. auto_ptr不能作为容器的成员。
+4. 不能通过赋值操作来初始化auto_ptr
+
+        std::auto_ptr<int> p(new int(42));     //OK
+        std::auto_ptr<int> p = new int(42);    //ERROR
+    这是因为auto_ptr构造函数被定义为explicit
+
+5. 不要把auto_ptr放入容器
+
+> 智能指针通过RAII来确保内存资源的安全，也间接地使得对象上的RAII得到实施
+
+> 这里的RAII并不是十分严格：对象（所占的内存也是资源）的创建（资源获取）是在构造函数之外进行的。广义上，我们也把它划归RAII范畴。
+
+> Matthew Wilson在《Imperfect C++》一书中，将其独立出来，称其为RRID（Resource Release Is Destruction）。
+
+----
+
+auto_ptr对象间的赋值是一个需要特别注意的地方。简单说来资源代理对象间赋值的语义不满足“赋值相等”，其语义是资源管理权的转移。
+
+    int a;  int b = 10;  a = b; //这句话执行后 a == b 但对于资源代理对象，这是不满足的，比如：
+    auto_ptr<int> a(null);  auto_ptr<int> b(new int(123));  a = b; //这句话执行后a != b，赋值的语义是b把资源的管理权交给了a 
+
+
