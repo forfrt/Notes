@@ -1,0 +1,9 @@
+**Advanced Computer Architectures: A Design Space Approach**
+
+#Computational Modela
+
+##The concept of a computational model
+
+*computer architecture classes and programming language classes correspond to one another!* For this to be the case the corresoponding architecture and language classes must have a common foundation or paradigm called a *computational model*.
+
+

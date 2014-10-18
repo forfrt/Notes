@@ -1,3 +1,203 @@
+#Introduction
+
+##private-key(or the symmetric-key)
+The same key is used to convert the plaintext into a ciphertext and back.
+
+> An implicit assumption in any system using private-key encryption is that the communicating parties have some way of initially sharing a key in a secret manner.
+
+A private-key encryption scheme is comprised of three algorithms:
+1. the key-generation algorithm.
+2. The encryption algorithm
+3. The decryption algorithm
+
+- The set of all possible keys output by the key-generation algorithm is called the *key space*.
+- The set of all "legal" messages is called plainttext space.
+
+----
+
+`The cipher method must not be required to be secret, and it must be able to fall into the hands of the enemy without inconvenience.--Kerckhoffs' principle`
+
+That means an encryptography should be designed so as to be secure even if an adversary knows the details of all the component algorithms of the scheme.
+
+    1. it is much easier for the parties to maintain secrecy of a short key than to maintain secrecy of an algorithm.
+    1. much easier for the honest parties to change the key than to replace the algorithm being used.
+    1. significantly easier for all parties to use the same algorithm/program, but different keys.
+
+**now**
+> not only advocating not relying on secrecy of the algorithms being used, but also demanding that these algorithms be made public.
+
+    1. Published designs undergo public scrutiny and are therefore likely to be stronger.
+    1. better for security flaws
+    1. reverse engineering of the code would be a serious threat to security.
+    1. enables the establishment of standards.
+
+----
+
+###Attack scenarios(Adversarial Powers)
+
+1. Ciphertext-only attack(Passive)
+1. Known-plaintext attack(Passive)
+
+    the adversary learns one or more pairs of plaintexts/ciphertexts enccrypted under the same key.
+
+1. Chosen-plaintext attck(CPA)(Active)
+
+    has the ability to obtain the encryption of plaintexts of tis choice
+
+1. Chosen-ciphertext attack(CCA)(Active)
+
+    the capability to obtain the decryption of ciphertexts of its choice
+
+----
+
+##The Basic Principles of Modern Cryptography
+
+Three principles that distinguish modern cryptography from 
+
+1. Principle 1 -- the first step in solving any cryptographic problems the formulation of a rigorous and precise definition of security
+1. Principle 2 -- the assumption must be precisely stated if the security of a cryptographic constrction relies on an unproven assumption.
+1. Principle 3 -- cryptographic constructions should be
+
+    - accompanied by a rigorous proof of security[aka a reduction]
+    - with respect to a definition formulated according to principle 1
+    - and relative to an assumption stated as in principle 2
+
+###Modelling choices
+
+Formal vs. Informal
+- Informally, it's just an *effective description* (e.g. in pseudocode) of which steps to perform to get some job done.
+- To be more formal, one needs to *fix the model of computation* and one typically *falls back to Turing machines*.
+
+----
+
+Concrete vs. Asymptotic
+- For concrete security, we look at specific algorithms for, or adversaries against, a particular cryptosystem, e.g., where the key-size is fixed to 256 bits.
+- For asymptotic security, we look at an infinite family of cryptosystems with a security parameter (e.g. the keysize) that can take any natural value. Algorithms are required to be polynomial time.
+
+----
+
+###Significant choices
+
+Stateful vs. Stateless
+Many algorithms, such as encryption, will be run time and again. If it can
+depend on **what happened before** (e.g. by maintaining a counter), it is stateful. If the algorithms running is independent of previous uses, it is
+stateless.
+
+----
+
+Probabilistic vs. Deterministic
+- A deterministic (stateless) algorithm always gives *the same input for the same output*.
+- For a probabilistic algorithm is allowed to *fip coins* etc. during its computation. Each time it runs can be different, even on identical inputs. We can make the randomness explicit by denoting it r and writing Enc k (m; r).
+
+> probabilistic algorithms are not non-deterministic ones.
+
+****
+
+##Security notion
+
+###IND-Security(indistinguaishability)
+
+The adversary is not able to guess in polynomial-time even a bit of the plain-text knowing the cipher-text , notion introduced by S. Goldwasser and S.Micali ([GM84]).
+
+----
+
+###One way Security
+
+Without the private key, it is computationally impossible to recover the plain-text . (Near of Perfect Security of Shannon)
+
+----
+
+One can mix-and-match the goals [ IND,OW ] and attacks [ CPA,CCA1,CCA2 ] in any combination,given rise to six notions of security.
+
+    IND-CCA IND-CPA IND-PASS
+    OW-CCA OW-CPA OW-PASS
+
+----
+
+The strongest notion we have seen is *IND-CCA*:
+- All modern ciphers must provably meet this definition of security.
+- Hence encryption must be probabilistic.
+- Any IND-CCA algorithm must expand the message space into the ciphertext space.
+- Encryption is a one-to-many "function"
+- 
+> Very modern symmetric ciphers often use stronger and more advanced notions than IND-CCA
+
+
+
+
+
+
+
+****
+
+#Some basic knowledge of Modern Cryptology
+
+##Probability Primer
+
+`A random variable X is a variable which takes certain values with certain probabilities.`
+
+`The joint probability is defined as p ( X = x ; Y = y) is the probability that X takes the value x and Y takes the value y .`
+
+`X and Y are independent iff`
+`p(X = x ; Y = y ) = p(X = x ) * p(Y = y ) for all values of x and y .`
+`X and Y are independent iff p(X = x |Y = y ) = p(X = x )`
+
+
+`The conditional probability is defined as p(X = x jY = y ) is the probability that X takes the value x given that Y takes the value y .`
+
+    p(X = x ; Y = y ) = p(X = x |Y = y ) * p(Y = y )
+
+    If p(Y = y ) > 0 then
+    p(X = x |Y = y)=(p( Y = y |X = x)*p(X = x))/p(Y = y)
+
+----
+
+##Perfect Secrecy
+
+A cryptosystem has *perfect secrecy* iff
+
+    p(M = m|C = c ) = p(M = m):
+
+so
+
+    p(C = c|M = m) = p(C = c);
+    P(C = c|M = m0) = p(C = c|M = m1);      //!perfect indistinguishability
+
+----
+
+##Shannon's Theorem
+
+Suppose (M; C; K; Kg; Enc; Dec) is a cryptosystem with |M| = |C| = |K|.
+
+This cryptosystem provides *perfect secrecy* if and only if every key is used
+with equal probability 1=|K| and, for each m belongs to M and c belongs to C, there is a unique key k such that Enc k(m) = c 
+
+****
+
+#计算机时代的密码学
+
+新加密法是基于计算机的特征而不是语言结构.
+新密码法设计与使用的焦点放在二进制而不是字母上.
+
+##计算机的特征
+
+计算机技术带来的基本改变是信息的表示方式
+
+##Xor计算与One Time Pad
+
+如果两个输入不同,则输出为1.
+
+One Time Pad: 密钥的二进制位与密文的二进制位进行XOR逻辑运算
+
+##流加密法
+
+将明文与随机密钥流进行XOR逻辑运算
+开发一个基于短的密钥来产生密钥流的随机位生成器,
+
+1. 同步生成器,生成的密钥流与明文流无关,丢失一个密文自负,密文与密钥流将无法对其
+1. 自同步流,根据前几个密钥自负来生成密钥流,如果某个密文字符有错,n个密文字符后密钥流会自动同步
+
+###线性反馈移位寄存器
 
 
 

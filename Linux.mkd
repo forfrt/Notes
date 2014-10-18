@@ -706,11 +706,22 @@ VFS中维护的另一个结构是挂装的文件系统。
 
 ##ulimit
 
-    控制shell程序的资源。
-    `ulimit -c unlimited`
+控制shell程序的资源。
+`ulimit -c unlimited`
 
 ----
 
+#终端命令
+
+##tty
+
+看到当前所处的终端
+
+##who
+
+看到系统中所有登录的用户
+> pts/0,1,2,3 终端为虚拟终端，多为图形界面下打开的终端或者远程登录的终端
+> tty1,tty8 为实际终端,对应ctrl-alt-F1到F7
 
 ****
 

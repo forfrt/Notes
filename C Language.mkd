@@ -1,0 +1,6 @@
+
+##Array
+
+`int myArray[10] = { 1, 2 }; // initialize to 1,2,0,0,0...`
+`int myArray[10] = { 0 }; // all elements 0`
+`int array[1024] = {[0 ... 1023] = 5}; //GCC only`

@@ -1,0 +1,289 @@
+#Course Assessment
+
+##Formal Assessment
+
+The formal (summative) assessment for this unit is 50% by exam, and 50% by written coursework.
+
+For the written coursework, you choose one of two options: either writing an essay, or writing a paper that reports on a programming project. If you choose the essay option, the essay must be all your own work (i.e., no group-work); if you choose to do the programming project, you may work alone or in groups of two or three. For programming projects submitted by groups of two or three students, the paper describing the work will be assessed and given a grade, and that grade will be the grade awarded to all the students who worked on that paper.
+
+Deadline for submission of the coursework is 23:59 on Friday 9th January 2015. Full details of the coursework will be announced early in the unit, and details will be posted here. 
+
+1. Write a 3,000 word essay on The Long Tail, discussed in Lecture 2. 
+2. Implement a trading agent (in Python, on the Bristol Stock Exchange) and write a short paper describing experiments with the agent: 
+
+    *Your agent may be entered into a tournament (you’re not assessed on this)*
+    *Best-performing agents may be written up in a research paper*
+
+##Feedback Assessment
+
+To give you practice at writing in the style needed for the formal assessments, there is one optional item of formative assessment: on SAFE this has the code FA1, and carries zero weight. So, if you don't submit anything, you don't lose any marks of your final grade for this unit. If you choose to submit something and it gets a really high mark, that also has no effect on your final grade. (It's like doing a problem-set in maths: it's intended to help you get better, but doesn't count to the final exam). 
+
+1. Format: A4 paper-size, single column, one-inch margins all round, and 11pt text. In a standard font (e.g. like Times New Roman) you should easily be able to fit 500 words on a single page. Include your name too! 
+1. Give your file a UNIQUE name – use your student/candidate number in the 
+filename. 
+
+Deadline for submission of the Feedback Assessment FA1 is 23:59 on Friday 24th October 2014. We will do our best to get feedbaack to you (via SAFE) within three weeks, i.e. by Friday 14th November 2104.
+
+Details of FA1 are given at the end of Lecture 01 -- see the PDF of the slides (below).
+
+****
+
+#Lecture 1: Introduction, and The Big Picture
+
+##Lecturers
+
+1. Prof David Cliff 
+
+    MVB-3.30 
+    Open door policy 
+    Email is alwaysbest 
+    Mobile phone/text too 
+
+1. Dr Chris Preist, Reader 
+    MVB-3.28 
+    Office days Tue/Wed/Thu, 
+    or just email me if I’m not in my office 
+
+Recommended Reading:
+
+1. The Big Switch: Rewriting the World from Edison to Google
+
+----
+
+##The Big picture
+
+###Evolution
+
+* Mainframe
+* Minicomputers
+* Micros/PCs
+* LAN/Distributed
+* Internet/Web
+* Utility/Service
+
+    like gas/water utility
+
+----
+
+##The Really Really Big Picture 
+
+1. S1: Industrial Revolution 1770-1829 (59yr) 
+1. S2: Steam & Railways 1829-1873 (44yr) 
+1. S3: Steel, Electricity 1875-1918 (43yr) 
+1. S4: Oil, Car, Mass Production 1908-1974 (66yr) 
+1. S5: IT & Telecoms 1971-20?? (nb: 1971+53=2024)
+
+![technological revolutions life circle](./img/Algorithmic and Economic Aspects of the Internet/technological revolutions life circle.PNG)
+----
+
+##Recommended Articles
+
+1. [Respecialisation and the deployment of the ICT paradigm: An essay on the present challenges of globalisation](http://www.carlotaperez.org/pubs?s=tf&l=en&a=wprespecialisationandthedeployment)
+1. [The financial crisis and the future of innovation: a view of technical change with the aid of history](http://www.carlotaperez.org/pubs?s=tf&l=en&a=thefinancialcrisisandfutureofinnovation)
+1. [Unleashing a golden age after the financial collapse: drawing lessons from history](http://www.carlotaperez.org/pubs?s=tf&l=en&a=unleashingagoldenageafterthefinancialcollapse )
+----
+
+##The bottom line
+
+Understanding the wider historical, social, and economic contexts of technology developments allows us to better understand the current situation, and possible/ likely futures. 
+
+> Perez is a leading thinker on these topics, widely held in high regard. 
+> There have been exam questions on these big-picture issues 
+
+****
+
+#Lecture 2: Who wants to be a billionaire? 
+
+A quick tour through the algorithmic & economic aspects of some notable success stories: 
+
+- eBay & Amazon: the economics of the long tail 
+- People who bought that also bought these: collaborative filtering algorithms 
+- Google’s crown jewels: PageRank, AdWords, MapReduce 
+
+----
+
+##The worlds biggest bookshop, & biggest tat-bazaar
+
+1. These two companies have won for a whole host of factors 
+2. History tends to concentrate on winners 
+3. Positive feedback and network externalities can help elevate a company or product to success, even if it has superior rivals: the (slightly) big get bigger 
+
+    - E.g. Betamax vs VHS; anyOS vs Windows 
+
+4. Commonplace productcan be sold via a strong brand 
+
+    - See, e.g., the chapter on Amazon.com in Cassidy’s book Dot.Con 
+
+5. Nevertheless, the internet did really change the economics of retail… 
+
+> Successes of both Amazon and eBay are cited as examples of The Long Tail 
+
+----
+
+##The Long Tail
+
+- 2004 Wired article 
+- 2006 book  
+- Definitely read the article [Article_url](www.wired.com/wired/archive/12.10/tail.html)
+- Optionally read the book 
+- Anderson also runs a blog: [Blog_url](http://longtail.typepad.com/the_long_tail/) for recent updates
+
+----
+
+###Background
+
+Retailers could make money 
+- on high-volume low-margin goods (e.g. selling hotdogs)  
+- on low-volume high-margin goods (e.g. selling Porsches) 
+
+For this reason, low-volume low-margin retail tended to be a loser’s game
+
+----
+
+“80-20 Rule” or “Pareto’s Principle” (1906 Italian economist) 
+- Only 20% of the major studio films will be hits. 
+- Same for TV shows, games, books …… 
+- Even less for major-label CDs <10%
+
+But surely this is just focused on hitsnot sales 
+99% - there is demand for almost everything even if it is very small 
+
+----
+
+Turns out the biggest money may well be in the smallest sales! 
+
+Rules: 
+
+1. Make everything available 
+2. Cut the price 
+3. “Help me find it”
+
+Amazon & other sites – have made it also just as easy to buy used /pre-owned items as it is new ones
+
+----
+
+- Amazon – makes a lot of money from those long tail products 
+- eBay – sells many niche, one-off products 
+- Google – makes most of its money from small advertisers 
+
+----
+
+###Amazon's advantage
+
+Going online automates the store 
+- Big stock, long shelves, gives long-tail benefits 
+- But other online bookstores did that too 
+
+Going online automated customer community-building
+- Customer reviews and recommendations attract buyers and build sales 
+- Using recommendations forces demand down the long tail 
+- But other online bookstores did that too 
+
+Amazon also automated one of the key roles of the bookseller 
+- Using the vendor’s-eye view of the market to suggest new purchases 
+
+----
+
+###Recommender Systems
+
+Form a specific type of Information Filtering (IF) technique that attempts to present information items (movies, music, books, news, images, web pages) that are likely of interest to the user. 
+Typically, a recommender system compares the user's profile to some reference characteristics. 
+
+These characteristics may be from the information item 
+- the content-based approach
+
+or the user's social environment 
+- the collaborative filtering approach 
+
+Recommender systems are a useful alternative to search algorithms since they help users discover items they might not have found by themselves 
+
+----
+
+Examples of explicit data collection include the following:
+- Asking a user to rate an item on a sliding scale. 
+- Asking a user to rank a collection of items from favorite to least favorite. 
+- Presenting two items to a user and asking him/her to choose the best one. 
+- Asking a user to create a list of items that he/she likes. 
+
+Examples of implicit data collection include the following:
+- Observing the items that a user views in an online store. 
+- Analyzing item/user viewing times 
+- Keeping a record of the items that a user purchases online. 
+- Obtaining a list of items that a user has listened to or watched on his/her computer. 
+- Analyzing the user's social network and discovering similar likes and dislikes 
+
+----
+
+###Collaborative Filtering
+
+- The process of filtering for information or patterns using techniques involving collaboration among multiple agents, viewpoints, data sources, etc. 
+- Typically involve very large data sets. 
+- Applied to many different kinds of data including sensing and monitoring data; financial data; or in electronic commerce and web 2.0 applications where the focus is on user data, etc. 
+- The method of making automatic predictions (filtering) about the interests of a user by collecting taste information from many users (collaborating). 
+- The underlying assumption of CF approach is that those who agreed in the past tend to agree again in the future. 
+
+----
+
+###Criticism of The Long Tail
+
+1. Anita Elberse, Harvard Business School, cites sales data which shows the Web actually magnifies the importance of “blockbuster” hits 
+
+    Anderson debates this and says it is where you define the head and tail, he states it in absolute values whereas Elbersegoes on percentages 
+
+1. Will Page and Andrew Bud found also that music sales exhibited a log-normal distribution rather than a power law curve. They reported that 80% of their music tracks available sold **NO copies at all over a 1 year period**. 
+
+    Anderson responded by saying this study was difficult to assess without seeing the full data!
+
+----
+
+On the contrary
+
+1. Bynjolfsson, Hu, & Smith (2010) "The Longer Tail: The Changing Shape of Amazon’s Sales Distribution Curve“
+
+    Shows the long tail has grown longer over time, with niche books accounting for a larger share of total sales. 2008, niche books accounted for 36.7% of Amazon's sales 
+
+1. Zhou & Duan(2010) “Online User Reviews, Product Variety, and the Long Tail: An Empirical Investigation on Online Software Downloads”
+
+    Found a longer tail but also a fatter tail in an in-depth analysis on consumer software downloading pattern
+
+The demand side factor (online user reviews) and the supply side factor (product variety) interplay to influence the long tail formation of user choices. Increased product variety helps niche products to get more downloads.
+
+----
+
+##Making stuff for the Long Tail
+
+- Book released Oct 2012 
+- Long Tail Makers E.g. LEGO – BrickArms, BrickForge 
+and Brick-stix ... 
+–? Make products that wouldn’t sell in large 
+enough quantities for full Lego 
+production: the Long Tail of Lego. 
+–? Entrepreneurs orbiting around the Lego 
+mother ship collectively fill in the gaps in 
+the market, allowing Lego to continue 
+focusing on the blockbusters its scale 
+requires.
+
+
+****
+
+##Lecture 4
+
+#Economics: truly a dismal science
+
+1. macroeconomics
+1. microeconomics
+
+----
+
+
+
+
+
+
+
+
+
+
+
+

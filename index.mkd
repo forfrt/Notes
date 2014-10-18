@@ -17,6 +17,11 @@
 1. [[ecryptfs]]
 1. [[FUSE]]
 1. [[Best Practice]]
+1. [[Photoshop]]
+1. [[Comment Style]]
+1. [[AWS]]
+1. [[Python]]
+1. [[C Language]]
 
 ##Theory
 1. [[Watermaking]]
@@ -27,13 +32,24 @@
 1. [[HTTP权威指南]]
 1. [[Japanese]]
 1. [[Modern Cryptography]]
+1. [[Git]]
+1. [[MindMapping]]
+1. [[小鹤双拼]]
+1. [[Algorithmic and Economic Aspects of the Internet]]
+1. [[Advanced Computer Architecture]]
+1. [[Cloud Computing]]
+1. [[BigTable]]
+1. [[GFS]]
 
 ##Books
 1. [[Linux网络编程]]
-1. 
+1. [[密歇根州公开课_平面设计]]
+1. [[みんなの日本語]]
 
 ##Articles
 1. 
+
+##Course
 
 
 ##Tools Hotkeys
