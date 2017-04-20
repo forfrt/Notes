@@ -1,0 +1,116 @@
+
+PHP's Source Code for PHP Developers
+
+#Understanding PHP's internal function definitions (PHP's Source Code for PHP Developers - Part 2) 
+
+What we’ll cover in this article is locating the definitions of internal functions in the PHP codebase, as well as understanding them.
+
+##How to find function definitions
+
+1. go to the PHP 5.4 source code root and type strpos into the search box at the top of the page.
+
+    > a little trick: Instead of searching for just `strpos`, we search for `"PHP_FUNCTION strpos"` instead
+1. You’ll find that the first link leads you to the `php_string.h` file, which is full of code looking like this:
+
+        // ...
+        PHP_FUNCTION(strpos);
+        PHP_FUNCTION(stripos);
+        PHP_FUNCTION(strrpos);
+        PHP_FUNCTION(strripos);
+        PHP_FUNCTION(strrchr);
+        PHP_FUNCTION(substr);
+        // ...
+
+    This is exactly how a typical header file (a file ending in .h) looks like: A plain list of functions which are defined elsewhere. 
+1. The second link is much more interesting: It leads to the string.c file, which contains the actual source code of the function.
+
+##The skeleton of a PHP function
+
+All PHP functions share the same basic structure. 
+1. At the top there are a few variable declarations, 
+1. then there is a zend_parse_parameters call, 
+1. then comes the main logic, with RETURN_*** and php_error_docref calls intermixed.
+
+    zval *needle;
+    char *haystack;
+    char *found = NULL;
+    char  needle_char[2];
+    long  offset = 0;
+    int   haystack_len;
+
+1. The first line declares needle as being a pointer to a zval.
+
+    A zval is PHP’s internal representation of an arbitrary PHP value. 
+1. The second line declares haystack as a pointer to a character. 
+1. The problem arising here is that PHP has to know when the string ends. Otherwise it would always keep incrementing the pointer without ever stopping. In order to deal with this, PHP also **stores an explicit length, here in the haystack_len variable**.
+1. The last declaration of interest to us at this point is the offset variable, which will be used to store the third parameter of the function
+
+    > you should know that PHP integers are stored in longs and string lengths are stored in ints.
+1. Now let’s look at the next three lines
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystack_len, &needle, &offset) == FAILURE) {
+        return;
+    }
+
+    1. The first argument to the function is **the number of arguments passed**. This number is provided by the ZEND_NUM_ARGS() macro.
+    1. The next argument is the TSRMLS_CC macro, which is kind of an idiosyncrasy of PHP. You’ll find this strange macro scattered across pretty much the whole PHP code base. It is part of the Thread Safe Resource Mananger (TSRM), which ensures that PHP doesn’t mix up variables between multiple threads.
+    1. Now comes the important stuff: The "sz|l" string specifies which parameters the function accepts:
+
+        - s  // first parameter is a *s*tring
+        - z  // second parameter is a *z*val (an arbitrary value)
+        - |  // the following parameters (here just one) are optional
+        - l  // third parameter is a *l*ong (an integer)
+
+        There are more type specifiers than s, z and l, but most should be clear from the character. For example b is a boolean, d is a double (floating point number), a is an array, f is a callback (function) and o is an object.
+1. The remaining arguments `&haystack, &haystack_len, &needle, &offset` specify the variables to put the values of the arguments into. As you can see, they are all passed by reference (&), which means that not the variables themselves are passed, but pointers to them.
+
+    After this call haystack will contain the haystack string, haystack_len the length of that string, needle the needle value and offset the starting offset.
+1. Additionally the function is checked for FAILURE (which happens if you try to pass invalid arguments to the function, e.g an array to a string parameter). In this case zend_parse_parameters will throw a warning and the code of the function just returns (which will eventually return null to the userland PHP code).
+1. So after the parameters are parsed, the main function body starts:
+
+    What this code does is pretty obvious. If the offset is out of bounds an E_WARNING level error is thrown through php_error_docref and then false is returned using the RETURN_FALSE macro.
+
+    php_error_docref is the error function you’ll mainly find in extensions (i.e. the ext folder). The name comes from the fact that it emits a reference to the documentation in the error message (you know, the one that never works…). Additionally there is the zend_error function, which is mainly used by the Zend Engine, but also occurs in extension code from time to time.
+        Both functions use sprintf-like formatting, thus error messages can contain placeholders, which are then filled using the following arguments.
+1. Let’s proceed in the code:
+
+    if (Z_TYPE_P(needle) == IS_STRING) {
+        if (!Z_STRLEN_P(needle)) {
+            php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
+            RETURN_FALSE;
+        }
+
+    found = php_memnstr(haystack + offset,
+                        Z_STRVAL_P(needle),
+                        Z_STRLEN_P(needle),
+                        haystack + haystack_len);
+    }
+
+    The first five lines should be clear: This branch is only executed if the needle is a string and an error is thrown if it is empty.
+
+    Then comes the interesting part:`php_memnstr` is called, which is the function doing the main work. As always you can click on the function name to see its source code.
+
+    php_memnstr returns the pointer to the first occurrence of the needle in the haystack (that’s why the found variable is declared as char *, i.e. a pointer to character). From this the offset can be easily computed by subtracting the two pointers, as can be seen at the end of the function:
+
+         RETURN_LONG(found - haystack);
+1. Finally, let’s look at the branch which is taken when the needle is not a string:
+
+    else {
+        if (php_needle_char(needle, needle_char TSRMLS_CC) != SUCCESS) {
+            RETURN_FALSE;
+        }
+        needle_char[1] = 0;
+
+        found = php_memnstr(haystack + offset,
+                            needle_char,
+                            1,
+                            haystack + haystack_len);
+    }
+
+
+
+
+
+
+
+

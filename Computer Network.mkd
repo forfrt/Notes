@@ -1,0 +1,16 @@
+
+
+#Network layer
+
+##ARP
+
+The Address Resolution Protocol is a telecommunication protocol used for resolution of network layer addresses into link layer addresses.
+
+**ARP is used to convert an IP address to a physical address such as Ethernet address(also known as a MAC address).** 
+
+> IPv4 over IEEE 802.3 and IEEE 802.11 is the most common case.
+> the functionality of ARP in IPv6 networks is provided by the NDP(Neighbor Discovery Protocol)
+
+----
+
+##SSL

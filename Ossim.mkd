@@ -1,0 +1,110 @@
+
+
+#Introduction
+
+https://www.youtube.com/watch?v=JVmvgLS81wk
+
+A mind-numbing array of applications, operating systems, routers, firewalls, VPNs, and cloud resources confront IT security professionals, with no shortage of logs and security events that need to be correlated and interpreted. The "old-school" way of one-off solutions for various security challenges just won't work anymore. What is needed is *a comprehensive solution that integrates disparate data and processes and provides knowledge and insight into security threats and a capacity to manage risks more effectively*.
+
+The Open Source Security Information and Event Management (OSSIM) system [1] is a Security Information and Event Management (SIEM) application. SIEMs are multipurpose tools for the security operations professional. They offer asset discovery, behavioral monitoring, data aggregation and correlation, security/threat intelligence, threat detection, and vulnerability assessment, among other features. SIEMs are a necessary evolution in the technology used to manage modern threats, and OSSIM is a key leader in the space.
+
+OSSIM offers an expansive array of features that would leave any IT security professional duly impressed, including:
+
+1. Security information management
+1. Security event management
+1. Asset management and discovery
+1. Log management
+1. Network management
+1. IDS (intrusion detection)
+1. HID (host intrusion detection)
+1. Vulnerability assessment
+1. Threat detection
+1. Behavioral monitoring
+1. Netflow support
+1. Incident response
+1. Reporting
+1. Powerful and user-friendly web interface
+1. Simple-to-install, prepackaged virtual machines
+
+OSSIM has many core components born of the open source community. It takes all of these disparate, often time-consuming-to-integrate tools and puts them under one beautifully usable web interface.
+
+A few critical open source projects are listed in the "OSSIM Open Source Projects" box. As you may note, many of these tools are commonly deployed and may already be in use in your organization. OSSIM, however, takes the process one step further by bringing these separate tools to a single place and making the whole even better than its astounding parts. All these amazing open source applications work as one cohesive whole for your information security insights.
+
+----
+
+##OSSIM Open Source Projects
+
+1. Arpwatch – Monitors address resolution protocol (ARP) by logging activity and detecting anomalies – think ARP spoofing. It logs IP/MAC address combinations and lets you know of changes or foul play on the data link layer.
+1. P0f – An effective passive fingerprinting tool to identify OS and software on endpoints and to show how the machine is connected to the Internet (e.g., T1/E1, DSL, etc.) as well as the types of packet filters it is behind. It does this without generating any network traffic, as active fingerprinting tools like DNS lookups, traceroute, or other tools might.
+1. PADS – The Passive Asset Detection System is used for service anomaly detection. For example, PADS and Nmap together are used to detect new network services or changes in existing ones.
+1. OpenVAS – The Open Vulnerability Assessment System is a powerful vulnerability scanning and management application. It is a feature-rich fork of Nessus that is fully GPL.
+1. OCS-NG – Open Computer and Software inventory is an open source asset management application. This cross-platform tool is a powerful way to manage all of your assets in one place.
+1. Snort – The powerful Intrusion Detection System/Intrusion Prevention System (IDS/IPS) uses signature-, protocol-, and anomaly-based inspection to give you insight into intrusions such as OS fingerprinting or buffer overflows, among others.
+1. Suricata – A network IDS, IPS, and network security monitoring engine, which, as of OSSIM 4.2, is the default IDS used in OSSIM.
+1. Tcptrack – A simple sniffer that allows you to monitor your network connections and bandwidth on an interface. It details connection state, source and destination addresses, and ports.
+1. Ntop – An effective network visualization application with rich graphical output and statistical output that can serve as a network probe while offering visual web-based insight into your network traffic flows.
+1. Nagios – A feature-rich network monitoring application for proactively managing your network. This popular network monitoring application keeps an eye on your critical services and devices and can notify you with alerts as to faults.
+1. OSSEC – A robust cross-platform HID system that offers log analysis, system integrity checking, policy monitoring, rootkit detection, and real-time alerting.
+1. OSVDB – Open Source Vulnerability Database is an independent, open source vulnerability database created by and for the community. OSVDB is integrated into OSSIM directly.
+1. Munin – A powerful network and infrastructure monitoring tool. Not only does it monitor and alert, but it give you useful graphs over a web interface to help you understand what is happening under the hood on your network.
+1. Nfdump/NfSen – The nfdump tool helps you collect and process NetFlow data. NetFlow is a network protocol that allows you to collect and analyze IP network traffic flows. NfSen is a web-based NetFlow visualization and investigation tool for nfdump.
+1. Fprobe – A libpcap-based tool that collects network traffic data and packages it as NetFlow flows directed at a specified collector.
+1. AV-OTX – AlienVault Open Threat Exchange [2] is a crowd-sourced threat intelligence service. This free service leverages information garnered from many sources to help you more effectively protect your network. AlienVault gathers this intelligence from other OSSIM and USM installs, OSSINT, hacker forums, and external reputation services and presents you with intelligence on the latest threats. The multitude of multilayered data sources gives you information that can help you make better security decisions.
+
+----
+
+##OSSIM vs. USM
+
+http://www.admin-magazine.com/Archive/2014/20/Open-Source-Security-Information-and-Event-Management-system
+
+OSSIM, like most successful open source products, has many commercially supported options for the needs of corporations and larger organizations that want enhanced features and support. OSSIM is the community open source version of the project, and Alien Vault Unified Security Management (USM) [3] offers even more in the way of features, scalability, and support. Additionally, it is worth noting that all USM versions offer a key feature not available in stock OSSIM: *long-term forensic storage of events*.
+
+###USM All-In-One
+
+Squarely focused on small businesses, this version starts at US$ 3,600 and provides most of the features of the enterprise-focused USM Standard and Enterprise. Critical differences are seen in capacities such as administration, performance, and reporting.
+
+Among the key features of USM All-In-One is support for PCI, HIPAA, GPG13, and ISO 27001 (SOX). This support helps you maintain critical compliance with the constant quagmire of regulatory frameworks. Also present is enhanced log management and threat intelligence from AlienVault Labs, a service that provides continuous intelligence on IP reputation, which helps you make more informed decisions. The All-In-One option includes 100+ compliance and threat reports and support from AlienVault.
+
+###USM Standard/Enterprise
+
+The Standard and Enterprise USM versions offer even more expansive features, in addition to those detailed in the USM All-In-One above, including options and multi-tier deployment options for large-scale environments. If your corporate overlords need a SIEM, AlienVault commercial solutions might be right up their alley. That said, my focus in this article is the open source, community-driven OSSIM, not its commercial big brothers.
+
+#The Detection Process
+
+We define a detector as any program capable of processing information in real time, usually low level information like traffic or system events, and capable of sending alerts when previously defined situations arise.
+
+These situations can be defined in either of two ways:
+1. By patterns, or rules defined by the user
+2. By anomaly levels
+
+----
+
+##Detection Capability
+
+Detection capabilities have improved enormously in recent years, the best example being IDSs, which are capable of detecting patterns at the most detailed level.
+
+In order to discuss the capability of a detector, we will define it using two variables:
+
+- Sensitivity or the capability our detector has for extensive and complex analysis in identifying possible attacks.
+- Reliability, which, as its name suggests, is the level of **certainty** provided by our detector when we receive warning of a possible event.
+
+----
+
+##The Detection Process
+
+We will refer to the global process developed by the SIM as the detection process, including the organization’s various detectors and monitors as well as those executed by the system to process this information.
+
+The detection process normally involves three well-defined phases:
+
+- Preprocessing: Detection itself, in which detectors generate alerts and information is consolidated before being sent.
+- Collection: All the information from these detectors is sent and received at a central location.
+- Post-processing: What we do with the information after we have it all centralized
+
+----
+
+##Post-processing
+
+
+
+
+

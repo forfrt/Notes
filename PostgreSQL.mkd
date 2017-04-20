@@ -1,0 +1,161 @@
+
+#Install
+
+[postgresql-setup](http://www.stuartellis.eu/articles/postgresql-setup/)
+1. `sudo apt-get install python-psycopg2`
+1. `sudo apt-get install postgresql postgresql-contrib`
+1. `sudo -u postgres psql`
+1. ALTER USER postgres WITH PASSWORD 'mypassword';
+1. select * from pg_shadow;
+
+添加用户
+1. `sudo adduser dbuser` OR `sudo useradd -m dbuser`
+
+    useradd只会添加一个用户, 没有密码没有主目录, 甚至不能登录
+1. CREATE USER dbuser WITH PASSWORD 'password'; 
+
+OR
+1. `sudo -u postgres createuser --superuser dbuser`
+1. `sudo -u postgres psql`
+1. \password dbuser
+
+OR
+1. create user dave with password 'dave';
+
+OR 
+1. CREATE ROLE bob WITH NOSUPERUSER INHERIT NOCREATEROLE CREATE LOGIN;
+
+
+修改密码
+1. `sudo passwd postgres`
+1. alter user postgres with password 'dave';
+
+----
+
+创建数据库
+1. CREATE DATABASE exampledb OWNER dbuser; 
+1. GRANT ALL PRIVILEGES ON DATABASE exampledb to dbuser;
+
+OR
+
+登录数据库
+1. psql -U dbuser -d exampledb -h 127.0.0.1 -p 5432 
+1. psql exampledb
+
+    > 如果当前Linux系统用户同时也是PostgreSQL用户,可以忽略用户名
+
+1. psql
+
+    > 如果PostgreSQL内部还存在与当前系统用户同名的数据库，则连数据库名都可以省略
+
+----
+
+##控制台命令
+
+1. \h：查看SQL命令的解释，比如\h select。
+1. \?：查看psql命令列表。
+1. \l：列出所有数据库。
+1. \c [database_name]：连接其他数据库。
+1. \d：列出当前数据库的所有表格。
+1. \d [table_name]：列出某一张表格的结构。
+1. \du：列出所有用户。
+1. \e：打开文本编辑器。
+1. \conninfo：列出当前数据库和连接的信息。
+
+----
+
+#基本语句
+### 创建新表
+CREATE TABLE user_tbl(name VARCHAR(20), signup_date DATE);
+
+### 插入数据
+INSERT INTO user_tbl(name, signup_date) VALUES('张三', '2013-12-22');
+
+### 选择记录
+SELECT * FROM user_tbl;
+
+### 更新数据
+UPDATE user_tbl set name = '李四' WHERE name = '张三';
+
+### 删除记录
+DELETE FROM user_tbl WHERE name = '李四' ;
+
+### 添加栏位
+ALTER TABLE user_tbl ADD email VARCHAR(40);
+
+### 更新结构
+ALTER TABLE user_tbl ALTER COLUMN signup_date SET NOT NULL;
+
+### 更名栏位
+ALTER TABLE user_tbl RENAME COLUMN signup_date TO signup;
+
+### 删除栏位
+ALTER TABLE user_tbl DROP COLUMN email;
+
+### 表格更名
+ALTER TABLE user_tbl RENAME TO backup_tbl;
+
+### 删除表格
+DROP TABLE IF EXISTS backup_tbl;
+
+----
+
+#详细指令
+
+##用户管理
+
+##添加用户
+1. `sudo adduser dbuser` OR `sudo useradd -m dbuser`
+
+    useradd只会添加一个用户, 没有密码没有主目录, 甚至不能登录
+1. CREATE USER dbuser WITH PASSWORD 'password'; 
+
+OR
+1. `sudo -u postgres createuser --superuser dbuser`
+1. `sudo -u postgres psql`
+1. \password dbuser
+
+OR
+1. create user dave with password 'dave';
+
+OR 
+1. CREATE ROLE bob WITH NOSUPERUSER INHERIT NOCREATEROLE CREATE LOGIN;
+
+----
+
+###删除用户
+1. 删除用户
+
+    drop user bob;
+1. 限制用户的登陆权限
+
+    alter user bob nologin;
+1. 对需要删除的用户重命名。
+
+    grant bob bobs_replacement;
+1. REASSIGN OWNED BY bob TO bobs_replacement;
+
+##用户密码
+
+1. 查看没有对密码进行加密的用户
+
+    select usename,passwd from pg_shadow where passwd not like 'md5%' or length(passwd) <> 35;
+
+1. 查看对密码加密过的用户
+
+    select usename,passwd from pg_shadow where passwd like 'md5%' and length(passwd) = 35;
+
+
+----
+
+##用户权限
+
+###数据库权限
+
+1. select * from pg_roles where rolename=username;
+1. ALTER ROLE BOB WITH CREATEDB;
+1. ALTER ROLE BOB WITH CREATEUSER;
+
+----
+
+###特定对象权限

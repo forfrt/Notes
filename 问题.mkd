@@ -1,0 +1,7 @@
+1. 后台清点
+
+    如: 给出的url是http://61.155.197.245:8080/trainManage/account/checkLogin;jsessionid=06B5854F465CCE88A5A97E515AB3336F, 实际的后台url是http://61.155.197.245:8080/trainManage/account/login, 不确定是否应该就原始url标记为后台
+    目前先处理为已标记
+
+    - http://61.155.197.245:8080/trainManage/account/checkLogin;jsessionid=06B5854F465CCE88A5A97E515AB3336F
+    - http://61.155.197.245:8080/trainManage/account/checkLogin;jsessionid=2F32884A27D266619907D9F57EB0B770

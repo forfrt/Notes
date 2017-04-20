@@ -1,0 +1,2137 @@
+#Course Assessment
+
+##Formal Assessment
+
+The formal (summative) assessment for this unit is 50% by exam, and 50% by written coursework.
+
+For the written coursework, you choose one of two options: either writing an essay, or writing a paper that reports on a programming project. If you choose the essay option, the essay must be all your own work (i.e., no group-work); if you choose to do the programming project, you may work alone or in groups of two or three. For programming projects submitted by groups of two or three students, the paper describing the work will be assessed and given a grade, and that grade will be the grade awarded to all the students who worked on that paper.
+
+Deadline for submission of the coursework is 23:59 on Friday 9th January 2015. Full details of the coursework will be announced early in the unit, and details will be posted here. 
+
+1. Write a 3,000 word essay on The Long Tail, discussed in Lecture 2. 
+2. Implement a trading agent (in Python, on the Bristol Stock Exchange) and write a short paper describing experiments with the agent: 
+
+    *Your agent may be entered into a tournament (you’re not assessed on this)*
+    *Best-performing agents may be written up in a research paper*
+
+##Feedback Assessment
+
+To give you practice at writing in the style needed for the formal assessments, there is one optional item of formative assessment: on SAFE this has the code FA1, and carries zero weight. So, if you don't submit anything, you don't lose any marks of your final grade for this unit. If you choose to submit something and it gets a really high mark, that also has no effect on your final grade. (It's like doing a problem-set in maths: it's intended to help you get better, but doesn't count to the final exam). 
+
+1. Format: A4 paper-size, single column, one-inch margins all round, and 11pt text. In a standard font (e.g. like Times New Roman) you should easily be able to fit 500 words on a single page. Include your name too! 
+1. Give your file a UNIQUE name – use your student/candidate number in the 
+filename. 
+
+Deadline for submission of the Feedback Assessment FA1 is 23:59 on Friday 24th October 2014. We will do our best to get feedbaack to you (via SAFE) within three weeks, i.e. by Friday 14th November 2104.
+
+Details of FA1 are given at the end of Lecture 01 -- see the PDF of the slides (below).
+
+****
+
+#How it all links together
+
+Below you will see the list of lecture-titles, and the links and readigns for each lecture. You might wonder how it all fits together. There is a story of how it all links up, but here it is for the record.
+
+The advent of the internet and the web was a significant discruption/trasition in the history of the development of ICT (information and communications technology); there had been similar desruptive trasitions in ICT's past (e.g., the introduction of cheep personal computers in the late 1970's and early 1980's), and it seems likely that there is a similar trasition taking place right now: the move to utility-style "cloud" computing. All of this can be viewed from the wider perspective of the ICT "technology revolution" being the latest in a series of surprisingly similar technology "surges" that have characterised the past 250 years. That's what we look at in the first lecture.
+
+In the last 15 years successful internet-based companies have grown to immense value, making their founders very rich. There are (socio~)economic explanations for some of these successes, but in some cases the company grew successful because of technology innovations too: typically in the form of smart algorithms or new ICT-enabled ways of doing things. To set up the motivation for the rest of the module, in **Lecture 2** we brefly remind ourselves of the stories behind the successes of Amazon, Google, eBay, Skype, and Facebook.
+
+In **Lecture 3** we have a 50-minute rapid tour through the world of cloud computing. Because of their major economic significance, and because of their dependence on innovative algorithmic solutions: cloud systems are a fascinating mix of algorithmic and economic aspects of the internet. However, there is so much to say about cloud computing that it is now the topic of a separate unit: COMSM0010.
+
+Then in **lectures 4, 5 and 6**, we study market systems. This includes some introductory economics, where we explore how the competitive interations between buyers seeking to purchase some scarce resource ("demand"), and sellers willing to supply units of that resource, can lead to efficient allocations that balance supply and demand. Market-based mechanisms can be used for balancing supply and demand of scarce resources within engineered systems (such as large-scale data-centers) and this requires automated trading algorithms. Once the web had enabled e-commerce, it became obvious that it was possible to have automated software trader-agents or "bots" do the buying and sellign. Such automated trading algorithms ahve also been a significant developmenet in real-world financial markets in recent years, and we survey those developments too (and return to that theme again, but tah the systemic level, in Lecture 18). The coursework componentn of the assessment is strongly linked with this set of three lectures: the programming assignment involves writing a trading algorithm and testing it against some existing algorithms. To do this successfully, you will need to run multiple experiements, generating enough data for statistically rigorous conclusions to be drawn: appropriate statistical methods are covered in **Lecture 7**.
+
+In **Lectures 9, 10, and 11 we focus on broad economic priciples and how they apply to the information technology industry and internet commerce. We consider a number of microeconomic ideas in this context, including market structure, pricing strategies, technological lock-in and network externalities. To understand the content in these three lectures, you need some familiartiy with the mathematics/science of networks, and how large-scale networks can be simplified and visualised, which we cover beforehand in **Lecture 8**.
+
+In **Lecture 12** we return to the algorithmic side of things, looking at the technology underlying peer-to peer systems.
+
+In **Lecture 13** we look at the economics of games on the internet - exploring how third world habitants can be better off playing computer games for a living rather than working the land, which takes us nicely into **Lecture 14**'s monetisation of social gaming and the game mechanics behind these big sellers.
+
+In **Lecture 15 and 16** we explore social networks, and the field of *sentiment analysis* which attempts to extract information on the views of groups of people, e.g. by monitoring messages on social media websites such as Twitter.
+
+**Lectures 17 and 18** are given over to current research issues, where your lecturers talk about their own research fields that are each directly relevant to this unit: first a lecture on sustainability issues; and then a lecuture on the diffculties of dealing with ultra-large-scale systems.
+
+Finally in **Lecture 19** we turn to the issue of cyber-security, of attack and defence on technology networks, where we explore the effects of computer viruses, worms, and other malware, and the associated security/countermeasures industry -- somewhat surprisingly, this takes us back into economics.
+
+Finally **Lecture 20** offers a summary, wrapping everything up and is followed by an extended Q&A session aimed at helping to prepare you for the exam.
+
+#Lecture 1: Introduction, and The Big Picture
+
+##Lecturers
+
+1. Prof David Cliff 
+
+    MVB-3.30 
+    Open door policy 
+    Email is alwaysbest 
+
+    Mobile phone/text too 
+
+1. Dr Chris Preist, Reader 
+    MVB-3.28 
+    Office days Tue/Wed/Thu, 
+    or just email me if I’m not in my office 
+
+Recommended Reading:
+
+1. The Big Switch: Rewriting the World from Edison to Google
+
+----
+
+##The Big picture
+
+###Evolution
+
+* Mainframe
+* Minicomputers
+* Micros/PCs
+* LAN/Distributed
+* Internet/Web
+* Utility/Service
+
+    like gas/water utility
+
+----
+
+##2010 Flash Crash
+
+was a United States trillion-dollar stock market crash, which started at 2:32 and lasted for approximately 36 minutes. Dow Jones Industrial Average collapsed and rebounded very rapidly.
+
+In April 2015, Navinder Singh Sarao, a London-based high-frequency trader, was arrested for his alleged role in the flash crash. According to criminal charges brought by the United States Department of Justice, Sarao allegedly used an automated program to generate large sell orders, pushing down prices, which he then cancelled to buy at the lower market prices.
+
+----
+
+##BATSCRASH
+
+BATS Global Markets planned to offer over seven million shares, at $16 apiece, on its own exchange, a high-frequency trading venue. After the shares opened at $15.25 under the ticker “BATS,” within nine seconds they fell to four cents per share, at one point spiking below one penny per share, forcing a halt and the subsequent withdrawal of the company’s IPOs from its own listings.
+
+
+It turns out that the crash at the third-biggest U.S. stock-exchange venue was due to a coding error that disrupted trading in firms with ticker symbols from A to BFZZZ. Along with BATS itself, Apple was also affected, with a slump of 9.4% within about five minutes before trading was suspended by circuit-breaker rules.
+
+##The Really Really Big Picture 
+
+Carlota Perez
+
+Last 250 years of technology "surges"
+
+Installation>[Crash]>Deployment
+
+1. S1: Industrial Revolution 1770-1829 (59yr) 
+1. S2: Steam & Railways 1829-1873 (44yr) 
+1. S3: Steel, Electricity 1875-1918 (43yr) 
+1. S4: Oil, Car, Mass Production 1908-1974 (66yr) 
+1. S5: IT & Telecoms 1971-20?? (nb: 1971+53=2024)
+
+![technological revolutions life circle](./img/Algorithmic and Economic Aspects of the Internet/technological revolutions life circle.PNG)
+----
+
+##Recommended Articles
+
+1. [Respecialisation and the deployment of the ICT paradigm: An essay on the present challenges of globalisation](http://www.carlotaperez.org/pubs?s=tf&l=en&a=wprespecialisationandthedeployment)
+1. [The financial crisis and the future of innovation: a view of technical change with the aid of history](http://www.carlotaperez.org/pubs?s=tf&l=en&a=thefinancialcrisisandfutureofinnovation)
+1. [Unleashing a golden age after the financial collapse: drawing lessons from history](http://www.carlotaperez.org/pubs?s=tf&l=en&a=unleashingagoldenageafterthefinancialcollapse )
+----
+
+##The bottom line
+
+Understanding the wider historical, social, and economic contexts of technology developments allows us to better understand the current situation, and possible/ likely futures. 
+
+> Perez is a leading thinker on these topics, widely held in high regard. 
+> There have been exam questions on these big-picture issues 
+
+----
+
+###1. [Respecialisation and the deployment of the ICT paradigm: An essay on the present challenges of globalisation](http://www.carlotaperez.org/pubs?s=tf&l=en&a=wprespecialisationandthedeployment)
+
+The future of ICT is inextricably intertwined with the future of the global economy and of each regional and national economy. This is because the core industires of a technological revolution are much more than a set of new products, industires and infrastructures to be added to the previously existing ones.
+
+Current biotechnology and nanotechnology wouldn't even be conceivable without the contribution of swift and massive data processing software and extremely precise computer-guided instruments. The same can be said about most innovations today, from products and process equipment in manufacturing to practically all the service industries, form finance to retail. Even the creative and craft idustries are innovating with ICT.
+
+*The mass-produced low-cost Model-T became the example that shaped the techno-economic paradigm of that revolution.* Stadardisation and assembly-line production were soon applied in one industry after anohter.
+The other core element of the constellation, the internal combustion engine, cooupled with increasingly efficient oil refinign techologies, guided the revolution in massive trasport from trains, ships, carriages, bicycles and horses to automobiles, buses, trucks and airplanes.
+In other words, for over half a century, oil-based mass productio shaped the direction of innovation towards the energy and materials-intensive patterns of production and living that the Knowledage Society has inherited.
+
+*But the relationship is mutual.* Technology shapes the economy as well as society and these, in turn, are constantly shaping technology, guiding its development and selecting within the potential it offers.
+
+Thus, in the process of examining the future path of ICT, (1)it is important to refer to the characteristics of the specific techno-economic paradigm and to the way they may be influencing the opportunities in other sectors of the economy. (2)Equally useful is making reference to the regular patterns identified in the diffusion process of earlier technological revolutions. 
+
+This essay is meant to go part of the way in that task. (1)It will summarise some of the relevant aspects of the great surges model presented by the author in Technological Revolutions and Financial Capital.
+
+On the basis of that framework, it will argue that, though the role of free markets was crucial in the early decades of diffusion of the ICT revolution, their continued unrestrained and unguided operation can only aggravate the tensions inherited from the casino economy and the income polarisation of the 1980s and 1990s. It will propose that a conscious, policy-facilitated and consensus-driven process of respecialisation in the developed economies can be the most effective way to overcome those tensions as well as theinstabilities generated by the present uneven globalisation of production.
+
+####The recurring diffusion pattern of revolutionary technologies
+
+Each has generated a great surge of development, diffusing unevenly across the world from an initial core country. 
+
+The resulting best practice frontier is superior to the previous one and becomes the new common sense for efficiency –**a new techno-economic paradigm**– that defines the guidelines for innovation and competitiveness.
+
+This paradigm will transform the whole economy and will gradually bring it to a higher productivity plateau. 
+
+Whatever its shape and rhythm, the complete process of diffusion of each new technological constellation and its techno-economic paradigm constitutes a Great Surge of Develop.
+
+
+
+
+
+
+
+****
+
+
+#Lecture 2: Who wants to be a billionaire? 
+
+Several of these success stories are due to ALGORITHMIC innovations
+
+A quick tour through the algorithmic & economic aspects of some notable success stories: 
+
+- eBay & Amazon: the economics of the long tail 
+- People who bought that also bought these: collaborative filtering algorithms 
+- Google’s crown jewels: PageRank, AdWords, MapReduce 
+
+----
+
+##The worlds biggest bookshop, & biggest tat-bazaar
+
+1. These two companies have won for a whole host of factors 
+2. History tends to concentrate on winners 
+3. Positive feedback and network externalities can help elevate a company or product to success, even if it has superior rivals: the (slightly) big get bigger 
+
+    - E.g. Betamax vs VHS; anyOS vs Windows 
+
+4. Commonplace productcan be sold via a strong brand 
+
+    - See, e.g., the chapter on Amazon.com in Cassidy’s book Dot.Con 
+
+5. Nevertheless, the internet did really change the economics of retail… 
+
+> Successes of both Amazon and eBay are cited as examples of The Long Tail 
+
+----
+
+##The Long Tail
+
+- 2004 Wired article 
+- 2006 book  
+- Definitely read the article [Article_url](www.wired.com/wired/archive/12.10/tail.html)
+- Optionally read the book 
+- Anderson also runs a blog: [Blog_url](http://longtail.typepad.com/the_long_tail/) for recent updates
+
+----
+
+###Background
+
+Retailers could make money 
+- on high-volume low-margin goods (e.g. selling hotdogs)  
+- on low-volume high-margin goods (e.g. selling Porsches) 
+
+For this reason, low-volume low-margin retail tended to be a loser’s game
+
+----
+
+“80-20 Rule” or “Pareto’s Principle” (1906 Italian economist) 
+- Only 20% of the major studio films will be hits. 
+- Same for TV shows, games, books …… 
+- Even less for major-label CDs <10%
+
+But surely this is just focused on hitsnot sales 
+99% - there is demand for almost everything even if it is very small 
+
+----
+
+Turns out the biggest money may well be in the smallest sales! 
+
+Rules: 
+
+1. Make everything available 
+2. Cut the price 
+3. “Help me find it”
+
+Amazon & other sites – have made it also just as easy to buy used /pre-owned items as it is new ones
+
+----
+
+- Amazon – makes a lot of money from those long tail products 
+- eBay – sells many niche, one-off products 
+- Google – makes most of its money from small advertisers 
+
+----
+
+###Amazon's advantage
+
+Going online automates the store 
+- Big stock, long shelves, gives long-tail benefits 
+- But other online bookstores did that too 
+
+Going online automated customer community-building
+- Customer reviews and recommendations attract buyers and build sales 
+- Using recommendations forces demand down the long tail 
+- But other online bookstores did that too 
+
+Amazon also automated one of the key roles of the bookseller 
+- Using the vendor’s-eye view of the market to suggest new purchases 
+
+----
+
+###Recommender Systems
+
+Form a specific type of Information Filtering (IF) technique that attempts to present information items (movies, music, books, news, images, web pages) that are likely of interest to the user. 
+Typically, a recommender system compares the user's profile to some reference characteristics. 
+
+These characteristics may be from the information item 
+- the content-based approach
+
+or the user's social environment 
+- the collaborative filtering approach 
+
+Recommender systems are a useful alternative to search algorithms since they help users discover items they might not have found by themselves 
+
+----
+
+###Explicit & Implicit data collection
+
+Examples of explicit data collection include the following:
+- Asking a user to rate an item on a sliding scale. 
+- Asking a user to rank a collection of items from favorite to least favorite. 
+- Presenting two items to a user and asking him/her to choose the best one. 
+- Asking a user to create a list of items that he/she likes. 
+
+Examples of implicit data collection include the following:
+- Observing the items that a user views in an online store. 
+- Analyzing item/user viewing times 
+- Keeping a record of the items that a user purchases online. 
+- Obtaining a list of items that a user has listened to or watched on his/her computer. 
+- Analyzing the user's social network and discovering similar likes and dislikes 
+
+----
+
+###Collaborative Filtering
+
+- The process of filtering for information or patterns using techniques involving collaboration among multiple agents, viewpoints, data sources, etc. 
+- Typically involve very large data sets. 
+- Applied to many different kinds of data including sensing and monitoring data; financial data; or in electronic commerce and web 2.0 applications where the focus is on user data, etc. 
+- *The method of making automatic predictions (filtering) about the interests of a user by collecting taste information from many users (collaborating).* 
+- The underlying assumption of CF approach is that *those who agreed in the past tend to agree again in the future.*
+
+----
+
+###Criticism of The Long Tail
+
+1. Anita Elberse, Harvard Business School, cites sales data which shows the Web actually magnifies the importance of “blockbuster” hits 
+
+    Anderson debates this and says it is where you define the head and tail, he states it in absolute values whereas Elbersegoes on percentages 
+
+1. Will Page and Andrew Bud found also that music sales exhibited a log-normal distribution rather than a power law curve. They reported that 80% of their music tracks available sold **NO copies at all over a 1 year period**. 
+
+    Anderson responded by saying this study was difficult to assess without seeing the full data!
+
+----
+
+On the contrary
+
+1. Bynjolfsson, Hu, & Smith (2010) "The Longer Tail: The Changing Shape of Amazon’s Sales Distribution Curve“
+
+    Shows the long tail has grown longer over time, with niche books accounting for a larger share of total sales. 2008, niche books accounted for 36.7% of Amazon's sales 
+
+1. Zhou & Duan(2010) “Online User Reviews, Product Variety, and the Long Tail: An Empirical Investigation on Online Software Downloads”
+
+    Found a longer tail but also a fatter tail in an in-depth analysis on consumer software downloading pattern
+
+The demand side factor (online user reviews) and the supply side factor (product variety) interplay to influence the long tail formation of user choices. Increased product variety helps niche products to get more downloads.
+
+----
+
+##Making stuff for the Long Tail
+
+- Book released Oct 2012 
+- Long Tail Makers E.g. LEGO – BrickArms, BrickForge and Brick-stix ... 
+    – Make products that wouldn’t sell in large enough quantities for full Lego production: the Long Tail of Lego. 
+    – Entrepreneurs orbiting around the Lego mother ship collectively fill in the gaps in the market, allowing Lego to continue focusing on the blockbusters its scale requires.
+
+----
+
+##Googole's Crown Jewels
+1. Adwords
+2. Pagerank
+2. Mapreduce
+    herding the server farm. Software framework introduced by Google to support parallel computations over large data sets on clusters of computers.
+
+****
+
+#Lecture 3 Cloud Computing: An Overview
+
+##It's a once-a-decade kind of thing
+1. Mainframes
+1. Minicomputers
+1. Micros/PCs
+1. LAN/Distributed
+1. Internet/Web
+1. Utility/Service
+
+----
+
+##A clever reverse-engineered acronym
+
+CLOUD means:
+1. Common
+1. Location-independent
+1. Online
+1. Utility-provisioned
+1. on-Demend
+
+----
+
+##A common stratification: *aaS
+1. SaaS
+    Software as a Service
+1. PaaS
+    Platform as a Service
+    GAE
+1. IaaS
+    Ifrastructure as a Service
+    AWS
+
+----
+
+##Surmmary
+1. Stuff we have covered so far has been much more about breadth than depth
+1. Key issues: a small number of companies jockeying to be IaaS/PaaS providers
+1. A much large number of SaaS providers are enabled by that IaaS/PaaS
+1. There is more than one type of cloud computing
+    E.g. “cloudbursting” from private cloud to public cloud.
+1. The future is uncertain
+
+****
+
+#Lecture 5
+
+##Very Informal Summary of ZIP algorithm
+For sellers, you have a thing to sell and a limit price L (don’t go below L) The price you ask, P, is L plus some (profit) margin M (i.e.: P=(1.0+M)L )
+
+So, ZIP is adaptive – adjusts behaviour according to other traders’ actions
+
+----
+
+##Todd Kaplan’s “Lurking Sniper” Trader
+A surprisingly robust and effective trader algorithm entered into an early trading-agent contest, which outperformed all the competition including more complex trading algorithms that used explicit optimizing principles, statistically based predictions of future transaction prices, or learning algorithms.
+
+1. Kaplan Snipers don’t adapt to market activity
+1. They are unable to infer the market’s P0; so they will snipe any deal, however far from equilibrium
+1. They free-ride on the goodwill of other traders; and so are not much good when confronted with lots of copies of themselves
+
+----
+
+##Gjerstad-Dickhaut GD traders
+
+A relatively sophisticated algorithm that computes a belief function using data for recent market activity: calculates the belief function from history H of n recent trades
+
+Chooses a quote-price that maximizes the trader’s expected gain: simple product of utility gain (i.e. expected profit) from trade at that price and probability of acceptance at that price
+
+----
+
+##Modified GD
+
+----
+
+
+
+****
+
+#Lecture 6 Economic Agents and Market-Based Systems III
+
+##ZIP & MGD better than humans, actually
+
+Both ZIP and MGD beat humans
+HP's ZIP did at least as well as IBM's MGD traders
+
+----
+
+##The innovator's Dilemma
+
+1. Your technology, mature improving well over time
+1. Improvement required by your mainstream market
+1. New technology appears: margins &/+ performance worse than yours,&/+ smaller market.  But may be lighter /cheaper/more - compact? 
+
+After a period of development, New technology now serves market needs, eats your lunch
+
+----
+
+****
+
+#Lecture 9&10 Economics of the Internet
+
+##“Technology changes, economic laws do not”
+
+Digital goods and the internet have substantially changed the business landscape.As a result, the underlying economic ‘forces’ manifest in new ways
+
+*But the underlying forces have not fundamentally changed.*
+
+----
+
+##Combinatorial Innovation
+A technology whose rich set of components can be combined and recombined to create new products/ services
+
+1. Demand: Social inertia to new ways of doing things are overcome. Customers get used to it
+1. Supply: Innovators ‘play’ with a set of components and come up with new ways of using them.
+1. Development of components, interchangeable parts, ‘standardisation’
+
+----
+
+##Why so fast
+
+Combinatorial innovation is not new, *But this time it is a lot quicker*
+
+Primarily because of ease of access to innovators:
+1. Cheap to get the kit you need, and to train up.
+1. Innovations are rapidly distributed globally.
+1. Increasingly, innovations are ‘open source’ or easy to reverse engineer. HTML is a prime example
+
+‘open source software is the primordial soup for combinatorial innovation.’
+
+----
+
+##Online economic activity
+
+1. Digital goods
+1. Information goods
+1. Online purchasing of physical goods and moving the B2B supply chain online
+1. Online provision of services
+
+----
+
+##Differences between physical and digital technology….
+
+1. Digital goods are costly to produce, but cheap to reproduce. Fixed costs (upfront, capital) are high, but Variable costs (additional cost per sale) are low.
+1. Most of the production costs are sunk – they can’t be recovered. (Unlike, e.g., a factory)
+There are no capacity constraints limiting the number of
+times something can be reproduced. (Unlike, eg a
+newspaper)
+1. There are no capacity constraints limiting the number of times something can be reproduced. (Unlike, eg a newspaper)
+1. Digital goods are often **experience goods** – a customer doesn’t know their value without actually using them
+1. **Positive Network Externalities** (‘the network effect’) are often very strong. The value to you increases as other people also use it.
+1. Searching is easy and information is easy to come by, so search costs for a consumer are very low.
+
+----
+
+##Effect on competition
+
+If two companies are competing with identical digital products, as their variable costs are near-zero, competition will drive the price down to zero.
+
+So for commodity digital goods, there will be a tendency to monopoly and/or zero pricing.
+
+Companies must therefore focus on product differentiation, or competing for emerging future monopolies.
+
+----
+
+##Disintermediation
+
+This was predicted because the cost of reaching customers directly online would be dramatically less. But as the cost of ‘reaching’ decreased, the cost of getting peoples attention increased
+
+So instead a new kind of intermediary emerged – the online marketplace. (EBay/Amazon)
+1. A single site to access and trade with many sellers.
+1. 1. Mechanisms to help assess trustworthiness.
+
+----
+
+##Price Discrimination
+
+Price discrimination is when a seller finds ways to charge different buyers different prices, depending on their willingness to pay.
+
+1. 1st degree price discrimination: personalising prices. Very difficult in physical world; a lot easier online.
+    Priceline
+1. 2nd degree price discrimination: Offering different product ‘versions’ at different price points.
+    1. Try before you buy
+    1. Free version with cut-down functionality
+    1. Free delayed information
+    Particulary useful for 'experience goods'
+    Free versions are also very important for building 'the network effect'
+1. 3rd degree price discrimination: Offering different prices to different groups of customers. Eg Student discount
+
+The risk of versioning is that people willing to pay for the higher price version will go for the lower price one.
+
+----
+
+##Personalisation
+
+Personalisation of product is versioning taken to the extreme, and moves it to almost 1 st degree price discrimination.
+
+Allowing the customer to construct their own most-valuable version.
+
+----
+
+##Economics of Bundling and Unbundling
+
+‘Bundling’ is the selling of a number of products/services together at a given price.
+
+- Like versioning, it can be used to sell more to customers who would otherwise not purchase.
+- It reduces ‘dispersion of willingness to pay’
+
+----
+
+##Digital Bundling/Unbundling
+
+Because digital goods have very low variable costs bundling is cheap to perform.
+
+But because no physical substrate is needed online, there is less commercial pressure to bundle: newspapers, CDs can ‘unbundle’.
+
+This can reduce profit overall, and also can *introduce competition for parts of the bundle*.
+
+----
+
+##Unbundling of News
+
+• In an ‘unbundled world’
+1. News cannot be cross-subsidized by the other parts.
+1. Raw news is a commodity, and so competition drives price to zero
+
+----
+
+##Economics of ‘The Network Effect’
+
+If two parties trade, and it has an effect on others who had no say in the trade, it is known as an externality
+
+- A negative externality imposes costs on others – such as pollution
+- A positive externality provides benefit to others – such as fire safety measures in the home.
+
+----
+
+##*Network externalities*
+
+A network externality is a particular kind of externality
+
+It occurs when the act of buying a product or service confers indirect cost or value on all those who already have bought the product or service
+
+----
+
+##'The Network Effect'
+
+Positive network externalities are more common and extreme in an online world
+
+----
+
+##Network Effect Demand Curve
+1. ‘Penetration Pricing’
+    Early adopters will have a low valuation, so need to charge them less to build the network
+    The nature of digital goods/services gives new ways of doing this….
+        1. The Use of Free Versions to build network
+1. ....
+1. 
+
+----
+
+##Freemium 
+The ‘Freemium’ business model is to offer different versions at different prices, including a free one
+
+The providers of the free service, of course, want you to upg
+
+This can be simply because you get used to the service and like it
+
+----
+
+##Switching Costs and Lock-In
+
+Switching from one product/service to another similar one can have additional costs – the switching costs.
+
+Switching costs in the digital world are very common and often great
+
+When switching costs are very high, buyers are said to be ‘locked in’ to one provider.
+
+----
+
+##Sources of switching costs in the digital domain
+1. Training how to use the system:
+1. The Network Effect
+1. Setup costs
+1. Reduced service quality due to loss of information
+
+----
+
+##Digital Monopolies
+
+Where both network effect and lock-in is great, we would expect to see monopolies emerging. Where it is less so, competition is easier
+
+----
+
+##Breaking into a Network
+
+Proprietary formats are a powerful means of enforcing monopoly over a network of users
+
+In 2007, OpenOffice reverse-engineered this format allowing OpenOffice to compete.
+
+----
+
+##Opening up a network through standard
+
+Adopting industry-wide standards allows a user network to be shared between providers:
+1. Adopting industry-wide standards allows a user network to be shared between providers:
+1. But also the ‘network effect’ of competitor’s users give value to your users.
+1. And the value of the overall network increases to potential new users, bringing more customers overall. 
+
+Trade off – The pie becomes bigger, but your slice may become smaller. 
+
+----
+
+##Economics of Standards
+1. Standards Leader : One player, often the major player, sets the standard by opening up their proprietary format.
+1. Standards War: Two or more players compete to determine which standard is adopted.
+1. Standards Negotiation: Two or more players negotiate a standard collectively.
+
+----
+
+##Standards Leader
+
+A Standards leader opens up a proprietary format with the aim of increasing the size of the overall network of users.
+
+1. Exploit leadership position to produce the best products in competition with others.
+1. Produce proprietary value-added products and services which build on this standard.
+
+----
+
+##Standards War
+
+Competing parties already have too much invested in each to allow negotiation. Hence battle in the marketplace.
+
+Usually not good for either sellers or buyers…
+
+- Penetration pricing to build market share.
+- Alliances with those selling complementary products: eg The DVD forum bringing electronics and film together.
+- ‘Expectations management’: customers want to buy the winner, so declare victory early. Eg 2 rival modem formats each claimed 80% market share…
+
+----
+
+##standards Negotiation
+
+More common nowadays as players talk early. Less of a commercial risk than a standards war.
+
+But still different players want to have an upper hand in the new market that is opened up.
+
+Hence parties are likely to continue researching their proprietary formats as a fall-back and bargaining chip
+
+----
+
+##Summary
+
+- Internet technology has developed rapidly due to ‘combinatorial innovation’.
+- Low variable costs, combined with high fixed costs, force prices down in competition, leading to monopolies or zeropriced goods/services
+- The ‘network effect’ and ‘lock-in’ further contributes to this.  Means of getting to a critical mass in the network is essential.
+- Standardisation can help with this; this plays out in different ways depending on the strength and interests of the parties involved.
+- Commodity competition driving zero pricing means new business models are necessary online.
+
+****
+
+##Lecture 11 Economics of the Internet (1II) Auctions and Online Advertising
+
+Commodity competition driving zero pricing means new business models are necessary online.
+
+Near-zero variable costs of digital goods means price is driven to zero by competition…
+
+How can organisations make money in this world?
+1. Differentiate based on quality, and charge…
+1. Sell complementary goods
+
+----
+
+##Sell complementary goods
+
+Two goods are complementary if they each increase the value of the other
+
+A digital good can be offered free, and a complementary good sold alongside it.
+- Red Hat Linux selling support contracts alongside free opensource software.
+
+Affiliate with providers of complementary goods, and revenue share on sales.
+
+----
+
+##Advertise
+
+Advertising is more valuable the more one knows about the recipient – background, context, intentions
+
+----
+
+##Online vs Offline advertising
+
+Traditional advertising is valued based on an estimate of the number of people viewing the advert (TV, magazine…)
+
+Online, this can be accurately measured:
+1. Cost per impression: Charged whenever an advert is displayed to a viewer.
+1. Cost per click: Charged whenever an advert is clicked to access the advertisers page.
+1. Cost per lead: Charged whenever a site passes an interested customer’s details on to an advertiser.
+
+----
+
+1. Online advertising has a far more sophisticated market for matching advertisers with advertising opportunities. This is significantly automated, and in the case of Google, uses an auction market mechanism.
+1. Content providers devolve the selling of advertising space to specialist advertising platforms (particularly Google’s AdSense)
+
+----
+
+##Google AdSense
+Service that allows content providers to specify areas of their site to be for advertising, and this to be dynamically filled by Google.
+
+Advert placement can be determined partly by page content, and partly by explicitly entered information about the site
+
+Selection of adverts is determined by the Google Advert auction system, with potential advertisers bidding for placement based on keyword and demographic information
+
+----
+
+##Social Networks and Adverts
+
+‘Earned’ vs ‘Paid’ media
+
+----
+
+##Search Advertising
+
+Varian estimated a ‘good click-through rate’ to be 3% of viewers, with a 3% of clickers actually making a purchase.  Hence fewer than 1 in 1000 of viewers make the purchase.
+
+But this is still significantly better than traditional advertising.
+
+Hence Google wants to maximise: `(price per click) * (number of clicks)`
+
+They do this by using the Google Ad Auction
+
+----
+
+##Auctions
+
+Auctions provide a mechanism to allow buyers and sellers to meet and trade.
+
+- English auction: Bidders continue bidding until no-one wants to raise their bid. Highest bid wins.
+- Dutch auction: Auctioneer lowers offer until a buyer accepts.  They pay that price.
+- Sealed bid auction: All bidders enter bids to auctioneer, and the highest bid wins. In a first price auction, they pay the price they bid. In a second price (Vickrey)  auction, they pay the second-highest price
+
+----
+
+##Incentive Compatibility
+
+An auction is said to be incentive compatible if it encourages bidders to bid their true value of the good to be purchased
+
+> An English auction is incentive compatible
+> A Dutch auction is no
+> Similarly, a first-price sealed bid auction is not incentive compatible
+> A Vickrey (second-price) sealed bid auction is incentive compatible:
+
+----
+
+##Equivalence of Vickrey and English auctions
+
+If you have a private value for the good, then English and
+Vickrey are almost equivalent:
+
+----
+
+##Auctions Online
+
+Mainly B2C and C2C, but also some B2B
+
+Near-monopoly as an auction provider: Amazon tried to break in and failed.
+
+Note that *because of the network effect and lock-in*, auction provision is a market that tends towards monopoly…
+
+----
+
+##Ebay auctions
+
+This can lead to a rush of last minute bidding, with people attempting to ‘snipe’ the deal
+
+Solutions:
+1. Extend the deadline whenever a bid is placed. This turns it into a ‘proper’ English auction. Amazon auctions did this
+1. Get everyone to use a sniper. This is effectively what eBay provide, in the form of the automated bidding functionality.
+
+----
+
+##B2B Reverse Auction
+
+A ‘reverse auction’ has suppliers bidding to meet a contract.
+
+Often suppliers must be ‘qualified’ before being allowed to participate
+
+A more formalised version of ‘Request for Quotes’, which also encourages explicit competition between the quoters
+
+----
+
+##The Google Ad Auction
+
+The largest number of auctions in the world by far – an auction per search + per display ad page…. Billions per week.
+
+Google assigns them based on: `Bid Price * ‘Quality’`, where Quality is dependent on three factors:
+- Historic click through rate for the ad
+- Relevancy
+- Landing page quality and load speed
+
+----
+
+##Quality
+
+The quality score aims to do two things:
+1. Estimate the likely probability of click-through for this particular display
+1. Ensure that people who do click through are not disappointed, thus reducing their chance of clicking through on completely different searches in the future.
+
+----
+
+##Google Ad Auction: Sealed bid second price
+
+They want the auction ‘incentive compatible’ to reduce monitoring overheads.
+
+http://www.youtube.com/watch?v=a8qQXLby4PY
+
+----
+
+##'Quality'
+
+To a first order approximation, quality q is an estimate of ‘probability of being clicked’.
+
+When a bidder bids a price, p, Google is not interested in this. It considers the bid to be (p*q) and uses this to determine the outcome of the auction.
+
+But the bidder doesn’t pay this.
+– The bid below them was (p’*q’) say. This is the ‘second price’ in the auction.
+– If the winning bidder is clicked, they pay (p’*q’)/q.
+– This is the price the bidder below bid, times the ratio of probabilities of being clicked
+
+----
+
+##Estimating ‘probability of being clicked’
+
+The probability of being clicked is dependent on two things: ad quality, and also ad placement on the page.
+
+It has done this by randomly allocating adverts to different positions to estimate the position-specific effect.
+
+----
+
+##The effect of competition
+
+As the price set depends on the bids of those under you, competition is important for Google. An oversold auction makes significantly more than an undersold one
+
+----
+
+##Summary
+
+- Business models when price is driven to zero.
+- On-page, social media and search-based advertising.
+- Charge models for online advertising.
+- The 4 kinds of auctions.
+- Revenue equivalence.
+- The Google Ad Auction and how it works.
+
+****
+
+#Lecture 12 Peer to Peer Networks
+
+##Definition
+Elements share their resources in order to provide the service the system has been designed to provide. the service the system has been designed to provide. The elements in the system both provide services to other elements and request services from other elements. 
+
+- Nodes act as suppliers as well consumers of resources
+- Resources are processing and storage capacity
+- Distributed network nodes enter/leave network at random
+
+Efficient use of distributed resources, self-organized and adaptive
+
+- Fault tolerant and resistance to attack/censorship
+- Scalability
+- Load balanced
+
+----
+
+##Taxonomy
+
+1. Ustructured/Mesh
+    - New nodes connect to any other node
+    - No knowledge about structure
+    - Join: Out of Band or Proximity
+1. Sturctured
+    - Connectivity or Discovery per specific topology implemented by a protocol
+    - Join: Register or other Bootstrap
+
+----
+
+##Four Key issues for P2P systems
+
+1. Join
+1. Publish
+1. Search
+1. Fetch
+
+----
+
+##Napster
+
+- Launched P2P
+- Centralized index
+- Advantages:
+    - Highly efficient data lookup
+    - Rapidly adapts to chages in network
+- Disadvantage
+    - Questionable scalability
+    - Vulnerable to censorship, failure, attack
+
+----
+
+##Gnutella
+- Unstructured
+- Using simple flooding
+- Advantages
+    - Entirely decentralized, pure P2P network
+    - Highly resistant to failure
+- Disadvantage
+    - Search is time-consuming
+    - Network typically scales poorly
+
+----
+
+##Kazza
+
+- Semi-structured
+- Tries to take into account node heterogeneity, i.e.  bandwidth and host computational resources and availability
+
+----
+
+##BitTorrent
+
+- Semi-structured
+- Trackers coordinate peer interaction
+- Central tracker server
+- Advantages
+    - Given peers incentive to share resource; avoids freeloaders
+- Disadvantages
+    - Central tracker server needed to bootstrap swarm
+
+----
+
+##P2P Performance Criteria
+1. Avaiability
+1. Download time
+1. Robustness
+1. Scalability
+1. Server cost
+
+----
+
+##Performance of Tracker BitTorrent
+
+- Clients identify peers via track
+- Each tracker createds a mini-overlay network
+- Two Phases in Client Life Cycle
+    - File Transfer phase
+    - Sharing Phase
+- Altruistic peers have longer sharing phase
+
+----
+
+##BitTorrent Incentive system
+- To deter Free-Riders
+
+----
+
+##Fluid model
+
+- Investigate
+    - Scalability
+    - Stability
+    - Throughput
+
+– x(t) = average number of leechers at time t
+– y(t) = average number of non-permanent seeds at time t
+
+----
+
+##Assumptions
+
+- Steady arrival with rate λ
+- Leecher upload efficiency 
+
+----
+
+##Modelling Energy Consumption of On Demand Video P2P Networks
+
+- Energy consumption proportional to time required to-  upload data
+- Since peer is downloading from another peer, peer energy consumption is proportional to peer upload bandwidth
+
+----
+
+##Energy consumption for C_D
+
+E_p2p=P_p2p • t
+t= B/C_D
+P_p2p = P_PC(1+n)
+
+----
+
+##ISP Perspective: Locality of P2P and Inter-ISP traffic
+
+- P2P reduces content provider cost
+- Increases ISP cost
+    Paying for Inter-ISP transit traffic
+
+Solutions:
+- Locality Peer Policies
+- Caching
+
+----
+
+##Application of DHT - Trackerless BitTorrent
+
+2nd version of BitTorrent
+Hash Function is SHA1, Each file segment is hashed, nodes have ID's from the same space
+
+----
+
+##Excursion: Distributed Hash Tables
+
+Hash Table: Data structure mapping keys to values
+
+The key locates the value in a bucket
+- Ranged Hash uses Buckets
+- Balanced Hash assigns equally
+- Distributed Hash Table: Locate buckets across nodes of the network
+    - Partition key space accross nodes
+    - Locate resource based on key partition algorithm
+
+----
+
+##Central DHT
+Central Authority partitions key space
+
+----
+
+##Decentralised Hashing
+
+Regular caches distribute hashes evenly across buckets, as a function of n
+
+Solution in Consistent Hashing:
+
+----
+
+##Chord
+
+Uses SHA1 Hash, 160bit (m) Number of keys = 2160
+Use Consistent Hashing for key distribution
+Nodes and Data draw from hash space:
+- A peer’s identifier is chosen by hashing the peer’s IP address, while a key identifier is produced by hashing the data key
+- probability of keys hashing to the same identifier
+
+----
+
+##DHT: Consistent Hashing
+
+----
+
+
+##Spotify
+
+client-server model
+
+clients discover peers through tracker
+
+###Spotify Protocol
+
+Client-Server connection always kept(TCP)
+Additional P2P entwork
+
+###Spotify Peer Discovery
+1. Central tracker
+1. Flooding Neighborhood
+
+****
+
+#Lecture 13. Online Games, Virtual Economics & Gold Farming
+
+##Virtual Game Economics
+
+- WoW has a very vibrant internal economy
+- Different servers have identical starting conditions but different economies (PvP/PvE)
+- Complex system driven by the players and environment
+- In-game virtual economies have many of the same issues as real economies (though no taxation!) 
+- For a persistent world to maintain a stable economy, a balance must be struck between currency sources and sinks
+- Virtual crime is also a problem in some (PvP) games
+- The „membrane‟ between real and virtual worlds is permeable
+
+----
+
+##Gold Farming
+
+EQ‟s GDP per Capita higher than many real-world countries
+
+In such countries, it makes sense to „work‟ in a virtual world
+
+The distinction between real and virtual becomes more blurred 
+
+Like any industry, Gold Farming is becoming increasingly automated
+
+----
+
+##Online AI & the Turing Test
+
+„Bots‟ are illegal and hated by players, but are increasingly common, despite the „Warden‟!
+
+----
+
+##Gold Farming Economics
+
+What do Gold Farmers do?
+- Selling in-game currency
+- Selling in-game items (BoE/BoP)
+- Power-levelling
+
+Gold Farming shows classic capitalist development
+- Subsistence  Barter  Monetisation
+- Wage Labour Globalisation/Offshoring Automation
+
+----
+
+##Future of Gold Farming
+
+1. Games companies fight back
+    1. Game company strategy has gone from “Ignore It” to “Fight It”
+    1. Other strategies “Permit It”, “Host It”, “Become It”
+    1. Reporting, Banning, Disruption, Nerfing, Patches, Abuse, Attacks
+    1. 1. Devaluation
+1. Gold Farming survives
+    1. Revenue Adjustment
+    1. Disintermediation
+    1. Diversification
+    1. Increased Productivity
+    1. Increased Automation
+
+----
+
+##Diablo III’s Real-Money Auctions
+
+- Fastest selling PC game ever 
+- Players could buy and sell items in the in-game auction house for real money or in-game gold
+- Blizzard take $1 fee for equipment sales and 15% fee for commodity auctions
+- They admitted that the existence of RMAHs “really hurt” Diablo III, “undermining” gameplay and “short-circuiting” the game
+
+----
+
+##GTA V’s Stock Market
+
+Two Stock Exchanges – LCN & BAWSAQ
+1. LCN is purely affected by what the player does in single-player story mode
+1. BAWSAQ prices are affected by the actions of the GTA V online community
+
+----
+
+##The Corrupted Blood Plague
+
+The spell, intended to last only seconds and function only within the new area of Zul‟Gurub, soon spread across the virtual world
+
+A pandemic ensued that quickly killed lower-level characters and was carried by higher-level ones, drastically changing normal game play, as players did what they could to avoid infection
+
+----
+
+##Summary
+- Many interesting, complex phenomena in virtual worlds which are well worth studying
+- Online games in particular provide a rich vein of complex economic behaviour
+- MMO gaming is HUGE
+- MMOs, Gold Farming and Social Networks are all rapidly developing areas for economics research avi
+
+****
+
+#Lecture 14. Social Games, Monetisation & Gamification
+
+##Social & Casual Games Defined
+
+1. Casual games
+    - Normally have less complex control and gameplay
+    - Are played for entertainment & relaxation
+    - Can be played in short sessions – ten minutes or less
+1. Social games
+    - Players want to compete, collaborate, socialize, & connect through chat and other forms of online communication
+    - However, the gameplay interactivity between players is often limited and asynchronous
+    - Social games are **not multiplayer games** in the usual sense
+
+----
+
+##FarmVille
+
+It is a Social Casual game
+
+A true cultural phenomena
+
+----
+
+##Monetisation & Virtual Goods
+
+„Monetisation‟ is the process of converting into money
+
+FarmVille uses a dual-currency model – this is very common in Social Casual games:
+1. FarmVille Gold is earned during normal play ingame 
+1. FarmVille Cash can usually only be gained in return for real-world money
+
+Many premium items or features can only be bought for FarmVille Cash
+
+----
+
+##Freemium
+
+The Freemium model is used extensively in Social Casual games
+
+You can play the basic game for free, forever
+
+However, the length of game play sessions are effectively capped, and many features limited
+
+Paying players will gain many benefits
+
+----
+
+##Virality
+
+- Much of FarmVille‟s success is due to Virality
+- You are encouraged to invite FB friends
+- FarmVille friends can be set as neighbours
+- Sending a FarmVille „gift‟ to a friend costs nothing but drives virality
+
+----
+
+##7 Ways Games Reward the Brain*
+
+1. Experience bars measuring progress – one overall profile bar progressing in tiny increments
+2. Multiple long and short term aims – choose and do in parallel lots of different tasks
+3. Reward effort – every time you do something you get credit.  Credit for trying, never punish failure
+4. Rapid, frequent, clear feedback – Hard for people to learn if they can‟t link consequences to action
+5. Element of Uncertainty – a known reward excites people, but what really gets them going is the unknown reward
+6. Windows of enhanced attention (hmm...)
+7. Other people – comparison, competition & collaboration
+
+----
+
+##The Rise of Zynga
+
+Formed in 2007 – Social Network (Facebook) Games
+
+Driven by virality, responsiveness and advertising
+
+Permanently free-to-play, with microtransactions for premium content and accelerated development
+
+----
+
+##Zynga Playbook, Metrics & Mining
+
+Zynga‟s „playbook‟ is legendary in the industry
+It lists all the ingredients that go into their social games to make them succesful
+Zynga use *extensive data mining* and constantly analyse – and react to – player metrics
+
+Games are becoming “a service, not a product”
+
+----
+
+##Zynga & Scamville
+
+Lead-gen: Generation of prospective consumer interest in a business' products or services
+
+CPA (cost per action) & CPL (cost per lead)
+
+Ecosystem: Lead-gen  Revenue  Advertising  Users
+
+Zynga removed CPA offers after FishVillesuspension
+
+----
+
+##The Fall of Zynga ?
+
+35 previous unsuccessful titles (Roxio had 50+ before Angry Birds)
+
+Zynga bought OMGPOP as it peaked - Draw Somethingnow <5m MAU
+
+*Zynga too reliant on FB* and changes in FB have hit Zynga‟s viral model
+
+Zynga‟s „Playbook‟ has gotten old, FB is no longer a novelty & FB players expect more from their games
+
+----
+
+##Other Social & Casual Games
+
+Bejeweled series has had 500+m downloads
+
+Bejeweled Blitz is the Social Casual version
+
+----
+
+##Microsoft Points & Live Marketplace
+
+Locked the player in to virtual currency
+
+These could be used to buy games but also to buy virtual goods – e.g. avatar clothing and items
+
+They allow for customisation and comparison with friends
+
+A couple of months ago, Microsoft replaced MS points with real cash…
+
+----
+
+##Microsoft Xbox Achievements
+
+Picked up by Sony (PS3), Steam (PC) & WoW
+
+Have become ubiquitous across entire industry
+
+1. Greatly add to game longevity as forces player to
+1. experiment and explore the game space
+1. Allow players to compare against friends
+1. Collection aspect, and more fun than just a score
+1. But also does give a total „score‟ across all games
+
+----
+
+##iPhone Apps & the Rise of Freemium
+
+Apps on iPhone & Android have destroyed the conventional handheld market
+
+76% of iPhone app revenue comes from in-app purchases (IAP); 77% of the top-grossing iPhone games are „Free‟
+
+„Freemium‟ model is used increasingly in mainstream titles
+
+Bad for game design as developers optimize for monetization rather than the quality of gameplay
+
+----
+
+##Candy Crush Saga
+
+By far the No. 1 game on Facebook, iOS & Google Play
+
+----
+
+##The Fall of Freemium
+
+Many freemium games are low quality
+Users can get „nickel-and-dimed to death‟
+There is an (often correct) perception that freemium games are „pay-to-win‟ – richer players have an unfair advantage
+IAP and advertising can be very intrusive
+
+----
+
+##The Gamification of Everything
+
+The gameplay mechanisms we‟ve explored today (visable goals, comparative status, collection, completion, improvement, achievement and reward) are all powerful drivers of behaviour
+
+Because of this they have been adopted by many non-game industries
+
+1. Location-based
+1. Charities
+1. Fitness
+1. Training
+1. Eduction
+1. Professional
+1. Financial Services
+1. Product Promotion
+
+----
+
+##The Fall of Gamification ?
+
+Badge Fatigue – just slapping some on some badges doesn‟t make a game – if there‟s no real it‟s a motivational dead end
+Gamification techniques deliver interesting and momentary novelty value, but generally have a very short shelf-life
+Behavioural control seems kind of evil – who wants to be manipulated to do what a company wants them to do?
+
+----
+
+##Summary
+
+- Freemium will remain the standard model for Social Casual Games
+- Microtransactions, Virtual Goods and Currency will become increasingly important
+- Games will become services rather than products
+- Game mechanisms will increasingly be used in non game applications as a way of driving behaviour
+
+****
+
+#Lecture 15/16. Social Computing and Sentiment Analysis
+
+The internet has turned computer use from an individual activity to a social activity
+1. Conectivity
+1. Collaboration&Competition
+1. Commuity
+
+----
+
+##Social Media
+
+supporting social network building by encouraging us to make it explicit
+
+----
+
+##Dunbar's number
+
+Social group size of primates is correlated with their
+neocortex size. Dunbar used regression to predict human
+group size to be around 150
+
+----
+
+Dunbar (2010) argues that Facebook does not increase the number of meaningful relationships you can handle.
+
+They found that facebook activity increased bridging social capital: ‘weak ties that provide information and ne
+
+In particular, its use was found to help integrate new students into university life
+
+----
+
+they found perceived ‘social attractiveness’ peaked at 300 friends, and then tailed off.
+
+Though still better to have ‘too many than too few’.
+1. Large number of friends indicates ‘desperation rather than popularity’
+1. Tendency to favour ‘people like me’ (participants had average of 300 friends.)
+
+----
+
+##Crowdsourcing
+
+A crowdsourcing system ‘enlists a crowd of humans to help solve a problem defined by the system owners’.
+
+----
+
+##Recruit and Retain contribututers
+
+1. Pay them
+1. Crowd Source as a side effect of something they want or have to do anyway.
+1. Recruit volunteers
+
+Volunteers need to be motivated:
+- Intrinsic motivation of doing a task that interests them or they believe is worth doing.
+- Fun.
+- Recognition and Virtual reward for contribution.
+- Competition with others
+
+----
+
+##Prediction Markets
+
+Trading of units which pay based on real world events – such as the result of an election
+1. Winner-take-all, paying if something happens, such as a given candidate winning an election.
+1. % payment based on a quantitative outcome such as share of seats or vote.
+
+Trade price is considered a measure of the (believed) probability of a given event by the collective of traders
+
+Money (even small amounts) speaks louder than opinion polls!
+
+----
+
+##Crowdfunding
+
+Pre-commitment of buyers allows money to be raised to fund development
+
+But psychology has an effect too….
+- Sense of ‘being part of’ a project.
+- Charitable action
+
+----
+
+##Social Data Mining
+
+The web, particularly Twitter, provides a lot of real-time information about what is going on in people’s lives.
+
+----
+
+##Sentiment Analysis (aka Opinion Mining)
+
+The web is full of publically broadcast opinions and emotions
+
+– Aggregating more ‘objective’ reviews for a purchaser.
+– Tracking concerns about your product. (Indirect customer
+feedback)
+– Spotting opinions which may impact a stock price
+– Predicting outcomes of elections.
+
+1. Document-Level Sentiment Analysis
+1. Sentence or Phrase Level Sentiment Analysis
+1. Aspect Level Sentiment Analysis
+
+----
+
+##Opinion Spammign
+
+‘Opinion Spamming’ is the act of organisations or individuals to influence this impact;
+
+- Products and services: A study estimated that a 1* increase on
+- Yelp for a restaurant resulted in a 5-9% increase in takings.
+- Corporate reputation
+- Attitudes to policy issues
+- Public discourse: What is and is not in the press
+
+----
+
+##Fake Reviews
+
+Fake reviews common. Yelp estimate they filter out about 25% of posted reviews as being suspected fake
+
+----
+
+##Sock Puppetry
+
+Use of many fake personas by one person/organisation to give a misleading impression of an opinion being held widely and diversely.
+
+----
+
+##Persona Management Software
+
+• Makes management of sock puppets easier.
+
+----
+
+##Opinion Spam Detection
+
+Spotting Opinion Spam is difficult and requires effort.
+
+
+##Sock Puppet Detection
+
+Create a network of links between online personas based on each time they express a similar view in a given discussion chain.
+dentify clusters within this network.
+
+----
+
+##Summary
+
+1. The internet enables a rich diversity of social computing applications to emerge
+1. Our social networks are moving online and becoming explicit.
+1. Crowdsourcing allows many people to contribute to solving a problem – ‘long tail’ of work, or making the solution more accurate
+1. Sentiment Analysis allows mining and aggregation of the many opinions expressed on the internet.
+1. But as opinions can have economic impact, ‘opinion spam’ is now a considerable problem.
+
+****
+
+#Lecutre 17.
+
+##ICT Energy Use
+
+Used a combination of official statistics, sales and market size data, and device power use data.
+
+ICT accounted for 710 TWh of electricity use – about 4% of the worlds total usage.
+
+----
+
+##The Cloud
+
+Servers and Networks are rapidly getting more efficient
+
+So server/network energy use is INCREASING currently
+
+----
+
+##Energy Use has Business Impact
+
+1. Site to reduce this cost; Cheap electricity locations.
+1. Reduce energy use in Data Centres
+1. • Reduce longer term risk: Energy Security
+
+----
+
+##Site to reduce cost
+
+Go to places with cheap electricity supply, and sign a longterm contract.
+
+But this is often not the coolest place – so it can increase cost of cooling datacentres.
+
+----
+
+##Reduce Data Centre Energy Usage
+
+‘Minimal’ servers for the applications
+
+• Separate Hot and Cold Aisles
+
+• Thermal Modelling
+
+• Water-based evaporative cooling. (Sea water in some cases)
+
+----
+
+##Energy Efficient Algorithms
+
+Design of algorithms, particularly when they are used extensively (such as pagerank), affects energy consumption
+
+----
+
+##Manage Longer Term Risk
+
+Energy scarcity, and climate change mitigation, is an opportunity: 
+But need to ensure enough energy to provide these hi-tech services, and protect against price increase
+
+----
+
+##Taming Bandwidth usage
+
+It is VIDEO which dominates bandwidth growth, growth of the internet, and therefore internet energy use.
+
+1. Distributed Content Distribution Network architectures – regional or even local caches. Or Peer-to-Peer
+1. Timeshifting subscription downloads off-peak. 
+1. Avoiding ‘digital waste’. 
+
+----
+
+##Broader Impacts
+
+Direct Impact: The environmental impact of actually using the product or service
+Indirect Impact: The impact of changes in behaviour that use of the technology allows
+
+    Internet as an ‘enabler’ of environmental impact reductions.
+    Home Shopping
+    Working at Home
+
+Systemic impact: The impact of structural changes in society that the technology enables.
+
+    Reorganisation of society.
+    Travelling less often to workplace, but travelling further.
+
+Social Impact of the Internet Economy
+
+    Impact on Employment and Self-Employment
+    Privacy
+    Internet-facilitated Tax Avoidance
+
+----
+
+##Small business
+
+Cost of starting a small business has decreased 
+
+‘Reach’ of a small business has increased.
+
+----
+
+##Internet Facilitated Tax Avoidance
+
+Tax Evasion is illegal non-payment of tax
+
+Tax Avoidance  is exploiting ‘loopholes’ in tax laws to legally reduce tax payments.
+
+1. Transactions can take place away from the country of the actual customer.
+1. It is easier for an organisation to conduct significant business in a state or country while preserving a ‘skeleton staff’ there
+
+----
+
+##Avoiding Sales Tax
+
+In US states, sales tax is payable if a company has a ‘significant presence’ in the state
+
+Washington was chosen as its base due to low population there
+
+----
+
+##More Complex Schemes
+
+Allows corporation tax to be reduced.
+
+Partly enabled by ease of distributed presence that the internet allows
+
+----
+
+##Privacy
+
+Google’s business model is based on it guessing correctly as much about you as it can, and using that to sell stuff to you.
+
+The private sector collects personal data about you primarily to sell you stuff more effectively.
+
+----
+
+##Google and PRISM
+
+Google cooperates with the US government on the PRISM program, allowing access to data on non-US citizens without a warrant.
+
+Leaked documents suggest the US NSA has direct access to the servers, but Google denies this is the case.
+
+----
+
+##Internet and the Press
+
+The established press is challenged by the internet for a number of reasons;
+
+- Disaggregation of news from other offerings makes it hard to subsidise news
+- Online advertising is not as profitable as traditional advertising, and is dominated by Google
+- Challenge from alternative, less formal sources.
+
+This may lead to more diversity but less professionalism and rigour  in news reporting
+
+----
+
+##Can increase transparency of public and private sector organisations and individuals in the public eye
+
+1. State secrecy
+1. Some early deliberations, discussions, negotiations are most effective when hidden from public scrutiny
+1. Violation of personal privacy for entertainment.
+
+****
+
+##Internet and Civil Society
+
+1. It has been argued that the Internet can increase participation in civil society by encouraging participation in debate and discussion
+1. But others have observed that the Internet results in ‘fragmentation of communication into ‘like minded’ groups
+
+----
+
+##Summary
+
+1. Cloud Data Centre consumption driven by algorithms for services; Internet energy consumption driven primarily by media use
+1. Energy use is non-trivial and growing: Companies use strategies to mitigate the impact.
+1. Internet businesses impact employment.
+1. Internet eases trans-national activities, making tax harder to collect.
+1. Internet encourages transparency for us all 
+1. Internet is transforming press and civil society.
+
+****
+
+#Lecture 18. Large Scale Complex IT System
+
+
+****
+
+#Lecture 19.
+
+Standard PC/server security market is significant
+
+These companies make legitimate profits from combating computer crime
+
+----
+
+##Operation Olympic Games
+
+US program of cyber-sabotage
+
+Believed to be USA’s first sustained use of cyber-weapons
+
+Targeting Iran’s nuclear enrichment facilities
+
+----
+
+##HP Virus Throttle
+
+Traditional signature-based approaches are case-by-case and increasingly defeated by polymorphism, cavity-filling (e.g. CIH), and memory-residency
+
+Make network nodes “socially responsible”
+
+Monitor self activity; if suddenly making many more connections than normal,
+throttle back and alert operator – this throttles the virus
+
+----
+
+##How might the throttle be defeated?
+
+It limits the rate of fast-spreading viruses, which is great
+
+Signature-based approaches for immunization are still very valuable
+
+With a bit of cunning, it may be possible to come up with a way around throttling
+
+----
+
+##Software Vulnerabilities
+
+A vulnerability is a ‘Weakness in an information system, system security procedures, internal controls or implementation that could be exploited or triggered by a threat source’ 
+
+Knowledge of a vulnerability is necessary both to produce an exploit, and to produce a patch.
+
+If the patch is produced before the exploit, then π is negative.
+
+----
+
+##Is it always good to release a patch?
+
+Releasing a patch also makes public the existence of an exploit.
+
+So if a SW company releases a patch, it needs to be confident that the patch will spread quickly.
+
+----
+
+##Vulnerability Disclosure
+
+Security companies and consultants would spot vulnerabilities and disclose them publically 
+
+They argued that this would force SW companies to improve security and release patches
+
+----
+
+##The Vulnerabilities Market
+
+Software vulnerabilities have a cost to find – time, expertise.
+
+Software vulnerabilities have a value
+
+    - ‘Black Hat’ hackers can gain direct economic benefit.
+    - SW companies can make their SW more secure.
+    - Security agencies can conduct surveillance and cyber-warfare.
+
+----
+
+##‘Security for the 1%....’
+
+‘Ethical’ sellers sell only to ‘NATO-approved governments’
+
+
+These pay more than the original SW company
+
+The SW therefore remains vulnerable: Security researchers that would formerly have disclosed information do not.
+
+Hence it leads to less secure SW, with government agencies holding the levers….
+
+even ‘ethical’ sellers may be fooled into selling to a black hat organisation, due to the use of ‘middlemen’.
+
+----
+
+##summary
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+----
+
+
+
+
+
+
+
+
+
+
+
+****
+
+#Revision session
+
+Very similar to previous exam
+
+4 question 20 points each
+
+chose the best 3 question
+
+Chanllenging
+
+not same materials, not exam twice
+
+lecture 4, 5 is excluded
+
+lecture 6's required reading, talk about deve in finance marketing
+face to fce
+telec
+auto
+is examable
+
+read it all
+
+histo pap, covered in lecture
+Jan pap 1.A is about lecture 6
+Jan pap 1.B is about lecture 18
+Jan pap 1.C is about your opinion, as independ adult
+
+
+
+will be change next year
+
+planning to release some note with more words other than pictures
+
+lecture 7, 8is excluded 
+
+very first lecture, 
+
+past paper, question 1 always C.Perez
+
+but C.Perez may be overexamed, but emphasized this year
+
+is not to
+
+Cloud computing will be examed in general paper
+
+question will not be repeated, but maybe same topic
+
+use general paper to practice
+
+answer should be readable
+
+do not be panic
+
+NO, u dont want us to pass! Admit it pls!
+
+lecture 9, 10, 11 big chank
+
+rough question like past question 
+
+lecture 17, 18 
+
+advantage of UOB is lecturer is leading the area
+
+final lecture 19, 
+
+previous paper, particular emphasize on lecture 19
+
+but in Jan, it is excluded
+
+Jan paper is clearly/likely come up again
+
+essay-style is not recommended dont 
+
+involve diagram
+
+scanable web
+
+bring pencil, robber, keep pencil sharp
+
+drawing is useful!
+
+lecture note
+
+no question about author's name
+
+10 point may be answered with two or three phra
+
+no trick question
+
+plan before you read
+
+dont rush in, stay calm
+
+marking done by monday
+
+text Dave if he doesnt notice
+
+PASS PASS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,40 @@
+
+#Introduction
+
+##Course Goals
+
+- Hardware:
+
+    1. Computer architectures
+    1. Interconnects
+    1. Storage
+
+- Software
+
+    1. Scaling to massive systems
+    1. Optimisation & Debugging
+
+- Trends
+
+##HPC at the University of Bristol
+
+Intel has chosen to invest in the University of Bristol to establish its first "Inter Parallel Computing Center (IPCC" in the UK
+
+1. High Performance Computing is enabling fundamental breakthroughs in science, engineering and medicine that will increasingly affect every person on the planet
+1. HPC has now broken out of its high-end niche and has gone mainstream 
+1. All processors becoming both  highly paralleland  heterogeneous! 
+
+****
+
+#Introduction to programming for HPC
+
+##Lesson #1: Algorithms Matter!
+##Lesson #2: Never Guess
+
+    > "We should forget about small efficiencies, say about 97% of the time: premature optimization is the root of all evil. Yet we should not pass up our opportunities in that critical 3%. A good programmer will not be lulled into complacency by such reasoning, he will be wise to look carefully at the critical code; but only after that code has been identified" ¡ª Donald Knuth
+
+##Lesson #3: Memory Hierarchies are Key
+
+
+
+

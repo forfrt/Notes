@@ -1,0 +1,36 @@
+
+#GCC
+
+##简介
+通常所说的GCC是GUN Compiler Collection的简称  
+
+##程序的编译过程
+1. 预处理
+
+    预处理阶段，输入的通常为C语言源文件*.c，它们通常带有包含*.h的包含文件。这阶段通常用来处理`#define`,`#typedef`,`include`命令，会生成*.i中间文件
+    `gcc -E test.c test.i`
+
+1. 编译
+
+    输入的是中间文件*.i，编译形成的汇编文件*.s
+    `gcc -S test.i test.s`
+
+1. 汇编
+
+    将输入的汇编语言文件*.s转换为机器语言文件*.o
+    `gcc -c test.s test.o`
+
+1. 连接
+
+    最后，将输入的机器语言文件*.o与其他机器语言文件和库文件汇集成一个可以执行的二进制代码文件
+    `gcc test.o test`
+
+##常用模式
+* `gcc test.c` 将test.c预处理、汇编、编译并链接形成可执行文件
+* `gcc test.c -o test` 将test.c预处理、汇编、编译并链接形成可执行文件test,-o选项用来指定输出文件的文件名。
+* `gcc test.o -o test` 将编译输出文件test.o链接成最终可执行文件test。
+
+多源文件的编译方法
+* `gcc testfun.c test.c -o test` 将testfun.c和test.c分别编译后链接成test可执行文件。
+* 分别编译各个源文件，之后对编译后输出的目标文件链接: `gcc -c testfun.c`,`gcc -c test.c`,`gcc -o testfun.o test.o -o test`
+

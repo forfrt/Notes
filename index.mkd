@@ -3,59 +3,135 @@
 ##[[Introduce]]
 
 ##Coding
-1. [[LibGDX]]
-1. [[JUnit]]
+
+1. [[AJAX]]
 1. [[Android]]
-1. [[Markdown]]
-1. [[Software Configuration Tool]]
-1. [[Makefile]]
-1. [[Cpp]]
+1. [[Assembly Language]]
+1. [[AWS]]
+1. [[Bash]]
 1. [[Beautiful Codes]]
+1. [[Best Practice]]
+1. [[Bing API]]
+1. [[Cpp]]
+1. [[Comment Style]]
+1. [[Django]]
+1. [[Docker]]
+1. [[Ecryptfs]]
+1. [[GCC]]
+1. [[JUnit]]
+1. [[LibGDX]]
 1. [[truecrypt]]
 1. [[FiST]]
 1. [[Kconfig]]
-1. [[ecryptfs]]
 1. [[FUSE]]
-1. [[Best Practice]]
 1. [[Photoshop]]
-1. [[Comment Style]]
-1. [[AWS]]
 1. [[Python]]
-1. [[C Language]]
+1. [[Regex]]
+1. [[GDB]]
+1. [[BSE(The Bristol Stock Exchange)]]
+1. [[Makefile]]
+1. [[Markdown]]
+1. [[Mercurial]]
+1. [[Multi-precision multiplication]]
+1. [[MongoDB]]
+1. [[Node.js]]
+1. [[Nginx]]
+1. [[PHP]]
+1. [[PHP Sandbox]]
+1. [[PHP_SourceCode]]
+1. [[PHP_Ext]]
+1. [[PostgreSQL]]
+1. [[Socket]]
+1. [[Software Configuration Tool]]
+1. [[STL]]
+1. [[Windows Batch Processing]]
+1. [[Web Shell]]
+1. [[Lua]]
 
 ##Theory
-1. [[Watermaking]]
-1. [[Design Pattern]]
-1. [[File Filter]]
-1. [[Linux]]
-1. [[Linux Shell]]
-1. [[HTTP权威指南]]
-1. [[Japanese]]
-1. [[Modern Cryptography]]
-1. [[Git]]
-1. [[MindMapping]]
-1. [[小鹤双拼]]
+
 1. [[Algorithmic and Economic Aspects of the Internet]]
 1. [[Advanced Computer Architecture]]
-1. [[Cloud Computing]]
 1. [[BigTable]]
+1. [[Cloud Computing]]
+1. [[Coding]]
+1. [[Computer Network]]
+1. [[Design Pattern]]
+1. [[English]]
+1. [[File Filter]]
 1. [[GFS]]
+1. [[Git]]
+1. [[GRE]]
+1. [[Hack]]
+1. [[High Profermance Computing]]
+1. [[LaTeX]]
+1. [[Linux]]
+1. [[Linux Shell]]
+1. [[Japanese]]
+1. [[Microservice]]
+1. [[Modern Cryptography]]
+1. [[MindMapping]]
+1. [[System Security]]
+1. [[Watermaking]]
+1. [[小鹤双拼]]
+1. [[Artificial Intelligence]]
+1. [[SLAM]]
 
 ##Books
-1. [[Linux网络编程]]
+
+1. [[Linux Network Programming]]
 1. [[密歇根州公开课_平面设计]]
 1. [[みんなの日本語]]
+1. [[HTTP权威指南]]
 
 ##Articles
-1. 
+
+1. [[Webhsell威胁情报分析]]
+1. [[Webshell文件名]]
+1. [[Webshell路径]]
+1. [[A SANDBOX-BASED APPROACH TO THE DEOBFUSCATION AND DISSECTION OF PHP-BASED MALWARE]]
+1. [[CVE-2015-4852_breenmachine]]
+
+##Work
+
+1. [[日常]]
+1. [[问题]]
+1. [[补丁]]
+1. [[Password]]
 
 ##Course
 
+1. [[Programming Mobile Applications for Android Handheld Systems Part 1]]
+1. [[Machine Learning by Stanford University]]
 
 ##Tools Hotkeys
+
 1. [[eclipse]]
 1. [[vim]]
 1. [[sourceInsight]]
 1. [[apvlv]]
 
-2014-02-22 08:48 PM
+##Presentation
+
+1. [[CLOUD]]
+
+##Translation
+
+1. [[Re-thinking security to detect active data breaches]]
+1. [[OpenSSH Information-leak vulnerability (CVE-2016-0777)]]
+1. [[10 social engineering exploits your users should be aware of]]
+
+# Product
+
+1. [[Ossec]]
+1. [[Ossim]]
+1. [[vArmour]]
+1. [[青藤云安全]]
+
+# Sources
+
+1. [Tinyhttpd](Tinyhttpd)
+
+# Exercise
+
+1. [English](English)

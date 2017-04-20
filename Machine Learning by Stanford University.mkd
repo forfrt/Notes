@@ -1,0 +1,85 @@
+#机器学习 - 机械工业出版社
+
+##一些学科和它们对机器学习的影响
+
+1. 人工智能
+1. 贝叶斯方法
+1. 计算复杂性理论
+1. 控制论
+1. 信息论
+1. 哲学
+1. 心理学和神经生物学
+1. 统计学
+
+##学习问题的标准描述
+
+> 定义: 对于莫楼任务T和性能度量P, 如果一个计算机程序在T上以P衡量的性能随着经验E而自我完善, 那么我们称这个计算机程序在从经验E中学习.
+
+机器人驾驶学习文件:
+- 任务T: 通过视觉传感器在四车道高速公路上驾驶
+- 性能标准P: 平均无差错行驶里程(差错由人监督裁定)
+- 训练经验E: 注释人类驾驶时录制的一系列图像和驾驶指令
+
+##设计一个学习系统
+
+###选择训练经验
+
+1. 训练经验能否为系统的决策提供直接或间接的反馈
+1. 学习期可以在多大程度上控制训练样例序列
+1. 训练样例的分布能多好地表示实例分布
+
+西洋跳棋学习问题:
+- 任务T: 下西洋跳棋
+- 性能标准P: 世界锦标赛上击败对手的百分比
+- 训练经验E: 和自己进行对弈
+
+为了完成这个学习系统的设计, 现在需要选择:
+1. 要学习的只是的确切类型
+1. 对于真的目标只是的表示
+1. 一种学习机制
+
+###选择目标函数
+
+为了学习从合法走子中做出选择, 很明显, 要学习的信息类型就是一个程序或函数, 它对任何给定的棋局能选出最好的走法: 
+1. ChooseMove:B->M 来表示这个函数以合法棋局集合中的棋盘状态作为输入, 并从合法走子集合中产生某个走子作为输出
+    > 此目标函数是非常困难的, 提供给系统的是间接训练经验
+
+1. 另一个可供选择的目标函数是一个评估函数, V:B\to \Re来表示V吧任何合法的棋局映射到某一个实数值.
+    需要发现一个可操作的定义V, 能够被西洋跳棋程序用来在合理的时间内评估棋局并选择走法
+    通常要完美地学习一个这样的V的**可操作形式**是非常困难的, 我们仅仅希望学习算法得到**近似**的目标函数, 由于这个原因, 学习目标函数的过程常被称为**函数逼近**.
+
+###选择目标函数的表示
+
+1. x1 棋盘上黑子的数量
+1. x2 棋盘上红字的数量
+1. x3 棋盘上黑王的数量
+1. x4 棋盘上红王的数量
+1. x5 被红子威胁的黑子的数量
+1. x6 被黑子威胁的红子的数量
+\hat(V) (b)=\omega_0+\omega_1 x_1+\omega_2 x_2+\omega_3 x_3+\omega4 x_4+\omega_5 x_5+\omega_6 x_6
+
+###选择函数逼近算法
+
+为了学习目标函数\hat(V), 需要一系列
+
+
+##
+
+#[Machine Learning by Stanford](https://www.coursera.org/learn/machine-learning/home/welcome)
+##Supervised Learning
+
+in supervised learning, in every example in our data set, we are told what is the "correct answer" that we would have quite liked the algorithms have predicted on that example.
+
+1. regression problem:
+
+    the goal is to predict a continuous valued output.
+1. classification problem:
+
+    the goal is to predict a discrete value output.
+
+----
+
+##Unsupervised Learning
+
+
+

@@ -1,0 +1,550 @@
+
+#Introduction
+
+OSSEC是一款开源的基于主机的入侵检测系统，可以简称为HIDS。它具备日志分析，文件完整性检查，策略监控，rootkit检测，实时报警以及联动响应等功能。它支持多种操作系统：Linux、Windows、MacOS、Solaris、HP-UX、AIX。属于企业安全之利器。
+
+1. Watching
+
+    OSSEC watches it all, actively monitoring all aspects of Unix system activity with file integrity monitoring, log monitoring, rootcheck, and process monitoring
+
+1. Alerting
+
+    When attacks happen OSSEC lets you know through alert logs and email alerts sent to you and your IT staff so you can take quick actions
+
+1. Everwhere
+
+    Got a variety of operating systems to support and protect? OSSEC has you covered with comprehensive host based intrusion detection across multiple platforms including Linux,Solaris, AIX, HP-UX, BSD, Windows, Mac and VMware ESX. 
+
+----
+
+#Trusted By Security Vendors And IT Departments
+
+1. Atomicorp
+
+    Atomicorp is the producer of Atomic Secured Linux™ which provides the *most secure Linux kernel* on the market that **combines OSSEC host intrusion detection, a threat manager that hardens both your web applications and the operating system, and a self healing system that automatically fixes problems as they occur, from crashed processes on your server, to problems with your database, to even basic system errors.** Atomicorp provides comprehensive support deployment assistance and post-sale support for OSSEC. 
+
+1. Wazuh
+
+    Wazuh offers *deployment and support* for OSSEC HIDS and AlienVault USM™ security services. Wazuh identifies performance and configuration issues affecting your deployed solution. This process involves OSSEC, server and agent components, analysis of configurations and communications, as well as an overall system health-check. If you are an organization that requires commercial support of your OSSEC deployment, Wazuh is the company for you. 
+
+1. AlienVault
+
+    The AlienVault Unified Security Management™ (USM) platform provides five essential security capabilities in a single console, giving you everything you need to manage both compliance and threats. Understanding the sensitive nature of IT environments, we include active, passive and host-based technologies so that you can match the requirements of your particular environment. AlienVault USM uses OSSEC Host Intrusion Detection as one of its foundation technologies. 
+
+****
+
+#Getting started with OSSEC
+
+OSSEC is a platform to monitor and control your systems. It mixes together all the aspects of HIDS (host-based intrusion detection), log monitoring, and Security Incident Management (SIM)/Security Information and Event Management (SIEM) together in a simple, powerful, and open source solution.
+
+Key Benefits:
+1. Compliance Requirements
+1. Multi platform
+1. Real-time and Configurable Alerts
+1. Integration with current infrastructure
+1. Centralized management
+1. Agent and agentless monitoring
+
+Key Features:
+1. File Integrity checking
+1. Log Monistoring
+1. Rootkit detection
+1. Active response
+
+----
+
+OSSEC consists of the following sub-parts:
+
+    Main Application: the central manager for monitoring and receiving information from agents, syslog, databases and even agentless devices. It also stores the file integrity database and the log and event files. It must be installed on Linux, Solaris, BSD, or MacOS – no Windows support is available.
+
+    OSSEC Agent: small programs installed on the nodes to be monitored. In a server-agent setup it collects and sends real-time information to the OSSEC server about the state of the node on which it’s installed. There is also a special Windows agent that runs only in the server-agent mode.
+
+    Web Interface: the GUI for managing tasks and monitoring functions. Unfortunately, OSSEC's well-developed GUI does work on Windows platforms.
+
+****
+
+#Folder Tree
+
+- By default installed at /var/ossec
+- Main configuration file at /var/ossec/etc/ossec.conf
+- Decoders stored at /var/ossec/etc/decoders.xml
+- Binaries at /var/ossec/bin/
+- All rules at /var/ossec/rules/*.xml
+- Alerts are stored at /var/ossec/logs/alerts.log
+- Composed of multiple processes (all controlled by ossec-control)
+
+****
+
+#Bins
+
+- agent-auth
+
+    The agent-auth program is the client application used with **ossec-authd to automatically add agents** to an OSSEC manager.
+
+- agent-control
+
+    The agent_control tool allows you to query and get information from any agent you have configured on your server and it also allows you to restart (run now) the syscheck/rootcheck scan on any agent.
+
+- clear_stats
+
+    Clear the events stats
+
+- list_agents
+
+    OSSEC HIDS list_agents: **List available agents**. list_agents is only available on OSSEC servers or local mode installations.
+
+    - list of all OSSEC agents that successfully connected to the server in the past
+    - list of all OSSEC agents currently connected to the server
+    - list of all OSSEC agents that were connected to the server in the past but are currently not connected.
+
+    > If an agent was added via the manage_agents tool but has not yet been connected to the server, it will not show up in the output of list_agents.
+
+- manage_agents
+
+    manage_agents is available in two versions:
+    1. version for OSSEC server installations
+    1. version for OSSEC agent installations
+
+    The purpose of manage_agents is to provide an easy-to-use interface to handle authentication keys for OSSEC agents. These authentication keys are required for secure (encrypted and authenticated) communication between the OSSEC server and its affiliated agent instances.
+
+- ossec-agentd
+
+    ossec-agentd is **the client side daemon that communicates with the server**. It runs as ossec and is chrooted to /var/ossec by default.
+
+- ossec-agentlessd
+- ossec-analysisd 
+
+    **recveives the log messages and compares them to the rules**. It will create alerts when a log message matches an applicable rule.
+
+- ossec-authd
+
+    The ossec-authd daemon will **automatically add an agent to an OSSEC manager and provide the key to the agent**. The agent-auth application is the client application used with ossec-authd. ossec-authd will create an agent with an ip address of any instead of using its actual IP.
+
+- ossec-control
+
+    ossec-control is a script to start, stop, configure, or check on the status of OSSEC processes. ossc-control can enable or disable client-syslog, database logging, agentless configurations, and debug mode.
+
+- ossec-csyslogd
+
+    ossec-csyslogd is a daemon that **forwards the OSSEC alerts via syslog**. Configuration is done in the <syslog_output> section of the ossec.conf.
+
+- ossec-dbd
+
+    The ossec-dbd daemon inserts the alert logs into a database, either postgresql or mysql. ossec-dbd is configured in ossec.conf.
+
+1. ossec-execd
+
+    ossec-execd **executes active responses** by running the configured scripts. ossec-execd is configured in the ossec.conf. 
+
+1. ossec-logcollector
+
+    The ossec-logcollector daemon monitors configured files and commands for new log messages.
+
+1. ossec-logtest
+
+    ossec-logtest is the single most useful tool when working with ossec. This tool allows oneself to **test and verify log files** in the exact same way that ossec-anaylistd does.
+    
+    Something ossec-logtest can help with:
+    1. Writing rules (Debugging your custom rules)
+    1. Troubleshooting false positives or false negatives
+    
+1. ossec-maild
+
+    The ossec-maild daemon **sends OSSEC alerts via email**. ossec-maild is started by ossec-control. Configuration for ossec-maild is handled in the ossec.conf.  
+
+1. ossec-makelists
+
+    The ossec-makelists utility to **compile cdb databases**. ossec-makelists will scan ossec.conf for database files, check the mtime, and recompile all out of date databases.
+
+1. ossec-monitord
+
+    The ossec-monitord daemon **monitors agent connectivity and compress daily log files**. ossec-monitord is configured in ossec.conf. 
+
+1. ossec-regex
+
+    `ossec-regex` is a simple program that will **validate a regex expression**. The pattern should be enclosed in single quotes to help prevent any strange interactions with the shell.
+
+1. ossec-remoted
+
+    ossec-remoted is the **server side daemon that communicates with the agents**. It can listen to port 1514/udp (for OSSEC communications) and/or 514 (for syslog). It runs as ossecr and is chrooted to /var/ossec by default. ossec-remoted is configured in the <remote> section of ossec.conf.
+
+1. ossec-reportd
+
+    ossec-reportd is a program to **create reports from OSSEC alerts**. ossec-reportd accepts alerts on stdin, and outputs a report on stderr.
+
+1. ossec-syscheckd 
+
+    The ossec-syscheckd daemon **checks configured files for changes to the checksums, permissions or ownership**. ossec-syscheckd is started by ossec-control. Configuration for ossec-syscheckd is handled in the ossec.conf.
+
+1. rootcheck_control
+
+    The rootcheck_control tool allows you to **manage the policy monitoring and system auditing database that is stored on the server (manager) side**. You can list anomalies detected by the rootcheck functionality, categorized into resolved and outstanding issues.
+
+1. syscheck_control
+
+    syscheck_control provides an interface for **managing and viewing the integrity checking database**.
+
+1. syscheck_update
+
+#Internal process
+
+ossec-control manages the start and stop of all of them
+
+
+- Analysisd – on chroot as user ossec
+
+    Does all the analysis ( main process )
+
+- Remoted – on chroot as user ossecr
+
+    Receives remote logs from agents
+
+- Maild – on chroot as user ossecm
+
+    Sends e-mail alerts
+
+- Logcollector – as root, but only reads the logs, no analysis
+
+    Reads log files ( syslog, Flat files, Windows event log, IIS, etc )
+
+- Agentd – on chroot as user ossec (agent only)
+
+    Forwards logs to the server
+
+- Execd
+
+    Executes the active response
+
+- Monistord
+
+    Monitors agent status, compresses, and signs log files, etc
+
+****
+
+#OSSEC Architecture 
+
+OSSEC is composed of multiple pieces. It has a central manager for monitoring and receiving information from agents, syslog, databases, and from agentless devices.
+
+1. Manager (or Server)
+
+    The manager is the central piece of the OSSEC deployment. It stores the file integrity checking databases, the logs, events, and system auditing entries. All the rules, decoders, and major configuration options are stored centrally in the manager; making it easy to administer even a large number of agents.
+
+1. Agents
+
+    The agent is a small program, or collection of programs, installed on the systems to be monitored. The agent will collect information and forward it to the manager for analysis and correlation. Some information is collected in real time, others periodically. It has a very small memory and CPU footprint by default, not affecting the system’s usage.
+    Agent security: It runs with a low privilege user (generally created during the installation) and inside a chroot jail isolated from the system. Most of the agent configuration can be pushed from the manager.
+
+1. Agentless
+
+    For systems that an agent cannot be installed on, the agentless support may allow integrity checks to be performed. Agentless scans can be used to monitor firewalls, routers, and even Unix systems.
+
+1. Virtualization/VMware
+
+    OSSEC allows you to install the agent on the guest operating systems. It may also be installed inside some versions of VMWare ESX, but this may cause support issues. With the agent installed inside VMware ESX you can get alerts about when a VM guest is being installed, removed, started, etc. It also monitors logins, logouts and errors inside the ESX server. In addition to that, OSSEC performs the Center for Internet Security (CIS) checks for VMware, alerting if there is any insecure configuration option enabled or any other issue.
+
+1. Firewalls, switches and routers
+
+    OSSEC can receive and analyze syslog events from a large variety of firewalls, switches and routers. It supports all Cisco routers, Cisco PIX, Cisco FWSM, Cisco ASA, Juniper Routers, Netscreen firewall, Checkpoint and many others.
+
+----
+
+##Architecture
+
+This diagram shows the central manager receiving events from the agents and system logs from remote devices. When something is detected, active responses can be executed and the admin is notified.
+
+![ossec_arch.jpg](./img/OSSEC/ossec_arch.jpg)
+
+****
+
+#Installation
+
+https://bintray.com/artifact/download/ossec/ossec-hids/ossec-hids-2.8.3.tar.gz
+
+tar -vxzf ossec-hids-2.8.3.tar.gz
+cd ossec-hids-*
+./install.sh
+/var/ossec/bin/ossec-control start
+/var/ossec/bin/manage_agents
+
+
+****
+
+#Managing Agents
+
+##manage_agents on the OSSEC server
+
+The server version of manage_agents provides an interface to:
+
+1. add an OSSEC agent to the OSSEC server
+
+    > If this is the first agent added to this server, the server’s OSSEC processes should be restarted using /var/ossec/bin/ossec-control restart.
+
+1. extract the key for an agent already added to the OSSEC server
+
+    > The key is encoded in the string (shortened for this example) MDAyIGFnZW50MSAxOTIuMTY4LjIuMC8yNCBlNmY3N2RiMTdmMTJjZGRmZjg5YzA4ZDk5Mm and includes information about the agent. This string can be added to the agent through the agent version of manage_agents.
+
+1. remove an agent from the OSSEC server
+
+    > manage_agents then invalidates the agent information in /var/ossec/etc/client.keys. Only the values for ID and the key are kept to avoid conflicts when adding agents. The deleted agent can no longer communicate with the OSSEC server.
+
+1. list all agents already added to the OSSEC server.
+
+Running manage_agents and start screen
+    \# /var/ossec/bin/manage_agents
+
+##manage_agents on OSSEC agents
+
+****
+
+#Agent systems behind NAT or with DHCP
+
+##DHCP
+To add an agent that can receive any IP address in the 192.168.2.0/24 network, just provide the IP address of the agent as 192.168.2.0/24.
+
+##NAT 
+The same applies to systems behind a NAT device. The OSSEC server will see all agents behind the NAT as if they have the same IP address.
+
+For example, you have systems 192.168.1.2, 192.168.1.3 and 192.168.1.4 behind a nat server that connects to network 10.1.1.0/24 with the ossec server on it.
+
+In this case, you need to config the agents as if their IP was 10.1.1.0/24, because this is the IP that the server is seeing (not their original IP). Using any instead of an IP address or range is also a valid option, allowing the agent to connect from any IP address.
+On the manage_agents tool, add each one of those agents on the server using the following format:
+
+    Please provide the following:
+    * A name for the new agent: agent-1
+    * The IP Address of the new agent: 10.1.1.0/24
+
+    Please provide the following:
+    * A name for the new agent: agent-2
+    * The IP Address of the new agent: any
+
+****
+
+#Adding an agent with ossec-authd
+
+****
+
+#Log monitoring/analysis
+
+Log Analysis (or log inspection) is done inside OSSEC by the **logcollector and analysisd processes**. The first one collects the events and the second one analyzes (decodes, filters and classifies) them.
+
+It is done in **real time**, so as soon as an event is written OSSEC will process them. OSSEC can read events from internal log files, from the Windows event log and also receive them directly via remote syslog (一种用在互联网协定 ( TCP/IP ) 的网络中传递纪录档讯息的标准.
+
+Inside OSSEC we call log analysis a LIDS, or log-based intrusion detection. The goal is to detect attacks, misuse or system errors using the logs.
+
+LIDS - Log-based intrusion detection or security log analysis are the processes or techniques used to detect attacks on a specific network, system or application *using logs as the primary source of information*. It is also very useful to detect software misuse, policy violations and other forms of inappropriate activities.
+
+LIDS is also used to detect computer misuse, policy violations and other forms of inappropriate activities.
+
+----
+
+##File Monitoring
+
+OSSEC has a process named ossec-logcollector that monitors the configured log files for new events. When new log messages arrive, it forwards them to other processes for analysis or transport to an OSSEC server.
+
+##Process Monitoring
+
+[Process Monitoring](http://ossec.github.io/docs/manual/monitoring/process-monitoring.html)
+
+We love logs. Inside OSSEC we treat everything as if it is a log and parse it appropriately with our rules. However, some information is not available in log files but we still want to monitor it. To solve that gap, we added the ability to **monitor the output of commands** via OSSEC, and **treat the output of those commands just like they were log files**.
+
+    <localfile>
+        <log_format>command</log_format>
+        <command>df -h</command>
+    </localfile>
+
+----
+
+##Log flow
+
+![Log flow](./img/OSSEC/Log flow.jpg)
+![Log flow ( server/agent )](./img/OSSEC/Log flow agent&server.jpg)
+
+Generic log analysis flow breakdown (for ossec local)
+- Log collecting is done by ossec-logcollector
+- Analysis and decoding are done by ossec-analysisd
+- Alerting is done by ossec-maild
+- Active responses are done by ossec-execd
+
+###Network communication 
+
+![Network communication](./img/OSSEC/Network communication.jpg)
+
+Agent/Server network communication
+- Compressed (zlib)
+- Encrypted using pre-shared keys with blowfish
+- By default uses UDP port 1 51 4
+- Multi-platform (Windows, Solaris, Linux, etc)
+
+----
+
+###Internal Log Flow
+
+![Internal Log Flow](./img/OSSEC/Internal Log Flow.jpg)
+
+Log flow inside analysisd
+- Pre-decoding (extracts known fields, like time, etc)
+- Decoding (using user-defined expressions)
+- Signatures (using user-defined rules)
+
+----
+
+##Observing the ossec log files
+
+To watch alert logs, open a separate terminal and enter the following command:
+
+    tail -f /var/ossec/logs/alerts/alerts.log
+
+To watch OSSEC logs, open another terminal and enter the following command:
+
+    tail -f /var/ossec/logs/ossec.log
+
+
+----
+
+##Sending alerts via syslog
+[Sending alerts via syslog](http://ossec-docs.readthedocs.org/en/latest/manual/output/syslog-output.html#configuration-options)
+
+通过在ossec.conf中配置, 我们可以实现将OSSEC警报发给其他syslog服务.
+
+****
+
+#Syscheck
+
+Syscheck is the name of the integrity checking process inside OSSEC. It runs periodically to check **if any configured file (or registry entry on Windows) has changed**.
+
+##Reasons
+
+    There are multiple types of attacks and many attack vectors, but there is one thing unique about all of them: they leave traces and always change the system in some way. From viruses that modify a few files, to kernel-level rootkits that alters the kernel, there is always some change in the integrity of the system.
+
+    Integrity checking is an essential part of intrusion detection, that detects changes in the integrity of the system. OSSEC does that by looking for **changes in the MD5/SHA1 checksums of the key files** in the system and on the Windows registry.
+
+    The way it works is that the agent scans the system every few hours (user defined) and send all the checksums to the server. The server stores the checksums and look for modifications on them. An alert is sent if anything changes.
+
+****
+
+#Rootcheck / Syscheck Reference
+
+The rootcheck (rootkit detection engine) will be executed every X minutes (user specified - by default every 2 hours) to detect any possible rootkit installed.
+
+##Checks that rootcheck performs
+1. Read the rootkit_files.txt which contains a **database of rootkits and files commonly used by them**. It will try to stats, fopen and opendir each specified file. We use all these system calls because some kernel-level rootkits hide files from some system calls. The more system calls we try, the better the detection. This method is more like an anti-virus rule that needs to be updated constantly. The chances of false-positives are small, but false negatives can be produced by modifying the rootkits.
+1. Read the rootkit_trojans.txt which contains a database of **signatures of files trojaned by rootkits**. This technique of modifying binaries with trojaned versions was commonly used by most of the popular rootkits available. This detection method **will not find any kernel level rootkit or any unknown rootkit**.
+1. **Scan the /dev directory looking for anomalies**. The /dev should only have device files and the Makedev script. A lot of rootkits use the /dev to hide files. This technique **can detect even non-public rootkits**.
+4. **Scan the whole filesystem looking for unusual files and permission problems**. **Files owned by root, with write permission to others are very dangerous, and the rootkit detection will look for them**. Suid files, hidden directories and files will also be inspected.
+1. **Look for the presence of hidden processes**. We use getsid() and kill() to check if any pid is being used or not. If the pid is being used, but “ps” can’t see it, it is the indication of kernel-level rootkit or a trojaned version of “ps”. We also verify that the output of kill and getsid are the same.
+1. **Look for the presence of hidden ports.** We use bind() to check every tcp and udp port on the system. If we can’t bind to the port (it’s being used), but netstat does not show it, we probably have a rootkit installed
+1. Scan all interfaces on the system and look for the ones with **“promisc” mode enabled**. If the interface is in promiscuous mode, the output of “ifconfig” should show that. If not, we probably have a rootkit installed.
+
+##Beastkit Rootkit
+
+Analysis of a rootkit found on a RedHat 7.2 System in 01/2002. The rootkit setup script includes the line “#Beastkit 7.0 - X-Org edition”. Due to this fact, we call the rootkit “Beastkit 7.0” in this document. The compromise was done through an crc32 compensation attack against SSH-1.5-1.2.27.
+
+http://ossec.github.io/docs/rootcheck/rootcheck-beastkit.html
+
+###Detecting Beastkit
+
+
+http://ossec.github.io/docs/rootcheck/analysis-knack.html#analysis-knack
+
+
+****
+
+#Agentless Monitoring
+
+
+
+****
+
+#Comparision
+
+##With Tripwire
+
+Tripwire Open Source only runs on Linux and *nix systems-- there is *no Windows support*, although (no surprise) it’s available in the commercial enterprise version. The open source version of course has less features than enterprise, though it’s thankfully not as bare-bones as typical freemium offerings. What the open source version lacks most greatly are enterprise features such as the aforementioned multi-platform support, centralized control and reporting, a master-agent configuration mode, advanced automation features and professional corporate support-- albeit, this last option is offered by parent company Tripwire Inc.
+
+Tripwire Open Source agents monitor Linux systems to *detect and report any unauthorized changes to files and directories*. It first creates a baseline of all files in an encrypted file (encryption protects it from malware tampering) then *monitors the files for changes, including permissions, internal file changes, and timestamp details*. Cryptographic hashes are employed to detect changes in a file without storing its entire contents in the database. While useful for detecting intrusions after they’ve occurred, Tripwire Open Source can also serve many other purposes, such as *integrity assurance, change management and policy compliance*. 
+
+One of Tripwire Open Source’s major shortcomings is that it *does not generate real-time alerts upon intrusion detection* – the details are only saved in a log file for later perusal. And it also *cannot detect any intrusions already in the system prior to installation*. It’s thus advisable to install Tripwire Open Source immediately after OS installation.
+
+![Comparison to tripwire](./img/OSSEC/Comparison to tripwire.jpg)
+
+----
+
+##Own Drawbacks
+
+
+Transitioning to newer versions of the platform can be difficult, as *any previously defined rules are overwritten by default values upon upgrading*. This means that existing rules must be exported and re-imported after the upgrade, with no telling what may occur while the system is temporarily using default rules. *Miscoordination with pre-shared keys can also be problematic*-- OSSEC’s client and server communicate via a Blowfish-encrypted channel, and occasionally-- *key sharing is initiated prior to the creation of said channel*, which can make for a frustrating experience.
+
+****
+
+#WUI
+
+##OSSEC-WUI
+
+****
+
+****
+
+#Experiments
+
+##Detecting USB Stroage in real-time
+
+1. Add the following in /var/ossec/rules/local_rules.xml and save:
+
+    <rule id="111112" level="12">
+        <if_sid>5100</if_sid>
+        <match>scsi</match>
+        <regex>Direct-Access</regex>
+        <description>New USB FOUND</description>
+    </rule>
+
+2. Restart OSSEC using the following command
+
+    /var/ossec/bin/ossec-control restart
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Question
+1. Agentless原理, 四种模式
+
+    expect调用脚本进行执行
+1. execd触发
+
+    
+1. 文件完整性检查的周期, 触发条件
+
+    有周期, 默认22小时
+    inotify可以改为实时
+1. 日志传递方式: secure具体含义
+
+1. rootkit
+
+    unfinished
+
+1. baseline
+
+
+
+
+
+
+
+

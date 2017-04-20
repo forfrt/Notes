@@ -1,4 +1,95 @@
+
+
+
+##Formally Proving Properties
+
+1. To show a positive property we need to give a proof of security or reduction. For symmetric modes of operation this goes slightly beyond this course, but we can give intuition.
+1. To show a negative property we need to give an attack within the appropriate game rules. Usually easier and this is part of the course!
+
+#Definition
+
+##Definition (Mallea bility)
+A scheme is malleable if given a ciphertext C containing a message M it is
+possible to compute a valid ciphertext on a message related to M without
+needing to know M.
+
+##Definition (Homomorphic)
+A scheme is homomorphic if given ciphertexts c1 of m1 and c2 of m2 it is
+possible to create ciphertext c3 of m1 · m2.
+
+#Theorem
+
+a ∈ ZN has a unique inverse modulo N iffa and N are relatively prime, i.e.
+gcd(a, N) = 1.
+
+#Exercise
+
+##IND-CPA must be probabilistic(for both symmetric and public key)
+
+Because the adversary possesses the public encryption key in the above game, a semantically secure encryption scheme must by definition be probabilistic, possessing a component of randomness; if this were not the case, the adversary could simply **compute the deterministic encryption of m_0 and m_1 and compare these encryptions with the returned ciphertext c** to successfully guess the oracle's choice.
+
+##Malleable schemes cannot be OW-CCA or IND-CCA secure
+
+as the adversary can query the decryption oracle on the mauled ciphertext and learn the challenge plaintext
+
+##A completely random permutation is not IND-CPA and IND-CCA
+Cause it is deterministic
+
+##ECB Mode is not IND-PASS
+We can create an adversary which wins this game for ECB mo de, irrespective of the underlying blo ck cipher, in the following way
+
+1. Select two distinct message blocks b1 and b2.
+1. Set m0 = b1 | b2.
+1. Set m1 = b2 | b2.
+1. Output m0 and m1.
+1. Receive the challenge ciphertext c* .
+1. This will be a two block message, for which we denote the blocks by c1 and c2.
+1. If c1 = c2 output 1 otherwise output 0
+
+##ECB Mode is not OW-CCA
+
+1. Assume m is a two block message.
+1. So c* = c1 | c2
+1. Compute using the oracle m1 = OD(c1)
+1. Compute using the oracle m2 = OD(c2)
+1. Output m 0 = m1 | m2.
+
+##ECB Mode is OW-PASS and OW-CPA
+
+Essentially if Ek is a perfect block cipher then it will act like a random permutation.
+
+In the OW-PASS game we get a ciphertext, and are asked to find the plaintext.
+
+But we have no oracles, so really we have no handle on the problem.
+
+For the OW-CPA game we have an encryption oracle, but assuming the block size n is large enough we cannot enumerate all possible ciphertexts to see which one is correct.
+
+##CBC Mode is IND-CPA
+
+1. Intuitively this follows since the random IV produces a probabilistic scheme.
+1. The IV acts as a one-time-pad *on the initial block*, which is therefore a random block
+1. This is then encrypted, to produce another random value which is one-time-padded with the next block and so on.
+1. The above can be formally proved to pro duce an IND-CPA scheme.
+
+
+
+
+
+
+
 #Introduction
+
+##Seven Pillars of Cryptology
+
+1. Computer Science Basics
+1. Algorithms
+1. Complexity Theory
+1. Algebra/Group Theory
+1. Linear Algebra
+1. Number Theory
+1. (Discrete) Probability Theory
+
+----
 
 ##private-key(or the symmetric-key)
 The same key is used to convert the plaintext into a ciphertext and back.
@@ -24,6 +115,7 @@ That means an encryptography should be designed so as to be secure even if an ad
     1. significantly easier for all parties to use the same algorithm/program, but different keys.
 
 **now**
+
 > not only advocating not relying on secrecy of the algorithms being used, but also demanding that these algorithms be made public.
 
     1. Published designs undergo public scrutiny and are therefore likely to be stronger.
@@ -107,6 +199,82 @@ Without the private key, it is computationally impossible to recover the plain-t
 
 ----
 
+###SIM(simulation-based security definition)
+
+####SIM-CPA
+
+####SIM-CCA
+Real world experiment:
+
+1. In the case of private-key encryption, Alice and Bob share a key k chosen according to the encryption scheme's key generation algorithm \mathsf{KeyGen}. In the case of public-key encryption, Bob generates a public-key/private-key pair, so that the public-key k is made available to both Alice and the adversary.
+1. Repeatedly do:
+
+    1. The adversary Eve arbitrarily interacts with the environment (i.e, to influence its choice of message in the next step), and also sends *ciphertexts* of its choice to Bob. If Bob has not previously received this ciphertext from Alice, he decrypts it (using the shared key or his private key) and sends it to the environment.
+    1. The environment sends a message m to Alice.
+    1. Alice sends *\mathsf{Enc}_k(m)* to Bob, and Eve also receives a copy. Bob decrypts it and sends it to the environment. 
+
+1. The environment outputs a bit (whether Eve caused a particular observable effect on the environment). 
+
+The adversary is said to "succeed" in the experiment if the environment outputs 1. 
+
+----
+
+Ideal world experiment:
+
+1. Repeatedly do:
+
+    1. The adversary Eve arbitrarily interacts with the environment, and also sends *(plaintext)* messages of its choice to Bob. Bob relays these messages to the environment.
+    1. The environment sends a message m to Alice.
+    1. Alice sends the *message m* to Bob through a secure channel. Bob sends it to the environment.
+    1. Eve receives notification that a message was sent through the channel. (Here we assume that the messages come from a finite message space. Otherwise, Eve is notified the length of the message as well.) Eve continues to arbitrarily interact with the environment. 
+
+1. The environment outputs a bit (whether Eve caused a particular observable effect -- same as above -- on the environment). 
+
+The adversary is said to "succeed" in the experiment if the environment outputs 1. 
+
+----
+
+For all real-world adversaries A, there exists an ideal-world adversary A', such that for all environments, the success probabilities in these two experiments differ by a negligible amount (in the scheme's security parameter). 
+
+**SIM-CCA is a stronger definition in secrecy than IND-CCA.**
+
+----
+
+####SIM-onetime
+
+Real world experiment:
+
+1. The adversary Eve arbitrarily interacts with the environment (i.e, to influence its choice of message in the next step).
+1. The environment sends a message m to Alice.
+1. Alice sends an encryption of m to Bob according to the encryption scheme. In particular, they must already share a key, chosen randomly as prescribed in the definition of the encryption scheme.
+1. Eve receives a copy of the ciphertext, and then arbitrarily interacts with the environment (to influence the behavior of the environment).
+1. The environment outputs a bit (whether Eve caused a particular observable effect on the environment). 
+
+The adversary is said to "succeed" in the experiment if the environment outputs 1. 
+
+----
+
+Ideal world experiment:
+
+1. The adversary Eve arbitrarily interacts with the environment.
+1. The environment sends a message m to Alice.
+1. Alice sends the message m to Bob through a secure channel.
+1. Eve does not receive a copy of the ciphertext, but continues to arbitrarily interact with the environment.
+1. The environment outputs a bit (whether Eve caused a particular observable effect -- same as above -- on the environment). 
+
+The adversary is said to "succeed" in the experiment if the environment outputs 1. 
+
+----
+
+For all real-world adversaries A, there exists an ideal-world adversary A', such that for all environments, the success probabilities in these two experiments are the *same*. 
+
+**equivalent to perfect secrecy**
+
+It is convenient to interpret this definition in the following way:
+> for all ways to "do something malicious" in the presence of the encryption scheme (i.e, an adversary A,), there is another way to do the same malicious thing (i.e, the corresponding A'\,) without looking at the ciphertext at all! 
+
+----
+
 One can mix-and-match the goals [ IND,OW ] and attacks [ CPA,CCA1,CCA2 ] in any combination,given rise to six notions of security.
 
     IND-CCA IND-CPA IND-PASS
@@ -116,34 +284,35 @@ One can mix-and-match the goals [ IND,OW ] and attacks [ CPA,CCA1,CCA2 ] in any 
 
 The strongest notion we have seen is *IND-CCA*:
 - All modern ciphers must provably meet this definition of security.
-- Hence encryption must be probabilistic.
+- Hence encryption must be *probabilistic*.
 - Any IND-CCA algorithm must expand the message space into the ciphertext space.
 - Encryption is a one-to-many "function"
 - 
 > Very modern symmetric ciphers often use stronger and more advanced notions than IND-CCA
 
-
-
-
-
-
-
 ****
+
+#Week5
+
+##Blockcipher
+
+
 
 #Some basic knowledge of Modern Cryptology
 
 ##Probability Primer
 
-`A random variable X is a variable which takes certain values with certain probabilities.`
+A random variable X is a variable which takes certain values with certain probabilities.
 
-`The joint probability is defined as p ( X = x ; Y = y) is the probability that X takes the value x and Y takes the value y .`
+The joint probability is defined as p ( X = x ; Y = y) is the probability that X takes the value x and Y takes the value y .
 
-`X and Y are independent iff`
-`p(X = x ; Y = y ) = p(X = x ) * p(Y = y ) for all values of x and y .`
-`X and Y are independent iff p(X = x |Y = y ) = p(X = x )`
+X and Y are independent iff
+
+    p(X = x ; Y = y ) = p(X = x ) * p(Y = y ) for all values of x and y .
+    X and Y are independent iff p(X = x |Y = y ) = p(X = x )
 
 
-`The conditional probability is defined as p(X = x jY = y ) is the probability that X takes the value x given that Y takes the value y .`
+The conditional probability is defined as p(X = x |Y = y ) is the probability that X takes the value x given that Y takes the value y .
 
     p(X = x ; Y = y ) = p(X = x |Y = y ) * p(Y = y )
 
@@ -173,6 +342,25 @@ This cryptosystem provides *perfect secrecy* if and only if every key is used
 with equal probability 1=|K| and, for each m belongs to M and c belongs to C, there is a unique key k such that Enc k(m) = c 
 
 ****
+
+#MAC
+
+1. Encryption provides confidentiality.
+
+    Encryption does not necessarily provide integrity of data !
+
+1. Use cryptographic function to get a check-value and send it with data.
+
+    Message Authentication Codes (MAC).
+
+----
+
+##
+
+
+
+
+
 
 #计算机时代的密码学
 
@@ -322,4 +510,12 @@ F=(((S[1,a]+S[2,b]%0xFFFFFFFF)^S[3,c]+S[4,d])%0xFFFFFF
 
 ###blowfish加密算法性能分析
 
-blowfish设计的基本原理既容易理解又实现简单。与其他算法不同，子密钥的生成都是由加密函数blowfish—encrypt（）完成，每个子密钥都会受到密钥位的影响，这　使得密钥和数据完全混合在一起，对密钥的分析显得十分困难。其中的f函数给fesistel网络一个很好的雪崩效应。
+****
+
+#数学基础
+
+##概率论与信息论
+
+一个任意确定的点的集合,称为概率空间(样本空间)S
+
+任意元素x

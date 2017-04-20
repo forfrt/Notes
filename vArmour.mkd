@@ -1,0 +1,5 @@
+Full deep packet inspection is conducted on all traffi no packet sampling, up to Layer 7 with deep understanding of application context and interactions. With integration into user directories and metadata repositories, organizations can visualize relationships of users and applications for inter-hypervisor and workload-to-workload traff across clouds.  
+
+
+vArmour¡¯s application-aware micro-segmentation can be deployed in three simple steps and in less than 30 minutes without requiring complex network overlays, service-chaining, or deploying of resource-intensive components. Controls are placed next to each workload and are independent of the workload itself.  vArmour DSS offrs the flxibility of providing both zone-based and workload-level segmentation on any underlying infrastructure, so organizations have the freedom to segment workloads in any heterogeneous cloud environment.
+

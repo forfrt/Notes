@@ -1,0 +1,390 @@
+
+#概述
+
+一般来说，GDB主要帮忙你完成下面四个方面的功能：
+
+1. 启动你的程序，可以按照你的自定义的要求随心所欲的运行程序。
+2. 可让被调试的程序在你所指定的调置的断点处停住。（断点可以是条件表达式）
+3. 当程序被停住时，可以检查此时你的程序中所发生的事。
+4. 动态的改变你程序的执行环境。
+
+----
+
+一般来说GDB主要调试的是C/C++的程序。要调试C/C++的程序，首先在编译时，我们必须要把调试信息加到可执行文件中
+`hchen/test> cc -g tst.c -o tst`
+> 如果没有-g，你将看不见程序的函数名、变量名，所代替的全是运行时的内存地址
+
+使用GDB调试：
+1. `hchen/test> gdb <program> <---------- 启动GDB`
+1. `hchen/test> gdb <program> core`
+
+    用gdb同时调试一个运行程序和core文件，core是程序非法执行后core dump后产生的文件。
+
+1. `hchen/test> gdb <program> <PID>`
+
+    如果你的程序是一个服务程序，那么你可以指定这个服务程序运行时的进程ID。gdb会自动attach上去，并调试他。program应该在PATH环境变量中搜索得到。
+
+----
+
+GDB启动时，可以加上一些GDB的启动开关，详细的开关可以用gdb -help查看。我在下面只例举一些比较常用的参数：
+
+    -symbols <file>
+    -s <file>
+    从指定文件中读取符号表。
+
+    -se file
+    从指定文件中读取符号表信息，并把他用在可执行文件中。
+
+    -core <file>
+    -c <file>
+    调试时core dump的core文件。
+
+    -directory <directory>
+    -d <directory>
+    加入一个源文件的搜索路径。默认搜索路径是环境变量中PATH所定义的路径。
+
+----
+
+#命令概述
+
+gdb的命令很多，gdb把之分成许多个种类。help命令只是例出gdb的命令种类，如果要看种类中的命令，可以使用help <class> 命令，如：help breakpoints，查看设置断点的所有命令。也可以直接help <command>来查看命令的帮助。
+
+----
+
+#GDB中运行UNIX的shell程序
+
+在gdb环境中，你可以执行UNIX的shell的命令，使用gdb的shell命令来完成：
+
+`shell <command string>`
+
+调用UNIX的shell来执行<command string>，环境变量SHELL中定义的UNIX的shell将会被用来执行<command string>，如果SHELL没有定义，那就使用UNIX的标准shell：/bin/sh。（在Windows中使用Command.com或cmd.exe）
+
+还有一个gdb命令是make：
+`make <make-args>`
+可以在gdb中执行make命令来重新build自己的程序。这个命令等价于“shell make <make-args>”。 
+
+----
+
+#在GDB中运行程序
+
+当以gdb <program>方式启动gdb后，gdb会在PATH路径和当前目录中搜索<program>的源文件。如要确认gdb是否读到源文件，可使用l或list命令，看看gdb是否能列出源代码。
+
+在gdb中，运行程序使用r或是run命令。程序的运行，你有可能需要设置下面四方面的事。
+
+1. 程序运行参数。
+
+    set args 可指定运行时参数。（如：set args 10 20 30 40 50）
+    show args 命令可以查看设置好的运行参数。
+
+2. 运行环境。
+
+    path <dir> 可设定程序的运行路径。
+    show paths 查看程序的运行路径。
+    set environment varname [=value] 设置环境变量。如：set env USER=hchen
+    show environment [varname] 查看环境变量。
+
+3. 工作目录。
+
+    cd <dir> 相当于shell的cd命令。
+    pwd 显示当前的所在目录。
+
+4. 程序的输入输出。
+
+    info terminal 显示你程序用到的终端的模式。
+    使用重定向控制程序输出。如：run > outfile
+    tty命令可以指写输入输出的终端设备。如：tty /dev/ttyb
+
+----
+
+#调试已运行的程序
+两种方法：
+1. 在UNIX下用ps查看正在运行的程序的PID（进程ID），然后用gdb <program> PID格式挂接正在运行的程序。
+2. 先用gdb <program>关联上源代码，并进行gdb，在gdb中用`attach`命令来挂接进程的PID。并用detach来取消挂接的进程。
+
+----
+
+#暂停/恢复程序运行
+
+调试程序中，暂停程序运行是必须的，GDB可以方便地暂停程序的运行。你可以设置程序的在哪行停住，在什么条件下停住，在收到什么信号时停往等等。以便于你查看运行时的变量，以及运行时的流程。
+
+当进程被gdb停住时，你可以使用info program 来查看程序的是否在运行，进程号，被暂停的原因.如果要恢复程序运行，可以使用c或是continue命令。
+
+----
+
+##设置断点
+
+我们用break命令来设置断点
+
+1. break <function>
+
+    在进入指定函数时停住。C++中可以使用class::function或function(type,type)格式来指定函数名。
+
+1. break <linenum>
+
+    在指定行号停住。
+
+1. break+-offset
+
+    在当前行号的前面或后面的offset行停住。offiset为自然数
+
+1. break filename:linenum
+
+    在源文件filename的linenum行处停住。
+
+1. break filename:function
+
+    在源文件filename的function函数的入口处停住。
+
+1. break *address
+
+    在程序运行的内存地址处停住。
+
+1. break 
+
+    break命令没有参数时，表示在下一条指令处停住。
+
+1. break ... if <condition>
+
+    ...可以是上述的参数，condition表示条件，在条件成立时停住。比如在循环境体中，可以设置break if i=100，表示当i为100时停住程序。
+
+查看断点时，可使用info命令，如下所示：（注：n表示断点号）
+1. info breakpoints [n]
+1. info break [n] 
+
+----
+
+##设置观察点（WatchPoint）
+
+1. watch <expr>
+
+    为表达式（变量）expr设置一个观察点。一量表达式值有变化时，马上停住程序。
+
+1. rwatch <expr>
+
+    当表达式（变量）expr被读时，停住程序。
+
+1. awatch <expr>
+
+    当表达式（变量）的值被读或被写时，停住程序。
+
+1. info watchpoints
+
+        列出当前所设置了的所有观察点
+
+----
+
+##设置捕捉点（CatchPoint）
+
+你可设置捕捉点来补捉程序运行时的一些事件。如：载入共享库（动态链接库）或是C++的异常。设置捕捉点的格式为：
+
+catch <event>
+
+   当event发生时，停住程序。event可以是下面的内容：
+   1. throw 一个C++抛出的异常。（throw为关键字）
+   2. catch 一个C++捕捉到的异常。（catch为关键字）
+   3. exec 调用系统调用exec时。（exec为关键字，目前此功能只在HP-UX下有用）
+   4. fork 调用系统调用fork时。（fork为关键字，目前此功能只在HP-UX下有用）
+   5. vfork 调用系统调用vfork时。（vfork为关键字，目前此功能只在HP-UX下有用）
+   6. load 或 load <libname> 载入共享库（动态链接库）时。（load为关键字，目前此功能只在HP-UX下有用）
+   7. unload 或 unload <libname> 卸载共享库（动态链接库）时。（unload为关键字，目前此功能只在HP-UX下有用）
+
+tcatch <event>
+
+    只设置一次捕捉点，当程序停住以后，应点被自动删除。
+
+----
+
+##维护停止点
+
+上面说了如何设置程序的停止点，GDB中的停止点也就是上述的三类。在GDB中，如果你觉得已定义好的停止点没有用了，你可以使用delete、clear、disable、enable这几个命令来进行维护。
+
+1. clear
+
+    清除所有的已定义的停止点。
+
+1. clear <function>
+1. clear <filename:function>
+
+    清除所有设置在函数上的停止点。
+
+1. clear <linenum>
+1. clear <filename:linenum>
+
+    清除所有设置在指定行上的停止点。
+
+1. delete [breakpoints] [range...]
+
+    删除指定的断点，breakpoints为断点号。如果不指定断点号，则表示删除所有的断点。range 表示断点号的范围（如：3-7）。其简写命令为d。
+
+----
+
+比删除更好的一种方法是disable停止点，disable了的停止点，GDB不会删除，当你还需要时，enable即可，就好像回收站一样。
+
+1. disable [breakpoints] [range...]
+
+    disable所指定的停止点，breakpoints为停止点号。如果什么都不指定，表示disable所有的停止点。简写命令是dis.
+
+1. enable [breakpoints] [range...]
+
+    enable所指定的停止点，breakpoints为停止点号。
+
+1. enable [breakpoints] once range...
+
+    enable所指定的停止点一次，当程序停止后，该停止点马上被GDB自动disable。
+
+1. enable [breakpoints] delete range...
+
+    enable所指定的停止点一次，当程序停止后，该停止点马上被GDB自动删除。
+
+----
+
+##停止条件维护
+
+前面在说到设置断点时，我们提到过可以设置一个条件，当条件成立时，程序自动停止，这是一个非常强大的功能，这里，我想专门说说这个条件的相关维护命令。一般来说，为断点设置一个条件，我们使用if关键词，后面跟其断点条件。并且，条件设置好后，我们可以用condition命令来修改断点的条件。（只有break和watch命令支持if，catch目前暂不支持if）
+
+1. condition <bnum> <expression>
+
+    修改断点号为bnum的停止条件为expression。
+
+1. condition <bnum>
+
+    清除断点号为bnum的停止条件。
+
+
+还有一个比较特殊的维护命令ignore，你可以指定程序运行时，忽略停止条件几次。
+
+1. ignore <bnum> <count>
+
+    表示忽略断点号为bnum的停止条件count次。
+
+----
+
+##为停止点设定运行命令
+
+我们可以使用GDB提供的command命令来设置停止点的运行命令。也就是说，当运行的程序在被停止住时，我们可以让其自动运行一些别的命令，这很有利行自动化调试。对基于GDB的自动化调试是一个强大的支持
+
+    commands [bnum]
+    ... command-list ...
+    end
+
+为断点号bnum指写一个命令列表。当程序被该断点停住时，gdb会依次运行命令列表中的命令
+
+例如：
+
+    break foo if x>0
+    commands
+    printf "x is %d/n",x
+    continue
+    end
+
+断点设置在函数foo中，断点条件是x>0，如果程序被断住后，也就是，一旦x的值在foo函数中大于0，GDB会自动打印出x的值，并继续运行程序。
+
+> 如果你要清除断点上的命令序列，那么只要简单的执行一下commands命令，并直接在打个end就行了。
+
+----
+
+##断点菜单
+
+在C++中，可能会重复出现同一个名字的函数若干次（函数重载），在这种情况下，break <function>不能告诉GDB要停在哪个函数的入口。当然，你可以使用break <function(type)>也就是把函数的参数类型告诉GDB，以指定一个函数。否则的话，GDB会给你列出一个断点菜单供你选择你所需要的断点。你只要输入你菜单列表中的编号就可以了。
+
+----
+
+##恢复程序运行和单步调试
+
+当程序被停住了，你可以用continue命令恢复程序的运行直到程序结束，或下一个断点到来。也可以使用step或next命令单步跟踪程序。
+
+1. continue [ignore-count]
+1. c [ignore-count]
+1. fg [ignore-count]
+
+恢复程序运行，直到程序结束，或是下一个断点到来。ignore-count表示忽略其后的断点次数。continue，c，fg三个命令都是一样的意思。
+
+1. step <count>
+
+    单步跟踪，如果有函数调用，他会进入该函数。进入函数的前提是，此函数被编译有debug信息。很像VC等工具中的step in。后面可以加count也可以不加，不加表示一条条地执行，加表示执行后面的count条指令，然后再停住。
+
+1. next <count>
+
+    同样单步跟踪，如果有函数调用，他不会进入该函数。很像VC等工具中的step over。后面可以加count也可以不加，不加表示一条条地执行，加表示执行后面的count条指令，然后再停住。
+
+1. set step-mode on
+
+    打开step-mode模式，于是，在进行单步跟踪时，程序不会因为没有debug信息而不停住。这个参数有很利于查看机器码。
+
+1. set step-mod off
+
+    关闭step-mode模式。
+
+1. finish
+
+    运行程序，直到当前函数完成返回。并打印函数返回时的堆栈地址和返回值及参数值等信息。
+
+1. until 或 u
+
+    当你厌倦了在一个循环体内单步跟踪时，这个命令可以运行程序直到退出循环体。
+
+1. stepi 或 si/nexti 或 ni
+
+        单步跟踪一条机器指令！一条程序代码有可能由数条机器指令完成，stepi和nexti可以单步执行机器指令。与之一样有相同功能的命令是`display/i $pc` ，当运行完这个命令后，单步跟踪会在打出程序代码的同时打出机器指令（也就是汇编代码）
+
+----
+
+##信号
+
+信号是一种软中断，是一种处理异步事件的方法。一般来说，操作系统都支持许多信号。尤其是UNIX，比较重要应用程序一般都会处理信号。UNIX定义了许多信号，比如SIGINT表示中断字符信号，也就是Ctrl+C的信号，SIGBUS表示硬件故障的信号；SIGCHLD表示子进程状态改变信号；SIGKILL表示终止程序运行的信号，等等。信号量编程是UNIX下非常重要的一种技术。
+
+GDB有能力在你调试程序的时候处理任何一种信号，你可以告诉GDB需要处理哪一种信号。你可以要求GDB收到你所指定的信号时，马上停住正在运行的程序，以供你进行调试。你可以用GDB的handle命令来完成这一功能。
+
+1. handle <signal> <keywords...>
+
+    在GDB中定义一个信号处理。信号<signal>可以以SIG开头或不以SIG开头，可以用定义一个要处理信号的范围（如：SIGIO-SIGKILL，表示处理从SIGIO信号到SIGKILL的信号，其中包括SIGIO，SIGIOT，SIGKILL三个信号），也可以使用关键字all来标明要处理所有的信号。一旦被调试的程序接收到信号，运行程序马上会被GDB停住，以供调试。其<keywords>可以是以下几种关键字的一个或多个。
+    1. nostop
+
+        当被调试的程序收到信号时，GDB不会停住程序的运行，但会打出消息告诉你收到这种信号。
+
+    1. stop
+
+        当被调试的程序收到信号时，GDB会停住你的程序。
+
+    1. print
+
+        当被调试的程序收到信号时，GDB会显示出一条信息。
+
+    1. noprint
+
+        当被调试的程序收到信号时，GDB不会告诉你收到信号的信息。
+
+    1. pass/noignore
+
+        当被调试的程序收到信号时，GDB不处理信号。这表示，GDB会把这个信号交给被调试程序会处理。
+
+    1. nopass/ignore
+
+            当被调试的程序收到信号时，GDB不会让被调试程序来处理这个信号。
+
+
+1. info signals/info handle
+
+    查看有哪些信号在被GDB检测中。
+
+----
+
+##线程
+
+如果你程序是多线程的话，你可以定义你的断点是否在所有的线程上，或是在某个特定的线程。GDB很容易帮你完成这一工作。
+
+1. break <linespec> thread <threadno>
+1. break <linespec> thread <threadno> if ...
+
+    linespec指定了断点设置在的源程序的行号。threadno指定了线程的ID，注意，这个ID是GDB分配的，你可以通过“info threads”命令来查看正在运行程序中的线程信息。如果你不指定thread <threadno>则表示你的断点设在所有线程上面。你还可以为某线程指定断点条件。如：
+        (gdb) break frik.c:13 thread 28 if bartab > lim
+
+当你的程序被GDB停住时，所有的运行线程都会被停住。这方便你你查看运行程序的总体情况。而在你恢复程序运行时，所有的线程也会被恢复运行。那怕是主进程在被单步调试时。
+
+----
+
+#栈
+
+
+
+

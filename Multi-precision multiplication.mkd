@@ -1,0 +1,755 @@
+
+#Essays
+
+##Efficient Arithmetic on ARM_NEON and Its Application for High-Speed RSA Implementation
+
+1. introduce a novel Double Operand Scanning (DOS) method to speed-up multi-precision squaring with non-redundant representations on SIMD architecture.
+1. presented Karatsuba Cascade Operand Scanning (KCOS) multiplication and Karatsuba Double Operand Scanning (KDOS) squaring.
+
+###Introduction
+
+Montgomery's algorithm which avoid division in modular multiplication and squaring, is still a computation-intensive operation.
+
+An increasing number of embedded processors started to employ Single Instruction Multiple Data (SIMD) instructions to perform massive body of multimedia workloads.
+
+####redundant & non-redundant representaiton
+The most well known approach to rewrite cryptography software into a vectorized format is a reduced-radix representation (redundant representation):
+
+1. reduces the number of active bits per register
+1. However, it requires to compute more number of partial products than the non-redundant representation.
+
+non-redundant representation:
+1. flipped the sign of the precomputed Montgomery constant and accumulate the result in two separate intermediate values
+1. suffers from Read-After-Write dependencies in the instruction flow.
+
+----
+
+product-scanning multiplication:
+1. computes a pair of 32-bit multiplications at once but it accesses to the same destination column to accumulate the intermediate result in each inner loop
+1. high RAW dependencies.
+
+2-level Karatsuba multiplication in the redundant representation:
+1. not proper choice for the standard NIST elliptic curves.
+1. The curves allow easy computation of modular operation rather than reduced representations.
+
+2-way Cascade Operand Scnaning (COS) multiplication:
+1. processes the partial products in a non-conventional order to reduce the number of data-dependencies in the carry propagations from the least to most significant words.
+
+Coarsely Integrated Cascade Operand Scanning (CICOS) method:
+1. processes the partial products in a non-conventional order to reduce the number of data-dependencies in the carry propagations from the least to most significant words.
+1. consists of two COS computations: multiplication and reduction
+
+###Multi-precision Squaring Methods
+Squaring dedicated method has two advatages over the multiplication methods for squaring computations:
+1. only one operand is required for squaring computations.
+1. The some part of partial products output the identical partial product results.
+
+Squaring on SISD:
+1. LD method by delays the doubling process to the end of each inner partial product and then double it at once.
+1. Sliding-Block_Doubling (SBD) computes doubling using "1-bit left shifting" operation at the end of duplicated partial product computation.
+1. Karatsuba squaring divides the traditional squaring architecture intwo two sub-squaring and one sub-multiplication parts.
+
+But the advanced SISD based squaring is not compatible with SIMD architecture.
+1. The SISD intruction set can readily handle carry bits with status registers but carry-handing over SIMD architecture incurs a number of pipleline stall in the non-redundant representations.
+2. SISD approach does not concern about groupign the multiple operands for parallel computations but SIMD approach should concern the alignments of operands and intermediate results.
+
+Squaring on SIMD in redundant representations
+1. The squaring method is easily established with doubling the operands or intermediate results but not farorable with long integers since the number of partial products singificantly increase with smaller radix.
+1. redundant representations should conduct carry propagations to fit the result into smaller radix if the next operation is multiplication or squaring.
+
+###Karatsuba's Multiplication
+
+Karatsuba's method reduces a multiplication of two n-word operands to three multiplications, which have a length of n/2 words. These three half-size multiplication can be performed with any multiplication techniques.
+
+****
+
+##Fast Multi-precision Multiplication for Public-Key Cryptography on Embedded Microprocessors
+
+###Abstract
+
+In this paper, we present a novel multiplication technique that increases the performance of multiplication by sophisticated caching of operands.
+
+Our method significantly reduces the number of **needed load instructions** which is usually one of the most expensive operation on modern processors.
+
+----
+
+###Introduction
+
+Common multiplication methods are the schoolbook or Comba technique which are widely used in practice. They require at least 2n^2 load instrctions to process all operands and to calculate the necessary partial products.
+
+hybrid multiplication reduced the number of load instructions to only 2(n^2/d) where the parameter d depends on the number of available register of the underlying architecture.
+
+In this paper, we present a novel multiplication technique that reduces the nubmer of needed load instructions to only 2n^2/e where e>d.
+
+This method fully complies with common architectures that support multiply-accumulate instructions using a (Comba-like) triple-register accumulator.
+
+----
+
+###Related Work
+
+Most of the work given in literature make use of the **hybrid-multiplication technique** which provideds best performance on most microprocessors.
+
+Further improvements have been also reported by Scott et al. They introduced **additional register (so-called carry catchers)**. Note that they fully **unrolled the execution sequence** to avoid additional clock cycles for loop instructions. 
+
+----
+
+###Multiprecision Multiplication Techniques
+
+In the following subsections, we describe common multiplication techniques that are often used in practice.
+1. operand scanning
+2. product scanning
+3. hybrid multiplication method
+
+differ in several ways how to process the operands and how many load and store instructions are necessary to perform the calculation.
+
+Most of these methods lack in the fact that they load the same operands not only once but several times throughout the algorithm which results in additional and unnecessary clock cycles.
+
+We present a new multiplication technique that improves existing solutions by efficiently reducing the load instructions through sophisticated caching of operands
+
+----
+
+####Operand Scanning Method
+
+Among the most simplest way to perform large Integer multiplication is the operand-scanning method.
+
+The multiplication can be implemented using two nested loop operations:
+1. The outer loop loads the operand A[i] at index i=0 ... n-1 and keeps the value constant inside the inner loop of the algorithm
+1. Within the inner loop, the multiplicand B[j] is loaded word by word and multiplied with the operand A[i]. The partial product is then added to the intermediate result of the same column which is usually buffered in a register or stored in data memory.
+
+In each row, n multiplication have to be performed. Furthermore, 2n **load operations** and **n store operations** are required to load the multiplicand and the intermediate result `C[i+j]` and to store the result C[i+j]
+
+> 和小学乘法没区别
+
+----
+
+####Product-Scanning Method
+Another way to perform a multi-precision multiplication is the product-scanning method (Comba or column-wise multiplication method)
+
+This has several advantages:
+1. Since all operands of each column are multiplied and added consecutively, a final word of the result is obtained for each column.        //! Get the final result of each column
+    1. No intermediate results have to be stored or loaded throughtout the algorithm.
+    1. The handling of carry propagation is very easy because the carry can be simply added to the result of the next column using a simple register-copy operation.
+1. Only five working registers are needed to perform the multiplication: two registers for the operand and multiplicand and three registers for accumulation.
+
+----
+
+####Hybrid Method
+
+The hybrid multiplication method combinse the advantages of the operand-scanning and product-scanning method. It can be implemented using two nested loop structures where 
+1. the outer loop follows a product-scanning approach.
+1. the inner loop performs a multiplication according to the operand-scanning method.
+
+The main idea is to minimize the number of load instuctions within the inner loop.
+
+This method has an advantage over a microprocessor equipped with many general purpose registers.
+----
+
+####Operand-Cacheing Method
+
+By reordering the sequence of inner and outer row sections, previously loaded operands in working registers are reused for the next partial products.
+
+----
+
+####Algorithm for Operand-Caching Multiplication
+
+The following pseudo code shows the algorithm for multi-precision multiplication using the operand-caching method. Variables that are located in data memory are denoted by M_x where x represents the name of the Integer a or b. The parameter e describes the number of locally usable registers R_a[e-1, ..., 0] and R_b[e-1, ..., 0]. The triple-word accumulator is denoted by ACC=(ACC_2, ACC_1, ACC_0).
+
+Require: word size n, parameter e, n >=e, Integers a, b \in [0, n), c\in [0, 2n).
+Ensure: c=ab.
+
+为方便理解, 这里每个方法都用了一个例子来说明. 例子中的数据是这样的:
+    n=8
+    e=3
+    r=2
+> 只讨论r_0的情况
+
+1. b_init
+    r= \lfloor n/e \rfloor
+    R_A[e-1, ..., 0]<-M_A[n-1, ..., re]
+    R_B[e-1, ..., 0]<-M_B[n-re-1, ..., 0]
+    ACC<-0.
+    for i=0 upto n-re-1 do                              //! B在b_init的取值范围为0到n-re-1
+        for j=0 upto i do                               //! A在b_init的取值范围为re到n-1
+            ACC<-ACC+R_A[j]*R_B[i-j].
+        end for
+        M_C[re+i]<-ACC_0
+        (ACC_1, ACC_0)<-(ACC_2, ACC_1)                  //! carry propagation
+        ACC_2<-0
+    end for                                             //! 计算b_init左侧部分
+    for i=0 to n-re-2 do
+        for j=i+1 to n-re-1 do
+            ACC<-ACC+R_A[j]*R_B[n-re-j+i]
+        end for
+        M_C[n+i]<-ACC_0
+        (ACC_1, ACC_0)<-(ACC_2, ACC_1)
+        ACC_2<-0
+    end for                                             //! 计算b_init右侧部分
+    M_C[2n-re-1]<-ACC_0
+    ACC_0<-0.
+2. Row Loop
+    for p=r-1 to 0 do                                   //! 这里的p与r_0, r_1对应关系刚好想法. 即: p=0对应图中r_1, p=1对应图中r_0. 也就是说, Row的遍历顺序为由上向下
+3. Part 1
+        R_A[e-1, ..., 0]<-M_A[(p+1)e-1, ..., pe]
+        R_B[e-1, ..., 0]<-M_B[e-1, ..., 0]
+        for i=0 to e-1 do
+            for j=0 to i do
+                ACC<-ACC+R_A[j]*R_B[i-j]
+            end for
+            M_C[pe+i]<-ACC_0
+            (ACC_1, ACC_0)<-ACC_2, ACC_1)
+            ACC_2<-0
+        end for
+> R_A[e-1, ..., 0]<-M_A[(p+1)e-1, ..., pe]
+> R_B[e-1, ..., 0]<-M_B[e-1, ..., 0]
+4. Part 2
+        for i=0 to n-(p+1)e-1 do
+            R_B[e-1, ..., 0]<-M_B[e+i], R_B[e-2, ..., 1]        //! 由B[1]开始, 从右向左依次处理, 由下向上
+            for j=0 to e-1 do
+                ACC<-ACC+R_A[j]*R_B[e-1-j]
+            end for
+            ACC<-ACC+M_C[(p+1)e+i]                      //! carry propagation. (p+1)e+i为当前操作位置
+            M_C[(p+1)e+i]<-ACC_0
+            (ACC_1, ACC_0)<-(ACC_2, ACC_1)
+            ACC_2<-0
+        end for
+> ----i=0 to 4----
+> R_B[e-1, ..., 0]<-M_B[e, ..., 1]
+> --j=0 to 2--
+> M_A[j]*M_B[e]:                                        M_A[0]*M_B[3]
+> --j=1--
+> M_A[j]*M_B[e-1]:                                      M_A[1]*M_B[2]
+> --j=2--
+> M_A[j]*M_B[e-2]:                                      M_A[2]*M_B[1]
+> ACC<-ACC+M_C[(p+1)e+i]:                               ACC<-ACC+M_C[3]
+> ----i=1----
+> R_B[e-1, ..., 0]<-M_B[e+1, ..., 2]
+> --j=0 to 2--
+> M_A[j]*M_B[e+1]:                                      M_A[0]*M_B[4]:
+> --j=1--
+> M_A[j]*M_B[e]:                                        M_A[1]*M_B[3]:
+> --j=2--
+> M_A[j]*M_B[e]:                                        M_A[2]*M_B[2]:
+> ACC<-ACC+M_C[(p+1)e+i]                                ACC<-ACC+M_C[4]
+> ----i=2----
+> ....
+> ----i=4----                                           Final loop
+> R_A[e-1, ..., 0]<-M_A[(p+1)e-1, ..., pe]
+> R_B[e-1, ..., 0]<-M_B[e+n-(p+1)e-1, ..., n-(p+1)e]    M_B[n-pe-1, ..., n-(p+1)e]
+5. Part 3
+        for i=0 to n-(p+1)e-1 do
+            R_A[e-1, ..., 0]<-M_A[(p+1)e+i], R_A[e-2, ..., 1]   //! 由A[pe+1]开始, 从右向左, 由下向上
+            for j=0 to e-1 do
+                ACC<-ACC+R_A[j]*R_B[e-1-j]
+            end for
+            ACC<-ACC+M_C[(n+i]
+            M_C[n+i]<-ACC_0
+            (ACC_1, ACC_0)<-(ACC_2, ACC_1)
+            ACC_2<-0
+        end for
+> ----i=0 to 4----
+> R_A[e-1, ..., 0]<-M_A[e+pe, ..., pe+1]:               M_A[e, ..., 1]
+> --j=0 to 2--
+> R_A[0]*M_B[e-1-j+n-(p+1)e]:                           M_A[1]*M_B[7]
+> --j=1--
+> R_A[1]*M_B[e-1-j+n-(p+1)e]:                           M_A[2]*M_B[6]
+> --j=2--
+> R_A[2]*M_B[e-1-j+n-(P+1)e]:                           M_A[3]*M_B[5]
+> ACC<-ACC+M_C[(n+i]:                                   ACC<-ACC+M_C[8]
+> ----i=1----
+> R_A[e-1, ..., 0]<-M_A[e+ep+1, ..., pe+2]
+> --j=0 to 2--
+> R_A[0]*M_B[e-1-j+n-(p+1)e]:                           M_A[2]*M_B[7]
+> --j=1--
+> R_A[1]*M_B[e-1-j+n-(p+1)e]:                           M_A[3]*M_B[6]
+> --j=2--
+> R_A[2]*M_B[e-1-j+n-(p+1)e]:                           M_A[4]*M_B[5]
+> ACC<-ACC+M_C[(n+i]:                                   ACC<-ACC+M_C[9]
+> ----i=2----
+> ...
+> ----i=4----                                           Final loop
+> R_A[e-1, ..., 0]<-M_A[n-(p+1)e-1+ep+e, ..., n-(p+1)e-1+pe+1]  M_A[n-1, ..., n-e]
+> R_B[e-1, ..., 0]<-M_B[e+n-(p+1)e-1, ..., n-(p+1)e]    M_B[n-pe-1, ..., n-(p+1)e]
+6. Part 4
+        for i=0 to e-2 do
+            for j=i+1 to e-1 do
+                ACC<-ACC+R_A[j]*R_B[e-j+i]
+            end for
+            M_C[2n-(p+1)e+i]<-ACC_0
+            (ACC_1, ACC_0)<-(ACC_2, ACC_1)
+            ACC_2<-0
+        end for
+        M_C[2n-1-pe]<-ACC_0
+        ACC_0<-0
+    end for                                             //! end the Row Loop
+    Return c
+> ----i=0 to 1----
+> --j=1 to 2--
+> R_A[1]*R_B[2]:                                        M_A[6]*M_B[7]
+> --j=2--
+> R_A[2]*R_B[1]:                                        M_A[7]*M_B[6]
+> M_C[13]<-ACC_0                                        //! 因为Row的遍历顺序是由上向下, 因此这里的M_C[2n-pe-1]必定为第一次计算, 因而不需要M_C[13]<-ACC_0+M_C[13]. 与Part 1.原理相同
+> ----i=1----
+> --j=1 to 2--
+> R_A[1]*R_B[3]:                                        M_A[6]*M_B[8]
+> --j=2--
+> R_A[2]*R_B[2]:                                        M_A[7]*M_B[7]
+> M_C[14]<-ACC_0
+----end i loop----
+M_C[15]<-ACC_0
+
+遍历坐标系上两直角边平行于坐标轴的等腰直角三角上的离散整数点:
+直角边方程: 
+    1. x=x1
+    1. y=y1
+
+直角边长度为d.
+for i=0 to d do
+    for j=0 to i do
+        someop(x[j]);
+        someop(y[i-j]);
+
+****
+
+##Multi-precision Multiplication for Public-Key Cryptography on Embedded Microprocessors
+
+###Introduction
+
+In this paper, we propose a novel multiplication method that highly optimizes the number of **load instructions** required for operand loading: From initial partial products to the final partial products, the required operands are cached and not loaded repeatedly. For this reason, the number of required **load instructions** is reduced.
+
+----
+
+###Consecutive Operand-Caching Method
+
+This method is based on **operand-caching**, it can perform multiplication with a reduced number of memory accesses for operand **load instructions** by using caching operands.
+However, previous method has to reload operands whenever a row is changed, which generates unnecessary overheads.
+
+To overcome these shortcomings, we divided the rows and rescheduled the multiplication sequences. Thus, we divided the rows and re-scheduled the multiplication sequences.
+Thus, we found a contact point among rows that share the same operands for partial products.
+Therefore, we can cache the operands by sharing them, even when a row is changed.
+
+Given the number of working registers w, the value is w=3+2e. Three working registers are used for accumulating the intermediate results obtained from the partial products.
+
+The algorithm is divided into three parts
+1. The initialization block b_top is the top of the rhombus and the remaining rows are divided into two parts, b_bottom and b_middle.
+1. The b_bottom part is located in the bottom of the rhombus.
+1. The remaining rows, b_middle, are divided into two parts based on the following condition:
+    1. if \lfloor n/e \rfloor =n/e is true, b_middle is not divided.
+    1. otherwise, b_middle is divided into b_middle and b_last parts: The b_last part is the last sequence of the rows which has a different operand size compared to the other rows because the size of operands A in the last part, n-re, is smaller than e.
+
+*All the partial products are computed from right to left:*
+1. Top of the Rhombus b_top:
+    The block located at the top of the rhombus executes "product scanning" using operands of size n-re. While computing the partial products, the number of caching operands is smaller than the number of required operands e. Therefore, the operand reload process does not occur. If \lfloor n/e \rfloor=n/e is true, the b_top process is skipped.
+1. Processing the Row:
+    The row parts compute the overlapping store and load instructions between the bottom and upper rows. Throughout the computations, operands are consecutively cached. When operands B[j] are loaded for partial products in the rows, the operands A[i] are maintained and vice versa. Whenever the row is changed, the operand  A[i] is still maintained for the next partial product of the row. For this reason, the number of load instructions is significantly reduced.
+1. Bottom of the Row b_bottom:
+    The block located in the bottom of the rhombus can reuse caching operands B[0] and B[1] from b_top:
+        1. First, operands A[i], (i=0, 1) are loaded as caching operands, and then, partial products are computed with operands B[j], (j=0, ..., 7).
+        1. When partial products with caching operands A[i[ are completed, the next sequence of operands A[i], (i=2, 3) is loaded and the partial products are computed by e, the size of caching operand.
+1. Middle of the Row b_middle:
+    The block located between b_top and b_bottom can use caching operands A[i] from the previous row block. The partial products are computed with operands B[j]. The range of j increases for the remaining partial products in a row. In the second row(r_1), the range of j is 0<=j<=5. After the operands B[4] and B[5] are cached, tehe next sequence of operands A[i], (i=4, 5) is loaded and the partial products are computed by e. Finally the remaining partial products, with operands A[i] on the left side of the rhombus, are computed
+1. End of the Row b_last:
+    The b_last part occurs when the condition is \lfloor n/e \rfloor!=n/e. Most processes are equal to b_middle, but in the last part, computing partial products using operands A[i], (re<=i<n) with B[j], (n-re<=j<n) is different. Because the remaining operands A[i] are smaller than the size of the cahcing operand e, the partial products are computed with a narrow width of operands than b_middle.
+
+----
+
+####Algorithm for Consecutive Operand-Caching Method
+Input: word size n, parameter e, where n>=e, Integers a, b\in [0, n), c\in[0, 2n)
+Output: c=ab.
+
+为方便理解, 这里每个方法都用了一个例子来说明. 例子中的数据是这样的:
+    n=8
+    e=2
+    r=4
+> 只讨论r_1的情况
+
+\begin{lstlisting}
+    r=\lfloor n/e \rfllor
+    if(r==n/e)
+        r=r-1
+    R_A[e-1, ..., 0]<-M_A[n-1, ..., re]
+    R_B[e-1, ..., 0]<-M_B[n-re-1, ..., 0]
+> R_A[e-1, ..., 0]<-M_A[7, 6]
+> R_B[e-1, ..., 0]<-M_B[1, 0]
+    ACC<-0
+1. 
+    for i=0 to n-re-1 do                                //! b_top的右半三角
+        for j=0 to i do
+            ACC<-ACC+R_A[j]*R_B[i-j]
+        end for
+        M_C[re+i]<-ACC_0
+        (ACC_1, ACC_0)<-(ACC_2, ACC_1)
+        ACC_2<-0
+    end for
+> ----i=0 to 1----
+> --j=0 to 0--
+> M_A[j+re]*M_B[i-j]                                    M_A[6]*M_B[0]
+> M_C[6]<-ACC_0
+> ----i=1----
+> --j=0 to 1--
+> M_A[j+re]*M_B[i-j]                                    M_A[6]*M_B[1]
+> --j=1--
+> M_A[j+re]*M_B[i-j]                                    M_A[7]*M_B[0]
+> M_C[7]<-ACC_0
+2. 
+    for i=0 to n-re-2 do                                //! b_top的左半部分
+        for j=i+1 to n-re-1 do
+            ACC<-ACC+R_A[j]*R_B[n-re-j+i]
+        end for
+        M_C[n+i]<-ACC_0
+        (ACC_1, ACC_0)<-(ACC_2, ACC_1)
+        ACC_2<-0
+    end for
+    M_C[2n-re-1]<-ACC_0                                 2n-re-1=n + n-re-2 + 1
+    ACC_0<-0
+> ----i=0 to 0----
+> --j=1 to 1--
+> M_A[re+j]*M_B[n-re-j+i]                               M_A[7]*M_B[1]
+> M_C[8]<-ACC_0
+    for p=0 to r-1 do                                   //! Row Loop. 由下向上遍历
+3. 
+        R_A[e-1, ..., 0]<-M_A[(p+1)e-1, ..., pe]
+        R_B[e-1, ..., 0]<-M_B[e-1, ..., 0]
+        for i=0 to e-1 do
+            for j=0 to i do                             //! 每一行最左边的小三角
+                ACC<-ACC+R_A[j]*R_B[i-j]
+            end for
+            M_C[pe+i]<-ACC_0
+            (ACC_1, ACC_0)<-(ACC_2, ACC_1)
+            ACC_2<-0
+        end for
+> ----i=0 to 1----
+> --j=0 to 0--
+> M_A[ep+j]*M_B[i-j]                                    M_A[0]*M_B[0]                           M_A[2]*M_B[0]
+> M_C[ep+i]<-ACC_0                                      M_C[0]                                  M_C[2]
+> ----i=1----
+> --j=0 to 1--
+> M_A[ep+j]*M_B[i-j]                                    M_A[0]*M_B[1]                           M_A[2]*M_B[1]
+> --j=1--
+> M_A[ep+j]*M_B[i-j]                                    M_A[1]*M_B[0]                           M_A[3]*M_B[0]
+> M_C[pe+i]<-ACC_0                                      M_C[1]                                  M_C[3]
+4. 
+        for i=0 to n-(p+1)e-1 do                        //! 每行右半部分除去最右端小三角的菱形部分, 从右向左
+            R_B[e-1, ..., 0]<-M_B[e+i], R_B[e-2, ..., 1]    //! M_B[e+i, ..., i+1]
+            for j=0 to e-1 do
+                ACC<-ACC+R_A[j]*R_B[e-1-j]
+            end for
+            ACC<-ACC+M_C[([+1)e+i]
+            M_C[(p+1)e+i]<-ACC_0
+            (ACC_1, ACC_0)<-(ACC_2, ACC_1)
+            ACC_2<-0
+        end for
+> ----i=0 to 5----                                                                              i=0 to 3
+> R_B<-M_B[e, ..., 1]
+> --j=0 to 1--
+> M_A[ep+j]*M_B[e-j]                                    M_A[0]*M_B[2]                           M_A[2]*M_B[2]
+> --i=1--
+> M_A[ep+j]*M_B[e-j]                                    M_A[1]*M_B[1]                           M_A[3]*M_B[1]
+> M_C[(p+1)e+i]                                         M_C[2]                                  M_C[4]
+> ...
+> ----i=3----
+> R_B<-M_B[e+3, ..., 4]
+> --j=0 to 1--
+> M_A[ep+j]*M_B[e-j-1+4]                                M_A[0]*M_B[5]                           M_A[2]*M_B[5]
+> --j=1--
+> M_A[ep+j]*M_B[e-j-1+4]                                M_A[1]*M_B[4]                           M_A[3]*M_B[4]
+> M_C[(p+1)e+i]                                         M_C[5]                                  M_C[7]
+> ...
+> ----i=5----
+> R_B<-M_B[e+5, ..., 6]
+> --j=0 to 1--
+> M_A[ep+j]*M_B[e-j-1+6]                                M_A[0]*M_B[7]
+> --j=1--
+> M_A[ep+j]*M_B[e-j-1+6]                                M_A[1]*M_B[6]
+> M_C[(p+1)e+i]                                         M_C[7]
+5. 
+        if p==r-1                                       //! b_last
+            k=n-re-1                                    //! if r==n/e then n-re-1==e-1
+        else
+            k=e-1
+        for i=0 to k do                                 //! 每行第一个向上的转折的菱形, 由右向左
+            R_A[e-1, ..., 0]<-M_A[(p+1)e+i], R_A[e-2, ..., 1]
+            for j=0 to e-1 do
+                ACC<-ACC+R_A[j]*R_B[e-1-j]
+            end for
+            ACC<-ACC+M_C[n+i]
+            M_C[n+i]<-ACC_0
+            (ACC_1, ACC_0)<-(ACC_2, ACC_1)
+            ACC_2<-0
+        end for
+> ----i=0 to 1----
+> R_A<-M_A[(p+1)e+i, ..., ep+1+i]
+> --j=0 to 1--
+> M_A[ep+1+j]*M_B[e-1-j+n-(p+1)e]                       M_A[1]*M_B[7]                           M_A[3]*M_B[5]
+> --j=1--
+> M_A[ep+1+j]*M_B[e-1-j+n-(p+1)e]                       M_A[2]*M_B[6]                           M_A[4]*M_B[4]
+> M_C[n+i]                                              M_C[8]
+6. 
+        for i=k to k+e-2 do
+            for j=i+1 to k+e-1 do
+                ACC<-ACC+R_A[j]*R_B[e-j+i]
+            end for
+            ACC<-ACC+M_C[n+i+pe]
+            M_C[n+i+pe]<-ACC_0
+            (ACC_1, ACC_0)<-(ACC_2, ACC_1)
+            ACC_2<-0
+        end for
+> ----i=1 to 1----
+> --j=2 to 2--
+> R_A[2]*R_B[1]                                         M_A[4]*M_B[7]                           M_A[6]*M_B[5]
+> Wrong?                                                M_A[3]*M_B[7]                           M_A[5]*M_B[5]
+> M_C[n+i+pe]                                           M_C[9]                                  M_C[11]
+> Wrong?                                                M_C[10]                                 M_C[10]
+7. 
+        for i=0 to pe-1 do
+            R_B[e-1, ..., 0]<-M_B[(r-p+1)e+i], R_B[e-2, ..., 1]
+            for j=0 to e-1 do
+                ACC<-ACC+R_A[j]*R_B[e-1-j]
+            end for
+            ACC<-ACC+M_C[(p+1)e+i]
+            M_C[n+(p+1)e+i]<-ACC_0
+            (ACC_1, ACC_0)<-(ACC_2, ACC_1)
+            ACC_2<-0
+        end for
+> ----i=0 to -1----                                                                             1
+> R_B<-M_B[(r-p+1)e+i, ..., n-(p+1)e+1+i]
+> --j=0 to 1--
+> R_A[0]*R_B[1]                                         M_A[2]*M_B[8]                           M_A[4]*M_B[6]
+> --j=1--
+> R_A[1]*R_B[0]                                                                                 M_A[5]*M_B[5]
+> M_C[(p+1)e+i]                                                                                 M_C[5]
+> Wrong? M_C[pe+n+i]                                                                            M_C[10]
+> ----i=1--
+> --j=0 to 1--
+> R_A[0]*R_B[1]                                                                                 M_A[4]*M_B[7]
+> --j=1--
+> R_A[1]*R_B[0]                                                                                 M_A[5]*M_B[6]
+        M_C[2n-1-pe]<-ACC_0
+        ACC_0<-0
+    end for
+    Return c.
+\end{lstlisting}
+
+    
+
+****
+
+##Coarsely Integrated Operand Scanning (CIOS) Architecture For High-Speed Montgomery Modular Multiplication
+
+A generic Coarsely Integrated Operand Scanning (CIOS) architecture that provides high speed Montgomery modular multiplication is presented in this paper.
+
+###Introduction
+
+The CIOS algorithm is one of five Montogmery multiplication algorithm proposed by Koc et al.
+
+----
+
+****
+
+##Analyzing and Comparing Montgomery Multiplication Algorithms
+
+
+###Binary method for computing the powers
+
+we replace the exponentiation operation with a seriees of square and multiplication operation modulo n.
+
+    function ModExp(a, e, n)
+    Step 1. \bar{a}:=ar mod n
+    Step 2. \bar{x}:=1r mod n
+    Step 3. for i=j-1 downto 0
+        \bar{x}:=MonPro(\bar{x}, \bar{x})
+        if e_i=1 then \bar{x}:=MonPro(\bar{x}, \bar{a})
+    Step 4. return x:=MonPro(\bar{x}, 1)
+
+----
+
+###Time analysis and space analysis
+We performed time analysis by counting the total number of multiplications, additions (and subtractions), and memory read and write operations in terms of the input size parameter $s$.
+
+> If $\omega$ is the computer's word size, we can think of a number as a sequence of integers each represented in radix $W=2^\omega$. If these "multiprecision" numbers require s words in the radix W representation, then we take $r$ as $r=2^s\omega$
+
+We performed the space analysis counting the total number of words used as the temporary space.
+
+###The algorithms
+
+1. The first factor is whether multiplication and reduction are separated or integrated.
+
+    1. In the separated approach, we first multiply a and b, then perform a Montgomery reduction.
+    1. In the integrated approach, we alternate between multiplication and reduction.
+
+1. The second factor is the general form of the multiplication and reduction steps.
+
+    1. One form is operand scanning, by which an outer loop moves through one operand's words.
+    1. Another form is product scanning, by which the loop moves through words of the product itself.
+    > The product- or operand-scanning methods are independent of whether multiplication and reduction steps are separated or integrated.
+
+1. separated operand scanning (SOS)
+1. coarsely integrated operand scanning (CIOS)
+1. finely integrated operand scanning (FIOS)
+1. finely integrated product scanning (FIPS)
+1. coarsely integrated hybried scanning (CIHS)
+
+为方便理解, 这里每个方法都用了一个例子来说明. 例子中的数据是这样的:
+    $\bar{a}$=64
+    $\bar{b}$=64
+    n=53
+    n^-1=17
+    n'=-n^-1=83
+    W=10^1
+    s=2
+    r=W^s=100
+
+####Separated operand scanning
+First computes t=a*b and then interleaves the computations of m=t*n\prime mod r and u=(t+m*n)/r. Squaring can be optimized.
+
+This method requires 2s+2 words of space.
+
+> It should be noticed that $since m=t*n' mod r$ and the reduction process proceeds word by word, we can use $n_0'=n' mod 2^\omega$ instead of n'.
+
+//! a=64 b=64
+\begin{lstlisting}
+for i=0 to s-1
+    C:=0
+    for j=0 to s-1
+        (C, S):=t[i+j]+a[j]b[i]+C
+        t[i+j]:=S
+    t[i+s]:=C
+\end{lstlisting}
+//! t=4096
+----i=0----
+--j=0--
+--j=1--
+----i=1----
+--j=0--
+--j=1--
+
+> 这里用小学数学的方法算出$\bar{a}*\bar{b}$.
+
+\begin{lstlisting}
+for i=0 to s-1
+    C:=0
+    m:=t[i]n'[0] mod W
+    for j=0 to s-1
+        (C, S):=t[i+j]+mn[j]+C
+        t[i+j]:=S
+    ADD(t[i+s], C)
+\end{lstlisting}
+//! t=7700
+
+> since m=tn' mod r and the reduction process proceeds word by word, we can use n_0'=n' mod 2^w instead of n'
+
+\begin{lstlisting}
+for j=0 upto s
+    u[j]:=i[j+s]
+\end{lstlisting}
+
+> 除以r=2^sw
+
+\begin{lstlisting}
+B:=0
+for i=0 upto s-1
+    (B, D):=u[i]-n[i]-B
+    t[i]:=D
+(B, D):=u[s]-B
+t[s]:=D
+if B=0 then return t[0], t[1], ..., t[s-1]
+    else return u[0], u[1], ..., u[s-1]
+\end{lstlisting}
+
+
+----
+
+####Coarsely intergrated operand scanning
+CIOS improves on SOS by integrating the multiplication and reduction steps. Instead of computing the entire product a*b, then reducting, we alternate between iterations of the outer loops for multiplication and reduction.
+
+\begin{lstlisting}
+for i=0 to s-1
+    C:=0
+    for j=0 to s-1
+        (C, S):=t[i+j]+a[j]b[i]+C
+        t[i+j]:=S
+    (C, S):=t[s]+C
+    t[s]:=S
+    t[s+1]:=C
+    C:=0
+    m:=t[0]n'[0] mod W                      //! t每次都会在前面的计算乘法循环中算出
+    for j=0 to s-1
+        (C, S):=t[j]=mn[j]+C
+        t[j]:=S
+    (C, S):=t[s]+C
+    t[s]:=S
+    t[s+1]:=t[s+1]+C
+    for j=0 to s-1
+        t[j]:=t[j+1]
+\end{lstlisting}
+
+这里与上面SOS的方法类似. 对比于一次性/r, CIOS选择了每算出一部分, 就/一次W. 这样, /s次W的效果, 就与/r的效果是一样的了.
+
+This is possible because the value of m in the $i$th iteration of the outer loop for reduction depends only on value t[i], which is completely computed by the $i$th iteration of the outer loop for multiplication.
+
+For a slight improvement, we integrate the shifting into the reduction as follows:
+
+\begin{lstlisting}
+    m:=t[0]n'[0] mod W                      //! t每次都会在前面的计算乘法循环中算出
+    (C, S):=t[0]+mn[0]
+    for j=1 to s-1
+        (C, S):=t[j]=mn[j]+C
+        t[j-1]:=S
+    (C, S):=t[s]+C
+    t[s-1]:=S
+    t[s]:=t[s+1]+C
+\end{lstlisting}
+
+----
+
+####Finely intergrated operand scanning
+
+#Article
+[Understanding the Montgomery reduction algorithm](http://alicebob.cryptoland.net/understanding-the-montgomery-reduction-algorithm/)
+
+
+w=-N^-1 (mod b^k)
+u=a*w (mod b)=a*-N^-1 (mod b^k)
+(a+u*N) (mod b)=0
+(a+[a*w (mod b)]*N) (mod b)
+(a+a*N*[-N^-1 (mod b^k)]) (mod b)
+(a+a*-N^-1 (mod b^k)*N)=a+(-a)
+
+
+****
+
+#Project
+
+##Efficient multi-precision multiplication on AVR and beyond
+
+Abstract:
+
+Multi-precision multiplication represents an important, but computationally
+expensive cornerstone of public key cryptography. On embedded platforms, a
+series of progressively more efficient [1-4] approaches have been proposed:
+keys idea include **maximising retention of operands within the register file**,
+and **use of careful decomposition** (e.g., through Karatsuba-Ofman). One can
+view elements of some approaches as a form of compile-time specialisation,
+involving a search for parameters that match algorithm to platform in order
+to get the best result. Various related ideas exist, e.g., multi-versioning
+(cf. MILEPOST) and auto-tuning (cf. PetaBricks).
+
+The goals of this project would initially be to
+
+- reproduce existing implemention(s) on an AVR development board,
+- performing a rigorous comparison between different algorithms, including
+non-efficiency metrics such as power consumption,
+- assessing whether the approaches apply beyond AVR (on which most of them
+were initially developed) for example ARM or XMOS, and
+- developing techniques for tuning the parameters available (e.g., the
+level of operand-caching) for a given platform,
+- developing a program-generator for such implementations (e.g., automate
+the task of producing an executable result for any fixed parameters).
+
+The work involved may or may not relate to cryptography itself: you *could*
+think of the challenge as embedded development of computer arithmetic, or
+even study of algorithms and compilation instead.
+
+1. [Fast Multi-precision Multiplication for Public-Key Cryptography on Embedded Microprocessors](http://link.springer.com/chapter/10.1007/978-3-642-23951-9_30)
+2. [Multi-precision Multiplication for Public-Key Cryptography on Embedded Microprocessors ](http://link.springer.com/chapter/10.1007/978-3-642-35416-8_5)
+3. [New Speed Records for Montgomery Modular Multiplication on 8-bit AVR Microcontrollers](http://eprint.iacr.org/2013/882)
+4. [Multiprecision multiplication on AVR revisited](http://eprint.iacr.org/2014/592)

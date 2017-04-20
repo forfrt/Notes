@@ -1,0 +1,211 @@
+
+#Overview
+
+- accept_request
+
+    处理从套接字上监听到的一个HTTP请求, 在这里可以很大一部分地体现服务器处理请求流程
+- bad_request
+
+    返回给客户端这是个错误请求, HTTP状态码400 BAD REQUEST
+- cat
+
+    读取服务器上某个文件写到socket套接字
+- cannot_execute
+
+    主要处理发生在执行cgi程序时出现的错误
+- error_die
+
+    把错误信息写到perror并退出
+- execute_cgi
+
+    运行cgi程序的处理, 也是个主要函数
+- get_line
+
+    读取套接字的一行, 把回车换行等情况都统一为换行符结束
+- header
+
+    把HTTP响应的头部写到套接字
+- not_found
+
+    主要处理找不到请求的文件时的情况
+- server_file
+
+    调用cat把服务器文件返回给浏览器
+- startup
+
+    初始化httpd服务, 包括建立套接字, 绑定端口, 进行监听等
+- unimplemented
+
+    返回给浏览器表明收到的HTTP请求所用的method不被支持
+
+----
+
+#Workflow
+
+1. 服务器启动, 在指定端口或随机选取端口绑定httpd服务
+2. 收到一个HTTP请求 ( 其实就是listen的端口accept的时候 ) , 派生一个线程运行accept_request函数
+3. 去除HTTP请求中的method (GET or POST ) 和url. 对于GET方法, 如果有携带参数, 则query_string指针指向url. 对于GET方法, 如果有携带参数, 则query_string指针指向url中?后面的GET参数
+4. 格式化url到path数组, 表示浏览器请求的服务器文件路径, 在tinyhttpd中服务器文件时在htdocs文件夹下. 当url以/结尾, 或url是个目录, 则默认在path中加上index.html, 表示访问主页
+5. 如果文件路径合法, 对于无参数的GET请求, 直接输出服务器文件到浏览器, 即用HTTP格式写到套接字上, 跳到10. 其他情况 ( 带参数GET, POST方式, url为可执行文件 ) , 则调用execute_cgi函数执行cgi脚本
+6. 读取整个HTTP请求并丢弃, 如果是POST则找出Content-Length, 把HTTP 200状态码写到套接字.
+7. 建立两个管道,, cgi_input和cgi_output, 并fork一个进程
+8. 在子进程中, 把STDOUT重定向到cgi_output的写入端, 把STDIN重定向到cgi_input的读取器, 关闭cgi_input的写入端和cgi_output的读取端, 设置request_method的环境变量, GET的话设置query_string的环境变量, POST的话设置content_length的环境变量, 这些环境变量都是为了给cgi脚本调用, 接着用execl运行cgi程序.
+9. 在父进程中, 关闭cgi_input的读取端和cgi_output的写入端, 如果POST的话, 把POST数据写入cgi_input, 已被重定向到STDIN, 读取cgi_output的管道输出到客户端, 该管道输出是STDOUT. 接着关闭所有管道, 等待子进程结束:
+
+    ![Before](./img/src/Tinyhttpd_1.jpg)
+    ![After](./img/src/Tinyhttpd_2.jpg)
+10. 关闭与浏览器的连接, 完成了一次HTTP请求与回应, 因为HTTP是无连接的
+
+----
+
+#Source
+
+建议源码阅读顺序： main -> startup -> accept_request -> execute_cgi, 通晓主要工作流程后再仔细把每个函数的源码看一看。
+
+##`int startup(u_short *port)`
+
+```
+/**
+ * This function starts the process of listening for web connections on a 
+ * specified port. If the port is 0, then dynamically allocate a port and 
+ * modify the original port variable to reflect the actual port.
+ * 
+ * @params port pointer to variable containing the port to connect on
+ * @return the socket
+ * /
+```
+
+1. create a stream socket on IPv4
+2. set the created socket with option SO_REUSEADDR
+3. if port number is not specified, get the port number allocated by system call `bind()`
+4. return the socket descriptor
+
+----
+
+##`void accept_request(void *)`
+
+```
+/**
+ * A request has caused a call to accept() on the server port to return. 
+ * Process the request appropriately.
+ * 
+ * @params arg the socket connected to the socket
+ * /
+```
+
+1. Get the first line of received message
+2. Strip the string before first space and compare it to various method type (GET, POSTT)
+3. Skip all spaces and get the rest string of this line and store it in `url`
+4. If url contains parameters, load all parameters behind `?` into query_string
+5. If url points to a directory, append the url with `index.html`
+6. If the
+
+----
+
+##`void serve_file(int client, const char *filename)`
+
+```
+/**
+ * Send a regular file to the client. Use headers, and report errors to client 
+ * if they occur.
+ * @params client a pointer to a file structure produced from the socket file 
+ * descriptor
+ * @params filename the name of the file to serve
+ */
+```
+1. Read the other line of request and do nothing (discard)
+2. Construct a HTTP header and send it to client
+3. Send the content of file
+
+----
+
+##`void execute_cgi(int client, const char *path, const char *method, const char *query_string)`
+
+```
+/**
+ * Execute a CGI script. Will need to set environment variables as appropriate.
+ * @params client client socket descriptor
+ * @params path to CGI script
+ */
+```
+
+----
+
+##`get_line(int, char *, int)`
+```
+/**
+ * Get a line from a socket. Whether the line ends in a newline, carriage return, 
+ * or a CRLF combination. Terminates the string read with a null character. 
+ * If no newline indicator is found before the end of * the buffer, the string 
+ * is terminated with a null. If any of the above three line terminator is read, 
+ * the last character of the string will be a linefeed and the string will be 
+ * terminated with a null character.
+ * 
+ * @params sock the socket descriptor
+ * @params buf the buffer to save the data in
+ * @params size the size of the buffer
+ * 
+ * @return the number of byte stored (excluding null)
+ * /
+```
+
+----
+
+##`execute_cgi(int client, const char *path, const char *method, const char *query_string)`
+```
+/**
+ * Execute a CGI script. Will need to set environment variables as appropriate.
+ * @params client client socket descriptor
+ * @params path path to the CGI script
+ *
+ */
+```
+1. If the request method is POST, get Content-Length value from request body. Otherwise, read the whole request and discard.
+2. create two pipeline cgi_in and cgi_out for:
+    1. receiving client request
+    2. executing the cgi file with given arugments received in former step
+    3. Read the executing output from STDOUT
+    4. send the output to client
+
+    The pattern is like:
+    - send(client)  <-  cgi_out     <-  STDOUT
+    - STDIN         <-  cgi_in      <-  recv(client)
+    - STDOUT        <-  execl(path) <-  STDIN
+
+3. child process execute the specified cgi file
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

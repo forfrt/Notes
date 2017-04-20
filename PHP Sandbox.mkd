@@ -1,0 +1,214 @@
+
+#Introduction
+
+PHPSandbox is a PHP 5.4+ class designed to implement tightly-controlled and highly configurable code sandboxes in pure PHP code. It utilizes the **PHP-Parser and FunctionParser libraries** to parse the sandboxed code for violations of the sandbox configuration and to disassemble closures passed to the sandbox.
+
+*The PHPSandbox Toolkit is used to demonstrate the use of the PHPSandbox class*, its various configuration options, creation of custom templates and for easy experimentation. The JSON templates it generates can also be imported directly into a PHPSandbox instance to allow for easy sharing of common configurations.
+
+The PHPSandbox project is licensed under the open source BSD License. Click the "PHPSandbox License" tab below or see the LICENSE file that came with your distribution for more information.
+
+##Using PHPSandbox
+
+###Including PHPSandbox
+
+If you have downloaded PHPSandbox through composer, then the only thing you need to do to include all required PHPSandbox classes is:
+
+require_once('vendor/autoload.php');
+
+If you have a PSR-0 compliant autoloader, simply put the PHPSandbox folder under /src in your library folder and it will handle loading all PHPSandbox files for you. Otherwise, you must include all PHPSandbox files and its dependencies yourself.
+
+##Instantiating A PHPSandbox Instance
+
+You have two methods of instantiating a PHPSandbox instance: the new keyword, or the static method PHPSandbox::create();
+
+1. New Keyword
+
+    `$sandbox = new \PHPSandbox\PHPSandbox();`
+
+1. Static Method
+
+    `$sandbox = \PHPSandbox\PHPSandbox::create();`
+
+You can pass the following array arguments to either method to setup the sandbox:
+
+- $options ！ This is equivalent to using the setOptions() method.
+- $functions ！ This is equivalent to using the defineFuncs() method.
+- $variables ！ This is equivalent to using the defineVars() method.
+- $constants ！ This is equivalent to using the defineConsts() method.
+- $namespaces ！ This is equivalent to using the defineNamespaces() method.
+- $aliases ！ This is equivalent to using the defineAliases() method.
+- $superglobals ！ This is equivalent to using the defineSuperglobals() method.
+- $magic_constants ！ This is equivalent to using the defineMagicConsts() method.
+- $classes ！ This is equivalent to using the defineClasses() method.
+- $interfaces ！ This is equivalent to using the defineInterfaces() method.
+- $traits ！ This is equivalent to using the defineTraits() method.
+
+#Configuring PHPSandbox
+
+You have four main areas of configuration available in PHPSandbox: Options, Whitelists, Blacklists and Definitions.
+
+##Options
+
+Options are configured in the PHPSandbox class by accessing the flag's public instance property (e.g. $sandbox->allow_functions = true; ) or through the setOption() and setOptions() instance methods.
+
+    $sandbox->setOption('allow_functions', false);
+
+##Whitelists & Blacklists
+
+By default, an exception is thrown if any function, variable, global, superglobal, constant, magic constant, namespace, alias (aka use), class, interface, or type is executed in sandboxed code without being either defined or whitelisted, or if it has been blacklisted.
+
+Keywords other than eval, die, exit, include, require, include_once, require_once, and __halt_compiler, are allowed even if they are not whitelisted as long as they are not in the blacklist and a keyword whitelist hasn't been defined.
+
+Operators and primitives are allowed even if they are not whitelisted as long as they are not in the blacklist and a whitelist hasn't been defined.
+
+###Whitelist & Blacklist Precedence
+
+*Whitelists override their blacklist counterpart*, therefore if a whitelist of functions has been defined and also a blacklist of functions, the blacklist will have no effect. Furthermore, *definitions override both whitelists and blacklists*, so that a defined function will always be allowed even if that function is not defined in a function whitelist or is in a function blacklist.
+
+Whitelists are configured in the PHPSandbox class through the whitelist(), whitelistFunc(), whitelistVar(), etc. instance methods.
+
+Blacklists are configured in the PHPSandbox class through the blacklist(), blacklistFunc(), blacklistVar(), etc. instance methods.
+
+##Definitions
+
+Definitions are configured in the PHPSandbox class through the define(), defineFunc(), defineVar(), etc. instance methods. They are fully trusted, and override any respective whitelist or blacklist.
+
+----
+
+##Custom Validators
+
+Custom validators are configured in the PHPSandbox class through the setValidator(), setFuncValidator(), setVarValidator(), etc. instance methods. They are passed the name of the element and the PHPSandbox instance as arguments, and override any respective whitelist or blacklist.
+
+----
+
+#Using PHPSandbox Toolkit
+
+WARNING: The PHPSandbox toolkit is NOT DESIGNED to be used on a publicly accessible server! It is for local testing in a private environment only! Use of The PHPSandbox toolkit on a public-facing server will likely lead to the rooting of your server!
+
+##The Toolbar
+
+The far right of the toolkit screen is the toolbar. Links to the API documentation and this help dialog can be found here. This is also where sandbox templates, stored in the /toolkit/templates/ folder, can be selected and automatically loaded in the toolkit environment to test, or templates can be imported from your local filesystem.
+
+More importantly, this is where the various sandbox configuration options can be selected, whitelists and blacklists can be enabled, and definitions for functions, superglobals, etc. can be defined. Click the "Configuring PHPSandbox Toolkit" tab below for more information.
+
+Finally, the error level for the code to be executed can be set, and clicking "Run Code In Sandbox" will execute the toolkit environment and output the response.
+
+##The Code Editor
+
+The top left of the toolkit screen is the code editor, which can be set to four possible modes via the Editor Mode menu above the code editor. These modes are:
+
+- Sandboxed Code ！ Code entered in this mode will be run within the sandbox environment, and will be subject to all validation checks determined by the sandbox configuration.
+- Setup Code ！ This is a special mode that allows the toolkit to run trusted code outside the sandbox, in the global scope of the script. This will allow for testing the sandbox against globally scoped functions, variables, etc. it is NOT subject to any validation checks, and can do anything a typical PHP script can!
+- Prepended Code ！ Code entered in this mode will be automatically trusted by the sandboxed and will run before the sandboxed code runs, in the same execution scope as the sandbox. If auto_whitelist is not enabled you will likely run into validation errors if the sandboxed code attempts to use classes or functions declared by this code.
+- Appended Code ！ Code entered in this mode is treated exactly the same as prepended code except it is run after the sandboxed code runs, and in the same execution scope.
+
+----
+
+##The Output Box
+
+When "Run Code In Sandbox" is clicked, any execution output is sent to this box, including error messages, uncaught exceptions and echoed output. Any values returned by the sandbox via the return keyword will also be shown as a **var_dump()** output in a line underneath the echoed output.
+
+Finally, a line will be shown at the end of the output showing the amount of milliseconds spent preparing and executing the sandbox as well as the total time spent.
+
+****
+
+#Configuring PHPSandbox Toolkit
+
+In the toolbar on the right side of the screen is a set of tabs that allow you to define all four areas of configuration for your sandbox.
+
+##Options
+
+This tab shows a list of checkboxes correlating with the configuration options available in the PHPSandbox class. When a checkbox is checked its corresponding flag will be enabled, when unchecked its corresponding flag will be disabled.
+
+----
+
+##Whitelists & Blacklists
+
+----
+
+##Definitions
+
+****
+
+#Using PHPSandbox Templates
+
+The PHPSandbox toolkit comes with a special template feature that allows for you to open and save templates in a JSON format that the PHPSandbox class can easily import. This makes the sharing of sandboxed configurations incredibly easy as well as making it simple to extend existing templates for your own uses.
+
+##Loading Templates
+
+To load a template, simply select a template from the dropdown list of available templates in the /toolkit/templates/ folder, or click "Import A Template" to load one from your local filesystem. Once a template is selected the toolkit environment will automatically load all the template options, whitelists, blacklists, definitions, and all setup, trusted and sandboxed code in their respective modes.
+
+----
+
+##Saving Templates
+
+----
+
+##Importing Templates
+
+****
+
+#README
+
+#Features:
+
+- Finegrained whitelisting and blacklisting, with sensible defaults configured.
+- Includes dynamic demonstration system that allows for local testing of custom sandbox configurations
+- Can redefine internal PHP and other functions to make them more secure for sandbox usage.
+- Can redefine superglobals and magic constants to expose your own values to sandboxed code.
+- Can overwrite the get_defined_* and get_declared_* functions to show only allowed functions, classes, etc. to the sandboxed code.
+- Can selectively allow and disallow function creation, class declarations, constant definitions, keywords, and much more.
+- Can prepend and append trusted code to setup and tear down the sandbox, and automatically whitelist the classes, functions, variables, etc. they define for the sandbox.
+- Can retrieve the generated sandbox code for later usage.
+- Can pass arguments directly to the sandboxed code through the execute method to reveal chosen outside variables to the sandbox.
+- Can access the parsed, prepared and generated code ASTs for further analysis or for serialization.
+- Can define custom validation functions for fine-grained control of every element of the sandbox.
+- Can specify a custom error handler to intercept PHP errors and handle them with custom logic.
+- Can specify a custom exception handler to intercept thrown exceptions and handle them with custom logic.
+- Can specify a validation error handler to intercept thrown validation errors and handle them with custom logic.
+- Can intercept callbacks and validate them against function whitelists and blacklists, even if they are called as strings
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

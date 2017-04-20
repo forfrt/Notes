@@ -1,0 +1,851 @@
+
+
+Security Engineering
+
+#Lecture
+
+##Lecture 1
+
+###Aims
+
+The aim of this unit is to introduce concepts and principles of security design for information technology and data processing at the system level.  
+
+###Assessment Methods
+
+Group practical coursework in two parts, to be handed out Wk 2/3 (Part A due in Wk 7/8; Part B due in Wk 11/12), weighing 40% (~40hrs of work per person); and tiinal examination (60%) during January exams period (date TBA).  
+
+The focus here is on the system: an assembly of hardware, sorware,  people, data, procedures put meaningfully together to complete some tasks/goals
+
+    emphasis on design and principles 
+
+###Overview
+
+*Computer Security* 
+
+protection afforded to an automated information system in order to attain the applicable objectives of preserving the integrity, availability and confidentiality of  information system resources (includes  hardware, sorware, firmware, information/ data, and telecommunications).
+
+----
+
+Computer Security Challenges 
+- complex interconnected systems 
+- must consider potential aGacks 
+
+    - battle of wits between attacker / admin 
+
+- must decide where to deploy mechanisms 
+- requires regular monitoring 
+- too oren an arerKthought 
+- not usually perceived as benefit until it fails 
+- regarded as impediment to using system 
+
+----
+
+###OSI Security Architecture 
+
+- ITUKT X.800 “Security Architecture for OSI” 
+- systematic way of defining requirements for  security and realising approaches to satisfying  them 
+- defines:  
+
+    - security attacks -- security compromises
+    - security mechanisms -- act to detect, prevent, recover  from attack&
+    - security service -- counter security attacks
+
+- for us it provides a useful, if abstract, overview of  concepts we will study 
+
+----
+
+###Security Attack((Threat)
+
+1. Passive Attacks
+
+    e.g. eavesdropping 
+    - release of message contents 
+    - traffic analysis 
+    - are%hard%to%detect%so%aim%to%prevent%
+
+1. Active Attack
+
+    e.g. modify/fake data 
+    - masquerade 
+    - replay 
+    - modificaFon 
+    - denial of service 
+    - hard%to%prevent%so%aim%to%detect%
+
+----
+
+###Security Mechanism
+
+- feature designed to detect, prevent, or  recover from a security attack 
+- no single mechanism that will support all  services required 
+- however one particular element underlies  many of the security mechanisms in use: 
+
+    - cryptographic techniques 
+
+- hence&the&focus on these&in&our MSc 
+
+1. specific security mechanisms: 
+
+    - encipherment, digital signatures, access controls,  data integrity, authentication exchange, traffic  padding, routing control, notarization 
+
+1. pervasive security mechanisms: 
+
+    - trusted functionality, security labels, event  detection, security audit trails, security recovery 
+
+----
+
+###Security Services
+
+- enhance security of data processing systems and  information transfers of an organization 
+- intended to counter security attacks 
+- using one or more security mechanisms  
+- often replicates functions normally associated  with physical documents 
+
+    - which, for example, have signatures, dates; need protection from disclosure, tampering, or destruction; be notarised or witnessed; be recorded or licensed 
+
+
+- Authentcation – assurance that the communicating  entity is the one claimed 
+- Access Control – prevention of the unauthorized use  of a resource 
+- Data Confidentiality – protection of data from  unauthorized disclosure 
+- Data Integrity – assurance that data received is as  sent by an authorized entity 
+- Non-Repudiation – protection against denial by one  of the parties in a communication 
+
+----
+
+###Architecting Systems Security
+
+- specification/policy
+- implementation/mechanisms
+- correctness/assurance
+
+****
+
+##Lecture 2 AUTHENTICATION*
+
+###User Authentication
+
+> Fundamental security building block
+> The process of verifying an identity claimed by or for a system entity
+
+- identification    specify identifier
+- verification      bind entity and identifier
+
+----
+
+###Means of User Authentication
+
+four means of authenticating a user's identity based on something the individual
+- knows         password, PIN
+- possesses     key, token
+- is            fingerprint, retina
+- does          voice, sign
+
+> can use alone or combined
+
+----
+
+###Password Authentication
+
+- widely used user authen?ca?on method
+- authenticates ID of user logging in and
+
+    - that the user is authorised to access system
+    - determines the user's privileges
+    - is used in discretionary access control
+
+----
+
+###Password implementation
+
+A safer approach uses one-way cryptographic hash functions
+
+using salt value to create a unique entry per password and relieves th epressure of protecting the entire file
+
+> salt value: originally a 12-bit number derived from process ID and time of password creation
+
+----
+
+####Improved Implementations
+
+- other stronger hash/salt variants
+- MD5
+- Blowfish block cipher based hash algorithm called Bcrypt
+
+----
+
+###Password Cracking
+
+- brute force and dictionary attacks
+- space for time trade-off(rainbow table) attack
+- other attacks
+
+----
+
+####Space for time tradeoffs
+
+An alternative to building up dictionaries of possible passwords and  using each one to derive hash values combined with each salt etc., is to  preMcompute potential hash values 
+
+----
+
+####Other password attacks
+
+- workstation hijacking
+- observing notes down ones
+- exploiting multiple password use
+- electronic monitoring and eavesdropping
+- asking the user (scoial engineering)
+
+----
+
+###The Android Pattern Lock
+
+- side channel attacks
+- Thermal emision detection
+- oily residue detection
+
+----
+
+###Password file protection
+
+can block offline guessing attacks by denying access to encrypted passwords
+
+still have vulnerablilities
+- exploit O/S bug
+- accident with permissions making it readable
+- users with same password on other systems
+- access from unprotected backup media
+- sniff passwords in unprotected network traffic
+
+----
+
+###Other password management practices
+
+- Limittng the amount of ‘left-over’, potenttally useful to  a\ackers, informatton 
+    - e.g. machine name, previous logged username on prompt 
+- Providing users with informatton such as when last  logged in, where from etc. 
+- Limittng login attempts; lockdown or timeout aeer  each incident 
+- Password ageing; expiry date with or *without memory  of previous password hashes* to avoid password reuse,  within a reasonable ttme frame, e.g. last 5 used
+
+----
+
+###Single Sign-On(SSO)
+
+Some systems implement the concept of single-sign on, where the system retains authentication  credentials for the user and provides them to subsequent systems or processes as needed 
+
+> MyBristol implements some sort of SSO
+
+----
+
+###Remote User Authentication 
+
+authentication over network more complex 
+- problems of eavesdropping, replay 
+
+generally use challenge-response 
+- user sends iden?ty 
+- host responds with random number 
+- user computes f(r,h(P)) and sends back 
+- host compares value from user with own computed value, if match user authenticated
+
+----
+
+A one-time password changes every time is used; instead of using a fixed phrase, the system uses a fixed mathematical function
+
+This may be obviously onerous for a user, but the intension here  is to be generated by devices (tokens) 
+
+----
+
+###Security protocols
+
+Analysing properties of password scheme as protocols may reveal a lot of security issues
+
+----
+
+###Man in the middle attacks 
+
+Applies to the onMline challengeMresponse scheme: say here for  simplicity, simple encryp?on under one's key 
+
+A malicious entity spoofs (i.e. assumes the iden?ty of) a legitimate server and simultaneously opens a connection to a  server pretending to be a user 
+
+----
+
+###Multiple factor authentication
+
+Additional system information may be used to increase confidence of successful user ID and verification 
+
+An additional form of authentication may be required too
+
+Assume a bank web server S, a user U, a  password generator device P and the user's  PIN for it (PIN). 
+
+A possible protocol could be 
+1. S → U: N
+1. U → P: N,PIN
+1. P → U: {N,PIN}K
+1. U → S: {N,PIN}K
+
+----
+
+###Token Authentication
+
+object user possesses to authenticate
+
+1. Memory Card
+
+    - magnetic stripe card, e.g. bank card
+    - store but do not process data
+    - with password/PIN for computer use
+
+1. Smartcard
+
+    credit-card like with own processor, memory, I/O ports
+
+----
+
+###Biometric authentication
+
+use unique physical characteristics to perform twon functions
+- 1:1 verification
+- 1:n identification
+
+----
+
+###Fingerprint recognition
+
+The pattern of the ridges of the fingerprint serves as a unique characteristic
+
+----
+
+###Biometric accuracy
+
+- False acceptance rate(FAR)
+- False rejection rate(FRR)
+
+-------------------------------------------------------------------------
+
+#Chroot Sandbox Vulnerability
+
+##Basic Knowledge
+
+##Sandbox Vulnerability 
+
+The learning objective of this lab is for students to substantiate an essential security engineering principle, the *compartmentalization principle*, by studying and evaluating the chroot mechanism implemented in Unix operating systems.
+
+Sandbox can provide a restricted environment for us to run programs that are not completely trustworthy.
+
+> Almost all the Unix systems have a simple built-in sandbox mechanism, called chroot.
+
+###chroot command
+
+The chroot command in Unix redefines the meaning of the root directory.
+
+Using chroot, we can confine a program to a specific directory, so any damage a process can cause is confined to that directory.  
+
+In other words, chroot creates an environment in which the actions of an untrusted process are restricted, and such restriction protects the system from untrusted programs.
+
+###su command
+
+used to become another user during a login session.
+A subsystem login is indicated by the presence of a "*" as the first character of the login shell. The given home directory will be used as the root of a new file system which the user is actully logged into.
+
+-c      execute the next argument as a command by the target user
+
+###relative files
+
+`/etc/passwd`
+
+    user account information
+
+`/etc/shadow`
+
+    Secure user account information.
+
+----
+
+Sandbox can provide a restricted environment for us to run programs that are not completely trustworthy.
+
+ The kernel on Unix varients which support chroot() maintain a note of the root directory each process on the system has. Generally this is "/", but the chroot() system call can change this.
+
+ When chroot() is successfully called, the calling process has its idea of the root directory changed to the directory given as the argument to chroot(). 
+
+----
+
+Due to the change in the root directory, the area which a chroot()ed program lives in will require various files and programs for sane operation. For example, the following files are required for the sane operation of the basic shell interpreter sh within a chroot()ed environment. 
+
+*File*	                                        *Usage*
+/bin/sh 	                                    The binary for sh
+/usr/ld.so.1 	                                Dynamically link in the shared object libraries
+/dev/zero 	                                    Ensuring that the pages of memory used by shared objects are clear
+/usr/lib/libc.so.1 	                            The general C library
+/usr/lib/libdl.so.1 	                        The dynamic linking access library
+/usr/lib/libw.so.1 	                            Internationalisation library
+/usr/lib/libintl.so.1 	                        Internationalisation library
+/usr/platform/SUNW,Ultra-1/lib/libc_psr.so.1 	"Processor Specific Runtime" - contains replacements for certain library functions (i.e. memcpy) hand coded in faster assembly.
+
+It should be noted that the more complex and larger a program gets, the more support files it will use. For example, perl requires a very large number of files and directories to work within a chroot()ed environment - 2610 files and 192 directories for a reasonable installation. 
+
+----
+
+###Breaking chroot()
+
+Whilst chroot() is reasonably secure, a program can escape from its trap. So long as a program is run with root (ie UID 0) privilages it can be used to break out of a chroot()ed area.
+
+For a user to do this, they would need access to:
+* C compiler or a Perl interpreter
+* Security holes to gain root access
+
+----
+
+Whilst this is outside the topic of the document, an attacker could make use of application programs which are setuid-root and have security holes within them. In a well maintained chroot() area such programs should not exist.
+
+However, it should be noted that maintaining a chroot()ed environment is a non-trival task, 
+
+for example system patches which fix such security holes will not know about the copies of the programs within the chroot()ed area. Ensuring that there are no setuid-root executables within the padded cell is going to be a must. 
+
+----
+
+ To break out of a chroot()ed area, a program should do the following:
+
+* Create a temporary directory in its current working directory
+* Open the current working directory
+> Note: only required if chroot() changes the calling program's working directory.
+* hange the root directory of the process to the temporary directory using chroot().
+* Use fchdir() with the file descriptor of the opened directory to move the current working directory outside the chroot()ed area.
+> Note: only required if chroot() changes the calling program's working directory.
+* Perform chdir("..") calls many times to move the current working directory into the real root directory.
+* Change the root directory of the process to the current working directory, the real root directory, using chroot(".")
+
+----
+
+##Experiment
+
+###Enviroment 
+
+[Chroot](http://www.cis.syr.edu/~wedu/seed/Labs/Vulnerability/Chroot/)
+*Ubuntu 9.11*
+
+###Initial setup
+
+
+
+****
+
+#Buffer overflow attack
+
+
+##Basic knowledge
+
+###Memory Allocation(layout)
+
+2 paticular data region: 
+1. stack(upper end) 
+
+    upside down
+
+2. heap 
+
+    blocked memory O/S give to you
+
+> from program's view, they believe that all the memories belongs to them(which is actually not true)
+
+----
+
+###Virtual address & Physical address
+
+There is a translation mechanism between Pyhsical memory and Virtual memory. In other words, the final physical memory of same virtual memory may be not equal.
+
+----
+
+###Stack layout
+
+Stack frame constructed during the function call for memory allocation implicitly.   
+
+Explicitly, memory allocation can be requested from and released to heap area using malloc(), calloc(), realloc(), new, free() and delete respectively.   
+
+A typical layout of a stack frame is shown below although it may be organized differently in different operating systems:
+
+1. Function parameters.
+1. *Function’s return address*.
+1. *Frame pointer*.
+1. Exception Handler frame.
+1. Locally declared variables.
+1. *Buffer*.
+1. Callee save registers.
+
+As you can see, we can divide a stack into three parts:
+
+1. Parameters
+1. return address+pointer+Handler frame
+1. Locally declared variables+buffer+callee save register
+
+from the layout, it is clear that a buffer overflow if occurs, has the opportunity to overwrite other variables allocated at the memory address higher than the buffer that is the locally declared variables, the exception handler frame, the frame pointer, *the return address*, and the function parameters.
+> the higher index of buffer lays above the lower index of buffer
+
+----
+
+![Typical Layout of A Stack.png](./img/System Security/Typical Layout of A Stack.png)
+
+----
+
+ As an example in Windows/Intel, typically, when the function call takes place, data elements are stored on the stack in the following way:
+
+1. The function parameters are pushed on the stack before the function is called.  The parameters are pushed from right to left.
+1. The function return address is placed on the stack by the x86 CALL instruction, which stores the current value of the EIP register.
+1. Then, the frame pointer that is the previous value of the EBP register is placed on the stack.
+1. If a function includes try/catch or any other exception handling construct such as SEH (Structured Exception Handling - Microsoft implementation), the compiler will include exception handling information on the stack.
+1. Next, the locally declared variables.
+1. Then the buffers are allocated for temporary data storage.
+1. Finally, the callee save registers such as ESI, EDI, and EBX are stored if they are used at any point during the functions execution.  For Linux/Intel, this step comes after step no. 4.
+
+----
+
+gcc with -fno-stack-protection option
+
+    void func(char *a1, int a2, int a3){
+        char b1[12];
+        int b2;, b3;
+        ...some code...
+    }
+
+> frame pointer points to the first Local variable, and stores it at %ebp
+
+1. a1's address = %ebp+8
+1. a2's address = %ebp+12
+1. a3's address = %ebp+16
+1. b1's address = %ebp-20
+1. b2's address = %ebp-24
+1. b3's address = %ebp-28
+
+----
+
+That means a3 was pushed first into stack and a1  
+
+compare to b1 was push before b2 and b3  
+> The function parameters are pushed on the stack before the function is called.  The parameters are pushed from right to left.
+
+----
+
+
+----
+
+###Return to libc Attack
+
+> one of overflow attack's countermeasure is to make the stack non-executable
+> even if you put your malicious code on the stack, but your code will not be executed
+
+So chanllenge is ** YOU CAN NOT PUT YOUR MALICIOUS CODE ON THE STACK **
+
+####KEY IDEA
+**Run my own code using existing code instead of injection**
+
+1. The address of `System` function of libc library is not secret
+1. Let program jump to the `System` function by overflow the return address
+1. Let the `System` function to execute "/bin/sh"
+
+    1. we canfind the string address using frame pointer(`%ebp`)
+    1. so just put the string "/bin/sh" on the stack at `%ebp+8`(need to anticipate where the stack will be)
+
+----
+
+all program compiled looks same
+
+    foo:
+        pushl   %ebp                //! push the previous frame pointer on the stack
+        movl    %esp, %ebp          //! let %ebp points to the top of stack(%esp)
+
+        subl    $8,%esp
+        movl    8(%ebp), %eax
+        movl    %eax, 4(%esp)
+        movl    $.LC0, (%esp)
+        call    printf
+
+        leave
+        ret
+
+----
+
+using existing string
+1. add "/bin/sh" to environment variables
+1. find where the "/bin/sh" is
+1. push the address at "%ebp+8"
+
+> offsit of "/bin/sh" may be changed if the file's name is changed
+
+----
+
+##Experiment
+
+###Enviroment 
+
+[Buffer_Overflow](http://www.cis.syr.edu/~wedu/seed/Labs/Vulnerability/Buffer_Overflow/)
+*Ubuntu 9.11*
+
+###Initial setup
+
+    sysctl -w kernel.randomize_va_space=0       //! disable these features that uses address space randomization to randomize the starting address of heap and stack
+    sysctl -w kernel.exec-shield=0                  //! diable ExecShield that essentially disallows executing any code that is stored in the stack
+
+> Ubuntu systems do not have this protection by default but Fedora has
+
+many shell programs such as /bin/bash automatically drop their privileges when invoked.
+
+use zsh instad that do not contain this protection
+
+----
+
+###shell
+
+
+****
+
+#TCP/IP Attack
+
+##Basic knowlege
+
+###Netwox
+
+####General Tools
+
+1. '7' is used to sniff packets.
+
+    - Find the device you are using to sniff. Most probably you will be using vmnet8.
+    - Although the above information is enough to start sniffing, you can refine it by supplying a pcap filter.
+
+1. '38' is used to spoof IP packets. 
+
+    - The issue a student might encounter while using this tool is that the host OS might drop the packet. This happens because some OS verifies whether the ip address of the source is there on its ARP cache or not. The workaround this problem is to **poison the ARP cache before using this tool.
+    - Tool 38 can be used to send fack ip packets and it gives the user total control over the ip header. Theoretically it is itself self-sufficient to carry all the other TCP/ICMP attacks as long as can precisely supply the right value of ita payload, which can get a bit messy. Hence we'll use this tool purely for IP attacks like DoS, Tear Drop etc.
+
+1. '41' is used to spoof IP/ICMP packet.
+
+    - It allows the attacker to send arbitrary length ICMP packets with arbitrary IP parameters. Almost all ICMP related attacks can be accomplished with this tool. This tool is based on tool 38.
+    - It allows the user to specify ICMP header parameters along with IP header parameters. Although there are special tools for most of the specific ICMP attacks like **Source Quench, ICMP redirect etc**, this tool can be used for those attacks too.
+    - This tool is useful for **Ping Of Death and smurf attacks**, which cannot be executed with other tools.
+
+1. '40' is used to spoof TCP/IP packets.
+
+    - With the right set of parameters, all the TCP attacks can be accomplished with this tool. It allows the user to modify the IP header, TCP header and the TCP data of the packet.
+    - This is used for **session highjacking and can be easily used to write a OS fingerprint scanner**.
+
+        > The session Hijacking attack consists of the exploitation of the web session control mechanism, which is normally managed for a session token.
+
+----
+
+####Special Tools
+
+1. '80' sends continuous ARP replies.
+
+    - You need the device name, along with the source and destination IP addresses and Ethernet addresses. **Even if you don't know the Ethernet address of any machine you can supply @IP as an argument and Netwox will resolve it for you.**
+
+1. '72' Some systems reject the ARP replies if they didn't ask for it. This is when this tool comes in handy.
+
+    - It sends an ARP request to the destination machine using spoofed addresses(**Can be used in ARP cache poisoning).
+    - The only issue with this tool is that it does not send continuous packets. This problem can be overcome by using it in a script, which shall be demonstrated in the next section.
+
+1. '82, 83, 84, 85, 86' are used for specialized ICMP attacks and are quite simple to use.
+1. '76, 78' are for specific TCP attacks(**SYN and RST attacks).
+
+####Netwag
+
+The Netwag GUI is just a wrapper around Netwox. we can use the GUI to generate the command for us.
+
+----
+
+###ARP poisoning
+
+####Command
+
+the command "netwox 33" is used to create a fake packet.
+
+
+****
+
+#CSRF(Cross Site Request Forege) Attack
+
+##Basic knowlege
+
+The browser will attach user's own session ID to those requests which is going to be sent to victim website as long as the session ID is not out of date. Even the request is not generated by the victim website.
+
+> The attacker can not get the content of cookie as well as the response of the sent request.
+> only those action that may change database needs to be protected.
+
+###Countermeasure
+1. Server Side Solution(compare the Source URL with its own):
+
+    It's important to know which page sends the request.
+    To achieve that, server needs the help of browser. ie reference of http request head which contains the source URL
+
+1. Server Side Solution(retrict the response content):
+
+    ie. only can view information, but not allowed to update data.
+
+1. Browser choose not to attach the session ID
+
+    It will lose some functionality
+
+1. Attach a secret token to the request(Most common Countermeasure)
+1. Use POST method to sent the request instead of GET method
+
+    It doesn't works. Only make forgery harder. But the attacher still can construct a same request.
+1. 
+
+###Cross Site Request Ajax
+
+Using Ajax to send Cross Site Request, the attacker's web page will receive the result, rather than your browser.
+However, the risk of Ajax is already well recognised, so the designers put *SOP*(Same Origin Policy) there.
+
+****
+
+#XSS(Cross Site Scripting) Attack
+
+##Basic knowlege
+
+Scripting-> code injection
+
+Attacker stores malicious code in some public space. And victim somehow access those codes and get executed.
+So the session id can be get by malicious code since it is run by server page.
+
+> ie. inject a text that will be displayed embraced by `<script></script>`
+
+
+###How XSS works
+
+write malicious code in text field and let them displayed by other people.
+The executed code can access victim's own session id, which enables server to do what the attacker wants.
+> the most XSS attack was launched by Sammy in MySpace
+> he want to be friend of millions. So what he do is to write malicious code in his profile. The code can add Sammy to their friend list and copy those piece of code to their own profile(*self-progagating*).
+
+----
+
+###XSS Discussion
+
+1. Advertisement displayed by FB using <iframe> contains malicious code
+
+    SOP will prevent FB's session ID from being sent to Advertisement Page
+    Only the Advertisement Page's session ID will be sent
+
+1. Blog contains malicious code aceessed by FB
+
+    Well the FB's session ID will be attatched to the request which is going to be sent to Blog Page(CSR).
+    However, the cookie of FB is still unaccessable. In other words, the secret token can not be accessed(CSRF countermeasure).
+
+----
+
+###More Details on XSS
+1. steal your cookie(session ID)
+
+    send a HTTP request to attacker website using `<img src="url"></img>`
+
+1. Run the attack code inside the Victim's Page
+
+    Using AJAX to keep the response sent to attacker website.
+    But AJAX is not allowed to send cookie to other domain.(SOP)
+
+----
+
+###Countermeasure
+
+1. data filtering
+
+    
+
+##Practice
+
+###Initialization
+
+
+###Task 1
+
+###Task 2
+###Task 3
+###Task 4
+###Task 5: Writing an XSS Worm
+
+
+
+###Task 6
+
+
+
+****
+
+#Race Condition Vulnerability Lab
+
+****
+
+#ClickJacking Attack
+
+##Basic Knowledeg
+
+1. `<iframe id="inner" src="http://www.cis.syr.edu~wedu/test/mylike.html#Archer" width="60" height="40"></iframe>`
+1. Use the "Opaclity" property to set a malicious button invisible
+
+    `@top: opaclity: 0.0` 
+
+----
+
+##Countermeasure
+
+1. frame busting:
+
+    1. `if(top!=self)`
+    1. `if(top.location=self.location)`
+    1. `if(parent.frame.length>0)`
+    1. ....
+
+1. X-Frame-Options
+
+    1. `<? php header("X-Frame_Option: DENY"); ?>`
+    1. Appache Configuration
+
+1. Add-ons Detection
+
+    ie. NoScript of firefox
+
+****
+
+#SQL Injection
+
+##Basic knowlege
+
+###SQL Example
+
+`SELECT * FROM Customers WHERE City='Bersion' OR City='London';`
+`SELECT * FROM Customers WHERE Country='Germany' AND City='Berlin';`
+`SELECT * FROM customer -- Selects all columns and rows`
+
+So given
+`SELECT ID, name, lastlogin FROM Users_Table WHERE (name=' ' AND pass=' ')`
+1. Fill the first blank with `name ='' OR 1=1 --` and login with arbitrary passcode.
+1. Fill the first blank with `name=''); Drop *****` to do something deleterous.
+
+----
+
+##Countermeasure
+
+1. filtering(input validation)
+
+    - `-` ->`\-`
+    - `;` ->`\;`
+    - `'` ->`\'`
+    - `\` ->`\\`
+    - ......
+    - php configuration & php escape function(`mysql_real_escape_string()`)
+
+1. prepare statement
+
+    `$stmt=$db->prepare("SELECT ID, name, locale, lastlogin FROM USERS WHERE name=? AND age=?");               //! only code`
+    `$stmt->bind_param("si", $user, $age)`
+    > main point is to seperate code away from data
+
+****
+
+
+
+
+
+
+
+
+
+
+

@@ -64,12 +64,24 @@ make命令执行时，需要一个 Makefile 文件，以告诉make命令需要�
 
 ----
 
+##Makefile Name
+
+The make utility looks for a file named "Makefile" in the current directory, and attempts to build the target whose name is given on the commandline. If no target is given on the commandline, then the first target in the file named "Makefile" is built. One can use a name other than "Makefile"; however, doing so necessitates the use of the "-f" option with make to specify that a different file should be sued and, therefore, using any name other than "Makefile" for a makefile is very strongly discouraged.
+
+----
+
+##Predefined Stuff
+
+I have already stated that Make already knows about the system's compilers and how to build an object file from a C or C++ source file. This is not the only stuff that Make is aware of. There is actually a huge database of predefined variables and rules that Make knows about. You can get make to print out that database using the invocation `make -p`
+
+----
+
 ##make是如何工作的
 
 1. make会在当前目录下找名字叫“Makefile”或“makefile”的文件。
 2. 如果找到，它会找文件中的第一个目标文件（target），在上面的例子中，他会找到“edit”这个文件，并把这个文件作为最终的目标文件。
 3. 如果edit文件不存在，或是edit所依赖的后面的 .o 文件的文件修改时间要比edit这个文件新，那么，他就会执行后面所定义的命令来生成edit这个文件。
-4. 如果edit所依赖的.o文件也存在，那么make会在当前文件中找目标为.o文件的依赖性，如果找到则再根据那一个规则生成.o文件。（这有点像一个堆栈的过程）
+4. 如果edit所依赖的.o文件也不存在，那么make会在当前文件中找目标为.o文件的依赖性，如果找到则再根据那一个规则生成.o文件。（这有点像一个堆栈的过程）
 5. 当然，你的C文件和H文件是存在的啦，于是make会生成 .o 文件，然后再用 .o 文件生命make的终极任务，也就是执行文件edit了。
 
 在找寻的过程中，如果出现错误，比如最后被依赖的文件找不到，那么make就会直接退出，并报错，而对于所定义的命令的错误，或是编译不成功，make根本不理。make只管文件的依赖性，即，如果在我找了依赖关系之后，冒号后面的文件还是不在，那么对不起，我就不工作啦。  
@@ -240,14 +252,82 @@ GNU的make工作时的执行步骤入下：（想来其它的make也是类似）
 
 ----
 
+##基本语法
+1. The pound sign `£`/ hash symbol `#` begins a single-line comment.
+1. Make is very sensitive about tabs; a line begins with a tab if and only if it is a step in a build rule.
+1. Variables are expanded by surrounding a variable's name with parentheses and prefixing it with a dollar sign (as in `$(VAR)` ).
+1. Variables are delared using `:=` or `=`, but the former is statically bound while the latter is dynamically bound, and so the former is more efficient.
+1. Variables may be augmented using `+=`, which is equivalent to resaaiging with a space followed by the content to the right of the `+=` sign.
+1. A name followed by a colon `:` denotes a target. Anything to the right of the colon is interpreted as a dependency of that target.
+1. If one or more statements begining with a tab follows after the declaration of a target, those statements are used to build the target (they are executed by `$(SHELL)` ).
+
+----
+
+
 ##在规则中使用通配符
 
-make支持三各通配符：“*”，“?”和“[...]”。这是和Unix的B-Shell是相同的。  
+make支持三个通配符：“*”，“?”和“[...]”。这是和Unix的B-Shell是相同的。  
 
 通配符代替了你一系列的文件，如“*.c”表示所以后缀为c的文件。一个需要我们注意的是，如果我们的文件名中有通配符，如：“*”，那么可以用转义字符“/”，如“/*”来表示真实的“*”字符，而不是任意长度的字符串。  
 
+****
+
+#Rules
+
+##The Function Wildcards
+
+Wildcard expansion happens automatically in rules. But wildcard expansion does not normally take place when a variable is set, or inside the arguments of a function. If you want to do wildcard expansion in such places, you need to use `wildcard` function, like this:
+
+    $(wildcard pattern...)
+    $(wildcard &.c)
+
+This string, used anywhere in a makefile, is replaced by a space-separated list of names of existing files that match one of the given file name patterns. If no existing file name matches a pattern, then that pattern is omitted from the `wildcard` function.
+
+----
+
+##Static Pattern
+
+Here is the syntax of a static pattern rule:
+
+    targets ...: target-pattern: prereq-patterns ...
+        recipe
+        ...
+
+The `targets` list specifies the targets that the rule applies to. The targets can contain wildcard characters, just like the targets of ordinary rules.
+
+The `target-pattern` and `prereq-patterns` say how to compute the prerequisites of each target. Each target is matched aginst the `target-pattern` to extract a part of the target name, called the `stem`. This stem is substituted into each of the `prereq-patterns` to make the prerequisite names.
+
+Each pattern normally contains the character `%` just once. When the `target-pattern` matches a target, the `%` can match any part of the target name;
 
 ****
+
+#Variables
+
+##`$@`
+The name of the target current being processed
+
+##`$<`
+The name of the *first* dependency
+
+****
+
+#Functions
+
+##`$(patsubst pattern, replacement, text)`
+Finds whitespace-separated words in `text` that match pattern and replaces them with replacement. Here `pattern` may contain a `%` which acts as a wildcard, matching any number of any characters within a word. If `replacement` also contains a `%`, the `%` is replaced by the text that matched the `%` in `pattern`. Only the first `%` in the `pattern` and `replacement` is treated this way; any subsequent `%` is unchanged.
+
+‘%’ characters in patsubst function invocations can be quoted with preceding backslashes (‘\’). Backslashes that would otherwise quote ‘%’ characters can be quoted with more backslashes. Backslashes that quote ‘%’ characters or other backslashes are removed from the pattern before it is compared file names or has a stem substituted into it. Backslashes that are not in danger of quoting ‘%’ characters go unmolested. For example, the pattern the\%weird\\%pattern\\ has ‘the%weird\’ preceding the operative ‘%’ character, and ‘pattern\\’ following it. The final two backslashes are left alone because they cannot affect any ‘%’ character. 
+
+Whitespace between words is folded into single space characters; leading and trailing whitespace is discarded. 
+
+##`$(filter pattern..., text)`
+Return all whitespace-separated words in `text` that **do** match any of the `pattern` word, removing any words that **do not** match.
+
+The pattern are written using `%`, just like the patterns used in the patsubst function above.
+
+
+
+
 
 #关于Linux
 内核的Makefile分为5个组成部分：

@@ -1,0 +1,258 @@
+
+#Learn about images & containers
+
+Docker Engine provides the core Docker technology that enables images and containers. As the last step in your installation, you ran the Engine `docker run hello-world` command. With this one command, you completed the core tasks to using Engine. The command you ran had three parts.
+
+![docker_run_hello-world.png](./img/Docker/docker_run_hello-world.png)
+
+A container is a stripped-to-basics version of a Linux operating system. An image is software you load into a container. When you ran the command, the Engine software:
+
+1. checked to see if you had the hello-world software image
+1. downloaded the image from the Docker Hub (more about the hub later)
+1. loaded the image into the container and ¡°ran¡± it
+
+Depending on how it was built, an image might run a simple, single command and then exit. This is what Hello-World did.
+
+A Docker image, though, is capable of much more. An image can start software as complex as a database, wait for you (or someone else) to add data, store the data for later use, and then wait for the next person.
+
+Who built the `hello-world` software image though? In this case, Docker did but anyone can. Docker Engine lets people (or companies) create and share software through Docker images. Using Docker Engine, you don¡¯t have to worry about whether your computer can run the software in a Docker image ¡ª a Docker container can always run it.
+
+#Find and run the whalesay image
+
+People all over the world create Docker images. You can find these images by browsing the Docker Hub. In this next section, you¡¯ll do just that to find the image to use in the rest of this getting started.
+
+##Step 1: Locate the whalesay image
+
+1. Open your browser and browse to the Docker Hub.
+
+    The Docker Hub contains images from individuals like you and official images from organizations like RedHat, IBM, Google, and a whole lot more.
+1. Click Browse & Search.
+
+    The browser opens the search page.
+1. Enter the word `whalesay` in the search bar.
+1. Click on the docker/whalesay image in the results.
+
+    The browser displays the repository for the whalesay image.
+    Each image repository contains information about an image. It should include information such as what kind of software the image contains and how to use it. You may notice that the whalesay image is based on a Linux distribution called Ubuntu. In the next step, you run the whalesay image on your machine.
+
+##Step 2: Run the whalesay image
+
+1. Put your cursor in your terminal window at the $ prompt.
+1. Type the `docker run docker/whalesay cowsay boo` command and press RETURN.
+
+    This command runs the whalesay image in a container.
+    The first time you run a software image, the `docker` command looks for it on your local system. If the image isn¡¯t there, then `docker` gets it from the hub.
+1. While still in the terminal, type `docker images` command and press RETURN.
+
+    The command lists all the images on your local system. You should see docker/whalesay in the list.
+
+        $ docker images
+        REPOSITORY           TAG         IMAGE ID            CREATED            VIRTUAL SIZE
+        docker/whalesay      latest      fb434121fc77        3 hours ago        247 MB
+        hello-world          latest      91c95931e552        5 weeks ago        910 B
+
+    When you run an image in a container, Docker downloads the image to your computer. This local copy of the image saves you time. Docker only downloads the image again if the image¡¯s source changes on the hub. You can, of course, delete the image yourself. You¡¯ll learn more about that later. Let¡¯s leave the image there for now because we are going to use it later.
+1. Take a moment to play with the whalesay container a bit.
+
+    Try running the whalesay image again with a word or phrase. Try a long or short phrase. Can you break the cow?
+
+#Build your own image
+
+The whalesay image could be improved. It would be nice if you didn¡¯t have to think of something to say. And you type a lot to get whalesay to talk.
+
+    docker run docker/whalesay cowsay boo-boo
+
+In this next section, you will improve the whalesay image by building a new version that ¡°talks on its own¡± and requires fewer words to run.
+
+##Step 1: Write a Dockerfile
+
+In this step, you use your favorite text editor to write a short Dockerfile. A Dockerfile describes the software that is ¡°baked¡± into an image. It isn¡¯t just ingredients tho, it can tell the software what environment to use or what commands to run. Your recipe is going to be very short.
+
+1. Go back to your terminal window.
+1. Make a new directory by typing mkdir mydockerbuild and pressing RETURN.
+
+        $ mkdir mydockerbuild
+
+    This directory serves as the ¡°context¡± for your build. The context just means it contains all the things you need to build your image.
+1. Change to your new directory.
+
+        $ cd mydockerbuild
+    Right now the directory is empty.
+1. Create a text file called Dockerfile in your current directory.
+
+    You can use any text editor for example, vi or nano to do this.
+1. Open your Dockerfile file and Add a line to the file like this:
+
+        FROM docker/whalesay:latest
+    The FROM keyword tells Docker which image your image is based on. Whalesay is cute and has the cowsay program already, so we¡¯ll start there.
+1. Now, add the `fortunes` program to the image.
+
+        RUN apt-get -y update && apt-get install -y fortunes
+    The fortunes program has a command that prints out wise sayings for our whale to say. So, the first step is to install it. This line installs the software into the image.
+1. Once the image has the software it needs, you instruct the software to run when the image is loaded.
+
+        CMD /usr/games/fortune -a | cowsay
+    This line tells the fortune program to pass a nifty quote to the cowsay program.
+1. Check your work, your file should look like this:
+
+        FROM docker/whalesay:latest
+        RUN apt-get -y update && apt-get install -y fortunes
+        CMD /usr/games/fortune -a | cowsay
+1. Save and close your Dockerfile.
+
+    At this point, you have all your software ingredients and behaviors described in a Dockerfile. You are ready to build a new image.
+
+##Step 2: Build an image from your Dockerfile
+
+
+##Step 3: Learn about the build process
+
+
+
+
+
+
+#DockerFile
+
+#RUN
+
+RUN has 2 forms:
+
+- `RUN <command>` (shell form, the command is run in a shell - `/bin/sh -c`)
+- `RUN ["executable", "param1", "param2"]` (exec form)
+
+The `RUN` instruction will execute any commands in a new layer on top of the current image and commit the results. The resulting committed image will be used for the next step in the `Dockerfile`.
+
+Layering `RUN` instructions and generating commits conforms to the core concepts of Docker where commits are cheap and containers can be created from any point in an image¡¯s history, much like source control.
+
+The exec form makes it possible to avoid shell string munging, and to `RUN` commands using a base image that does not contain `/bin/sh`.
+
+##ADD
+
+ADD has two forms:
+- ADD <src>... <dest>
+- ADD ["<src>",... "<dest>"] (this form is required for paths containing whitespace)
+
+The ADD instruction copies new files, directories or remote file URLs from <src> and adds them to the filesystem of the container at the path <dest>.
+
+Multiple <src> resource may be specified but if they are files or directories then *they must be relative to the source directory* that is being built (the context of the build).
+
+Each <src> may contain wildcards and matching will be done using Go¡¯s filepath.Match rules. For example:
+
+    ADD hom* /mydir/        # adds all files starting with "hom"
+    ADD hom?.txt /mydir/    # ? is replaced with any single character, e.g., "home.txt"
+
+The <dest> is an absolute path, or a path relative to WORKDIR, into which the source will be copied inside the destination container.
+
+    ADD test relativeDir/          # adds "test" to `WORKDIR`/relativeDir/
+    ADD test /absoluteDir/         # adds "test" to /absoluteDir/
+
+All new files and directories are created with a UID and GID of 0.
+
+In the case where `<src>` is a remote file URL, the destination will have permissions of 600. If the remote file being retrieved has an HTTP `Last-Modified` header, the timestamp from that header will be used to set the `mtime` on the destination file. However, like any other file processed during an `ADD`, `mtime` will not be included in the determination of whether or not the file has changed and the cache should be updated.
+
+##COPY
+
+
+----
+
+##VOLUME
+
+    VOLUME ["/data"]
+
+The VOLUME instruction creates a mount point with the specified name and marks it as holding externally mounted volumes from native host or other containers. The value can be a JSON array, `VOLUME ["/var/log/"]`, or a plain string with multiple arguments, such as VOLUME `/var/log` or VOLUME `/var/log /var/db`. For more information/examples and mounting instructions via the Docker client, refer to *Share Directories via Volumes* documentation.
+
+The docker run command initializes the newly created volume with any data that exists at the specified location within the base image. For example, consider the following Dockerfile snippet:
+
+    FROM ubuntu
+    RUN mkdir /myvol
+    RUN echo "hello world" > /myvol/greeting
+    VOLUME /myvol
+
+This Dockerfile results in an image that causes docker run, to create a new mount point at /myvol and copy the greeting file into the newly created volume.
+
+----
+
+##ENTRYPOINT
+
+ENTRYPOINT has two forms:
+
+- `ENTRYPOINT ["executable", "param1", "param2"]` (exec form, preferred)
+- `ENTRYPOINT command param1 param2` (shell form)
+
+An `ENTRYPOINT` allows you to configure a container that will run as an executable.
+
+For example, the following will start nginx with its default content, listening on port 80:
+
+    docker run -i -t --rm -p 80:80 nginx
+Command line arguments to `docker run <image>` will be appended after all elements in an exec form `ENTRYPOINT`, and will override all elements specified using `CMD`. This allows arguments to be passed to the entry point, i.e., `docker run <image> -d` will pass the `-d` argument to the entry point. You can override the `ENTRYPOINT` instruction using the `docker run --entrypoint` flag.
+
+The shell form prevents any `CMD` or `run` command line arguments from being used, but has the disadvantage that your `ENTRYPOINT` will be started as a subcommand of `/bin/sh -c`, which does not pass signals. This means that the executable will not be the container¡¯s `PID 1` - and will not receive Unix signals - so your executable will not receive a `SIGTERM` from `docker stop <container>`.
+
+Only the last `ENTRYPOINT` instruction in the `Dockerfile` will have an effect.
+
+###Exec form ENTRYPOINT example
+
+You can use the exec form of ENTRYPOINT to set fairly stable default commands and arguments and then use either form of CMD to set additional defaults that are more likely to be changed.
+
+
+
+
+
+----
+
+#Manage data in containers
+
+You¡¯re going to look at the two primary ways you can manage data with Docker Engine.
+
+1. Data volumes
+1. Data volume containers
+
+##Data volumes
+
+A data volume is a specially-designated directory within one or more containers that bypasses the Union File System. Data volumes provide several useful features for persistent or shared data:
+
+
+1. Volumes are initialized when a container is created. If the container¡¯s base image contains data at the specified mount point, that existing data is copied into the new volume upon volume initialization. (Note that this does not apply when mounting a host directory.)
+1. Data volumes can be shared and reused among containers.
+1. Changes to a data volume are made directly.
+1. Changes to a data volume will not be included when you update an image.
+1. Data volumes persist even if the container itself is deleted.
+
+Data volumes are designed to persist data, independent of the container¡¯s life cycle. Docker therefore never automatically deletes volumes when you remove a container, nor will it ¡°garbage collect¡± volumes that are no longer referenced by a container.
+
+###Adding a data volume
+
+You can add a data volume to a container using the `-v` flag with the `docker create` and `docker run` command. You can use the -v multiple times to mount multiple data volumes. Now, mount a single volume in your web application container.
+
+    $ docker run -d -P --name web -v /webapp training/webapp python app.py
+
+This will create a new volume inside a container at `/webapp`.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

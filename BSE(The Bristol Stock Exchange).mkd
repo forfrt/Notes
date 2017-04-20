@@ -1,0 +1,179 @@
+
+
+BSE: The BRISTOL STOCKEXCHANGE
+
+#Introduction
+
+> Action: buyers and sellers come together to exchange money for goods.
+
+1. English Auction(first-price ascending-bid auction)
+
+    seller stays silent and the buyers announce increasing bid-prices until only one buyer remains, who then gets the deal.
+
+1. eBay Auction
+
+    you win the deal by bidding highest, but the price you pay is the bid-price of the second-highest bidder.
+
+1. Posted Offer Auction
+
+    the sellers name their offer prices, and the buyers simply take it or leave it at that price.
+
+1. Dutch Flower Auction(descending-offer auction)
+
+    the buyers stay silent while the seller starts with an initial high offer-price and then gradually drops the offer price until a buyer jumps in to take the deal.
+
+1. CDA(Continuous Double Auction)
+
+    a buyer can announce a bid at any time and a seller can announce an offer at any time.
+
+----
+
+The CDA interests  economists because, even with a very small number of tra ders, the transaction prices (i.e. the agreed deal-prices) rapidly approach the theoretical market **equilibrium price**. 
+
+> The **equilibrium price** is the price that best matches the quantity demanded to the quantity supplied by the market, and in that sense it is the most efficient price for the market. 
+
+The CDA is also of pragmatic interest because of the trillions of dollars that flow through national and international CDA-based markets in commodities, equities (stocks and shares), foreign exchange, fixed income (tradable debt contracts  such as government bonds, known in the UK as  gilts and in the USA as treasury bills), and derivatives contracts.  
+
+the LOB has two sides: **the bid book and the ask book**.  The bid book shows the prices of outstanding bid orders, and the quantity available at each of those prices, in descending order, so that the best (highest) bid is at the top of the book. The ask book shows the prices of outstanding asks, and the quantity available at each of those prices, in ascending order, so that the best (lowest) ask is at the top of the book.
+
+> In market terminology, offers are also referred to as  asks
+
+----
+
+The information shown on a LOB is sometimes referred to as ¡°level 2¡± or ¡°market depth¡± data. 
+
+In contrast, **¡°Level 1¡± market data** just shows the price and size (quantity) for the best bid and ask, along with the price and size of the last recorded transaction, of the instrument being traded. 
+
+There are more restricted data need to be displayed in BSE, such as simply whatever price the instrument was last traded at, or the mid-price, the point between the current best bid and the best ask.
+
+----
+
+#BSE: The Bristol Stock Exchange
+
+BSE is a minimal simulation of a financial exchange running a limit order book in a single tradable security.
+
+1. **A trader can at any time issue a new order**, which replaces any previous order that the rader had on the LOD: that is, any one trader can have at most one order on a LOB at any one time.
+1. BSE assumes **zero latency** in communications between the traders and the exchange
+1. It also assumes that after any one trader issues an order that alters the LOB, **the updated LOB is distributed to all traders before any other trader can issue another order**.
+
+> real-world exchanges and markets are much more complicated than this.
+
+[BSE](https://github.com/davecliff/BristolStockExchange/downloads)
+
+----
+
+The output data-files created by BSE.py are **all ASCII comma-separated values** (i.e., files of type  .csv) because that format can easily be imported by spreadsheet programs (such as OpenOffice  Calc, Apple  Numbers, or Microsoft  Excel) and can also be readily imported by more sophisticated statistical analysis systems such as  R or  Matlab. 
+
+Examining the BSE code you can see that the Exchange has to **keep internal records of exactly which trader submitted which order**, so that the book-keeping can be done when two traders enter into a transaction, but that the LOB it ¡°publishes¡± to the traders deliberately **discards a lot of that data, to anonymize the identity of the traders**. The Exchange class¡¯s  publish method **uses values from the exchange¡¯s internal data structures to build the market¡¯s LOB data** as a Python dictionary structure containing the time, the bid LOB and the ask LOB:
+
+    def publish_lob(self, time):
+        public_data={}
+        public_data[ ' time' ]=time
+        public_data[ 'bids' ]={'best' :self.bids.best_price,
+            'worst' :self.bids.worstprice,
+            'n' : self.bids.n_orders,
+            'lob' :self.bids.lob_anon}
+        public_data[ 'asks' ]={'best' :self.asks.best_price,
+            'worst' :self.bids.worstprice,
+            'n' : self.asks.n_orders,
+            'lob' :self.asks.lob_anon}
+        return public_data
+
+----
+
+#How to store LOB
+The bid and ask  LOBs are both also dictionary structures. Each LOB shows:
+- the current best price;
+- the worst possible price(i.e. the lowest-allowable bid-price, or the highest allowable offer price: these values can be of use to trader algorithms, i.e. for making ¡°stub quotes¡±: an example is given later in this document);
+- the number of orders on the LOB;
+- and then the anonymized LOB itself. 
+
+The anonymized LOB is a list structure, with the bids and asks each sorted into *ascending order* (so the best bid is the  last item on the bid LOB, but the best ask is the first item on the ask LOB). Each item in the list is a pair of items: a price, and the number of shares bid or offered at that price: `[price, quantity]`. Prices for which there are currently no bids or asks are not shown on the LOB. 
+
+
+Orders that are issued by a trader have a trader-i.d. (TID) code, an order type (bid or ask), price, quantity, and a timestamp. NB in the current version of BSE, for extra simplicity, the quantity is always 1. For illustration, in this document we¡¯ll write the order as a list: `[TID, type, price, quantity, time]`, hence if trader T22 bids $1.55 for one share at time  t=10 seconds after the market opens, we¡¯d write the order as: 
+
+    [T22,bid,155,1,0010]. 
+
+So, for example, if the bid and ask LOBs are initially blank and then the following sequence of orders is issued, the bid and ask LOBs will alter as shown:
+
+    [T11, bid, 022, 1, 0002] // bid:[(22, 1) ]        ask:[]
+    [T02, bid, 027, 1, 0006] // bid:[(22, 1),(27,  1) ] ask:[]
+    [T08,  ask, 077, 1, 0007]// bid:[(22, 1),(27, 1)] ask:[(77, 1) ]
+    [T01, bid, 027, 1, 0010] // bid:[(22, 1),(27, 2)] ask:[(77, 1) ] 
+    [T03,  ask, 062, 1, 0018]// bid:[(22, 1),(27, 2) ] ask:[ (62, 1),(77, 1) ]
+    [T11, bid, 030, 1, 0021] // bid:[(27, 2),(30, 1) ] ask: [ (62, 1),(77, 1) ]
+
+Note that the order issued at  t=21 comes from trader T11, and **hence replaces T11¡¯s previous order issued at  t=2**, which is why the bid at `$0.22` is deleted from the bid LOB at  t=21. At this stage, the  bid-ask spread  (i.e., the difference  between the best bid and the best ask) is $0.32.  
+
+----
+
+##reaction of the record of LOB after hitting of crossing
+In financial-market terminology, if a trader wants to sell at the current best bid price, that¡¯s referred to as **¡°hitting the bid¡±**; if a trader wants to buy at the current best askprice, that¡¯s referred to as ¡°lifting the ask¡±. Both are instances of **¡°crossing the spread¡±**. So, to continue our example, let¡¯s say that trader T02 decides to lift the ask. In BSE, this is signalled by the trader issuing an order that crosses the spread,  i.e. issuing a bid p ri c e d  at more than the current best ask,  and the transaction  then  goes through at whatever the best price was on the LOB as the crossing order was issued. So, if at  t=25s T02 lifts the ask by bidding $0.67, we¡¯d see this: 
+
+    [ T02, bid, 067, 1, 0025] // bid:[(27, 1),(30, 1)] ask:[(77, 1) ]
+
+Note that T02 already had an earlier bid on the LOB, one of the two priced at 27, so when T02¡¯s new bid of 67 was received by the exchange, it **first deleted the earlier bid** (i.e., the new order replaced the old one), and then **the exchange system detected that the bid crossed the best ask** (which was priced at 62, from the order sent at  t=18 by trader T03) and so the exchange deleted that ask from the LOB too. Immediately afterwards, **the exchange and the traders do some book-keeping: the exchange records the transaction price and time on its ¡°tape¡±** (the time-series record of orders on the exchange); **and the two counterparties to the trade, traders T02 and T03, each update their ¡°blotters¡±** (their local record of trades they have entered into)  -- these uses of ¡°tape¡± and ¡°blotter¡± are common terminology in the markets.
+
+----
+
+##What sales traders do
+Now let¡¯s look at some simple automated trading algorithms, or ¡°robot traders¡±. The simple algorithms explored here are all automated execution systems: that is, they *automate* the process of executing an order that has originated elsewhere. In investment banking, **the human workers that do this job are known as ¡°sales traders¡±** : a human sales trader waits for an order to arrive from a customer, and then works that order in the market: that is, the sales trader **just executes the order without giving any advice or comment on the customer¡¯s decision to buy or sell**. At its simplest, a customer order will state what instrument (e.g., which stocks or shares) the customer wants to deal  in, whether she wants to buy or sell, how many, and what price she wants. If the customer is keen to complete the transaction as soon as possible, she should specify a *market order*, i.e. just do the deal at whatever is the best price in the market right (i.e., on the LOB) now. But if the customer is happy to wait, then she can specify a *limit order*, a maximum price for a purchase or a minimum price for a sale, and then the sales trader¡¯s job is to wait until the conditions are right for the deal to be done. **The execution of limit orders is where the sales trader can make some money**. 
+
+Say for example that the customer has sent an order stating that she wants to sell one share of company XYZ for no less than `$10.00`, at a time when XYZ is trading at `$9.90` but where the price has been rising steadily: if the sales trader waits a while and executes the order when XYZ has risen to `$10.50`, the trader can return the `$10.00` to the customer and take the extra `$0.50` as a fee on the transaction; but if the trader instead  executes this order at the precise moment that the price of XYZ hits `$10.00`, then the customer¡¯s order has been satisfied but there is no extra money, no margin on the deal, for the trader to take a share of.  
+
+----
+
+##What our robot do
+So, the simple robot traders we¡¯ll look at here can all be thought of as *computerized sales-traders*: they take customer limit orders, and do their best to execute the order in the market **at a price that is better than the limit-price provided by the customer** (this is the price below which they should not sell, or above which they should not buy). Customer orders are issued to traders in BSE and then the traders issue their own orders as bids or asks into the market, **trying to get a better price than the limit-price specified by the customer**. 
+
+----
+
+##The Framework of the BSE
+The core of a market session in BSE is a  while loop that repeats once per time-step. In each cycle of this loop, the following things happen:
+
+- There is a check to see **if any new customer orders need to be distributed to any of the traders**, via a call to `customer_orders()`.
+- **An individual trader is chosen at random to issue its current response** by calling the trader¡¯s  `getorder()` method: this will either return the value  None, signaling that the trader is not issuing a order at the current time, or it will return an order to be added to the LOB; if that is the case then BSE processes the order via `exchange.process_order()`.
+- If processing the order resulted in a trade, **the traders do the necessary book keeping, updating their blotters**, via a call to `bookkeep()`.
+- **Each trader is given the chance to update its internal values** that affect its trading behavior, via a call to the trader¡¯s  respond() method.  
+
+Before any of that happens, the market needs to be *populated* by a call to `populate_market()` ¨C that is where the number of traders and the type of each trader is determined. So the core loop of the BSE code looks roughly like this: 
+
+    Traders = {}
+    populate_market(n_traders, traders)
+    while time < endtime:
+    # how much time left, as a percentage?
+          time_left = (endtime  ¨C time) / float(endtime  - starttime)
+           # distribute  any new  customer orders to the traders
+          customer_orders(time, traders, order_schedule)
+           # get an order (or None)  from a randomly chosen trader
+           tid = random_tid(traders)
+           order = traders[tid].getorder(time,time_left,exchange.publish_lob(time))
+           if  order !=  None:
+    # send order to exchange
+                  trade = exchange.process_order(time, order)
+    lob = exchange.publish_lob(time)
+                 
+    if trade != None:
+                        # trade occurred, 
+    # so counterparties update order lists and blotters
+                         traders[trade['party1']].bookkeep(trade, order)
+                         traders[trade['party2']].bookkeep(trade, order)
+                         trade_stats(expid, traders,  tdump, time, lob)
+            # traders respond to whatever happened
+            lob = exchange.publish_lob(time)
+             for t  in traders:
+                  traders[t]. respond(time, trade,  lob)
+                            
+    time = time + timestep
+
+
+
+
+
+
+
+
+
+
+

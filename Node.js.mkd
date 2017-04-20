@@ -1,0 +1,114 @@
+#模块系统
+
+为了让Node.js文件可以互相调用, Node.js提供了一个简单的模块系统  
+
+文件和模块是一一对应的  
+
+1. require()
+
+    从外部获取一个模块的接口, 即获取模块的exports对象
+
+1. exports
+
+    模块公开的接口
+
+----
+
+#util模块
+
+1. util.inherits(constructor, superConstructor)
+
+    实现对象间原型集成的函数
+    不是通过对象集成的语言级别特性, 而是通过圆形复制来实现的
+
+1. util.inspect(object, [showHidden], [depth], [colors])
+
+    把任意对象转换为字符串
+
+1. util.isArray(object)
+
+    判断是否是数组
+
+1. util.isRegExp(object)
+
+    判断是否是正则
+
+1. util.isDate(object)
+1. util.isError(object)
+
+----
+
+#文件系统
+封装在fs模块
+
+1. fs.readFile(), fs.readFileSync()
+
+    读取文件
+
+----
+
+#GET/POST
+
+
+
+####
+
+#Express
+1. app.set(), app.get();
+
+    Alter the application settings.
+
+1. app.enable(), app.enabled();
+
+    Set a value to true; Check if the setting is true;
+
+1. app.disable(), app.disabled();
+1. app.use([path], [function...], function)
+
+    Mount the middleware at path
+    middleware is a function with access to the request object, the response object, and the next middleware: `function(req, res, next){`
+    The middleware functions are executed sequentially, `next()` is used to pass on the control to the next middleware
+
+1. app.engine(ext, callback)
+
+    register the given template engin callback as ext.
+
+1. app.param([name], callback)
+
+    map logic to route parameter
+
+1. app.VERB(path, [callback...], callback)
+
+    The app.VERB() methods provide the routing functionality in Express, where VERB is one of the HTTP verbs (such as app.post()).
+    Multiple callbacks may be given; all are treated equally
+    behave just like middleware.
+
+    注意这里get()与前面get()的区别
+
+1. app.all(path, [callback...], callback)
+
+    Just like app.VERB() methods, but mathches all HTTP verbs.
+
+1. app.route(path)
+
+    Return an instance of a single route
+
+1. app.locals
+
+    Application local variables are provided to all templates rendered within the application.
+
+1. app.render(view, [options], callback)
+
+    Render a view with a callback responding with the rendered string.
+
+1. app.listen()
+
+    Bind and listen for connections on the given host and port.
+
+1. app.path()
+
+    Return the canonical path of the app
+
+1. app.mountpath
+1. 
+    

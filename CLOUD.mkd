@@ -1,0 +1,218 @@
+
+#Cloud Computing
+
+##From edision to google
+
+----
+
+#什么是云计算
+
+- XaaS?
+- Amazon/Alibaba?
+- 下一个技术爆点?
+- WEB 3.0?
+
+> 从起源讲起----------> 
+
+----
+
+#Edision
+
+![EdisonVSTesla](./img/Presentation/CLOUD/TeslaVSEdison.jpg)
+
+----
+
+![Old Factory Generator](./img/Presentation/CLOUD/Old Factory Generator.jpg)
+
+VS
+
+![Power Plant](./img/Presentation/CLOUD/Power Plant.png)
+
+> Positive Network Externalities
+
+****
+
+#换个角度
+
+- S1: Industrial Revolution 1770-1829 (59yr) <-蒸汽机
+- S2: Steam & Railways 1829-1873 (44yr) <-火车赢得社会的认可, 从利物浦到曼彻斯特的铁路的正式开通
+- S3: Steel, Electricity 1875-1918 (43yr) <-发电机与第一座发电厂
+- S4: Oil, Car, Mass Production 1908-1974 (66yr)<-福特公司使用流水线技术生产第一辆T型车
+- S5: IT & Telecoms 1971-20?? (nb: 1971+53=2024)
+    > 1971 年11 月15 日:Marcian E.Hoff 在Intel 公司开发成功第一块微处理器4004，含2300 个晶体管，字长为4 位，时钟频率为108KHz，每秒执行6 万条指令。 
+    > 第四代计算机随着大规模集成电路的成功而诞生, 微机在社会上的应用领域进一步扩大, 开始形成产业化
+- S6???
+
+----
+
+![科技变革发展曲线](./img/Presentation/Techonological revolutions.png)
+
+----
+
+• Mainframes
+• Minicomputers
+• Micros/PCs
+• LAN/Distributed
+• Internet/Web
+• Utility/Service?
+
+----
+
+##长尾理论 - The long Tail
+
+以往的商业:
+1. 高容量, 高利润
+1. 高容量, 低利润
+1. 低容量, 高利润
+> Key words: physical shelf space, 
+
+现在的商业:
+1. Make everything available
+1. Cut the price
+1. Help me find it
+
+    Key words: Search engine, Ebay, Recommender System
+
+> 淘宝, Adwords
+
+----
+
+![The Long Tail](./img/Presentation/CLOUD/The Long Tail Curve.png)
+
+----
+
+![Mark Zuckerberg.png](./img/Presentation/Mark Zuckerberg.png)
+
+----
+
+##How about Amazon?
+
+In the dotcom boom, it was predicted that small businesses would no longer need intermediaries to sell their products and services
+
+But as the cost of ‘reaching’ decreased, the cost of getting peoples attention increased.
+
+So instead a new kind of intermediary emerged – the online marketplace ---> Amazon
+
+----
+
+##On the contrary
+
+> If two companies are competing with identical digital products, as their variable costs are near-zero, competition will drive the price down to zero.
+
+> So for commodity digital goods, there will be a tendency to monopoly and/or zero pricing.
+
+    Key words: **The net effect**, **Lock-in**, **Digital bunding**
+
+Companies must therefore focus on *product differentiation*, or competing for emerging future monopolies.
+
+----
+
+#逆向工程名词 - Reverse_Engineered Acronym
+
+CLOUD means:
+- Common
+- Location-independent
+- Online
+- Utility-provisioned
+- on-Demand
+
+----
+
+![Cloud Computing](./img/Presentation/CLOUD/Future.png)
+
+----
+
+#IT不再重要 - IT Doesn't matter
+
+- On-demand self-service
+- Broad network access
+- Resource pooling
+- Rapid elasticity
+- Measured service
+
+----
+
+#XaaS
+
+1. SaaS
+1. Paas
+
+    - GooGle APP ENGINE
+    - Amazon APPSTREAM, DYNAMODB, RDS
+
+1. IaaS
+
+    - Amazon EC2, S3, SQS
+    - GOOGLE COMPUTE ENGINE
+
+----
+
+![AWS架构](./img/Presentation/AWS_Classical.png)
+
+****
+
+#还有什么?
+
+1. 物联网 - Internet of Things
+1. 海上数据中心 - Floating Data Centre
+1. 大数据 - Big Data
+
+****
+
+
+----
+
+##物联网 - Internet of Things
+
+![小米硬件](./img/Presentation/CLOUD/Mi_Hardware.png)
+
+----
+
+##海上数据中心 - Floating Data Centre
+
+IT产业已成为化工、钢铁之后第五大能耗产业。目前，全球所有数据中心每年的耗电量相当于30座核电站的发电量。而2011年，中国数据中心的耗电量就已经占到了全社会的2%，相当于三峡大坝的全年发电量。
+[专家：中国数据中心年耗电量惊人](http://www.gog.cn/sjb/system/2013/10/25/012803343.shtml)
+
+2011年我国数据中心总耗电量达700亿千瓦时，已经占到全社会用电量的1.5%，相当于2011年天津市全年的总用电量；921个经营性数据中心机房，面积约88万平米。同时，随着云计算的快速增长，未来5年我国对数据中心流量处理能力需求将增长7-10倍，机房面积需要翻一番才能满足云计算发展的需求。因此，高容量、高密度、高性能和低能耗，成为了未来云服务器的最大标准。
+[云计算耗电量惊人](http://www.jifang360.com/news/2012720/n227038426.html)
+
+----
+
+1. Site to reduce this cost; Cheap electricity locations.
+1. Reduce energy use in Data Centres
+1. Reduce longer term risk: Energy Security
+
+![散热](./img/Presentation/CLOUD/Cloud_Heat.png)
+
+----
+
+![海上数据中心](./img/Presentation/CLOUD/Floating Data Centre.jpg)
+
+----
+
+##大数据 - Big Data
+
+1. Volume
+1. Velocity
+1. Variety
+1. Value
+
+----
+
+从技术上看，大数据与云计算的关系就像一枚硬币的正反面一样密不可分。大数据必然无法用单台的计算机进行处理，必须采用分布式计算架构。它的特色在于对海量数据的挖掘，但它必须依托云计算的分布式处理、分布式数据库、云存储和虚拟化技术。
+
+京东，在今年的双11，京东将整体业务系统迁移至云端，借助弹性云进行全自动化的维护、直接部署，平台实现统一控制，大幅度的提升扩容的速度，达到了良好的用户体验。
+
+----
+
+![未来前景](./Presentation/CLOUD/Mixture)
+
+
+
+#The End
+
+![Burden's Wheel](./img/Presentation/Water-wheel.jpg)
+> "This really is a utility," I said to Sullivan
+> He nodded, grinning. "This is the future".
+
+

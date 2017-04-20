@@ -1,0 +1,140 @@
+
+#Introduction to the Android Platform
+
+##Linux Kernel
+
+###Linux Kernel - STANDARD SERVICES
+
+1. Security
+1. Memory & Process Management
+1. File & Network I/O
+1. Device Device
+
+----
+
+###Linux Kernel - ANDROID SPECIFIC
+1. Power Management
+1. Android Shared Memory
+1. Low Memory Killer
+1. Interprocess COmmunication
+1. And Much more
+
+----
+
+##Libraries
+
+1. System C Library
+
+    Bionic Libc
+
+1. Surface Mgr
+
+    Display Management
+
+1. Media
+1. Framework
+
+    Audio/Video
+
+1. Webkit
+
+    Browser Engine
+
+1. OpenGL
+
+    Graphics Engines
+
+1. SQLite
+
+    Relational Database Engine
+
+----
+
+##Android Runtime
+
+###Core Java Libraries
+
+1. Basic Java Classes -- JAVA.* JAVAX.*
+1. APP Lifecycle -- ANDROID.*
+1. Internet/Web Services -- ORG.*
+1. Unit Testing -- Junit.*
+
+----
+
+##Dalivik Virtual Machine
+APP are executed by the dalvik virtual machine
+
+Designed for resource-constrained environments
+
+    - slower CPU
+    - Less RAM
+    - Limited Battery Life
+
+----
+
+###Workflow
+1. APP written in Java
+1. Compiled to Java byte files
+1. DX converts Java bytecode files to a single dex bytecode file(Classes.dex)
+1. Dalvik executes dex bytecode file
+
+----
+
+##Application Framework
+
+1. Package Management
+
+    Keeps track of app packages on device
+
+1. Window Management
+
+    Manages the windows comprising an app
+
+1. View System
+
+    Provides common user interface elements: icons, text entry boxes, buttons and more
+
+1. Resource Manager
+
+    Manages non-compiled resources: strings, graphics & layout files
+
+1. Activity Manager
+
+    Manages APP lifecycle and navigation stack
+
+1. ContentProvider
+
+    Inter_application data sharing
+
+1. LocationManager
+
+    Providers location & movement information
+
+1. NotificationManager
+
+    Place notification icons in the status bar when important events occur
+
+----
+
+##Application
+
+Nothing special about those standard apps
+
+****
+
+#The Android Developement Environment - Part 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
