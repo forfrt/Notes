@@ -101,6 +101,1083 @@ Internet IP 地址有三种基本类型：
 #Beej's Guide to Network Programming Using Internet Sockets
 [Beej's Guide to Network Programming Using Internet Sockets](http://beej.us/net2/html/index.html)
 
+#Sockets
+
+##Two Type of Internet Sockets
+
+What's this? There are two types of Internet sockets? Yes. Well, no. I'm lying. There are more, but I didn't want to scare you. I'm only going to talk about two types here. Except for this sentence, where I'm going to tell you that "Raw Sockets" are also very powerful and you should look them up.
+
+All right, already. What are the two types? One is "Stream Sockets"; the other is "Datagram Sockets", which may hereafter be referred to as "SOCK_STREAM" and "SOCK_DGRAM", respectively. 
+
+1. Datagram sockets are sometimes called "connectionless sockets". 
+2. Stream sockets are reliable two-way connected communication streams. if you output two items into the socket in the order "1, 2", they will arrive in the order "1, 2" at the opposite end. They will also be error free.
+
+How do stream sockets achieve this high level of data transmission quality? They use a protocol called "The Transmission  Control Protocol", otherwise konwn as "TCP". TCP make sure your data arrives sequentially and error-free. You may have heard  "TCP" before as the better half of "TCP/IP" where "IP" stands for "Internet Protocol". IP deals primarily with Internet routing and is not generally responsible for data integrity.
+
+Datagram sockets also use IP for routing, but they don't use TCP; they use the "User Datagram Protocol", or "UDP"Why are they connectless? Well, basically, it's  because you don't  have to maintain an open connection as you do with strea sockets. You just build a packet, slap an IP header on it with destination information, and send it out. No connection needed. They are generally used for packet-by-packet transfers of informations.
+
+----
+
+#Low level Nonsense and Network Theory
+
+Since I just mentioned layering of protocols, it's time to talk about how networks really work, and to showw some examples of how SOCK_DGRAM packets are built. 
+
+![dataencap](./img/Linux_Network_Programming/dataencap.gif)
+
+When another computer receives the packet, the hardware strips the Ethernet header, the kernel strips the IP and UDP header, the TFTP program strips the TFTP, and it finnally has the data.
+
+Now I can finally talk about the infamous Layered Network Model. This Network Model describes a system of network functionality that has many advantages over other models. For instance, you can write sockets programs that are exactly the same without caring how the data is physically transmitted (serial, thin Ethernet, AUI, whatever) because programs on lower levels deal with it for you. The actual network hardware and topology is transparent to the socket programmer.
+
+Without any further ado, I'll present the layers of the full-blown model. Remember this for network class exams:
+
+- Application
+- Presentation
+- Session
+- Transport
+- Network
+- Data Link
+- Physical
+
+The Physical Layer is the hardware. The Application Layer is just about as far from the physical layer as  you can imagine--it's the place where users interact with the network.
+
+A layered model more consistent with Unix might be:
+- Application Layer (telnet, ftp, etc.)
+- Host-to-Host Transport Layer (TCP, UDP)
+- Internet Layer (IP and routing)
+- Network Access Layer (Ethernet, ATM, or whatever)
+
+All you have to do for stream sockets is send() the data out. All you have to do for datagram sockets is encapsulate the packet in the method of your choosing and sendto() it out. The kernel builds the Transport Layer and Internet Layer on for you and the hardware does the Network Access Layer.
+
+----
+
+#structs and Data Handling
+
+First the easy one: a socket descriptor. A socket descriptor is the following type: `int`
+
+There are two byte orderings: most significant byte (sometimes called an "octet") first, or least significant byte first. The former is called "Network Byte Order". When I say something has to be in Network Byte Order, you have to call a function (such as htons()) to change it from "Host Byte Order". If I don't say "Network Byte Order", then you must leave the value in Host Byte Order.
+
+My First Struct TM--`struct sockaddr`. This structure holds socket address information for many types of sockets:
+
+    struct sockaddr {
+        unsigned short    sa_family;    // address family, AF_xxx
+        char              sa_data[14];  // 14 bytes of protocol address
+    }; 
+
+`sa_family` can be a variety of things, but it'll be `AF_INET` for everything we do in this document. `sa_data` contains a destination address and port number for the socket. This is rather unwieldy since you don't want to tediously pack the address in the `sa_data` by hand.
+
+To deal with `struct sockaddr`, programmers created a parallel structure: `struct sockaddr_in` ("in" for "Internet")
+
+    struct sockaddr_in {
+        short int           sin_family;
+        unsigned short int  sin_port;
+        struct in_addr      sin_addr;
+        unsigned char       sin_zero[8];
+    }
+
+This structure makes it easy to reference elements of the socket address. Note that `sin_zero` (which is included to pad the structure to the length of a `struct sockaddr`). A pointer to a `struct sockaddr_in` can be cast to a pointer to a `struct sockaddr` and vice-versa. The `sin_port` and `sin_addr` must be in *Network Byte Order*!
+
+The question, how can the entire structure, `struct in_addr sin_addr`, be in Network Byte Order, requires careful examination of the structure `struct in_addr`:
+
+    struct in_addr{
+        unsigned long s_addr;
+    }
+
+So if you have declared `ina` to be of type `struct sockaddr_in`, then `ina.sin_addr.s_addr` references the 4-byte IP address.
+
+----
+
+##Convert the Natives
+
+There are two types that you can convert: `short` and `long`. These functions work for the unsigned variation as well. The function needed starts with "h" for "host", follow it with "to", then "n" for "network", and "s" for "short": `htons()`:
+- htons()   Host to Network Short
+- htonl()   Host to Network Long
+- ntohs()   Network to Host Short
+- ntohl()   Network to Host Long
+
+> Why do `sin_addr` and `sin_port` need to be in Network Byte Order in a `struct sockaddr_in`, but `sin_family` does not?
+> The answer: `sin_addr` and `sin_port` get encapsulated in the packet at the IP and UDP layers, respectively. Thus, they must be in Network Byte Order. However, the `sin_fmaily` field is only used by the kernel to determine what type of address the structure contains, so it must be in Host Byte Order. Also, since `since_family` does not get send out on the network, it can be in Host Byte Order.
+
+##IP Addresses and How to Deal With Them
+
+First, let's say you have a `struct sockaddr_in ina`, and you have an IP address "10.12.110.57" that you want to store into it. The function you want to use, `inet_addr()`, converts an IP address in numbers-and-dots notation into an unsigned long. The assignment can be made as follows:
+
+    ina.sin_addr.s_addr=inet_addr("10.12.110.57");
+
+Notice that `inet_addr()` returns the address in Network Byte Order already-you don't have to call htonl(). 
+
+> Now, the above code snippet isn't very robust because there is no error checking. See, `inet_addr()` returns -1 on error. Remember binary numbers? (unsigned)-1 just happens to correspond to the IP address 255.255.255.255! That's the broadcast address! Wrongo. Remember to do your error checking properly.
+
+Actually, ,there is a cleaner interface you can use instead of `inet_addr()`: it's called `inet_aton()` ("aton" means "ascii to network"):
+
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+
+    int inet_aton(const char *cp, struct in_addr *inp); 
+
+And here's a sample usage, while packing a `struct sockaddr_in`
+
+    struct sockaddr_in my_addr;
+
+    my_addr.sin_family = AF_INET;         // host byte order
+    my_addr.sin_port = htons(MYPORT);     // short, network byte order
+    inet_aton("10.12.110.57", &(my_addr.sin_addr));
+    memset(&(my_addr.sin_zero), '\0', 8); // zero the rest of the struct 
+
+`inet_aton()`, unlike practically every other socket-related function, returns non-zero on success, and zero on failure. And the address is passed back in `inp`. Unfortunately, not all platforms implement `inet_aton()` so, althought its use is preferred, the older more common `inet_addr()` is used in this guide.
+
+What if you have a `struct in_addr` and you want to print it in numbers-and-dots notation. In this case, you'll want to use the function `inet_ntoa()` ("ntoa" means "network to ascii")
+
+    printf("%s", inet_ntoa(ina.sin_addr)); 
+
+It returns a pointer to a char. This points to a statically stored char array within `inet_ntoa()` so that each time you call `inet_ntoa()` it will overwrite the last IP address you asked for.
+
+    char *a1, *a2;
+    .
+    .
+    a1 = inet_ntoa(ina1.sin_addr);  // this is 192.168.4.14
+    a2 = inet_ntoa(ina2.sin_addr);  // this is 10.12.110.57
+    printf("address 1: %s\n",a1);
+    printf("address 2: %s\n",a2); 
+
+will print
+
+    address 1: 10.12.110.57
+    address 2: 10.12.110.57 
+
+----
+
+#System Calls or Bust
+
+This is the section where we get into the system calls that allow you to access the network functionality of a Unix box. When you call one of these functions, the kernel takes over and does all the work for you automagically.
+
+##`socket()`--Get the File Descriptor!
+
+    #include <sys/types.h>
+    #include <sys/socket.h>
+
+    int socket(int domain, int type, int protocol); 
+    
+First, `domain` should be set to "AF_INET", just like in the `struct sockaddr_in`. Next, the `type` argument tells the kernel what kind of socket this is: SOCK_STREAM or SOCK_DGRAM. Finally, just set `protocol` to "0" to have `socketet()` choose the correct protocol based on the `type`.
+
+`socket()` simply returns to you a socket descriptor that you can use in later system calls, or -1 on error. The global variable `errno` is set to the error's value.
+
+ Once a long time ago, it was thought that maybe a address family (what the "AF" in "AF_INET" stands for) might support several protocols that were referenced by their protocol family (what the "PF" in "PF_INET" stands for). That didn't happen. Oh well. *So the correct thing to do is to use AF_INET in your struct sockaddr_in and PF_INET in your call to socket()*. But practically speaking, you can use AF_INET everywhere.
+
+##`bind()`--What port am I on
+
+Once you have a socket, you might have to associate that socket with a port on your local machine. (This is commonly done if you're going to listen() for incoming connections on a specific port--MUDs do this when they tell you to "telnet to x.y.z port 6969".) *The port number is used by the kernel to match an incoming packet to a certain process's socket descriptor*. If you're going to only be doing a connect(), this may be unnecessary.
+
+    #include <sys/types.h>
+    #include <sys/socket.h>
+
+    int bind(int sockfd, struct sockaddr *my_addr, int addrlen); 
+
+`sockfd` is the socket file descriptor returned by `socket()`. `my_addr` is a pointer to a `struct sockaddr` that contains information about your address, namely, port and IP address. addrlen can be set to `sizeof(struct sockaddr)`.
+
+Lastly, on the topic of bind(), I should mention that some of the process of getting your own IP address and/or port can can be automated:
+
+    my_addr.sin_port = 0; // choose an unused port at random
+    my_addr.sin_addr.s_addr = INADDR_ANY;  // use my IP address 
+
+> if you are into noticing little things, you might have seen that I didn't put INADDR_ANY into Network Byte Order! Naughty me. However, I have inside info: INADDR_ANY is really zero! Zero still has zero on bits even if you rearrange the bytes.
+
+`bind()` also returns -1 on error and sets errno to the error's value.
+
+Another thing to watch out for when calling `bind()`: don't go underboard with your port numbers. All ports below 1024 are RESERVED (unless you're the superuser)! You can have any port number above that, right up to 65535 (provided they aren't already being used by another program.)
+
+Sometimes, you might notice, you try to rerun a server and `bind()` fails, claiming "Address already in use." What does that mean? Well, a bit a of socket that was connected is still hanging around in the kernel, and it's hogging the port. You can either wait for it to clear (a minute or so), or *add code to your program allowing it to reuse the port*, like this:
+
+    int yes=1; //char yes='1'; // Solaris people use this
+
+    // lose the pesky "Address already in use" error message
+    if (setsockopt(listener,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(int)) == -1) {
+        perror("setsockopt");
+        exit(1);
+    }
+
+One small extra final note about `bind()`: there are times when you won't absolutely have to call it. If you are `connect()`ing to a remote machine and you don't care what your local port is (as is the case with telnet where you only care about the remote port), you can simply call `connect()`, it'll check to see if the socket is unbound, and will `bind()` it to an unused local port if necessary.
+
+----
+
+##`connect()`--Hey, you!
+
+    #include <sys/types.h>
+    #include <sys/socket.h>
+
+    int connect(int sockfd, struct sockaddr *serv_addr, int addrlen); 
+
+`sockfd` is our friendly neighborhood socket file descriptor, as returned by the `socket()` call, `serv_addr` is a `struct sockaddr` containing the destination port and IP address, and `addrlen` can be set to `sizeof(struct sockaddr)`.
+
+Again, be sure to check the return value from `connect()`--it'll return -1 on error and set the variable `errno`.
+
+Also, notice that we didn't call `bind(). Basically, we don't care about our local port number; we only care where we're going. The kernel will choose a local port for us, and the site we connect to will automatically get this information from us.
+
+----
+
+##`listen()`--Will somebody please call me?
+
+You want to wait for incoming connections and handle them in some way. The process is two step: first you `listen()`, then you `accept()`
+
+    int listen(int sockfd, int backlog); 
+
+`sockfd` is the usual socket file descriptor from the `socket*(` system call. `backlog` is the number of connections allowed on the incoming queue.
+
+Again, as per usual, `listen()` returns -1 and sets `errno` on error.
+
+Well, as you can probably imagine, we need to call `bind()` before we call `listen` or the kernel will have us listening on a random ort. So if you're going to be listening for incoming connections, the sequence of system calls you'll make is:
+
+    socket();
+    bind();
+    listen();
+
+----
+
+##`accept()`--"Thank you for calling port 3490"
+
+
+The `accept()` call is kinda weird! What's going to happen is this: someone far far away will try to `connect()` to your machine on a port that you are `listen()`ing on. Their connection will be queued up waiting to be `accept()`ed. You call `accept()` and you tell it to get the pending connection. It'll return to you a brand new socket file descriptor to use for this single connection!
+
+    #include <sys/socket.h>
+
+    int accept(int sockfd, void *addr, int *addrlen); 
+
+`sockfd` is the `listen()`ing socket descriptor. `addr` will usually be a pointer to a local `struct sockaddr_in`. This is where the information about the incomming connection will go. `addrlen` is a local integer variable that should be set to `sizeof(struct sockaddr_in)` *before its address is passed to `accept()`*. Accept will not put more than that many bytes into `addr`. If it puts fewer in, it'll change the value of `addrlen` to reflect that.
+
+`accept()` returns -1 and sets `errno` if an error occurs.
+
+----
+
+##`send()` and `recv()`--Talk to me, baby!
+
+These two functions are for communicating over stream sockets or connected datagram sockets. If you want to use regular unconnected datagram sockets, you'll need to see the section on `sendto()` and `recvfrom()`, below.
+
+    int send(int sockfd, const void *msg, int len, int flags); 
+
+`sockfd` is the socket descriptor you want to send data to (whether it's the one returned by `socket()` or the one you got with `accept()`.) `msg` is a pointer to the data you want to send, and `len` is the length of that data in bytes. Just set `flags` to 0. (See the send() man page for more information concerning flags.)
+
+    char *msg = "Beej was here!";
+    int len, bytes_sent;
+    .
+    .
+    len = strlen(msg);
+    bytes_sent = send(sockfd, msg, len, 0);
+
+`send()` returns the number of bytes actually sent out--*this might be less than the number you told it to send!* See, sometimes you tell it to send a whole gob of data and it just can't handle it. It'll fire off as much of the data as it can, and trust you to send the rest later. Remember, if the value returned by `send()` doesn't match the value in `len`, *it's up to you to send the rest of the string*. The good news is this: if the packet is small (less than 1K or so) it will probably manage to send the whole thing all in one go. 
+
+Again, -1 is returned on error, and errno is set to the error number.
+
+    int recv(int sockfd, void *buf, int len, unsigned int flags); 
+
+`sockfd` is the socket descriptor to read from, `buf` is the buffer to read the information into, `len` is the maximum length of the buffer, and `flags` can again be set to 0. (See the recv() man page for flag information.)
+
+`recv()` returns the number of bytes actually read into the buffer, or -1 on error (with `errno` set, accordingly.)
+
+Wait! `recv()` can return 0. This can mean only one thing: the remote side has closed the connection on you! A return value of 0 is `recv()`'s way of letting you know this has occurred.
+
+----
+
+##`sendto()` and `recvfrom()`--Talk to me, DGRAM-style
+
+Since datagram sockets aren't connected to a remote host, guess which piece of information we need to give before we send a packet? That's right! The destination address! Here's the scoop:
+
+    int sendto(int sockfd, const void *msg, int len, unsigned int flags,
+               const struct sockaddr *to, int tolen); 
+
+As you can see, this call is basically the same as the call to `send()` with the addition of two other pieces of information. `to` is a pointer to a `struct sockaddr` (which you'll probably have as a `struct sockaddr_in` and cast it at the last minute) which contains the destination IP address and port. `tolen` can simply be set to `sizeof(struct sockaddr)`.
+
+Just like with `send()`, `sendto()` returns the number of bytes actually sent (which, again, might be less than the number of bytes you told it to send!), or -1 on error.
+
+    int recvfrom(int sockfd, void *buf, int len, unsigned int flags,
+                 struct sockaddr *from, int *fromlen); 
+
+Again, this is just like `recv()` with the addition of a couple fields. `from` is a pointer to a local `struct sockaddr` that will be filled with the IP address and port of the originating machine. fromlen is a pointer to a local int that should be initialized to sizeof(struct sockaddr). When the function returns, fromlen will contain the length of the address actually stored in from.
+
+`recvfrom()` returns the number of bytes received, or 1 on error (with `errno` set accordingly.)
+
+Remember, if you `connect()` a datagram socket, you can then simply use `send()` and `recv()` for all your transactions. The socket itself is still a datagram socket and the packets still use UDP, but the socket interface will automatically add the destination and source information for you.
+
+----
+
+##`close()` and `shutdown()`--Get outta my face!
+
+You've been `send()`ing and `recv()`ing data all day long, and you've had it. You're ready to close the connection on your socket descriptor.
+
+    close(sockfd);
+
+This will prevent any more reads and writes to the socket. Anyone attempting to read or write the socket on the remote end will receive an error.
+
+Just in case you want a little more control over how the socket closes, you can use the `shutdown()` function. It allows you to cut off communication in a certain direction, or both ways (just like `close()` does.) Synopsis:
+
+    int shutdown(int sockfd, int how); 
+
+`sockfd` is the socket file descriptor you want to shutdown, and `how` is one of the following:
+- 0 -- Further receives are disallowed
+- 1 -- Further sends are disallowed
+- 2 -- Further sends and receives are disallowed (like close())
+
+`shutdown()` returns 0 on success, and -1 on error (with `errno` set accordingly.)
+
+If you deign to use `shutdown()` on unconnected datagram sockets, it will simply make the socket unavailable for further `send()` and `recv()` calls (remember that you can use these if you `connect()` your datagram socket.)
+
+It's important to note that `shutdown()` doesn't actually close the file descriptor--it just changes its usability. To free a socket descriptor, you need to use `close()`.
+
+----
+
+##`getpeername()`--Who are you?
+
+    #include <sys/socket.h>
+
+    int getpeername(int sockfd, struct sockaddr *addr, int *addrlen); 
+
+`sockfd` is the descriptor of the connected stream socket, `addr` is a pointer to a `struct sockaddr` (or a `struct sockaddr_in`) that will hold the information about the other side of the connection, and `addrlen` is a pointer to an `int`, that should be initialized to `sizeof(struct sockaddr)`.
+
+The function returns -1 on error and sets errno accordingly.
+
+Once you have their address, you can use `inet_ntoa()` or `gethostbyaddr()` to print or get more information.
+
+----
+
+##`gethostname()`--Who am I?
+
+Even easier than `getpeername()` is the function `gethostname()`. It returns the name of the computer that your program is running on. The name can then be used by `gethostbyname()`, below, to determine the IP address of your local machine.
+
+    #include <unistd.h>
+
+    int gethostname(char *hostname, size_t size); 
+
+The arguments are simple: `hostname` is a pointer to an array of chars that will contain the hostname upon the function's return, and `size` is the length in bytes of the `hostname` array.
+
+The function returns 0 on successful completion, and -1 on error, setting errno as usual.
+
+----
+
+##DNS--You say "whitehouse.gov", I say "198.137.240.92"
+
+    $ telnet whitehouse.gov
+
+`telnet` can find out that it needs to `connect()` to "198.137.240.92".
+
+    #include <netdb.h>
+
+    struct hostent *gethostbyname(const char *name); 
+
+As you see, it returns a pointer to a `struct hostent`, the layout of which is as follows:
+
+    struct hostent {
+        char    *h_name;
+        char    **h_aliases;
+        int     h_addrtype;
+        int     h_length;
+        char    **h_addr_list;
+    };
+    #define h_addr h_addr_list[0] 
+
+And here are the descriptions of the fields in the `struct hostent`:
+
+- `h_name` -- Official name of the host.
+- `h_aliases` -- A NULL-terminated array of alternate names for the host.
+- `h_addrtype` -- The type of address being returned; usually AF_INET.
+- `h_length` -- The length of the address in bytes.
+- `h_addr_list` -- A zero-terminated array of network addresses for the host. Host addresses are in Network Byte Order.
+- `h_addr` -- The first address in `h_addr_list`.
+
+`gethostbyname()` returns a pointer to the filled `struct hostent`, or NULL on error. (But `errno` is not set--`h_errno` is set instead. See `herror()`, below.)
+
+With `gethostbyname(), you can't use perror() to print error message (since errno is not used). Instead, call herror(). 
+
+    /*
+    ** getip.c -- a hostname lookup demo
+    */
+    
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <errno.h>
+    #include <netdb.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+    
+    int main(int argc, char *argv[])
+    {
+        struct hostent *h;
+    
+        if (argc != 2) {  // error check the command line
+            fprintf(stderr,"usage: getip address\n");
+            exit(1);
+        }
+    
+        if ((h=gethostbyname(argv[1])) == NULL) {  // get the host info
+            herror("gethostbyname");
+            exit(1);
+        }
+    
+        printf("Host name  : %s\n", h->h_name);
+        printf("IP Address : %s\n", inet_ntoa(*((struct in_addr *)h->h_addr)));
+       
+       return 0;
+    } 
+
+With `gethostbyname()`, you can't use `perror()` to print error message (since `errno` is not used). Instead, call `herror()`.
+
+> The only possible weirdness might be in the printing of the IP address, above. `h->h_addr` is a char*, but `inet_ntoa()` wants a `struct in_addr` passed to it. So I cast `h->h_addr` to a `struct in_addr*`, then dereference it to get at the data.
+
+----
+
+#Client-Server Background
+
+It's a client-server world, baby. Just about everything on the network deals with client processes talking to server processes and vice-versa. Take telnet, for instance. When you connect to a remote host on port 23 with telnet (the client), a program on that host (called telnetd, the server) springs to life. It handles the incoming telnet connection, sets you up with a login prompt, etc.
+
+![Client-Server Interaction](./img/Linux_Network_Programming/Client-Server_Interaction.gif)
+
+Note that the client-server pair can speak `SOCK_STREAM`, `SOCK_DGRAM`, or anything else (as long as they're speaking the same thing.) Some good examples of client-server pairs are telnet/telnetd, ftp/ftpd, or bootp/bootpd. Every time you use ftp, there's a remote program, ftpd, that serves you.
+
+Often, there will only be one server on a machine, and that server will handle multiple clients using `fork()`. The basic routine is: server will wait for a connection, `accept()` it, and `fork()` a child process to handle it. This is what our sample server does in the next section.
+
+----
+
+##A Simple Stream Server
+
+All this server does is send the string "Hello, World!\n" out over a stream connection. All you need to do to test this server is run it in one window, and telnet to it from another with:
+
+    $ telnet remotehostname 3490
+
+Where `remotehostname` is the name of the machine you're running it on.
+
+    /*
+    ** server.c -- a stream socket server demo
+    */
+    
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <unistd.h>
+    #include <errno.h>
+    #include <string.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+    #include <sys/wait.h>
+    #include <signal.h>
+    
+    #define MYPORT 3490    // the port users will be connecting to
+    
+    #define BACKLOG 10     // how many pending connections queue will hold
+    
+    void sigchld_handler(int s)
+    {
+        while(wait(NULL) > 0);
+    }
+    
+    int main(void)
+    {
+        int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
+        struct sockaddr_in my_addr;    // my address information
+        struct sockaddr_in their_addr; // connector's address information
+        int sin_size;
+        struct sigaction sa;
+        int yes=1;
+    
+        if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+            perror("socket");
+            exit(1);
+        }
+    
+        if (setsockopt(sockfd,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(int)) == -1) {
+            perror("setsockopt");
+            exit(1);
+        }
+        
+        my_addr.sin_family = AF_INET;         // host byte order
+        my_addr.sin_port = htons(MYPORT);     // short, network byte order
+        my_addr.sin_addr.s_addr = INADDR_ANY; // automatically fill with my IP
+        memset(&(my_addr.sin_zero), '\0', 8); // zero the rest of the struct
+    
+        if (bind(sockfd, (struct sockaddr *)&my_addr, sizeof(struct sockaddr))
+                                                                       == -1) {
+            perror("bind");
+            exit(1);
+        }
+    
+        if (listen(sockfd, BACKLOG) == -1) {
+            perror("listen");
+            exit(1);
+        }
+    
+        sa.sa_handler = sigchld_handler; // reap all dead processes
+        sigemptyset(&sa.sa_mask);
+        sa.sa_flags = SA_RESTART;
+        if (sigaction(SIGCHLD, &sa, NULL) == -1) {
+            perror("sigaction");
+            exit(1);
+        }
+    
+        while(1) {  // main accept() loop
+            sin_size = sizeof(struct sockaddr_in);
+            if ((new_fd = accept(sockfd, (struct sockaddr *)&their_addr,
+                                                           &sin_size)) == -1) {
+                perror("accept");
+                continue;
+            }
+            printf("server: got connection from %s\n",
+                                               inet_ntoa(their_addr.sin_addr));
+            if (!fork()) { // this is the child process
+                close(sockfd); // child doesn't need the listener
+                if (send(new_fd, "Hello, world!\n", 14, 0) == -1)
+                    perror("send");
+                close(new_fd);
+                exit(0);
+            }
+            close(new_fd);  // parent doesn't need this
+        }
+    
+        return 0;
+    } 
+
+----
+
+##A Simple Stream Client
+
+All this client does is connect to the host you specify on the command line, port 3490. It gets the string that the server sends.
+
+    /*
+    ** client.c -- a stream socket client demo
+    */
+    
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <unistd.h>
+    #include <errno.h>
+    #include <string.h>
+    #include <netdb.h>
+    #include <sys/types.h>
+    #include <netinet/in.h>
+    #include <sys/socket.h>
+    
+    #define PORT 3490 // the port client will be connecting to 
+    
+    #define MAXDATASIZE 100 // max number of bytes we can get at once 
+    
+    int main(int argc, char *argv[])
+    {
+        int sockfd, numbytes;  
+        char buf[MAXDATASIZE];
+        struct hostent *he;
+        struct sockaddr_in their_addr; // connector's address information 
+    
+        if (argc != 2) {
+            fprintf(stderr,"usage: client hostname\n");
+            exit(1);
+        }
+    
+        if ((he=gethostbyname(argv[1])) == NULL) {  // get the host info 
+            perror("gethostbyname");
+            exit(1);
+        }
+    
+        if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+            perror("socket");
+            exit(1);
+        }
+    
+        their_addr.sin_family = AF_INET;    // host byte order 
+        their_addr.sin_port = htons(PORT);  // short, network byte order 
+        their_addr.sin_addr = *((struct in_addr *)he->h_addr);
+        memset(&(their_addr.sin_zero), '\0', 8);  // zero the rest of the struct 
+    
+        if (connect(sockfd, (struct sockaddr *)&their_addr,
+                                              sizeof(struct sockaddr)) == -1) {
+            perror("connect");
+            exit(1);
+        }
+    
+        if ((numbytes=recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
+            perror("recv");
+            exit(1);
+        }
+    
+        buf[numbytes] = '\0';
+    
+        printf("Received: %s",buf);
+    
+        close(sockfd);
+    
+        return 0;
+    } 
+
+Notice that if you don't run the server before you run the client, connect() returns "Connection refused". Very useful.
+
+----
+
+##Datagram Sockets
+
+**listener** sits on a machine waiting for an incoming packet on port 4950. **talker** sends a packet to that port, on the specified machine, that contains whatever the user enters on the command line.
+
+    /*
+    ** listener.c -- a datagram sockets "server" demo
+    */
+    
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <unistd.h>
+    #include <errno.h>
+    #include <string.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+    
+    #define MYPORT 4950    // the port users will be connecting to
+    
+    #define MAXBUFLEN 100
+    
+    int main(void)
+    {
+        int sockfd;
+        struct sockaddr_in my_addr;    // my address information
+        struct sockaddr_in their_addr; // connector's address information
+        int addr_len, numbytes;
+        char buf[MAXBUFLEN];
+    
+        if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
+            perror("socket");
+            exit(1);
+        }
+    
+        my_addr.sin_family = AF_INET;         // host byte order
+        my_addr.sin_port = htons(MYPORT);     // short, network byte order
+        my_addr.sin_addr.s_addr = INADDR_ANY; // automatically fill with my IP
+        memset(&(my_addr.sin_zero), '\0', 8); // zero the rest of the struct
+    
+        if (bind(sockfd, (struct sockaddr *)&my_addr,
+                                              sizeof(struct sockaddr)) == -1) {
+            perror("bind");
+            exit(1);
+        }
+    
+        addr_len = sizeof(struct sockaddr);
+        if ((numbytes=recvfrom(sockfd,buf, MAXBUFLEN-1, 0,
+                           (struct sockaddr *)&their_addr, &addr_len)) == -1) {
+            perror("recvfrom");
+            exit(1);
+        }
+    
+        printf("got packet from %s\n",inet_ntoa(their_addr.sin_addr));
+        printf("packet is %d bytes long\n",numbytes);
+        buf[numbytes] = '\0';
+        printf("packet contains \"%s\"\n",buf);
+    
+        close(sockfd);
+    
+        return 0;
+    } 
+
+Notice that in our call to `socket()` we're finally using `SOCK_DGRAM`. Also, note that there's no need to `listen()` or `accept()`. This is one of the perks of using unconnected datagram sockets!
+
+    /*
+    ** talker.c -- a datagram "client" demo
+    */
+    
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <unistd.h>
+    #include <errno.h>
+    #include <string.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+    #include <netdb.h>
+    
+    #define MYPORT 4950    // the port users will be connecting to
+    
+    int main(int argc, char *argv[])
+    {
+        int sockfd;
+        struct sockaddr_in their_addr; // connector's address information
+        struct hostent *he;
+        int numbytes;
+    
+        if (argc != 3) {
+            fprintf(stderr,"usage: talker hostname message\n");
+            exit(1);
+        }
+    
+        if ((he=gethostbyname(argv[1])) == NULL) {  // get the host info
+            perror("gethostbyname");
+            exit(1);
+        }
+    
+        if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
+            perror("socket");
+            exit(1);
+        }
+    
+        their_addr.sin_family = AF_INET;     // host byte order
+        their_addr.sin_port = htons(MYPORT); // short, network byte order
+        their_addr.sin_addr = *((struct in_addr *)he->h_addr);
+        memset(&(their_addr.sin_zero), '\0', 8); // zero the rest of the struct
+    
+        if ((numbytes=sendto(sockfd, argv[2], strlen(argv[2]), 0,
+             (struct sockaddr *)&their_addr, sizeof(struct sockaddr))) == -1) {
+            perror("sendto");
+            exit(1);
+        }
+    
+        printf("sent %d bytes to %s\n", numbytes,
+                                               inet_ntoa(their_addr.sin_addr));
+    
+        close(sockfd);
+    
+        return 0;
+    } 
+
+Except for one more tiny detail that I've mentioned many times in the past: connected datagram sockets. I need to talk about this here, since we're in the datagram section of the document. Let's say that talker calls `connect()` and specifies the listener's address. From that point on, talker may only sent to and receive from the address specified by `connect()`. For this reason, you don't have to use `sendto()` and `recvfrom()`; you can simply use send() and recv().
+
+----
+
+#Slightly Advanced Techniques
+
+##Blocking
+
+Lots of functions block. `accept()` blocks. All the `recv()` functions block. The reason they can do this is because they're allowed to. When you first create the socket descriptor with `socket()`, the kernel sets it to blocking. If you don't want a socket to be blocking, you have to make a call to `fcntl()`:
+
+    #include <unistd.h>
+    #include <fcntl.h>
+    .
+    .
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    fcntl(sockfd, F_SETFL, O_NONBLOCK);
+    .
+    . 
+
+By setting a socket to non-blocking, you can effectively "poll" the socket for information. If you try to read from a non-blocking socket and there's no data there, it's not allowed to block--it will return -1 and `errno` will be set to **EWOULDBLOCK**.
+
+Generally speaking, however, this type of polling is a bad idea. If you put your program in a busy-wait looking for data on the socket, you'll suck up CPU time like it was going out of style. A more elegant solution for checking to see if there's data waiting to be read comes in the follwing section on `select()`.
+
+----
+
+##`select()`--Synchronous I/O Multiplexing
+
+This function is somewhat strange, but it's very useful. Take the following situation: you are a server and you want to listen for incoming connections as well as keep reading from the connections you already have.
+
+No problem, you say, just an `accept()` and a couple of `recv()`s. Not so fast, buster! What if you're blocking on an `accept()` call? How are you going to `recv()` data at the same time? "Use non-blocking sockets!" No way! You don't want to be a CPU hog. What, then?
+
+`select()` gives you the power to monitor several sockets at the same time. It'll tell you which ones are ready for reading, which are ready for writing, and which sockets have raised exceptions, if you really want to know that.
+
+   #include <sys/time.h>
+   #include <sys/types.h>
+   #include <unistd.h>
+
+   int select(int numfds, fd_set *readfds, fd_set *writefds,
+              fd_set *exceptfds, struct timeval *timeout); 
+
+The function monitors "sets" of file descriptors; in particular `readfds`, `writefds`, and `exceptfds`. If you want to see if you can read from standard input and some socket descriptor, `sockfd`, just add the file descriptors 0 and `sockfd` to the set `readfds`. The parameter `numfds` should be set to the values of the highest file descriptor plus one. In this example, it should be set to `sockfd+1`, since it is assuredly higher than standard input (0).
+
+When `select()` returns, `readfds` will be modified to reflect which of the file descriptors you  selected which is ready for reading. You can test them with the macro `FD_ISSET()`, blow.
+
+Before progressing much further, I'll talk about how to manipulate these sets. Each set is of the type `fd_set`. The following macros operate on this type:
+
+- `FD_ZERO(fd_set *set)` -- clears a file descriptor set
+- `FD_SET(int fd, fd_set *set)` -- adds `fd` to the set
+- `FD_CLR(int fd, fd_set *set)` -- removes `fd` from the set
+- `FD_ISSET(int fd, fd_set *set)` -- tests to see if `fd` is in the set
+
+Finally, what is this weirded out `struct timeval`? Well, sometimes you don't want to wait forever for someone to send you some data. Maybe every 96 seconds you want to print "Still Going..." to the terminal even though nothing has happened. This time struct allows you to specify a timeout period. If the time is exceeded and select() still hasn't found any ready file descriptors, it'll return so you can continue processing.
+
+    struct timeval {
+    
+        int tv_sec;     // seconds
+        int tv_usec;    // microseconds
+    }; 
+
+Yay! We have a microsecond resolution timer! Well, don't count on it. Standard Unix timeslice is around 100 milliseconds, so you might have to wait that long no matter how small you set your `struct timeval`.
+
+Other things of interest: If you set the fields in your `struct timeval` to 0, `select()` will timeout immediately, effectively polling all the file descriptors in your sets. If you set the parameter `timeout` to NULL, it will never timeout, and will wait until the first file descriptor is ready. Finally, if you don't care about waiting for a certain set, you can just set it to NULL in the call to `select()`.
+
+    /*
+    ** select.c -- a select() demo
+    */
+    
+    #include <stdio.h>
+    #include <sys/time.h>
+    #include <sys/types.h>
+    #include <unistd.h>
+    
+    #define STDIN 0  // file descriptor for standard input
+    
+    int main(void)
+    {
+        struct timeval tv;
+        fd_set readfds;
+    
+        tv.tv_sec = 2;
+        tv.tv_usec = 500000;
+    
+        FD_ZERO(&readfds);
+        FD_SET(STDIN, &readfds);
+    
+        // don't care about writefds and exceptfds:
+        select(STDIN+1, &readfds, NULL, NULL, &tv);
+    
+        if (FD_ISSET(STDIN, &readfds))
+            printf("A key was pressed!\n");
+        else
+            printf("Timed out.\n");
+    
+        return 0;
+    } 
+
+If you're on a line buffered terminal, the key you hit should be RETURN or it will time out anyway.
+
+Now, some of you might think this is a great way to wait for data on datagram socket--and you are right: it might be. Some unices can use `select` in this manneer, and some can't. You should see what your local man page says on the matter if you want to attempt it.
+
+What happens if a socket in the read set closes the connection? Well, in that case, `select()` returns with that socket descriptor set as "ready to read". When you actually do `recv()` from it, `recv()` will return 0. That's how you know the client has closed the connection.
+
+One more note of interest about `select()`: if you have a socket that is `listen()`ing, you can check to see if there is a new connection by putting that socket's file descriptor in the readfds set.
+
+----
+
+This program acts like a simple multi-user chat server. Start it running in one window, then telnet to it ("telnet hostname 9034") from multiple other windows. When you type something in one telnet session, it should appear in all the others.
+
+    /*
+    ** selectserver.c -- a cheezy multiperson chat server
+    */
+    
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+    
+    #define PORT 9034   // port we're listening on
+    
+    int main(void)
+    {
+        fd_set master;   // master file descriptor list
+        fd_set read_fds; // temp file descriptor list for select()
+        struct sockaddr_in myaddr;     // server address
+        struct sockaddr_in remoteaddr; // client address
+        int fdmax;        // maximum file descriptor number
+        int listener;     // listening socket descriptor
+        int newfd;        // newly accept()ed socket descriptor
+        char buf[256];    // buffer for client data
+        int nbytes;
+        int yes=1;        // for setsockopt() SO_REUSEADDR, below
+        int addrlen;
+        int i, j;
+    
+        FD_ZERO(&master);    // clear the master and temp sets
+        FD_ZERO(&read_fds);
+    
+        // get the listener
+        if ((listener = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+            perror("socket");
+            exit(1);
+        }
+    
+        // lose the pesky "address already in use" error message
+        if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes,
+                                                            sizeof(int)) == -1) {
+            perror("setsockopt");
+            exit(1);
+        }
+    
+        // bind
+        myaddr.sin_family = AF_INET;
+        myaddr.sin_addr.s_addr = INADDR_ANY;
+        myaddr.sin_port = htons(PORT);
+        memset(&(myaddr.sin_zero), '\0', 8);
+        if (bind(listener, (struct sockaddr *)&myaddr, sizeof(myaddr)) == -1) {
+            perror("bind");
+            exit(1);
+        }
+    
+        // listen
+        if (listen(listener, 10) == -1) {
+            perror("listen");
+            exit(1);
+        }
+    
+        // add the listener to the master set
+        FD_SET(listener, &master);
+    
+        // keep track of the biggest file descriptor
+        fdmax = listener; // so far, it's this one
+    
+        // main loop
+        for(;;) {
+            read_fds = master; // copy it
+            if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) {
+                perror("select");
+                exit(1);
+            }
+    
+            // run through the existing connections looking for data to read
+            for(i = 0; i <= fdmax; i++) {
+                if (FD_ISSET(i, &read_fds)) { // we got one!!
+                    if (i == listener) {
+                        // handle new connections
+                        addrlen = sizeof(remoteaddr);
+                        if ((newfd = accept(listener, (struct sockaddr *)&remoteaddr,
+                                                                 &addrlen)) == -1) { 
+                            perror("accept");
+                        } else {
+                            FD_SET(newfd, &master); // add to master set
+                            if (newfd > fdmax) {    // keep track of the maximum
+                                fdmax = newfd;
+                            }
+                            printf("selectserver: new connection from %s on "
+                                "socket %d\n", inet_ntoa(remoteaddr.sin_addr), newfd);
+                        }
+                    } else {
+                        // handle data from a client
+                        if ((nbytes = recv(i, buf, sizeof(buf), 0)) <= 0) {
+                            // got error or connection closed by client
+                            if (nbytes == 0) {
+                                // connection closed
+                                printf("selectserver: socket %d hung up\n", i);
+                            } else {
+                                perror("recv");
+                            }
+                            close(i); // bye!
+                            FD_CLR(i, &master); // remove from master set
+                        } else {
+                            // we got some data from a client
+                            for(j = 0; j <= fdmax; j++) {
+                                // send to everyone!
+                                if (FD_ISSET(j, &master)) {
+                                    // except the listener and ourselves
+                                    if (j != listener && j != i) {
+                                        if (send(j, buf, nbytes, 0) == -1) {
+                                            perror("send");
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } // it's SO UGLY!
+                }
+            }
+        }
+        
+        return 0;
+    } 
+
+Notice I have two file descriptor sets in the code: `master` and `read_fds`. The first, `master`, holds all the socket descriptors that are currently connected, as well as the socket descriptor that is listening for new connections.
+
+The reason I have the `master` set is that `select()` actually changes the set you pass into it to reflect which sockets are ready to read. Since I have to keep track of the connections from one call of `select()` to the next, I must store these safely away somewhere. At the last minute, I copy the `master` into the `read_fds`, and then call `select()`.
+
+Notice I check to see when the `listener` socket is ready to read. When it is, it means I have a new connection pending, and I `accept()` it and add it to the master set. Similarly, when a client connection is ready to read, and `recv()` returns 0, I know the client has closed the connection, and I must remove it from the `master` set.
+
+If the client `recv()` returns non-zero, though, I know some data has been received. So I get it, and then go through the `master` list and send that data to all the rest of the connected clients.
+
+----
+
+##Handling Partial send()s
+
+Remember back in the section about `send()`, above, when I said that `send()` might not send all the bytes you asked it to? That is, you want it to send 512 bytes, but it returns 412. What happened to the remaining 100 bytes?
+
+Well, they're still in your little buffer waiting to be sent out. Due to circumstances beyond your control, the kernel decided not to send all the data out in one chunk, and now, my friend, it's up to you to get the data out there.
+
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    
+    int sendall(int s, char *buf, int *len)
+    {
+        int total = 0;        // how many bytes we've sent
+        int bytesleft = *len; // how many we have left to send
+        int n;
+    
+        while(total < *len) {
+            n = send(s, buf+total, bytesleft, 0);
+            if (n == -1) { break; }
+            total += n;
+            bytesleft -= n;
+        }
+    
+        *len = total; // return number actually sent here
+    
+        return n==-1?-1:0; // return -1 on failure, 0 on success
+    } 
+
+In this example, `s` is the socket you want to send the data to, `buf` is the buffer containing the data, and `len` is a pointer to an `int` containing the number of bytes in the buffer.
+
+For completeness, here's a sample call to the function:
+
+    char buf[10] = "Beej!";
+    int len;
+    
+    len = strlen(buf);
+    if (sendall(s, buf, &len) == -1) {
+        perror("sendall");
+        printf("We only sent %d bytes because of the error!\n", len);
+    } 
+
+What happens on the receiver's end when part of a packet arrives?  If the packets are variable length, how does the receiver know when one packet ends and another begins? Yes, real-world scenarios are a royal pain in the donkeys. You probably have to encapsulate (remember that from the data encapsulation section way back there at the beginning?) Read on for details!
+
+----
+
+##Son of Data Encapsulation
+
+What does it really mean to encapsulate data, anyway? In the simplest case, it means you'll stick a header on there with either some identifying information or a packet length, or both.
+
+What should your header look like? Well, it's just some binary data that represents whatever you feel is necessary to complete your project.
+
+Okay. For instance, let's say you have a multi-user chat program that uses SOCK_STREAMs. When a user types ("says") something, two pieces of information need to be transmitted to the server: what was said and who said it.
+
+The problem is that the messages can be of varying lengths. One person named "tom" might say, "Hi", and another person named "Benjamin" might say, "Hey guys what is up?"
+
+So you `send()` all this stuff to the clients as it comes in. Your outgoing data stream looks like this:
+
+    t o m H i B e n j a m i n H e y g u y s w h a t i s u p ?
+
+And so on. How does the client know when one message starts and another stops? You could, if you wanted, make all messages the same length and just call the `sendall()` we implemented, above. But that wastes bandwidth! We don't want to `send()` 1024 bytes just so "tom" can say "Hi".
+
+So we *encapsulate* the data in a tiny header and packet structure. Both the client and server know how to pack and unpack (sometimes referred to as "marshal" and "unmarshal") this data. Don't look now, but we're starting to define a protocol that describes how a client and server communicate!
+
+In this case, let's assume the user name is a fixed length of 8 characters, padded with '\0'. And then let's assume the data is variable length, up to a maximum of 128 characters. Let's have a look a sample packet structure that we might use in this situation:
+
+1.  `len` (1 byte, unsigned) -- The total length of the packet, counting the 8-byte user name and chat data.
+1.  `name` (8 bytes) -- The user's name, NUL-padded if necessary.
+1.  `chatdata` (n-bytes) -- The data itself, no more than 128 bytes. The length of the packet should be calculated as the length of this data plus 8 (the length of the name field, above).
+
+Using the above packet definition, the first packet would consist of the following information (in hex and ASCII):
+
+    0A       74 6F 6D 00 00 00 00 00      48 69
+    (length)  T  o  m    (padding)         H  i
+
+And the second is similar:
+
+    14       42 65 6E 6A 61 6D 69 6E      48 65 79 20 67 75 79 73 20 77 ...
+    (length)  B  e  n  j  a  m  i  n       H  e  y     g  u  y  s     w  ...
+
+> The length is stored in Network Byte Order, of course. In this case, it's only one byte so it doesn't matter, but generally speaking you'll want all your binary integers to be stored in Network Byte Order in your packets.
+
+- When you're sending this data, you should be safe and use a command similar to `sendall()`, above, so you know all the data is sent, even if it takes multiple calls to `send()` to get it all out.
+- Likewise, when you're receiving this data, you need to do a bit of extra work. To be safe, you should assume that you might receive a partial packet (like maybe we receive "00 14 42 65 6E" from Benjamin, above, but that's all we get in this call to `recv()`). We need to call `recv()` over and over agin until the packet is completely received.
+
+    we know the number of bytes we need to receive in total for the packet to be complete, since that number is tacked on the front of the packet. We also know the maximum packet size is 1+8+128, or 137 bytes
+    
+    What you can do is declare an array big enough for two packets. This is your work array where you will reconstruct packets as they arrive.
+    
+    Every time you `recv()` data, you'll feed it into the work buffer and check to see if the packet is complete. That is, the number of bytes in the buffer is greater than or equal to the length specified in the header (+1, because the length in the header doesn't include the byte for the length itself.) If the number of bytes in the buffer is less than 1, the packet is not complete, obviously. You have to make a special case for this, though, since the first byte is garbage and you can't rely on it for the correct packet length.
+    
+    Whew! Are you juggling that in your head yet? Well, here's the second of the one-two punch: you might have read past the end of one packet and onto the next in a single recv() call. That is, you have a work buffer with one complete packet, and an incomplete part of the next packet! Bloody heck. (But this is why you made your work buffer large enough to hold two packets--in case this happened!)
+    
+    Since you know the length of the first packet from the header, and you've been keeping track of the number of bytes in the work buffer, you can subtract and calculate how many of the bytes in the work buffer belong to the second (incomplete) packet. When you've handled the first one, you can clear it out of the work buffer and move the partial second packed down the to front of the buffer so it's all ready to go for the next recv().
+
+----
+
+
+
+
+
+
 
 
 
