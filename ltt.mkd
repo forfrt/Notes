@@ -1,0 +1,335 @@
+
+#Code review
+
+##CP handling
+
+- `rte_eth_rx_burst`
+    
+    retrieve a burst of input packets from a receive queue of an Ethernet device. The retrieved packets are stored in `rte_mbuf` structures whose pointers are supplied in the `rx_pkts` array.
+
+    The `rte_eth_rx_burst()` function loops, parsing the RX ring of the receive queue, up to `nb_pkts` packets, and for each completed RX descriptor in the ring, it performs the following operations:
+
+        1. Initialize the `rte_mbuf` data structure associated with the RX descriptor accroding to the information provided by the NIC into that RX descriptor.
+        1. Store the `rte_mbuf` data structure into the next entry of the `rx_pkts` array.
+        1. Replenish the RX descriptor with a new `rte_mbuf` buffer allocated from the momery pool associated with the receive queue at initialization time.
+
+    ```
+    static inline uint16_t rte_eth_rx_burst(uint8_t port_id, uint16_t queue_id,
+    		 struct rte_mbuf **rx_pkts, const uint16_t nb_pkts)
+    {
+    	struct rte_eth_dev *dev = &rte_eth_devices[port_id];
+    
+    #ifdef RTE_LIBRTE_ETHDEV_DEBUG
+    	RTE_ETH_VALID_PORTID_OR_ERR_RET(port_id, 0);                            //! check for valid port
+    	RTE_FUNC_PTR_OR_ERR_RET(*dev->rx_pkt_burst, 0);                         //! check for invalid function pointer
+    
+    	if (queue_id >= dev->data->nb_rx_queues) {
+    		RTE_PMD_DEBUG_TRACE("Invalid RX queue_id=%d\n", queue_id);
+    		return 0;
+    	}
+    #endif
+    	int16_t nb_rx = (*dev->rx_pkt_burst)(dev->data->rx_queues[queue_id],
+    			rx_pkts, nb_pkts);                                              //! receive packets from ethernet device and append them in `rx_pkts` list
+    
+    #ifdef RTE_ETHDEV_RXTX_CALLBACKS
+    	struct rte_eth_rxtx_callback *cb = dev->post_rx_burst_cbs[queue_id];
+    
+    	if (unlikely(cb != NULL)) {
+    		do {
+    			nb_rx = cb->fn.rx(port_id, queue_id, rx_pkts, nb_rx,
+    						nb_pkts, cb->param);
+    			cb = cb->next;
+    		} while (cb != NULL);
+    	}
+    #endif
+    
+    ```
+- `eth_em_rec_pkts`
+
+    Get the RX descriptor and initialize membuf for it.
+    ```
+    ```
+
+- `receive_packet_pmd`
+
+    Receive packet and store it in membuf
+    ```
+    static int receive_packet_pmd(struct rte_mbuf *pkt, int rxq_id, uint16_t portid) {
+        struct IngressCxt cxt;
+        memset(&cxt, 0, sizeof(struct IngressCxt));
+    
+        cxt.timestamp  = rte_rdtsc();                                           //! Get current time
+        cxt.rxq_id     = rxq_id;
+        cxt.in_port    = portid;
+        cxt.l2_hdr_len = 0;
+    
+        return eth_recv(pkt, &cxt);
+    }
+    ```
+
+- `eth_recv: eth_proto.c`
+
+    ```
+    ```
+
+- `ipv4_recv`
+
+    ```
+    ```
+
+- `hook_ipv4`
+
+    ```
+    ```
+
+- `do_vnet_dev_route`
+
+    search vdev route by dst_ip and protocol
+
+    ```
+    int do_vnet_dev_route(struct VnetMatchVdevKey* key)
+    {
+        int index = 0;
+        while (index < MAX_NUM_IDEV_ROUTE) {
+            if (1 == g_vnet_vdev_route_table[key->proto][index].used) {
+                if (!comm_match_network(&(g_vnet_vdev_route_table[key->proto][index].subnet), &key->ip)) {
+                    return g_vnet_vdev_route_table[key->proto][index].dev_id;
+                }
+            } else {
+                return MAX_NUM_IDEV_ROUTE;
+            }
+            index++;
+        }
+        return MAX_NUM_IDEV_ROUTE;
+    }
+    ```
+
+----
+
+##Loopback
+
+- `loopback_quque_setup`
+
+    set up the `g_lo_queue` global variable with initiated `LoQueue` object
+    ```
+    int loopback_queue_setup(uint32_t queue_id)
+    {
+        struct LoQueue *queue = (struct LoQueue *)rte_malloc(NULL, sizeof(struct LoQueue), 0);
+        if (!queue) {
+            printf("%s: rte_malloc queue failed\n", __func__);
+            return LTT_FAILURE;
+        }
+    
+        queue->queue_id = queue_id;
+        queue->num_pkts = 0;
+    
+        g_lo_port.queue[queue_id] = queue;
+    
+        return LTT_SUCCESS;
+    }
+    ```
+
+- `loopback_rx_burst`
+
+    get all packets from `g_lo_port.queue[queue_id]->packets` and store them in `*rx_pkts`
+    ```
+    loopback_rx_burst(uint32_t queue_id, struct rte_mbuf **rx_pkts)
+    {
+        struct LoQueue *queue = g_lo_port.queue[queue_id];
+        int i = 0;
+    
+        if (0 == queue->num_pkts) {
+            return 0;
+        }
+        while(queue->num_pkts > 0) {
+            rx_pkts[i] = queue->packets[i];
+            queue->num_pkts--;
+            i++;
+        }
+        
+        return i;
+    }
+    ```
+
+----
+
+#Commands
+
+##Dallas Build
+
+```
+    setup_15Aspace
+    export LTT_REPO=/repo/eruitfe/ltt_ng
+    cd $MK
+    make clean; make
+    make dist
+
+    cd /proj/pcn/lts/user/dallas_r15b/releases/
+    
+    tar xvf 19089_CXP9011454_eruitfe.tar.Z
+    ll *eruitfe*
+    
+    cp -rp 19089_CXP9011454_eruitfe /lab/testtools/rhel664/dallas/testRelease/Dallas_15B_eruitfe_sdk
+    /lab/gw_test_framework/epglib2/bin/lab_storage_sync sync --src SERO --dest SELN /lab/testtools/rhel664/dallas/testRelease/Dallas_15B_eruitfe_sdk
+    or
+    scp statem_mme.beam root@epgtool1004-10:/lab/testtools/rhel664/dallas/testRelease/Dallas_15B_eruitfe_sdk/app/ebin/
+
+```
+
+----
+
+##Dallas Install
+
+```
+    /lab/testtools/rhel664/dallas/testRelease/Dallas_15B_RC1_0_0052_ebm_load_balance_emoqrst/scripts/lts_system_setup -a uninstall
+    /lab/testtools/rhel664/dallas/testRelease/Dallas_15B_RC1_0_0052_ebm_load_balance_emoqrst/scripts/lts_system_setup -a install
+    /etc/rc.d/rc.vlan restart
+    lts_control start -c /autott/dallas
+    lts_info
+    vim /autott/dallas_15a/vepg31-4.dallas.backbone
+    vim /var/log/dallas_msg.log
+    vim /var/log/ltt.log
+    vim /var/dallas/policy.conf
+
+```
+
+1. Uninstall current Dallas
+1. Install Dallas
+1. Configure vlan for Dallas
+1. Specify configuration directory for Dallas and Start it
+1. Check Dallas status
+1. View Dallas Backbone configuration
+1. View Dallas log messages
+1. View Ltt log messages
+1. View Dallas vlan configurations used in step 3
+
+----
+
+##Dallas Delivery
+
+```
+    git resete -soft HEAD^
+    git commit
+    
+        The format of commit message is like: "<jira_num>[commit description]"
+    git pull --rebase
+    git push origin HEAD:refs/for/dallas_15b/sdk
+```
+
+----
+
+##Dallas push
+`git push origin HEAD:refs/for/dallas_15b`
+
+----
+
+##Dallas Jira Dashboard
+https://pdupc-jira.mo.sw.ericsson.se/secure/RapidBoard.jspa 
+
+----
+
+#Configurations
+
+----
+
+##Calculate Profile
+    {udp_payload_profile,
+    1, %% 'Payload-profile-index'
+    300, %% 'Payload session life time' %% (Integer 0 .. 3600). Note that '0' means that packets per session will be used instead.
+    10, %% 'MTU-packets per session' %% "The large packet side"
+    10, %% 'ACK-packets per session' %% "The small packet side"
+    186, %% 'MTU packet size'
+    90, %% 'ACK packet size'
+    0.276, %% 'MS bandwidth uplink (kbps)' k->1000
+    0.471, %% 'MS bandwidth downlink (kbps)'
+    1, %% 'MS download/upload ratio (download < 0.5 <= upload)'
+    (滑块模型，1表示downlink 为MTU大包，0表示uplink 为MTU大包)
+    0.3, %% 'MS/NW starting point ratio (MS < 0.5 <= NW)'
+    (滑块模型，1表示MS 触发，0表示NW 触发)
+    0 %% Gi net index (0 = use general gi network specified in the system file)
+    , []}.
+    
+    {udp_payload_profile, 55, 300, 10, 10, 186, 90, 0.276, 0.471, 1, 0.3, 0, []}. 
+    
+    bandwidth:
+    kbps --> byte/s uplink 0.276/8*1000=34.5 35
+    kbps --> byte/s downlink 0.471/8*1000 =58.875 59
+    send one packet need ? s (s/packet)
+    MTU -> downlink 186/59 s = 3.152542372881356 s 
+    ACK -> uplink 90/35 s = 2.571428571428571 s
+    300s (Payload session life time could send total packet)
+    MTU 300/3.152542372881356 = 95.16129032258064 real total MTU total packet: 95 
+    ACK 300/2.571428571428571 = 116.6666666666667 real total MTU total packet: 117 
+    
+    extra 1 packet need 2.571428571428571 s 
+
+#Run Dummy Payload
+```
+    lts_run_mobiles '1,1,[104]'
+    lts_run_mobiles '1,1,[{160,1,1}]'
+    -------------------------------------
+    lts_run_mobiles '2,1,[104]' 
+    lts_get_subscriber 2
+    lts_run_mobiles '2,1,[{160,1,22}]' 
+    lts_run_mobiles '2,1,[106]' #stop ms:2 session
+```
+
+
+----
+
+#Important Informations
+
+vswitch 的group 应该是interface的概念
+表示是哪个interface的
+app的group是 payload type的概念
+表明是哪种类型的payload
+
+----
+
+#TEMP
+
+https://selngerrit.mo.sw.ericsson.se/#/c/378391/2/arch/dpn/c/src/application_framework/third_party/ltt_driver/ltt_driver_application.cc
+https://selngerrit.mo.sw.ericsson.se/#/c/378582/1/src/app/dummy_session.c
+
+P0092144
+
+ Gn/Iuu DL packets                                         14266961278                                                           3380950.601
+ Gn/Iuu UL packets                                         14210381169                                                           3367617.776
+ Gi UL packets                                             14209555448                                                           3367616.376
+ Gi DL packets                                             14267805301                                                           3380951.835
+ Gn/Iuu DL bytes                                        14351303196400                                                        3400707615.394
+ Gn/Iuu UL bytes                                         3600586108800                                                         853145688.920
+ Gi UL bytes                                             3600375461150                                                         853145338.856
+ Gi DL bytes                                            14352154675000                                                        3400708848.951
+ Gn/Iuu DL packets dropped                                           0                                                                 0.000
+ Gn/Iuu UL packets dropped                                           0                                                                 0.000
+ Gi UL packets dropped                                               0                                                                 0.000
+ Gi DL packets dropped                                               0                                                                 0.000
+ Gn/Iuu DL Errors                                                    0                                                                 0.000
+ Gn/Iuu UL Errors                                                    0                                                                 0.000
+ Gi UL Errors                                                        0                                                                 0.000
+ Gi DL Errors                                                        0                                                                 0.000
+ Uplink Packets dropped(E2E)                                   -825721                                                                -1.400
+ Downlink Packets dropped(E2E)                                 -844023                                                                -1.234
+
+    app_stats.ue_rx_pkts   += app_stat[i].ue_rx_pkts;
+    app_stats.ue_tx_pkts   += app_stat[i].ue_tx_pkts;
+    app_stats.ue_rx_bytes  += app_stat[i].ue_rx_bytes;
+    app_stats.ue_tx_bytes  += app_stat[i].ue_tx_bytes;
+    app_stats.ue_rx_drop   += app_stat[i].ue_rx_drop;
+    app_stats.ue_tx_drop   += app_stat[i].ue_tx_drop;
+    app_stats.ue_rx_error  += app_stat[i].ue_rx_error;
+    app_stats.ue_tx_error  += app_stat[i].ue_tx_error;
+    app_stats.pdn_rx_pkts  += app_stat[i].pdn_rx_pkts;
+    app_stats.pdn_tx_pkts  += app_stat[i].pdn_tx_pkts;
+    app_stats.pdn_rx_bytes += app_stat[i].pdn_rx_bytes;
+    app_stats.pdn_tx_bytes += app_stat[i].pdn_tx_bytes;
+    app_stats.pdn_rx_drop  += app_stat[i].pdn_rx_drop;
+    app_stats.pdn_tx_drop  += app_stat[i].pdn_tx_drop;
+    app_stats.pdn_rx_error += app_stat[i].pdn_rx_error;
+    app_stats.pdn_tx_error += app_stat[i].pdn_tx_error;
+
+/lab/testtools/dallas1/PRA/RC1_0_0050_51/PCDALNGEN-703_2017-04-25_10.44_TC13769.2.1_SF_ENEF-MME-RT_SGW_robustness_ssr8010s2/raw_logs/epgtool/dls_autott_ends.log
+/lab/testtools/dallas1/PRA/reference/2017-04-05_08.04_TC16621.1.1_SF_ENEF-SGW-RT_PGW_robustness_ssr8010s2/raw_logs/epgtool/vim dls_autott_ends.log
+
+
