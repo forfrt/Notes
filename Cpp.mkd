@@ -501,13 +501,14 @@ tagMyStruct称为“tag”，即“标签”，实际上是一个临时名字，
 
 另外，extern也可用来进行链接指定。  
 
+> 与extern对应的关键字是static，被它修饰的全局变量和函数只能在本模块中使用。因此，一个函数或变量只可能被本模块使用时，其不可能被extern “C”修饰。
+
 ##extern "C"
 
 C++语言在编译的时候为了解决函数的多态问题，会将函数名和参数联合起来生成一个中间的函数名称，而C语言则不会，因此会造成链接时找不到对应函数的情况，此时C函数就需要用extern “C”进行链接指定，这告诉编译器，请保持我的名称，不要给我生成用于链接的中间函数名。  
 
 C语言中不支持extern "C"声明，在.c文件中包含了extern "C"时会出现编译语法错误。
 
-> 与extern对应的关键字是static，被它修饰的全局变量和函数只能在本模块中使用。因此，一个函数或变量只可能被本模块使用时，其不可能被extern “C”修饰。
 
 ###extern "C" 使用要点
 1. 可以是单一语句
@@ -566,22 +567,25 @@ inline的使用是有所限制的，inline只适合函数体内代码简单的�
 (1) 出现问题：在此程序中存在着宏定义命令，宏N代表的字符串是2+2，在程序中有对宏N的使用，一般同学在读该程序时，容易产生的问题是先求解N为2＋2＝4，然后在程序中计算a时使用乘法，即N*N=4*4=16,其实该题的结果为8，为什么结果有这么大的偏差?
 (2)问题解析：如1节所述，宏展开是在预处理阶段完成的，这个阶段把替换文本只是看作一个字符串，并不会有任何的计算发生，在展开时是在宏N出现的地方 只是简单地使用串2＋2来代替N，并不会增添任何的符号，所以对该程序展开后的结果是a=2+2*2+2，计算后=8，这就是宏替换的实质，如何写程序才 能完成结果为16的运算呢？
 (3)解决办法：将宏定义写成如下形式
-#define   N   (2+2)
+
+    #define   N   (2+2)
 这样就可替换成(2+2)*(2+2)=16
 2.2 带参数的宏定义出现的问题
 在带参数的宏定义的使用中，极易引起误解。例如我们需要做个宏替换能求任何数的平方，这就需要使用参数，以便在程序中用实际参数来替换宏定义中的参数。一般学生容易写成如下形式：
-#define   area(x)   x*x
+
+    #define   area(x)   x*x
 这在使用中是很容易出现问题的，看如下的程序
-void main()
-{
-int   y=area(2+2);
-printf(“%d”,y);
+
+    void main()
+    {
+        int   y=area(2+2);
+        printf(“%d”,y);
     }
 按理说给的参数是2+2，所得的结果应该为4*4=16，但是错了，因为该程序的实际结果为8，仍然是没能遵循纯粹的简单替换的规则，又是先计算再替换 了，在这道程序里，2+2即为area宏中的参数，应该由它来替换宏定义中的x，即替换成2+2*2+2=8了。那如果遵循(1)中的解决办法，把2+2 括起来，即把宏体中的x括起来，是否可以呢？#define   area(x) (x)*(x)，对于area(2+2)，替换为(2+2)*(2+2)=16，可以解决，但是对于area(2+2)/area(2+2)又会怎么样 呢，有的学生一看到这道题马上给出结果，因为分子分母一样，又错了，还是忘了遵循先替换再计算的规则了，这道题替换后会变为 (2+2)*(2+2)/(2+2)*(2+2)即4*4/4*4按照乘除运算规则，结果为16/4*4=4*4=16，那应该怎么呢？解决方法是在整个 宏体上再加一个括号，即#define   area(x) ((x)*(x))，不要觉得这没必要，没有它，是不行的。
 
 ----
 
-和 #define 宏不同的是，内联函数总是对参数只精确地进行一次求值，从而避免了那声名狼藉的宏错误。换句话说，调用内联函数和调用正规函数是等价的，差别仅仅是更快  
+和`#define`宏不同的是，内联函数总是对参数只精确地进行一次求值，从而避免了那声名狼藉的宏错误。换句话说，调用内联函数和调用正规函数是等价的，差别仅仅是更快  
 
 和宏不同的，还有内联函数的参数类型被检查，并且被正确地进行必要的转换。  
 
@@ -592,7 +596,6 @@ printf(“%d”,y);
     {
         // ...
     } 
-
 
 ----
 
@@ -647,6 +650,363 @@ printf(“%d”,y);
 回到内联上来：*一个函数是否内联只是实现细节*，不会改变函数调用的可见语义（即含义）。因此inline关键字应该和函数定义放在一起，而不是在类的public声明区。  
 
 ----
+
+##预处理
+
+###`#define`
+
+`#define`命令是C语言中的一个宏定义命令，它用来将一个标识符定义为一个字符串，该标识符被称为宏名，被定义的字符串称为替换文本。
+该命令有两种格式：一种是简单的宏定义，另一种是带参数的宏定义。
+1. 简单的宏定义：
+    `#define`   <宏名>　　<字符串>
+    `#define` PI 3.1415926
+1. 带参数的宏定义
+    `#define`   <宏名> (<参数表>)   <宏体>
+    `#define`   A(x) x
+
+一个标识符被宏定义后，该标识符便是一个宏名。这时，在程序中出现的是宏名，在该程序被编译前，先将宏名用被定义的字符串替换，这称为宏替换，替换后才进行编译，宏替换是简单的替换。
+
+----
+
+####特殊的`#define`
+
+1. `#define Conn(x,y) x##y`
+
+    `x##y`表示什么？表示x连接y
+    `int n = Conn(123,456);`    结果就是n=123456;
+
+1. `#define ToChar(x) #@x`
+
+    `#@x`，其实就是给x加上单引号，结果返回是一个const char
+    `char a = ToChar(1);`   结果就是a='1';
+
+    > 但是如果你的参数超过四个字符，编译器就给给你报错了！error C2015: too many characters in constant   ：P
+
+1. `#define ToString(x) #x`
+
+    `char* str = ToString(123132);就成了str="123132";`
+
+----
+
+- #define xxx() ()
+- #define xxx() {} //!多条语句大括号
+
+    标准C支持的
+
+- #define xxx() ({})
+
+    GCC新增的功能，主要为了防止宏展开出现问题，默认展开时是要加上一个;的，容易出问题。
+    > 最后一个式子的返回值作为宏函数的返回值。
+
+----
+
+###`#undef`
+
+`#undef`是在后面取消以前定义的宏定义
+该指令的形式为 `#undef 标识符`
+
+----
+
+###`#typedef`
+
+Typedef 声明有助于创建平台无关类型，甚至能隐藏复杂和难以理解的语法。不管怎样，使用 typedef 能为代码带来意想不到的好处，通过本文你可以学习用 typedef 避免缺欠，从而使代码更健壮
+
+typedef 声明，简称 typedef，为现有类型创建一个新的名字
+
+　typedef 使用最多的地方是创建易于记忆的类型名，用它来归档程序员的意图。类型出现在所声明的变量名字中，位于 ''typedef'' 关键字右边。例如：`typedef int size;`   
+
+----
+
+记住：不管什么时候，只要为指针声明 typedef，那么都要在最终的 typedef 名称中加一个 const，以使得该指针本身是常量，而不是对象
+
+    typedef const char * cpstr;   
+    int mystrcmp(cpstr, cpstr); // 现在是正确的  
+
+****
+
+#Gcc
+
+##Delaring Attributes of Functions
+
+In GNU C, you can use function attributes to declare certain things about functions called in your program which help the compiler optimize calls and check your code more carefully. For example, you can use attributes to declare that a function never returns (noreturn), returns a value depending only on its arguments (pure), or has printf-style arguments (format). 
+
+You can also use attributes to control memory placement, code generation options or call/return conventions within the function being annotated. Many of these attributes are target-specific. For example, many targets support attributes for defining interrupt handler functions, which typically must follow special register usage and return conventions. 
+
+Function attributes are introduced by the __attribute__ keyword on a declaration, followed by an attribute specification inside double parentheses. You can specify multiple attributes in a declaration by separating them by commas within the double parentheses or by immediately following an attribute declaration with another attribute declaration. See Attribute Syntax, for the exact rules on attribute syntax and placement. 
+
+GCC also supports attributes on variable declarations (see Variable Attributes), labels (see Label Attributes), enumerators (see Enumerator Attributes), statements (see Statement Attributes), and types (see Type Attributes). 
+
+https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#Common-Function-Attributes
+
+###alias
+
+###aligned
+
+###`nonnull(arg-index, ...)`
+
+The nonnull attribute specifies that some function parameters should be non-null pointers. For instance, the declaration: 
+
+    extern void *
+    my_memcpy (void *dest, const void *src, size_t len)
+            __attribute__((nonnull (1, 2)));
+
+causes the compiler to check that, in calls to my_memcpy, arguments dest and src are non-null. If the compiler determines that a null pointer is passed in an argument slot marked as non-null, and the -Wnonnull option is enabled, a warning is issued. The compiler may also choose to make optimizations based on the knowledge that certain function arguments will never be null. 
+
+If no argument index list is given to the nonnull attribute, all pointer arguments are marked as non-null. To illustrate, the following declaration is equivalent to the previous example: 
+
+    extern void *
+    my_memcpy (void *dest, const void *src, size_t len)
+            __attribute__((nonnull));
+
+****
+
+#The GNU C Library
+
+https://www.gnu.org/software/libc/manual/html_node/index.html#SEC_Contents
+
+##Signal Handling
+
+A signal is a software interrupt delivered to a process. The operating system uses signals to report exceptional situations to an executing program. Some signals report errors such as references to invalid memory addresses; others report asynchronous events, such as disconnection of a phone line.
+
+The GNU C Library defines a variety of signal types, each for a particular kind of event. Some kinds of events make it inadvisable or impossible for the program to proceed as usual, and the corresponding signals normally abort the program. Other kinds of signals that report harmless events are ignored by default.
+
+If you anticipate an event that causes signals, you can define a handler function and tell the operating system to run it when that particular type of signal arrives.
+
+Finally, one process can send a signal to another process; this allows a parent process to abort a child, or two related processes to communicate and synchronize. 
+
+----
+
+##Basic Concepts of Signals
+
+This section explains basic concepts of how signals are generated, what happens after a signal is delivered, and how programs can handle signals. 
+
+- A program error such as dividing by zero or issuing an address outside the valid range.
+- A user request to interrupt or terminate the program. Most environments are set up to let a user suspend the program by typing C-z, or terminate it with C-c. Whatever key sequence is used, the operating system sends the proper signal to interrupt the process.
+- The termination of a child process.
+- Expiration of a timer or alarm.
+- A call to kill or raise by the same process.
+- A call to kill from another process. Signals are a limited but useful form of interprocess communication.
+- An attempt to perform an I/O operation that cannot be done. Examples are reading from a pipe that has no writer (see Pipes and FIFOs), and reading or writing to a terminal in certain situations (see Job Control). 
+
+Each of these kinds of events (excepting explicit calls to kill and raise) generates its own particular kind of signal. The various kinds of signals are listed and described in detail in Standard Signals. 
+
+----
+
+###Concepts of Signal Generation
+
+In general, the events that generate signals fall into three major categories: errors, external events, and explicit requests.
+
+An error means that a program has done something invalid and cannot continue execution. But not all kinds of errors generate signals—in fact, most do not. For example, opening a nonexistent file is an error, but it does not raise a signal; instead, open returns -1. *In general, errors that are necessarily associated with certain library functions are reported by returning a value that indicates an error. The errors which raise signals are those which can happen anywhere in the program, not just in library calls. These include division by zero and invalid memory addresses*.
+
+An external event generally has to do with I/O or other processes. These include the arrival of input, the expiration of a timer, and the termination of a child process.
+
+An explicit request means the use of a library function such as kill whose purpose is specifically to generate a signal.
+
+Signals may be generated synchronously or asynchronously. A synchronous signal pertains to a specific action in the program, and is delivered (unless blocked) during that action. Most errors generate signals synchronously, and so do explicit requests by a process to generate a signal for that same process. On some machines, certain kinds of hardware errors (usually floating-point exceptions) are not reported completely synchronously, but may arrive a few instructions later.
+
+Asynchronous signals are generated by events outside the control of the process that receives them. These signals arrive at unpredictable times during execution. External events generate signals asynchronously, and so do explicit requests that apply to some other process.
+
+A given type of signal is either typically synchronous or typically asynchronous. For example, signals for errors are typically synchronous because errors generate signals synchronously. But any type of signal can be generated synchronously or asynchronously with an explicit request. 
+
+----
+
+###How Signals Are Delivered
+
+When a signal is generated, it becomes pending. Normally it remains pending for just a short period of time and then is delivered to the process that was signaled. However, if that kind of signal is currently blocked, it may remain pending indefinitely—until signals of that kind are unblocked. Once unblocked, it will be delivered immediately. See Blocking Signals.
+
+*When the signal is delivered, whether right away or after a long delay, the specified action for that signal is taken*. For certain signals, such as `SIGKILL` and `SIGSTOP`, the action is fixed, but for most signals, the program has a choice: ignore the signal, specify a handler function, or accept the default action for that kind of signal. The program specifies its choice using functions such as `signal` or `sigaction` (see Signal Actions). We sometimes say that a handler catches the signal. *While the handler is running, that particular signal is normally blocked*.
+
+If the specified action for a kind of signal is to ignore it, then any such signal which is generated is discarded immediately. This happens even if the signal is also blocked at the time. A signal discarded in this way will never be delivered, not even if the program subsequently specifies a different action for that kind of signal and then unblocks it.
+
+If a signal arrives which the program has neither handled nor ignored, its default action takes place. Each kind of signal has its own default action, documented below (see Standard Signals). For most kinds of signals, the default action is to terminate the process. For certain kinds of signals that represent “harmless” events, the default action is to do nothing.
+
+When a signal terminates a process, its parent process can determine the cause of termination by examining the termination status code reported by the `wait` or `waitpid` functions. (This is discussed in more detail in Process Completion.) The information it can get includes the fact that termination was due to a signal and the kind of signal involved. If a program you run from a shell is terminated by a signal, the shell typically prints some kind of error message.
+
+*The signals that normally represent program errors have a special property: when one of these signals terminates the process, it also writes a core dump file which records the state of the process at the time of termination*. You can examine the core dump with a debugger to investigate what caused the error.
+
+If you raise a “program error” signal by explicit request, and this terminates the process, it makes a core dump file just as if the signal had been due directly to an error. 
+
+----
+
+##Defining Signal Handlers
+
+This section describes how to write a signal handler function that can be established with the `signal` or `sigaction` functions.
+
+A signal handler is just a function that you compile together with the rest of the program. Instead of directly invoking the function, you use `signal` or `sigaction` to tell the operating system to call it when a signal arrives. This is known as establishing the handler. See Signal Actions.
+
+There are two basic strategies you can use in signal handler functions:
+
+1. You can have the handler function note that the signal arrived by tweaking some global data structures, and then return normally.
+1. You can have the handler function terminate the program or transfer control to a point where it can recover from the situation that caused the signal. 
+
+You need to take special care in writing handler functions because they can be called asynchronously. That is, a handler might be called at any point in the program, unpredictably. If two signals arrive during a very short interval, one handler can run within another. This section describes what your handler should do, and what you should avoid. 
+
+----
+
+###Signal Handlers that Return
+
+Handlers which return normally are usually used for signals such as `SIGALRM` and the I/O and interprocess communication signals. But a handler for SIGINT might also return normally after setting a flag that tells the program to exit at a convenient time. 
+
+It is not safe to return normally from the handler for a program error signal, because the behavior of the program when the handler function returns is not defined after a program error. See Program Error Signals.
+
+*Handlers that return normally must modify some global variable in order to have any effect*. Typically, the variable is one that is examined periodically by the program during normal operation. Its data type should be sig_atomic_t for reasons described in Atomic Data Access. 
+
+Here is a simple example of such a program. It executes the body of the loop until it has noticed that a SIGALRM signal has arrived. This technique is useful because it allows the iteration in progress when the signal arrives to complete before the loop exits. 
+
+    #include <signal.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    
+    /* This flag controls termination of the main loop. */
+    volatile sig_atomic_t keep_going = 1;
+    
+    /* The signal handler just clears the flag and re-enables itself. */
+    void
+    catch_alarm (int sig)
+    {
+      keep_going = 0;
+      signal (sig, catch_alarm);
+    }
+    
+    void
+    do_stuff (void)
+    {
+      puts ("Doing stuff while waiting for alarm....");
+    }
+    
+    int
+    main (void)
+    {
+      /* Establish a handler for SIGALRM signals. */
+      signal (SIGALRM, catch_alarm);
+    
+      /* Set an alarm to go off in a little while. */
+      alarm (2);
+    
+      /* Check the flag once in a while to see when to quit. */
+      while (keep_going)
+        do_stuff ();
+    
+      return EXIT_SUCCESS;
+    }
+
+> The `signal()` function defines the handling of the next received signal only, after which the default handling is reinstated.
+
+----
+
+###Handlers That Terminate the Process
+
+Handler functions that terminate the program are typically used to cause orderly cleanup or recovery from program error signals and interactive interrupts. 
+
+*The cleanest way for a handler to terminate the process is to raise the same signal that ran the handler in the first place*. Here is how to do this: 
+
+    volatile sig_atomic_t fatal_error_in_progress = 0;
+    
+    void
+    fatal_error_signal (int sig)
+    {
+    
+      /* Since this handler is established for more than one kind of signal, 
+         it might still get invoked recursively by delivery of some other kind
+         of signal.  Use a static variable to keep track of that. */
+      if (fatal_error_in_progress)
+        raise (sig);
+      fatal_error_in_progress = 1;
+    
+    
+      /* Now do the clean up actions:
+         - reset terminal modes
+         - kill child processes
+         - remove lock files */
+      …
+    
+    
+      /* Now reraise the signal.  We reactivate the signal’s
+         default handling, which is to terminate the process.
+         We could just call exit or abort,
+         but reraising the signal sets the return status
+         from the process correctly. */
+      signal (sig, SIG_DFL);
+      raise (sig);
+    }
+
+----
+
+###Nonlocal Control Transfer in Handlers
+
+You can do a nonlocal transfer of control out of a signal handler using the `setjmp` and `longjmp` facilities (see Non-Local Exits).
+
+When the handler does a nonlocal control transfer, the part of the program that was running will not continue. If this part of the program was in the middle of updating an important data structure, the data structure will remain inconsistent. Since the program does not terminate, the inconsistency is likely to be noticed later on.
+
+There are two ways to avoid this problem. 
+1. One is to block the signal for the parts of the program that update important data structures. Blocking the signal delays its delivery until it is unblocked, once the critical updating is finished. See Blocking Signals.
+1. The other way is to re-initialize the crucial data structures in the signal handler, or to make their values consistent. 
+
+    #include <signal.h>
+    #include <setjmp.h>
+    
+    jmp_buf return_to_top_level;
+    
+    volatile sig_atomic_t waiting_for_input;
+    
+    void
+    handle_sigint (int signum)
+    {
+      /* We may have been waiting for input when the signal arrived,
+         but we are no longer waiting once we transfer control. */
+      waiting_for_input = 0;
+      longjmp (return_to_top_level, 1);
+    }
+    
+    
+    int
+    main (void)
+    {
+      …
+      signal (SIGINT, sigint_handler);
+      …
+      while (1) {
+        prepare_for_command ();
+        if (setjmp (return_to_top_level) == 0)
+          read_and_execute_command ();
+      }
+    }
+    
+    
+    /* Imagine this is a subroutine used by various commands. */
+    char *
+    read_data ()
+    {
+      if (input_from_terminal) {
+        waiting_for_input = 1;
+        …
+        waiting_for_input = 0;
+      } else {
+        …
+      }
+    }
+
+----
+
+###Signals Arriving While a Handler Runs
+
+What happens if another signal arrives while your signal handler function is running?
+
+When the handler for a particular signal is invoked, that signal is automatically blocked until the handler returns. *That means that if two signals of the same kind arrive close together, the second one will be held until the first has been handled*. (The handler can explicitly unblock the signal using sigprocmask, if you want to allow more signals of this type to arrive; see Process Signal Mask.)
+
+However, your handler can still be interrupted by delivery of another kind of signal. To avoid this, you can use the `sa_mask` member of the action structure passed to sigaction to explicitly specify which signals should be blocked while the signal handler runs. These signals are in addition to the signal for which the handler was invoked, and any other signals that are normally blocked by the process. See Blocking for Handler.
+
+When the handler returns, the set of blocked signals is restored to the value it had before the handler ran. So using `sigprocmask` inside the handler only affects what signals can arrive during the execution of the handler itself, not what signals can arrive once the handler returns.
+
+> Portability Note: Always use `sigaction` to establish a handler for a signal that you expect to receive asynchronously, if you want your program to work properly on System V Unix. On this system, the handling of a signal whose handler was established with signal automatically sets the signal’s action back to `SIG_DFL`, and the handler must re-establish itself each time it runs. This practice, while inconvenient, does work when signals cannot arrive in succession. However, *if another signal can arrive right away, it may arrive before the handler can re-establish itself*. Then the second signal would receive the default handling, which could terminate the process. 
+
+----
+
+###Signals Close Together Merge into One
+
+****
+
+#设计模式
 
 ##RAII
 
@@ -704,80 +1064,6 @@ STL容器是基于值语义的，在容器内部，对象是常被复制的。�
     ResourceMapType resourceMap;  
 
 > 作为替代，还可以使用非拷贝行为的容器：boost::ptr_map<Identifier,Resource> map;
-
-****
-
-##预处理
-
-###`#define`
-
-`#define`命令是C语言中的一个宏定义命令，它用来将一个标识符定义为一个字符串，该标识符被称为宏名，被定义的字符串称为替换文本。
-该命令有两种格式：一种是简单的宏定义，另一种是带参数的宏定义。
-1. 简单的宏定义：
-    `#define`   <宏名>　　<字符串>
-    `#define` PI 3.1415926
-1. 带参数的宏定义
-    `#define`   <宏名> (<参数表>)   <宏体>
-    `#define`   A(x) x
-
-一个标识符被宏定义后，该标识符便是一个宏名。这时，在程序中出现的是宏名，在该程序被编译前，先将宏名用被定义的字符串替换，这称为宏替换，替换后才进行编译，宏替换是简单的替换。
-
-----
-
-####特殊的`#define`
-
-1. `#define Conn(x,y) x##y`
-
-    `x##y`表示什么？表示x连接y
-    `int n = Conn(123,456);`    结果就是n=123456;
-
-1. `#define ToChar(x) #@x`
-
-    `#@x`，其实就是给x加上单引号，结果返回是一个const char
-    `char a = ToChar(1);`   结果就是a='1';
-
-    > 但是如果你的参数超过四个字符，编译器就给给你报错了！error C2015: too many characters in constant   ：P
-
-1. `#define ToString(x) #x`
-
-    `char* str = ToString(123132);就成了str="123132";`
-
-----
-
-- #define xxx() ()
-- #define xxx() {} //!多条语句大括号
-
-    标准C支持的
-
-- #define xxx() ({})
-
-    GCC新增的功能，主要为了防止宏展开出现问题，默认展开时是要加上一个;的，容易出问题。
-    > 最后一个式子的返回值作为宏函数的返回值。
-
-----
-
-###`#undef`
-
-#undef 是在后面取消以前定义的宏定义
-该指令的形式为
-#undef 标识符
-
-----
-
-###`#typedef`
-
-Typedef 声明有助于创建平台无关类型，甚至能隐藏复杂和难以理解的语法。不管怎样，使用 typedef 能为代码带来意想不到的好处，通过本文你可以学习用 typedef 避免缺欠，从而使代码更健壮
-
-typedef 声明，简称 typedef，为现有类型创建一个新的名字
-
-　typedef 使用最多的地方是创建易于记忆的类型名，用它来归档程序员的意图。类型出现在所声明的变量名字中，位于 ''typedef'' 关键字右边。例如：`typedef int size;`   
-
-----
-
-记住：不管什么时候，只要为指针声明 typedef，那么都要在最终的 typedef 名称中加一个 const，以使得该指针本身是常量，而不是对象
-
-    typedef const char * cpstr;   
-    int mystrcmp(cpstr, cpstr); // 现在是正确的  
 
 ****
 

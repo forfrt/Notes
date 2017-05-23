@@ -1,3 +1,11 @@
+#Concepts
+
+##Numa
+
+NUMA (non-uniform memory access) is a method of configuring a cluster of microprocessor in a multiprocessing system so that they can share memory locally, improving performance and the ability of the system to be expanded. NUMA is used in a symmetric multiprocessing system. An SMP system is a "tightly-coupled", "share everything" system in which multiple processors working under a single operating system access each other's memory over a common bus or "interconnect" path.
+
+Ordinarily, a limitation of SMP is that as microprocessors are added, the shared bus or data path get overloaded and becomes a performance bottlenect. Numa adds an intermediate level of memory shared amony a few microprocessors so sthat all data accesses don't have to travel on the main bus.
+
 
 #Code review
 
@@ -153,11 +161,113 @@
 
 ----
 
+##RPS
+
+###`bsharp_tree`
+
+    * --------------------------------------------------------------------------
+    * About the BSharpTree in RPS
+    * --------------------------------------------------------------------------
+    *
+    * In the RPS, we defined many structures/classes to implement the concepts,
+    * in B-tree, here are the struct/class notations:
+    *
+    * 1) class  BSharpTree: a bsharp tree
+    * 2) struct BNode     : a node in BSharpTree, contains many keys
+    * 3) struct BNodeKey  : a key in BSharpTree, contained in a specific BNode
+    *
+    * What's more, in RPS, a BSharpTree is divided into many BNodes by time -
+    * thus, each BNode represents a time slot, the duration of the slot is
+    * defined by the Aplication. e.g, duration is 50ms means the first BNode
+    * covers (0ms, 50ms), the second BNode (50ms, 100ms), the third (100ms,
+    * 150ms)...
+    *
+    * Each BNodeKey is a collection of application data with a specified
+    * timestamp, an insertion operation orders the BSharpTree to insert it into
+    * the the proper BNode. The comparison criteria is time: by comparing the
+    * key's timestamp with the nodes' timestamp (their start time), the key is
+    * inserted into the BNode who's timeslot range covers the timestamp.
+
+- `enum TimeStat BSharpTree:insert(struct BNodeKey*key)`
+
+    1. Get the possible index of BNodeKey pointer being inserted 
+    1. If the index is not out of range, get the exact index in `m_nodes` array by moduling the length of this BSharpTree
+    1. Insert this key into the node of former index.
+
+- `void BSharpTree::rotate()`
+
+    1. Add the total BSharpTree duration to the basetime of current node
+    1. Clear the current node
+    1. Move the current node pointer to next node object
+
+###`timetable`
+
+    * we use two B# trees:
+    *
+    * front tree stores all the RPS entities that will be scheduled in the
+    * near future (e.g. 1 minute, note that this is also the time length
+    * of the tree),
+    * it has a finer time-granularity (e.g. 50ms of each node).
+    *
+    * The back tree is used as a backlog, RPS entities that have
+    * timestamps outside the range of the first tree is stored in the
+    * back tree, it has a more coarser time-granularity (e.g. 500ms of
+    * each node). And in a proper time, the entities will be moved
+    * from back tree to front tree by a fetch_data() operation.
+
+- `bool TimeTable:insert(BNodeKey* bkey)`
+
+    1. Try to insert the key into `m_front_tree`
+    1. If the timestamp of key is out of `m_front_tree`'s range, try to insert into `m_back_tree`
+
+- `void TimeTable::fetch_data(uint64_t basetime)`
+
+- `void TimeTable::update_curr_time()`
+
+    1. Get the next step timestamp after current time
+    1. If the `m_front_tree` is ready to rotate, rotate it.
+    1. Fetch data from back tree and insert to the front tree.
+
+- ``
+
+----
+
+##Replay_payload
+
+    /** resend threshold: if packet is not received after the threshold, the             
+     * packet will be resend */                                                          
+    #define RESEND_THRESHOLD (2 * 1000 * 1000)  /** us */                                
+                                                                                         
+    /** resend abort threshold: if packet is not received after the abort threshold, the 
+     * packet will be aborted and notify upagent with LTT_STATUS_ERROR */                
+    #define RESEND_ABORT_THRESHOLD (RESEND_THRESHOLD * 5)  /** us */                     
+
+----
+
+#Structure
+
+Dallas有三种case:
+1. function case
+
+    只跑一个caselist, 测试功能, 包括payload caselist
+1. load case
+
+    只跑一个caselist, 但可以定制case调度的频繁度, 测单种caselist的极限性能
+
+1. tm case
+
+    用一个算法, 模拟现网cp/up traffic情况
+    用户需要写比较复杂的配置文件, 定义好模拟的现网中有什么node, 每个node是什么接口, 地址怎么分布, 以及一共有多少用户, 有哪些用户属性
+    用户属性包括它支持怎样的特性 (这个用户是什么policy, 是什么地区码, 有多少个session, 多少个bearer, 以及bearer支持什么样的payload profile (描述payload的速度, 类型dummy/replay等等) ) 和payload
+    tm一旦开始，就是dallas ap program根据配置来模拟每个用户的信令走向了
+
+
+----
+
 #Commands
 
 ##Dallas Build
 
-```
     setup_15Aspace
     export LTT_REPO=/repo/eruitfe/ltt_ng
     cd $MK
@@ -167,14 +277,36 @@
     cd /proj/pcn/lts/user/dallas_r15b/releases/
     
     tar xvf 19089_CXP9011454_eruitfe.tar.Z
-    ll *eruitfe*
     
     cp -rp 19089_CXP9011454_eruitfe /lab/testtools/rhel664/dallas/testRelease/Dallas_15B_eruitfe_sdk
     /lab/gw_test_framework/epglib2/bin/lab_storage_sync sync --src SERO --dest SELN /lab/testtools/rhel664/dallas/testRelease/Dallas_15B_eruitfe_sdk
     or
     scp statem_mme.beam root@epgtool1004-10:/lab/testtools/rhel664/dallas/testRelease/Dallas_15B_eruitfe_sdk/app/ebin/
 
-```
+
+##Dallas LTT Replacement
+
+    make clean & make
+    cp ltt [testRelease]/3pp/ltt/bin/ltt
+
+----
+
+##Dallas DPN Replacement
+
+    cp arch/dpn/c/bin/rhel664/dpn [testRelease]/sbin/dpn
+
+----
+
+##Dallas Node Reload
+
+    ssh erv@epg10-3
+
+    show chassis
+    reload card all
+
+    start oam_cli
+    ManagedElement=1,Epg=1,Sgw=1
+    statistics
 
 ----
 
@@ -191,6 +323,27 @@
     vim /var/log/ltt.log
     vim /var/dallas/policy.conf
 
+
+    lts_system_setup -a uninstall
+    /lab/testtools/rhel664/dallas/testRelease/Dallas_15B_3R1_LLV003_dummy_timeout_emoqrst/scripts/lts_system_setup -a install
+    lts_deploy ltt /etc/rc.d/rc.vlan restart
+    lts_set_loopback -dallas_config_dir  /autott/dallas
+    lts_control start -c /autott/dallas
+    watch lts_info
+    lts_run_tm all
+    lts_log -t
+    lts_info
+    vim /var/log/dallas_msg.log
+    exit
+    lts_info
+    lts_sstop
+    lts_stop
+    lts_system_setup -a uninstall -v
+
+    lts_run_mobiles '948578, 1, [104]'
+    lts_get_subscriber 948578
+    lts_run_mobiles '948578, 1, [{160, 1, 83}]'
+
 ```
 
 1. Uninstall current Dallas
@@ -205,15 +358,35 @@
 
 ----
 
+##Dallas Run Cases
+
+lts_run_tm all
+lts_run_load [1] 146, 500
+show chassis
+reload card all
+
+start oam-cli
+ManagedElement=1, Epg=1, Node=1
+status
+
+lts_get_subscriber
+
+
+----
+
 ##Dallas Delivery
 
 ```
-    git resete -soft HEAD^
+    git reset -soft HEAD^
+
     git commit
     
         The format of commit message is like: "<jira_num>[commit description]"
+
+    git branch --set-upstream-to=origin/dallas_15b sdk_parser
     git pull --rebase
-    git push origin HEAD:refs/for/dallas_15b/sdk
+
+    git push origin HEAD:refs/for/dallas_15b/sdk_parser 
 ```
 
 ----
@@ -232,7 +405,7 @@ https://pdupc-jira.mo.sw.ericsson.se/secure/RapidBoard.jspa
 
 ----
 
-##Calculate Profile
+##Calculate Dummy Profile
     {udp_payload_profile,
     1, %% 'Payload-profile-index'
     300, %% 'Payload session life time' %% (Integer 0 .. 3600). Note that '0' means that packets per session will be used instead.
@@ -262,6 +435,170 @@ https://pdupc-jira.mo.sw.ericsson.se/secure/RapidBoard.jspa
     ACK 300/2.571428571428571 = 116.6666666666667 real total MTU total packet: 117 
     
     extra 1 packet need 2.571428571428571 s 
+
+
+    83, 11, 10, 10, 245, 138, 0.41, 0.62, 1, 0.47, 0, []
+    0.41*125=51.25
+    0.62*125=77.5
+    245/77.5=3.1612903225806451612903225806452
+    138/51.25=2.6926829268292682926829268292683
+    11/2.6926829268292682926829268292683=4.0851449275362318840579710144927
+    11/3.1612903225806451612903225806452=3.4795918367346938775510204081632
+
+    97, 11, 10, 10, 294, 277, 0.81, 0.75, 1 ,0.47, 0, []
+    0.81*125=101.25
+    0.75*125=93.75
+    294/93.75=3.136
+    277/101.25=2.7358024691358024691358024691358
+    11/2.7358024691358024691358024691358=4.0207581227436823104693140794224
+    11/3.136=3.5076530612244897959183673469388
+
+    51.25   138  2.6926829268292682926829268292683  4.0851449275362318840579710144927   4
+    77.5    245  3.1612903225806451612903225806452  3.4795918367346938775510204081632   3
+    
+    51      138 2.7058823529411764705882352941176   4.0652173913043478260869565217392   4
+    78      245 3.1410256410256410256410256410256   3.5020408163265306122448979591837   4
+    
+    loop_time=2.7058823529411764705882352941176
+    pkt_burst_ack=1
+    pkt_burst_main=2.7058823529411764705882352941176*78/245=0.86146458583433373349339735894356
+    
+                                        MTU     ACK
+    2.70588*1       2.70588             0       1
+    2.70588*2       5.41176             0       1
+    2.70588*3       8.11764             1       2
+    2.70588*4       10.82352            2       3
+    
+    ----
+    
+    2.70588*5       13.5294             3       4
+    2.70588*6       16.23528            4       done   
+
+                                        0       1
+                                        0       1
+                                        1       1
+                                        2       2
+                                        3       3
+                                        4       4
+                                        4       4
+
+ERROR     05-17 08:09:14.619 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495001354, loop_elpased: 0, loop_time: 2705882,                    timestamp: 0 , pk
+t_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 0                    pkt_sent_ack: 1
+ERROR     05-17 08:09:17.315 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495001357, loop_elpased: 1, loop_time: 2705882,                    timestamp: 270588
+2 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 0                    pkt_sent_ack: 1
+ERROR     05-17 08:09:20.027 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495001360, loop_elpased: 2, loop_time: 2705882,                    timestamp: 541176
+4 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 1                    pkt_sent_ack: 1
+ERROR     05-17 08:09:22.725 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495001362, loop_elpased: 3, loop_time: 2705882,                    timestamp: 811764
+6 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 2                    pkt_sent_ack: 2
+ERROR     05-17 08:09:25.435 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495001365, loop_elpased: 4, loop_time: 2705882,                    timestamp: 108235
+28 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 3                    pkt_sent_ack: 3
+EVENT     05-17 08:09:26.460 dsyslog        TOO MANY PRINTOUTS PER SECOND! (critical:0 error:0 warning:0 event:0 info:0 debug:714 resend:3729208032 printouts dropped the last 31 secs)
+ERROR     05-17 08:09:28.135 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495001368, loop_elpased: 5, loop_time: 2705882,                    timestamp: 135294
+10 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 4                    pkt_sent_ack: 4
+ERROR     05-17 08:09:30.845 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495001370, loop_elpased: 6, loop_time: 2705882,                    timestamp: 162352
+92 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 4                    pkt_sent_ack: 4
+ERROR     05-17 08:09:31.345 LTT_1          dummy session 1156995616094552064 send to mq at 1495001371
+
+----
+
+INFO      05-17 08:59:58.536 pdn_sim        Register dummy payload profiles
+ERROR     05-17 09:01:44.656 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495004504, loop_elpased: 0, loop_time: 4803921,                    timestamp: 0 , pk
+t_total_main: 2                    pkt_total_ack: 2, pkt_sent_main: 1                    pkt_sent_ack: 0
+ERROR     05-17 09:01:49.458 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495004509, loop_elpased: 1, loop_time: 4803921,                    timestamp: 480392
+1 , pkt_total_main: 2                    pkt_total_ack: 2, pkt_sent_main: 1                    pkt_sent_ack: 0
+ERROR     05-17 09:01:54.263 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495004514, loop_elpased: 2, loop_time: 4803921,                    timestamp: 960784
+2 , pkt_total_main: 2                    pkt_total_ack: 2, pkt_sent_main: 1                    pkt_sent_ack: 1
+ERROR     05-17 09:01:59.059 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495004519, loop_elpased: 3, loop_time: 4803921,                    timestamp: 144117
+63 , pkt_total_main: 2                    pkt_total_ack: 2, pkt_sent_main: 2                    pkt_sent_ack: 2
+ERROR     05-17 09:02:03.869 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495004523, loop_elpased: 4, loop_time: 4803921,                    timestamp: 192156
+84 , pkt_total_main: 2                    pkt_total_ack: 2, pkt_sent_main: 2                    pkt_sent_ack: 2
+
+----
+
+ERROR     05-17 11:08:07.351 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 0,             pkt_total_main: 4, pkt_sent_main: 0
+ERROR     05-17 11:08:07.351 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 0             pkts_to_sent: 1
+ERROR     05-17 11:08:07.353 LTT_1          DUMMY TIMEOUTtry_to_send_packet : MAIN Packet Sending:             loop_elapsed: 0,             pkt_total_ack: 4, pkt_sent_ack: 0
+ERROR     05-17 11:08:07.353 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 0             pkts_to_sent: 0
+ERROR     05-17 11:08:07.353 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1156995616094552064                    send to mq at                    1495012087, loop_elpased: 0, 
+loop_time: 2705882,                    timestamp: 0 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 1                    pkt_sent_ack: 0
+ERROR     05-17 11:08:10.053 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 1,             pkt_total_main: 4, pkt_sent_main: 1
+ERROR     05-17 11:08:10.053 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 1             pkts_to_sent: 0
+ERROR     05-17 11:08:10.053 LTT_1          DUMMY TIMEOUTtry_to_send_packet : MAIN Packet Sending:             loop_elapsed: 1,             pkt_total_ack: 4, pkt_sent_ack: 0
+ERROR     05-17 11:08:10.053 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 1             pkts_to_sent: 0
+ERROR     05-17 11:08:10.053 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1156995616094552064                    send to mq at                    1495012090, loop_elpased: 1, 
+loop_time: 2705882,                    timestamp: 2705882 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 1                    pkt_sent_ack: 0
+ERROR     05-17 11:08:12.753 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 2,             pkt_total_main: 4, pkt_sent_main: 1
+ERROR     05-17 11:08:12.753 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 2             pkts_to_sent: 0
+ERROR     05-17 11:08:12.753 LTT_1          DUMMY TIMEOUTtry_to_send_packet : MAIN Packet Sending:             loop_elapsed: 2,             pkt_total_ack: 4, pkt_sent_ack: 0
+ERROR     05-17 11:08:12.753 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 2             pkts_to_sent: 1
+ERROR     05-17 11:08:12.757 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1156995616094552064                    send to mq at                    1495012092, loop_elpased: 2, 
+loop_time: 2705882,                    timestamp: 5411764 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 1                    pkt_sent_ack: 1
+ERROR     05-17 11:08:15.463 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 3,             pkt_total_main: 4, pkt_sent_main: 1
+ERROR     05-17 11:08:15.463 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 3             pkts_to_sent: 1
+ERROR     05-17 11:08:15.463 LTT_1          DUMMY TIMEOUTtry_to_send_packet : MAIN Packet Sending:             loop_elapsed: 3,             pkt_total_ack: 4, pkt_sent_ack: 1
+ERROR     05-17 11:08:15.463 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 3             pkts_to_sent: 1
+ERROR     05-17 11:08:15.463 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1156995616094552064                    send to mq at                    1495012095, loop_elpased: 3, 
+loop_time: 2705882,                    timestamp: 8117646 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 2                    pkt_sent_ack: 2
+ERROR     05-17 11:08:18.173 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 4,             pkt_total_main: 4, pkt_sent_main: 2
+ERROR     05-17 11:08:18.173 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 4             pkts_to_sent: 1
+ERROR     05-17 11:08:18.173 LTT_1          DUMMY TIMEOUTtry_to_send_packet : MAIN Packet Sending:             loop_elapsed: 4,             pkt_total_ack: 4, pkt_sent_ack: 2
+ERROR     05-17 11:08:18.173 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 4             pkts_to_sent: 1
+ERROR     05-17 11:08:18.173 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1156995616094552064                    send to mq at                    1495012098, loop_elpased: 4, 
+loop_time: 2705882,                    timestamp: 10823528 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 3                    pkt_sent_ack: 3
+ERROR     05-17 11:08:20.873 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 5,             pkt_total_main: 4, pkt_sent_main: 3
+ERROR     05-17 11:08:20.873 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 5             pkts_to_sent: 1
+ERROR     05-17 11:08:20.873 LTT_1          DUMMY TIMEOUTtry_to_send_packet : MAIN Packet Sending:             loop_elapsed: 5,             pkt_total_ack: 4, pkt_sent_ack: 3
+ERROR     05-17 11:08:20.873 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 5             pkts_to_sent: 1
+ERROR     05-17 11:08:20.873 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1156995616094552064                    send to mq at                    1495012100, loop_elpased: 5, 
+loop_time: 2705882,                    timestamp: 13529410 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 4                    pkt_sent_ack: 4
+ERROR     05-17 11:08:23.583 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 6,             pkt_total_main: 4, pkt_sent_main: 4
+ERROR     05-17 11:08:23.583 LTT_1          DUMMY TIMEOUTtry_to_send_packet : MAIN Packet Sending:             loop_elapsed: 6,             pkt_total_ack: 4, pkt_sent_ack: 4
+ERROR     05-17 11:08:23.583 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1156995616094552064                    send to mq at                    1495012103, loop_elpased: 6, 
+loop_time: 2705882,                    timestamp: 16235292 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 4                    pkt_sent_ack: 4
+
+----
+
+ERROR     05-17 11:57:23.763 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 0,             pkt_total_main: 4, pkt_sent_main: 0
+ERROR     05-17 11:57:23.763 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 0             pkt_sent: 0             pkts_to_sent: 1
+ERROR     05-17 11:57:23.766 LTT_1          DUMMY TIMEOUTtry_to_send_packet : ACK Packet Sending:             loop_elapsed: 0,             pkt_total_ack: 4, pkt_sent_ack: 0
+ERROR     05-17 11:57:23.766 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 0             pkt_sent: 0             pkts_to_sent: 0
+ERROR     05-17 11:57:23.766 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1152921508901814272                    send to mq at                    1495015043, loop_elpased: 0, 
+loop_time: 2705882,                    timestamp: 0 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 1                    pkt_sent_ack: 0
+ERROR     05-17 11:57:26.468 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 1,             pkt_total_main: 4, pkt_sent_main: 1
+ERROR     05-17 11:57:26.468 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 1             pkt_sent: 1             pkts_to_sent: 0
+ERROR     05-17 11:57:26.468 LTT_1          DUMMY TIMEOUTtry_to_send_packet : ACK Packet Sending:             loop_elapsed: 1,             pkt_total_ack: 4, pkt_sent_ack: 0
+ERROR     05-17 11:57:26.468 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 1             pkt_sent: 0             pkts_to_sent: 0
+ERROR     05-17 11:57:26.468 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1152921508901814272                    send to mq at                    1495015046, loop_elpased: 1, 
+loop_time: 2705882,                    timestamp: 2705882 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 1                    pkt_sent_ack: 0
+ERROR     05-17 11:57:29.168 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 2,             pkt_total_main: 4, pkt_sent_main: 1
+ERROR     05-17 11:57:29.168 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 2             pkt_sent: 1             pkts_to_sent: 0
+ERROR     05-17 11:57:29.168 LTT_1          DUMMY TIMEOUTtry_to_send_packet : ACK Packet Sending:             loop_elapsed: 2,             pkt_total_ack: 4, pkt_sent_ack: 0
+ERROR     05-17 11:57:29.168 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 2             pkt_sent: 0             pkts_to_sent: 1
+ERROR     05-17 11:57:29.168 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1152921508901814272                    send to mq at                    1495015049, loop_elpased: 2, 
+loop_time: 2705882,                    timestamp: 5411764 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 1                    pkt_sent_ack: 1
+ERROR     05-17 11:57:31.878 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 3,             pkt_total_main: 4, pkt_sent_main: 1
+ERROR     05-17 11:57:31.878 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 3             pkt_sent: 1             pkts_to_sent: 1
+ERROR     05-17 11:57:31.878 LTT_1          DUMMY TIMEOUTtry_to_send_packet : ACK Packet Sending:             loop_elapsed: 3,             pkt_total_ack: 4, pkt_sent_ack: 1
+ERROR     05-17 11:57:31.878 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 3             pkt_sent: 1             pkts_to_sent: 1
+ERROR     05-17 11:57:31.878 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1152921508901814272                    send to mq at                    1495015051, loop_elpased: 3, 
+loop_time: 2705882,                    timestamp: 8117646 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 2                    pkt_sent_ack: 2
+ERROR     05-17 11:57:34.578 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 4,             pkt_total_main: 4, pkt_sent_main: 2
+ERROR     05-17 11:57:34.578 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 4             pkt_sent: 2             pkts_to_sent: 1
+ERROR     05-17 11:57:34.578 LTT_1          DUMMY TIMEOUTtry_to_send_packet : ACK Packet Sending:             loop_elapsed: 4,             pkt_total_ack: 4, pkt_sent_ack: 2
+ERROR     05-17 11:57:34.578 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 4             pkt_sent: 2             pkts_to_sent: 1
+ERROR     05-17 11:57:34.578 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1152921508901814272                    send to mq at                    1495015054, loop_elpased: 4, 
+loop_time: 2705882,                    timestamp: 10823528 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 3                    pkt_sent_ack: 3
+ERROR     05-17 11:57:37.288 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 5,             pkt_total_main: 4, pkt_sent_main: 3
+ERROR     05-17 11:57:37.288 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 5             pkt_sent: 3             pkts_to_sent: 1
+ERROR     05-17 11:57:37.288 LTT_1          DUMMY TIMEOUTtry_to_send_packet : ACK Packet Sending:             loop_elapsed: 5,             pkt_total_ack: 4, pkt_sent_ack: 3
+ERROR     05-17 11:57:37.288 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 5             pkt_sent: 3             pkts_to_sent: 1
+ERROR     05-17 11:57:37.288 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1152921508901814272                    send to mq at                    1495015057, loop_elpased: 5, 
+loop_time: 2705882,                    timestamp: 13529410 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 4                    pkt_sent_ack: 4
+ERROR     05-17 11:57:39.998 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 6,             pkt_total_main: 4, pkt_sent_main: 4
+ERROR     05-17 11:57:39.998 LTT_1          DUMMY TIMEOUTtry_to_send_packet : ACK Packet Sending:             loop_elapsed: 6,             pkt_total_ack: 4, pkt_sent_ack: 4
+ERROR     05-17 11:57:39.998 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1152921508901814272                    send to mq at                    1495015059, loop_elpased: 6, 
+loop_time: 2705882,                    timestamp: 16235292 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 4                    pkt_sent_ack: 4
+
 
 #Run Dummy Payload
 ```
@@ -329,7 +666,79 @@ P0092144
     app_stats.pdn_rx_error += app_stat[i].pdn_rx_error;
     app_stats.pdn_tx_error += app_stat[i].pdn_tx_error;
 
+
+
+
+
 /lab/testtools/dallas1/PRA/RC1_0_0050_51/PCDALNGEN-703_2017-04-25_10.44_TC13769.2.1_SF_ENEF-MME-RT_SGW_robustness_ssr8010s2/raw_logs/epgtool/dls_autott_ends.log
 /lab/testtools/dallas1/PRA/reference/2017-04-05_08.04_TC16621.1.1_SF_ENEF-SGW-RT_PGW_robustness_ssr8010s2/raw_logs/epgtool/vim dls_autott_ends.log
 
 
+- 05052017
+
+replay_session_execute: resending timeout:profile_id[8110] session_id [4617346948532273152]resend_pktid[43736] flow_idx[0]
+@run :execute return error
+normal raw payload flow miss:
+ src 36.8.40.135 dst 196.2.176.65
+ipv4 pkt proto id 17
+
+{replay_payload_profile, 8110,  396,  1.00, 0, 0, false, true, 110, []}.   %%8048_ppfilm_20120525074558_1.cap
+DALLAS_REPLAY_FILE_DIR=/lab/epg_st_utils/captures/latest
+
+
+selnpcgwnx1001:/lab/testtools/dallas1/PRA/RC1_0_0049/2017-04-06_02.24_TC3362.1.2_BS_3.5_Standalone_PGW_SACC_MBB_stability_ssr8010s2_PCDALNGEN-684>
+
+----
+
+- 05082017
+
+LTT Replay Rx unexpected pkt, recv_pktid:[126], sent_pktid:[126], capture file:[/lab/epg_st_utils/captures/latest/sequences/rtsp/streaming_sofa_movie.cap], replay id:[6064]
+LTT Replay Rx unexpected pkt, recv_pktid:[335], sent_pktid:[335], capture file:[/lab/epg_st_utils/captures/latest/sequences/rtsp/streaming_sofa_movie.cap], replay id:[6064]
+ERROR     05-06 05:28:51.414 LTT_3          LTT Replay Rx unexpected pkt, recv_pktid:[126], sent_pktid:[126], capture [file:[/lab/epg_st_utils/captures/latest/sequences/ftp/stor_sound1_edited.cap|file:///[/lab/epg_st_utils/captures/latest/sequences/ftp/stor_sound1_edited.cap]], replay id:[6010]
+ERROR     05-06 05:28:51.414 LTT_1          LTT Replay Rx unexpected pkt, recv_pktid:[571], sent_pktid:[571], capture [file:[/lab/epg_st_utils/captures/latest/sequences/ftp/stor_sound1_edited.cap|file:///[/lab/epg_st_utils/captures/latest/sequences/ftp/stor_sound1_edited.cap]], replay id:[8010]
+
+selnpcgwnx1001:/home/eruitfe/ltt_ng/src> grep -r -i -n "recv_pktid" .
+./rps/cc_deps.hh:116:    uint64_t recv_pktid;            /** last received packet ID */
+./app/replay_session.c:315:    if (stat->recv_pktid != stat->sent_pktid) {/** pkts are not received */
+./app/replay_session.c:525:    LTT_LOG(DEBUG, APP,"\trecv pktid[%lu], sent_pktid[%lu]\n", stat->recv_pktid, stat->sent_pktid);
+./app/replay_session.c:535:    if (likely(stat->recv_pktid != stat->sent_pktid)) {
+./app/replay_session.c:809:        if (stat->recv_pktid < stat->sent_pktid) {
+./app/replay_session.c:810:            stat->recv_pktid++;
+./app/replay_session.c:817:            LTT_LOG(ERROR, APP, "LTT Replay Rx unexpected pkt, recv_pktid:[%lu], sent_pktid:[%lu], capture file:[%s], replay id:[%u] \n",
+./app/replay_session.c:818:                    stat->recv_pktid, stat->sent_pktid, replay->prof->pcapfile, replay->prof->replay_id);
+./app/replay_session.c:827:        LTT_LOG(ERROR, APP, "LTT Replay Rx unexpected direction, recv_pktid:[%lu], sent_pktid:[%lu], capture file:[%s], replay id:[%u] @[%lu]\n",
+./app/replay_session.c:828:                stat->recv_pktid, stat->sent_pktid, replay->prof->pcapfile, replay->prof->replay_id, rte_get_tsc_cycles());
+./app/replay_status.c:42:    stat->recv_pktid = 0;
+./app/replay_status.c:74:        LTT_LOG(L, APP,"\t\t\t\t\tPKT[%lu] RECEIVED\n", stat->recv_pktid);
+./app/replay_status.c:76:                stat->resend_pktid, stat->sent_pktid, stat->recv_pktid);
+./app/replay_status.c:80:        LTT_LOG(L, APP,"\tPKT[%lu] RECEIVED\n", stat->recv_pktid);
+./app/replay_status.c:82:                stat->resend_pktid, stat->sent_pktid, stat->recv_pktid);
+./app/replay_status.c:100:    stat->recv_pktid = stat->sent_pktid;
+Binary file ./app/replay_session.o matches
+./app/replay_status.h:50:    uint64_t recv_pktid;            /** last received packet ID */
+
+Auto-merging src/om/ltt_om.h
+Auto-merging src/om/jobtracker_agent.c
+CONFLICT (content): Merge conflict in src/om/jobtracker_agent.c
+Auto-merging src/instance/agent.c
+CONFLICT (content): Merge conflict in src/instance/agent.c
+
+        modified:   src/app/app_stats.c
+        modified:   src/app/app_stats.h
+        modified:   src/instance/agent.c
+        modified:   src/instance/agent.h
+        modified:   src/om/jobtracker_agent.c
+        modified:   src/om/ltt_om.h
+
+/lab/testtools/rhel664/dallas/testRelease/Dallas_15B_3R1_LLV003_dummy_timeout_emoqrst 
+dummy timeout的包
+
+epgtool10-30
+
+----
+
+- 05222017
+
+/lab/testtools/rhel664/dallas/testRelease/emenhui/3R1_LLV011_session_lif_time/app/ebin 
+
+----
