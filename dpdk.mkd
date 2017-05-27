@@ -1,0 +1,445 @@
+#Getting Started Guide#
+
+#Introduction#
+
+##Documentation Roadmap##
+
+The following is a list of DPDK documents in the suggested reading order:
+
+- Release Notes: Provides release-specific information, including supported features, limitations, fixed issues, known issues and so on. Also, provides the answers to frequently asked questions in FAQ format.
+- Getting Started Guide (this document): Describes how to install and configure the DPDK; designed to get users up and running quickly with the software.
+- Programmer’s Guide: Describes:
+    - The software architecture and how to use it (through examples), specifically in a Linux application (linuxapp) environment
+    - The content of the DPDK, the build system (including the commands that can be used in the root DPDK Makefile to build the development kit and an application) and guidelines for porting an application
+    - Optimizations used in the software and those that should be considered for new development
+
+    A glossary of terms is also provided.
+
+- API Reference: Provides detailed information about DPDK functions, data structures and other programming constructs.
+- Sample Applications User Guide: Describes a set of sample applications. Each chapter describes a sample application that showcases specific functionality and provides instructions on how to compile, run and use the sample application.
+
+----
+
+#System Requirement#
+
+##BIOS Setting Prerequisite on x86##
+
+For the majority of platforms, no special BIOS settings are needed to use basic DPDK functionality. However, for additional HPET timer and power management functionality, and high performance of small packets on 40G NIC, BIOS setting changes may be needed. Consult the section on Enabling Additional Functionality for more information on the required changes.
+
+----
+
+##Compilation of the DPDK##
+
+- GNU make.
+- coreutils: cmp, sed, grep, arch, etc.
+- gcc: versions 4.9 or later is recommended for all platforms. On some distributions, some specific compiler flags and linker flags are enabled by default and affect performance (-fstack-protector, for example). Please refer to the documentation of your distribution and to gcc -dumpspecs.
+- libc headers, often packaged as gcc-multilib (glibc-devel.i686 / libc6-dev-i386; glibc-devel.x86_64 / libc6-dev for 64-bit compilation on Intel architecture; glibc-devel.ppc64 for 64 bit IBM Power architecture;)
+- Linux kernel headers or sources required to build kernel modules. (kernel - devel.x86_64; kernel - devel.ppc64)
+- Additional packages required for 32-bit compilation on 64-bit systems are:
+    - glibc.i686, libgcc.i686, libstdc++.i686 and glibc-devel.i686 for Intel i686/x86_64;
+    - glibc.ppc64, libgcc.ppc64, libstdc++.ppc64 and glibc-devel.ppc64 for IBM ppc_64;
+
+- Python, version 2.7+ or 3.2+, to use various helper scripts included in the DPDK package.
+
+Optional Tools:
+
+- Intel® C++ Compiler (icc). For installation, additional libraries may be required. See the icc Installation Guide found in the Documentation directory under the compiler installation.
+- IBM® Advance ToolChain for Powerlinux. This is a set of open source development tools and runtime libraries which allows users to take leading edge advantage of IBM’s latest POWER hardware features on Linux. To install it, see the IBM official installation document.
+- libpcap headers and libraries (libpcap-devel) to compile and use the libpcap-based poll-mode driver. This driver is disabled by default and can be enabled by setting CONFIG_RTE_LIBRTE_PMD_PCAP=y in the build time config file.
+- libarchive headers and library are needed for some unit tests using tar to get their resources.
+
+----
+
+##Running DPDK Applications
+
+To run an DPDK application, some customization may be required on the target machine.
+
+###Use of Hugepages in the Linux Environment
+
+Hugepage support is required for the large memory pool allocation used for packet buffers (the HUGETLBFS option must be enabled in the running kernel as indicated the previous section). By using hugepage allocations, *performance is increased since fewer pages are needed, and therefore less Translation Lookaside Buffers (TLBs, high speed translation caches)*, which reduce the time it takes to translate a virtual page address to a physical page address. Without hugepages, high TLB miss rates would occur with the standard 4k page size, slowing performance.
+
+----
+
+###Reserving Hugepages for DPDK Use
+
+The allocation of hugepages should be done at boot time or as soon as possible after system boot to prevent memory from being fragmented in physical memory. To reserve hugepages at boot time, a parameter is passed to the Linux kernel on the kernel command line.
+
+For 2 MB pages, just pass the hugepages option to the kernel. For example, to reserve 1024 pages of 2 MB, use:
+
+    hugepages=1024
+
+For other hugepage sizes, for example 1G pages, the size must be specified explicitly and can also be optionally set as the default hugepage size for the system. For example, to reserve 4G of hugepage memory in the form of four 1G pages, the following options should be passed to the kernel:
+
+    default_hugepagesz=1G hugepagesz=1G hugepages=4
+
+In the case of a dual-socket NUMA system, the number of hugepages reserved at boot time is generally divided equally between the two sockets (on the assumption that sufficient memory is present on both sockets).
+
+See the Documentation/kernel-parameters.txt file in your Linux source tree for further details of these and other kernel options.
+
+
+Alternative:
+
+For 2 MB pages, there is also the option of allocating hugepages after the system has booted. This is done by echoing the number of hugepages required to a nr_hugepages file in the /sys/devices/ directory. For a single-node system, the command to use is as follows (assuming that 1024 pages are required):
+
+    echo 1024 > /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
+
+On a NUMA machine, pages should be allocated explicitly on separate nodes:
+
+    echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+    echo 1024 > /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages
+
+----
+
+###Using Hugepages with the DPDK
+
+
+Once the hugepage memory is reserved, to make the memory available for DPDK use, perform the following steps:
+
+    mkdir /mnt/huge
+    mount -t hugetlbfs nodev /mnt/huge
+
+The mount point can be made permanent across reboots, by adding the following line to the /etc/fstab file:
+
+    nodev /mnt/huge hugetlbfs defaults 0 0
+
+For 1GB pages, the page size must be specified as a mount option:
+
+    nodev /mnt/huge_1GB hugetlbfs pagesize=1GB 0 0
+
+----
+
+###Xen Domain0 Support in the Linux Environment
+
+The existing memory management implementation is based on the Linux kernel hugepage mechanism. On the Xen hypervisor, hugepage support for DomainU (DomU) Guests means that DPDK applications work as normal for guests.
+
+However, Domain0 (Dom0) does not support hugepages. To work around this limitation, a new kernel module rte_dom0_mm is added to facilitate the allocation and mapping of memory via IOCTL (allocation) and MMAP (mapping).
+
+----
+
+####Enabling Xen Dom0 Mode in the DPDK
+
+By default, Xen Dom0 mode is disabled in the DPDK build configuration files. To support Xen Dom0, the CONFIG_RTE_LIBRTE_XEN_DOM0 setting should be changed to “y”, which enables the Xen Dom0 mode at compile time.
+
+Furthermore, the CONFIG_RTE_EAL_ALLOW_INV_SOCKET_ID setting should also be changed to “y” in the case of the wrong socket ID being received.
+
+----
+
+####Loading the DPDK rte_dom0_mm Module
+
+To run any DPDK application on Xen Dom0, the rte_dom0_mm module must be loaded into the running kernel with rsv_memsize option. The module is found in the kmod sub-directory of the DPDK target directory. This module should be loaded using the insmod command as shown below (assuming that the current directory is the DPDK target directory):
+
+    sudo insmod kmod/rte_dom0_mm.ko rsv_memsize=X
+
+The value X cannot be greater than 4096(MB).
+
+----
+
+####Configuring Memory for DPDK Use
+
+After the rte_dom0_mm.ko kernel module has been loaded, the user must configure the memory size for DPDK usage. This is done by echoing the memory size to a memsize file in the /sys/devices/ directory. Use the following command (assuming that 2048 MB is required):
+    echo 2048 > /sys/kernel/mm/dom0-mm/memsize-mB/memsize
+
+The user can also check how much memory has already been used:
+    cat /sys/kernel/mm/dom0-mm/memsize-mB/memsize_rsvd
+
+Xen Domain0 does not support NUMA configuration, as a result the `--socket-mem` command line option is invalid for Xen Domain0.
+
+----
+
+####Running the DPDK Application on Xen Domain0
+
+To run the DPDK application on Xen Domain0, an extra command line option `--xen-dom0` is required.
+
+----
+
+#Compiling the DPDK Target from Source#
+
+##Install the DPDK and Browse Sources##
+
+First, uncompress the archive and move to the uncompressed DPDK source directory:
+
+    tar xJf dpdk-<version>.tar.xz
+    cd dpdk-<version>
+
+The DPDK is composed of several directories:
+
+- lib: Source code of DPDK libraries
+- drivers: Source code of DPDK poll-mode drivers
+- app: Source code of DPDK applications (automatic tests)
+- examples: Source code of DPDK application examples
+- config, buildtools, mk: Framework-related makefiles, scripts and configuration
+
+----
+
+##Installation of DPDK Target Environments##
+
+The format of a DPDK target is:
+
+    ARCH-MACHINE-EXECENV-TOOLCHAIN
+
+where:
+
+- ARCH can be: i686, x86_64, ppc_64
+- MACHINE can be: native, power8
+- EXECENV can be: linuxapp, bsdapp
+- TOOLCHAIN can be: gcc, icc
+
+The targets to be installed depend on the 32-bit and/or 64-bit packages and compilers installed on the host. Available targets can be found in the DPDK/config directory. The defconfig_ prefix should not be used.
+
+When using the Intel® C++ Compiler (icc), one of the following commands should be invoked for 64-bit or 32-bit use respectively. Notice that the shell scripts update the $PATH variable and therefore should not be performed in the same session. Also, verify the compiler’s installation directory since the path may be different:
+
+    source /opt/intel/bin/iccvars.sh intel64
+    source /opt/intel/bin/iccvars.sh ia32
+
+To install and make targets, use the make install T=<target> command in the top-level DPDK directory.
+
+For example, to compile a 64-bit target using icc, run:
+
+    make install T=x86_64-native-linuxapp-icc
+
+To compile a 32-bit build using gcc, the make command should be:
+
+    make install T=i686-native-linuxapp-gcc
+
+To prepare a target without building it, for example, if the configuration changes need to be made before compilation, use the make config T=<target> command:
+
+    make config T=x86_64-native-linuxapp-gcc
+
+> Any kernel modules to be used, e.g. igb_uio, kni, must be compiled with the same kernel as the one running on the target. If the DPDK is not being built on the target machine, the RTE_KERNELDIR environment variable should be used to point the compilation at a copy of the kernel version to be used on the target machine.
+
+Once the target environment is created, the user may move to the target environment directory and continue to make code changes and re-compile. The user may also make modifications to the compile-time DPDK configuration by editing the .config file in the build directory. (This is a build-local copy of the defconfig file from the top- level config directory).
+
+    cd x86_64-native-linuxapp-gcc
+    vi .config
+    make
+
+In addition, the make clean command can be used to remove any existing compiled files for a subsequent full, clean rebuild of the code.
+
+----
+
+##Browsing the Installed DPDK Environment Target##
+
+Once a target is created it contains all libraries, including poll-mode drivers, and header files for the DPDK environment that are required to build customer applications. In addition, the test and testpmd applications are built under the build/app directory, which may be used for testing. A kmod directory is also present that contains kernel modules which may be loaded if needed.
+
+----
+
+##Loading Modules to Enable Userspace IO for DPDK##
+
+To run any DPDK application, a suitable uio module can be loaded into the running kernel. In many cases, the standard uio_pci_generic module included in the Linux kernel can provide the uio capability. This module can be loaded using the command
+
+    sudo modprobe uio_pci_generic
+
+    > uio_pci_generic module doesn’t support the creation of virtual functions.
+
+As an alternative to the uio_pci_generic, the DPDK also includes the igb_uio module which can be found in the kmod subdirectory referred to above. It can be loaded as shown below:
+
+    sudo modprobe uio
+    sudo insmod kmod/igb_uio.ko
+
+Since DPDK release 1.7 onward provides VFIO support, use of UIO is optional for platforms that support using VFIO.
+
+----
+
+##Loading VFIO Module##
+
+----
+
+##3.6. Binding and Unbinding Network Ports to/from the Kernel Modules##
+
+----
+
+#Compiling and Running Sample Applications#
+
+The chapter describes how to compile and run applications in an DPDK environment. It also provides a pointer to where sample applications are stored.
+
+----
+
+##Compiling a Sample Application##
+
+Once an DPDK target environment directory has been created (such as `x86_64-native-linuxapp-gcc`), it contains all libraries and header files required to build an application.
+
+When compiling an application in the Linux* environment on the DPDK, the following variables must be exported:
+
+- `RTE_SDK` - Points to the DPDK installation directory.
+- `RTE_TARGET` - Points to the DPDK target environment directory.
+
+The following is an example of creating the `helloworld` application, which runs in the DPDK Linux environment. This example may be found in the `${RTE_SDK}/examples` directory.
+
+The directory contains the `main.c` file. This file, when combined with the libraries in the DPDK target environment, calls the various functions to initialize the DPDK environment, then launches an entry point (dispatch application) for each core to be utilized. By default, the binary is generated in the build directory.
+
+    cd examples/helloworld/
+    export RTE_SDK=$HOME/DPDK
+    export RTE_TARGET=x86_64-native-linuxapp-gcc
+    
+    make
+        CC main.o
+        LD helloworld
+        INSTALL-APP helloworld
+        INSTALL-MAP helloworld.map
+    
+    ls build/app
+        helloworld helloworld.map
+
+
+> In the above example, `helloworld` was in the directory structure of the DPDK. However, it could have been located outside the directory structure to keep the DPDK structure intact. In the following case, the helloworld application is copied to a new directory as a new starting point.
+
+    export RTE_SDK=/home/user/DPDK
+    cp -r $(RTE_SDK)/examples/helloworld my_rte_app
+    cd my_rte_app/
+    export RTE_TARGET=x86_64-native-linuxapp-gcc
+
+    make
+      CC main.o
+      LD helloworld
+      INSTALL-APP helloworld
+      INSTALL-MAP helloworld.map
+
+----
+
+##Running a Sample Application##
+
+> The UIO drivers and hugepages must be setup prior to running an application.
+
+> Any ports to be used by the application must be already bound to an appropriate kernel module, as described in Binding and Unbinding Network Ports to/from the Kernel Modules, prior to running the application.
+
+The application is linked with the DPDK target environment’s Environmental Abstraction Layer (EAL) library, which provides some options that are generic to every DPDK application.
+
+The following is the list of options that can be given to the EAL:
+
+    ./rte-app [-c COREMASK | -l CORELIST] [-n NUM] [-b <domain:bus:devid.func>] \
+              [--socket-mem=MB,...] [-d LIB.so|DIR] [-m MB] [-r NUM] [-v] [--file-prefix] \
+              [--proc-type <primary|secondary|auto>] [-- xen-dom0]
+
+The EAL options are as follows:
+
+- `-c COREMASK` or `-l CORELIST`: An hexadecimal bit mask of the cores to run on. Note that core numbering can change between platforms and should be determined beforehand. The corelist is a set of core numbers instead of a bitmap core mask.
+- `-n NUM`: Number of memory channels per processor socket.
+- `-b <domain:bus:devid.func>`: Blacklisting of ports; prevent EAL from using specified PCI device (multiple -b options are allowed).
+- `--use-device`: use the specified Ethernet device(s) only. Use comma-separate `[domain:]bus:devid.func` values. Cannot be used with -b option.
+- `--socket-mem`: Memory to allocate from hugepages on specific sockets.
+- -`d`: Add a driver or driver directory to be loaded. The application should use this option to load the pmd drivers that are built as shared libraries.
+- `-m MB`: Memory to allocate from hugepages, regardless of processor socket. It is recommended that --socket-mem be used instead of this option.
+- `-r NUM`: Number of memory ranks.
+- `-v`: Display version information on startup.
+- `--huge-dir`: The directory where hugetlbfs is mounted.
+- `--file-prefix`: The prefix text used for hugepage filenames.
+- `--proc-type`: The type of process instance.
+- `--xen-dom0`: Support application running on Xen Domain0 without hugetlbfs.
+- `--vmware-tsc-map`: Use VMware TSC map instead of native RDTSC.
+- `--base-virtaddr`: Specify base virtual address.
+- `--vfio-intr`: Specify interrupt type to be used by VFIO (has no effect if VFIO is not used).
+
+The `-c` or `-l` and option is mandatory; the others are optional.
+
+Copy the DPDK application binary to your target, then run the application as follows (assuming the platform has four memory channels per processor socket, and that cores 0-3 are present and are to be used for running the application):
+
+    ./helloworld -l 0-3 -n 4
+
+> The `--proc-type` and `--file-prefix` EAL options are used for running multiple DPDK processes. See the “Multi-process Sample Application” chapter in the DPDK Sample Applications User Guide and the DPDK Programmers Guide for more details.
+
+----
+
+###Logical Core Use by Applications
+
+The coremask (-c 0x0f) or corelist (-l 0-3) parameter is always mandatory for DPDK applications. Each bit of the mask corresponds to the equivalent logical core number as reported by Linux. The preferred corelist option is a cleaner method to define cores to be used. Since these logical core numbers, and their mapping to specific cores on specific NUMA sockets, can vary from platform to platform, it is recommended that the core layout for each platform be considered when choosing the coremask/corelist to use in each case.
+
+On initialization of the EAL layer by an DPDK application, the logical cores to be used and their socket location are displayed. This information can also be determined for all cores on the system by examining the `/proc/cpuinfo` file, for example, by running cat `/proc/cpuinfo`. The physical id attribute listed for each processor indicates the CPU socket to which it belongs. This can be useful when using other processors to understand the mapping of the logical cores to the sockets.
+
+A more graphical view of the logical core layout may be obtained using the lstopo Linux utility. On Fedora Linux, this may be installed and run using the following command:
+
+    sudo yum install hwloc
+    ./lstopo
+
+----
+
+###Hugepage Memory Use by Applications
+
+When running an application, it is recommended to use the same amount of memory as that allocated for hugepages. This is done automatically by the DPDK application at startup, if no `-m` or `--socket-mem` parameter is passed to it when run.
+
+If more memory is requested by explicitly passing a `-m` or `--socket-mem` value, the application fails. However, the application itself can also fail if the user requests less memory than the reserved amount of hugepage-memory, particularly if using the -m option. The reason is as follows. Suppose the system has 1024 reserved 2 MB pages in socket 0 and 1024 in socket 1. If the user requests 128 MB of memory, the 64 pages may not match the constraints:
+
+- The hugepage memory by be given to the application by the kernel in socket 1 only. In this case, if the application attempts to create an object, such as a ring or memory pool in socket 0, it fails. To avoid this issue, it is recommended that the --socket-mem option be used instead of the -m option.
+- These pages can be located anywhere in physical memory, and, although the DPDK EAL will attempt to allocate memory in contiguous blocks, it is possible that the pages will not be contiguous. In this case, the application is not able to allocate big memory pools.
+
+The socket-mem option can be used to request specific amounts of memory for specific sockets. This is accomplished by supplying the `--socket-mem` flag followed by amounts of memory requested on each socket, for example, supply `--socket-mem=0,512` to try and reserve 512 MB for socket 1 only. Similarly, on a four socket system, to allocate 1 GB memory on each of sockets 0 and 2 only, the parameter `--socket-mem=1024,0,1024` can be used. *No memory will be reserved on any CPU socket that is not explicitly referenced*, for example, socket 3 in this case. If the DPDK cannot allocate enough memory on each socket, the EAL initialization fails.
+
+----
+
+##Additional Sample Applications##
+
+Additional sample applications are included in the ${RTE_SDK}/examples directory. These sample applications may be built and run in a manner similar to that described in earlier sections in this manual. In addition, see the DPDK Sample Applications User Guide for a description of the application, specific instructions on compilation and execution and some explanation of the code.
+
+----
+
+##Additional Test Applications##
+
+In addition, there are two other applications that are built when the libraries are created. The source files for these are in the DPDK/app directory and are called test and testpmd. Once the libraries are created, they can be found in the build/app directory.
+
+- The test application provides a variety of specific tests for the various functions in the DPDK.
+- The testpmd application provides a number of different packet throughput tests and examples of features such as how to use the Flow Director found in the Intel® 82599 10 Gigabit Ethernet Controller.
+
+
+
+
+****
+
+#dpdk-procinfo Application#
+
+The dpdk-procinfo application is a Data Plane Development Kit (DPDK) application that runs as a DPDK secondary process and is capable of retrieving port statistics, resetting port statistics and printing DPDK memory information. This application extends the original functionality that was supported by dump_cfg.
+
+##Running the Application##
+
+The application has a number of command line options:
+
+    ./$(RTE_TARGET)/app/dpdk-procinfo -- -m | [-p PORTMASK] [--stats | --xstats |
+    --stats-reset | --xstats-reset]
+
+###Parameters
+
+- `-p` PORTMASK: Hexadecimal bitmask of ports to configure.
+- `–stats` The stats parameter controls the printing of generic port statistics. If no port mask is specified stats are printed for all DPDK ports.
+- `–xstats` The xstats parameter controls the printing of extended port statistics. If no port mask is specified xstats are printed for all DPDK ports.
+- `–stats-reset` The stats-reset parameter controls the resetting of generic port statistics. If no port mask is specified, the generic stats are reset for all DPDK ports.
+- `–xstats-reset` The xstats-reset parameter controls the resetting of extended port statistics. If no port mask is specified xstats are reset for all DPDK ports.
+- `-m:` Print DPDK memory information.
+
+----
+
+
+#Huge pagee part 1#
+
+https://lwn.net/Articles/374424/
+
+https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
+
+> Editor's note: this article is the first in a five-part series on the use of huge pages with Linux. We are most fortunate to have core VM hacker Mel Gorman as the author of these articles! The remaining installments will appear in future LWN Weekly Editions.
+
+----
+
+#UIO: user-space drivers#
+
+https://lwn.net/Articles/232575/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

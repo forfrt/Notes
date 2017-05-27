@@ -315,7 +315,7 @@ Dallas有三种case:
 ```
     /lab/testtools/rhel664/dallas/testRelease/Dallas_15B_RC1_0_0052_ebm_load_balance_emoqrst/scripts/lts_system_setup -a uninstall
     /lab/testtools/rhel664/dallas/testRelease/Dallas_15B_RC1_0_0052_ebm_load_balance_emoqrst/scripts/lts_system_setup -a install
-    /etc/rc.d/rc.vlan restart
+    lts_deploy ltt /etc/rc.d/rc.vlan restart
     lts_control start -c /autott/dallas
     lts_info
     vim /autott/dallas_15a/vepg31-4.dallas.backbone
@@ -360,16 +360,16 @@ Dallas有三种case:
 
 ##Dallas Run Cases
 
-lts_run_tm all
-lts_run_load [1] 146, 500
-show chassis
-reload card all
-
-start oam-cli
-ManagedElement=1, Epg=1, Node=1
-status
-
-lts_get_subscriber
+    lts_run_tm all
+    lts_run_load [1] 146, 500
+    show chassis
+    reload card all
+    
+    start oam-cli
+    ManagedElement=1, Epg=1, Node=1
+    status
+    
+    lts_get_subscriber
 
 
 ----
@@ -402,6 +402,11 @@ https://pdupc-jira.mo.sw.ericsson.se/secure/RapidBoard.jspa
 ----
 
 #Configurations
+1. 查看ltt reserve了多少内存
+
+    /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages 
+    /var/dallas/system_profile
+1. 
 
 ----
 
@@ -742,3 +747,110 @@ epgtool10-30
 /lab/testtools/rhel664/dallas/testRelease/emenhui/3R1_LLV011_session_lif_time/app/ebin 
 
 ----
+- 05242017
+
+hugepage=12863
+
+1. 16384
+
+    EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
+1. 8192
+
+    EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+       Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
+
+1. 3850
+    EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
+
+1. 3594
+
+    initialized
+
+1. 3722
+    EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
+
+1. 3658
+
+    initialized
+
+1. 3690
+
+    initialized
+
+1. 3706
+
+    EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
+
+1. 3698
+
+    initialized
+
+1. 3702
+
+    initialized
+
+1. 3704
+
+    EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
+
+1. 3703
+
+    initialized
+
+1. 3704
+
+    EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
+    
+----
+
+- 05272017
+hugepage=10240
+
+1. 3705
+
+    Enabling CRC32 instruction for dz_0_dp_7503_ft_IPv6_1 hashing
+    EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
+
+1. 3700
+
+    initialized
+
+
+
+
+
+
+
+
+
