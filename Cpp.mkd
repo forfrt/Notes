@@ -1004,6 +1004,8 @@ When the handler returns, the set of blocked signals is restored to the value it
 
 ###Signals Close Together Merge into One
 
+
+
 ****
 
 #设计模式

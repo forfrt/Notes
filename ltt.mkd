@@ -344,6 +344,8 @@ Dallas有三种case:
     lts_get_subscriber 948578
     lts_run_mobiles '948578, 1, [{160, 1, 83}]'
 
+    lts_control stop
+
 ```
 
 1. Uninstall current Dallas
@@ -402,10 +404,16 @@ https://pdupc-jira.mo.sw.ericsson.se/secure/RapidBoard.jspa
 ----
 
 #Configurations
-1. 查看ltt reserve了多少内存
+1. 查看/修改ltt reserve了多少内存
 
-    /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages 
-    /var/dallas/system_profile
+    htop
+    cat /proc/meminfo
+    vim /var/dallas/system_profile
+    echo 10240 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+    //! This file is unlikely be changed with this command. In this case, you should 
+    change the value of system_profile file and restart dallas project (lts_system_setup -deinstall & lts_system_setup -install)
+
+
 1. 
 
 ----
@@ -830,10 +838,17 @@ hugepage=12863
     
 ----
 
-- 05272017
+- 06022017
 hugepage=10240
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV014/
 
-1. 3705
+1. 3703
+
+    Enabling CRC32 instruction for dz_0_dp_7501_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_7502_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_7502_ft_IPv6_0 hashing
+
+1. 3704
 
     Enabling CRC32 instruction for dz_0_dp_7503_ft_IPv6_1 hashing
     EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
@@ -842,15 +857,228 @@ hugepage=10240
     EAL: Error - exiting with code: 1
       Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
 
-1. 3700
+----
 
-    initialized
+- 06022017
 
+hugepage=5120
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV014/
 
+1. 3703
 
+    0.0.16.5/13  VLAN 253 IF vlan0253:1001, IfIndex  1 SRC MAC 90:e2:ba:86:6e:c5,DST MAC 02:02:00:30:a0:00
+    
+    
+    
+    : Priority 32764, Source IPv6 ::
+    Destination:
+    
+    
+    : Priority 32765, Source 0.0.0.0/0
+    Destination:
+    
+    
+    =============================================================
+    Enabling CRC32 instruction for dz_0_dp_0_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_0_ft_IPv6_0 hashing
+    Enabling CRC32 instruction for dz_1_dp_0_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_1_dp_0_ft_IPv6_0 hashing
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_1_dp_0_ft_IPv6_0
 
+1. 100
 
+mem1.log
 
+    0.0.16.5/13  VLAN 253 IF vlan0253:1001, IfIndex  1 SRC MAC 90:e2:ba:86:6e:c5,DST MAC 02:02:00:30:a0:00
+    
+    
+    
+    : Priority 32764, Source IPv6 ::
+    Destination:
+    
+    
+    : Priority 32765, Source 0.0.0.0/0
+    Destination:
+    
+    
+    =============================================================
+    Enabling CRC32 instruction for dz_0_dp_0_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_0_ft_IPv6_0 hashing
+    Enabling CRC32 instruction for dz_1_dp_0_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_1_dp_0_ft_IPv6_0 hashing
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_1_dp_0_ft_IPv6_0
+    "/var/log/ltt.log" 586L, 28220C                                                                       
 
+----
 
+- 06022017
 
+hugepage=7680
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV014/
+1. 3703
+    mem2.log
+
+    Enabling CRC32 instruction for dz_0_dp_5306_ft_IPv4_0 hashing
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_0_dp_5306_ft_IPv4_0
+
+- 06052017
+hugepage=7680
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV014/
+1. 2618
+    mem3.log
+
+    Enabling CRC32 instruction for dz_0_dp_5306_ft_IPv4_0 hashing
+    RING: Cannot reserve memory                                  
+    HASH: memory allocation failed                               
+    EAL: Error - exiting with code: 1                            
+      Cause: Failed to create hash table dz_0_dp_5306_ft_IPv4_0  
+
+1. 1309
+
+    mem4.log
+
+    Enabling CRC32 instruction for dz_0_dp_2713_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_2713_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_2714_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_2714_ft_IPv6_0 hashing
+
+1. 2600
+
+    Enabling CRC32 instruction for dz_0_dp_5295_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_5295_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_5296_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_5296_ft_IPv6_0 hashing
+
+1. 2604
+
+    mem6.log
+    Enabling CRC32 instruction for dz_0_dp_5303_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_5303_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_5304_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_5304_ft_IPv6_0 hashing
+
+1. 2605
+
+    mem5.log
+    Enabling CRC32 instruction for dz_0_dp_5304_ft_IPv6_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_5305_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_5305_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_5306_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_5306_ft_IPv6_0 hashing
+    Enabling CRC32 instruction for dz_1_dp_640_ft_IPv4_0 hashing
+
+    RING: Cannot reserve memory                                 
+    HASH: memory allocation failed                              
+    EAL: Error - exiting with code: 1                           
+      Cause: Failed to create hash table dz_1_dp_640_ft_IPv4_0  
+
+5304/7502=0.70701146360970407891229005598507
+768/1024=0.75
+2604/3703=0.70321361058601134215500945179584
+
+- 06052017
+hugepage=8920
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV014/
+
+1. 3104
+
+    mem7.log
+    Enabling CRC32 instruction for dz_0_dp_6303_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_6303_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_6304_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_6304_ft_IPv6_0 hashing
+
+1. 3204
+
+    Enabling CRC32 instruction for dz_0_dp_6503_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_6503_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_6504_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_6504_ft_IPv6_0 hashing
+
+1. 3504
+
+    Enabling CRC32 instruction for dz_0_dp_7102_ft_IPv6_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_7103_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_7103_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_7104_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_7104_ft_IPv6_0 hashing
+
+1. 3703
+
+    Enabling CRC32 instruction for dz_0_dp_7501_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_7501_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_7502_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_7502_ft_IPv6_0 hashing
+
+----
+
+- 06062017
+hugepage=8236
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV014/
+
+1. 3703
+
+    Enabling CRC32 instruction for dz_0_dp_6995_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_6995_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_6996_ft_IPv4_0 hashing
+    HASH: memory allocation failed                               
+    EAL: Error - exiting with code: 1                            
+      Cause: Failed to create hash table dz_0_dp_6996_ft_IPv4_0  
+
+----
+
+hugepage=8330
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV014/
+
+1. 3703
+
+    Enabling CRC32 instruction for dz_0_dp_7281_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_7282_ft_IPv4_0 hashing
+    HASH: memory allocation failed                               
+    EAL: Error - exiting with code: 1                            
+      Cause: Failed to create hash table dz_0_dp_7282_ft_IPv4_0  
+
+8330-8236=94
+7282-6996=284
+94*4=376
+376/284=1.3239436619718309859154929577465
+
+lib/librte_hash/rte_cuckoo_hash.c:185:          RTE_LOG(ERR, HASH, "memory allocation failed\n");
+lib/librte_hash/rte_cuckoo_hash.c:217:          RTE_LOG(ERR, HASH, "memory allocation failed\n");
+lib/librte_hash/rte_cuckoo_hash.c:229:          RTE_LOG(ERR, HASH, "memory allocation failed\n");
+lib/librte_hash/rte_cuckoo_hash.c:245:          RTE_LOG(ERR, HASH, "memory allocation failed\n");
+
+lib/librte_ring/rte_ring.c:191:         RTE_LOG(ERR, RING, "Cannot reserve memory for tailq\n");
+lib/librte_ring/rte_ring.c:214:         RTE_LOG(ERR, RING, "Cannot reserve memory\n");
+examples/multi_process/client_server_mp/mp_server/init.c:276:           rte_exit(EXIT_FAILURE, "Cannot reserve memory zone for port information\n")
+
+----
+
+hugepage=8405
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV014/
+
+1. 3703
+
+    Enabling CRC32 instruction for dz_0_dp_7501_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_7501_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_7502_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_7502_ft_IPv6_0 hashing
+
+----
+
+- 06082017
+
+python add.py \\w+ memzone_12863_3603 memzone_12863_3703
+('memzone_12863_3603', 6834056512)
+('memzone_12863_3703', 6886536512)
+
+52480000=2*100*262400=2*100*(256k+64*100)
+
+    
