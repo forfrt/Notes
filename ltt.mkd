@@ -266,6 +266,10 @@ Dallas有三种case:
 
 #Commands
 
+##Password reset
+
+1001: https://etepwreset.seln.ete.ericsson.se/
+
 ##Dallas Build
 
     setup_15Aspace
@@ -293,6 +297,10 @@ Dallas有三种case:
 
 ##Dallas DPN Replacement
 
+    setup_15Aspace
+    cd arch/dpn/c/
+    make clean
+    make
     cp arch/dpn/c/bin/rhel664/dpn [testRelease]/sbin/dpn
 
 ----
@@ -300,12 +308,15 @@ Dallas有三种case:
 ##Dallas Node Reload
 
     ssh erv@epg10-3
+    ssh vepg31-3
 
     show chassis
     reload card all
 
-    start oam_cli
+    start oam-cli
     ManagedElement=1,Epg=1,Sgw=1
+
+    ManagedElement=1,Epg=1,Pgw=1,Apn=dls-apn3-0106
     statistics
 
 ----
@@ -318,6 +329,8 @@ Dallas有三种case:
     lts_deploy ltt /etc/rc.d/rc.vlan restart
     lts_control start -c /autott/dallas
     lts_info
+    lts_msgshow
+    lts_pm p
     vim /autott/dallas_15a/vepg31-4.dallas.backbone
     vim /var/log/dallas_msg.log
     vim /var/log/ltt.log
@@ -329,20 +342,25 @@ Dallas有三种case:
     lts_deploy ltt /etc/rc.d/rc.vlan restart
     lts_set_loopback -dallas_config_dir  /autott/dallas
     lts_control start -c /autott/dallas
+
     watch lts_info
+    lts_get_ms_groups_range type
+
     lts_run_tm all
     lts_log -t
     lts_info
-    vim /var/log/dallas_msg.log
-    exit
     lts_info
-    lts_sstop
     lts_stop
     lts_system_setup -a uninstall -v
 
     lts_run_mobiles '948578, 1, [104]'
     lts_get_subscriber 948578
     lts_run_mobiles '948578, 1, [{160, 1, 83}]'
+    lts_run_mobiles '1,1,[{159,1,109}]'
+    lts_run_tm '{perc, 10} , all'
+    lts_run_tm '104833,100'
+
+
 
     lts_control stop
 
@@ -364,6 +382,7 @@ Dallas有三种case:
 
     lts_run_tm all
     lts_run_load [1] 146, 500
+    lts_run_load '1,1000,[104,{158,cont}],100' 
     show chassis
     reload card all
     
@@ -1081,4 +1100,595 @@ python add.py \\w+ memzone_12863_3603 memzone_12863_3703
 
 52480000=2*100*262400=2*100*(256k+64*100)
 
+----
+
+- 06122017
+
+7680, 5360
+8236, 6996
+8330, 7282
+12863, 15694
+
+----
+
+- 06142017
+
+5360, 30720
+6996, 32944
+7282, 33320
+9939, 37200
+9026, 36000
+12068, 40000
+3234, 28380
+
+----
+
+- 06152017
+
+NUMA part researching
+
+session_pool从全局变量转移到每个instance下自带一个
+s_session_hash -->> instance->pool
+session_hash_init() -->> payload_pool_init
+将payload_pool_init从app_init移到了instance_schedule
+
+无numa版s_payload_session_pool->session[session_id]与s_payload_session_pool->session[session_id]->session_id没有直接关系
+
+session_find_by_id从app.c放到了payload_pool.c
+
+----
+
+- 06162017
+
+偶数dp放在numa 0上, 奇数dp放在numa 1上
+
+5306, 30720
+6996, 32944
+7282, 33320
+9939, 37200
+9026, 36000
+12068, 40000
+3234, 28380
+13588, 40200
+15108, 44000
+
+----
+
+2605,  30720
+3450,  32944
+3593,  33320
+4966.5, 37200
+4465,  36000
+5986,  40000
+1569,  28380
+7506,  44000
+6746,  40200
+
+30720,  2605
+32944,  3450
+33320,  3593
+37200, 4966.5
+36000,  4465
+40000,  5986
+28380,  1569
+44000,  7506
+40200,  6746
+
+----
+
+- 06192017
+
+TODOs:
+
+1. Finish the numa code review
+1. Get more acknowledge about cache and routing parts in vnet layer
+
+----
+
+- 06202017
+
+TODOs:
+1. Update the num code repo
+1. Try to fix the dpn error depending on DPN support
+
+cache也可以使用zmalloc_socket分到各自对应的socket上
+
+----
+
+- 06252017
+
+changes between old numa and new numa
+
+- app.h: add struct FragConf and related function back
+- payload.h: remove the socket_id attribute from struct PayloadSession
+- payload_pool.c: add socket_id to hash_table_create called in payload_pool_init
+- agent.c: 
+    1. change urcu header file from urcu.h to urcu-qsbr.h
+
+- up_agent.c
+    1. change urcu header file from urcu.h to urcu-qsbr.h
+
+- rps_wrapper.hh
+    1. changed the value of `RPS_ENTITY_LOOP_TIMES` from 1 to 10
+
+- sal.c
+    1. `s_id_generator` variable is divided to `[MAX_NUMA]` parts
+
+- rps.cc
+    1. add `times` to parameter list of `Rps::run` 
+
+- sal.c
+    1. Divided `salHashTablex` into `MAX_NUMA` parts
+    1. `lock` in `socket_hashx_insert` is divided into `MAX_NUMA` parts
+
+- datapath.c 
+    1. divided flowtable in default datapath into `[MAX_NUMA]` parts
+    1. other datapaths are stored in specified NUMA socket
+    > except default datapath, all other datapaths are consistent with their flowtable 
+    ( which means one of elements in g_dz[dz_id]->dp[dp_id]->flow_table[] array 
+    is Null )
+
+- flow.c
+    1. no change
+
+- vport.c
+    1. no change
+
+- vport_sal.c
+    1. change urcu header file from urcu.h to urcu-qsbr.h
+
+- 
+
+ERROR     06-26 10:16:32.080 epgtool1031-30:DPN_(1.1.0) TcpApplication HandleRead : TcpConnection Recei
+ve error:End of file
+
+./application_framework/dp/tcp/tcp_connection.cc:        gLog->Err("TcpApplication %s : TcpConnection Receive error:%s",
+
+./application_framework/third_party/ltt_driver/ltt_driver_application.cc:552:  //  zmq_obj_ptr upPush(new CZmqPusher("tcp://*:5305",
+./application_framework/third_party/ltt_driver/ltt_driver_application.cc:1216:  //  pos += Temp_Uint16ToLittleEndianBuffer(5305, &body[pos]);
+./application_framework/third_party/ltt_driver/ltt_driver_application.cc:1743:           boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string("127.0.0.1"),5305);
+
+TranslateFlowActionReq
+sa_msg.hh
+
+
+----
+
+#0  0x000000000045ca55 in create_vnet_bond_vdev ()                    
+#1  0x000000000045ce75 in vnet_init_vdev ()                           
+#2  0x000000000045da2e in vnetctrl_add_bond_dev ()                    
+#3  0x0000000000445b30 in console_service_task ()                     
+#4  0x00000034bc607aa1 in start_thread () from /lib64/libpthread.so.0 
+#5  0x00000034bc2e893d in clone () from /lib64/libc.so.6              
+
+ltt_driver_application.cc:2613
+
+----
+
+#0  0x00000000004e7b2a in rte_lcore_to_socket_id (lcore_id=4294967295)                          
+    at /repo/eruitfe/ltt_numa/dpdk/dpdk-16.07/x86_64-snb-linuxapp-gcc/include/rte_lcore.h:160   
+#1  0x00000000004f45b9 in create_vnet_bond_vdev (info=0x7fdcbcff8690) at vnet.c:383             
+#2  0x00000000004f4e57 in vnet_init_vdev (info=0x7fdcbcff8690) at vnet.c:551                    
+#3  0x00000000004f5f98 in vnetctrl_add_bond_dev (info=0x7fdcbcff8740) at vnet_controller.c:105  
+#4  0x0000000000495ba7 in handle_add_vnet_dev_req (reply=0x7fdcbcff8810, request=0x7fdcbcff9210)
+    at console_agent.c:677                                                                      
+#5  0x0000000000497005 in _handle_request (reply=0x7fdcbcff8810, request=0x7fdcbcff9210)        
+    at console_agent.c:1163                                                                     
+#6  0x0000000000494ace in console_service_task (zmq_ctx=0x11c61050) at console_agent.c:98       
+#7  0x00000034bc607aa1 in start_thread () from /lib64/libpthread.so.0                           
+#8  0x00000034bc2e893d in clone () from /lib64/libc.so.6                                        
+
+    static unsigned rte_lcore_id 	( 	void  		) 	
     
+    Return the ID of the execution unit we are running on.
+    
+    Returns
+        Logical core ID (in EAL thread) or LCORE_ID_ANY (in non-EAL thread) 
+
+> lcore runs console-agent is not contained in coremask. in other words, is in non-EAL thread
+
+----
+
+./src/om/up_agent.c:        LTT_LOG(ERROR, UPAGENT, "instance[%d] is not running", instanceid);
+./src/om/up_agent.c:        LTT_LOG(ERROR, UPAGENT, "instance[%d] is not running!\n", instanceid);
+./src/om/cp_agent.c:        LTT_LOG(ERROR, CPAGENT, "instance[%d] is not running\n", instanceid);
+./src/om/cp_agent.c:        LTT_LOG(ERROR, CPAGENT, "instance[%d] is not running", instanceid);
+Binary file ./src/om/cp_agent.o matches
+Binary file ./src/app/session_ctl.o matches
+./src/app/replay_session.c:        LTT_LOG(ERROR, APP, "instance[%d] is not running,"
+Binary file ./src/app/replay_session.o matches
+Binary file ./src/app/dummy_session.o matches
+./src/app/session_ctl.c:        LTT_LOG(ERROR, SCTRL, "instance[%d] is not running,"
+./src/app/session_ctl.c:        LTT_LOG(ERROR, SCTRL, "instance[%d] is not running,"
+./src/app/session_ctl.c:        LTT_LOG(ERROR, SCTRL, "instance[%d] is not running,"
+./src/app/session_ctl.c:        LTT_LOG(ERROR, SCTRL, "instance[%d] is not running,"
+./src/app/session_ctl.c:        LTT_LOG(ERROR, SCTRL, "instance[%d] is not running,"
+./src/app/dummy_session.c:        LTT_LOG(ERROR, APP, "instance[%d] is not running,"
+
+root      4162  553  0.4 1083092 297804 ?      Rl   10:20  68:47 /lab/testtools/rhel664/dallas/testRele
+ase/3R1_eruitfe_numa/3pp/ltt/bin/ltt -c 0x5404 -n 4 -- -p 3 -i 1 --pid-file /var/run/ltt.pid --config=(
+0,0,2),(0,1,10),(0,2,12),(0,3,14),(1,0,2),(1,1,10),(1,2,12),(1,3,14) --log-server=10.130.46.6 --oam-lco
+res={0, 1}, {5}, {7}                                                                                   
+
+ps -ef | grep lts_system_setup | grep -v grep
+
+----
+
+ERROR     06-29 04:29:36.833 epgtool1031-30:DPN_(1.1.0) HandleReceive : ltt connection transfered:0 err
+or:Connection reset by peer
+ERROR     06-29 04:29:36.833 epgtool1031-30:DPN_(1.1.0) HandleReceive : ltt connection transfered:0 err
+or:End of file
+
+#0  0x000000000049495d in sid_to_instanceid (session_id=1200325758732468224, socket_id=1)             
+    at session_ctl.c:206                                                                              
+206     session_ctl.c: No such file or directory.                                                     
+(gdb) bt                                                                                              
+#0  0x000000000049495d in sid_to_instanceid (session_id=1200325758732468224, socket_id=1)             
+    at session_ctl.c:206                                                                              
+#1  0x000000000049418b in sessctl_start_session (sinfo=0x7fd9de1f6680) at session_ctl.c:58            
+#2  0x000000000049d1c1 in handle_add_session_req (reply=0x7fd9de1f67b0, request=0x7fd9de1f7210)       
+    at up_agent.c:548                                                                                 
+#3  0x000000000049ea33 in handle_up_req (request=0x7fd9de1f7210, conn_idx=0) at up_agent.c:947        
+#4  0x000000000049ca84 in recv_handler (buffer=0x7fd9de1f7210 "", conn_idx=0, n=115) at up_agent.c:421
+#5  0x000000000049c899 in up_connection_handler (arg=0x7fe673200380) at up_agent.c:373                
+#6  0x00000034bc607aa1 in start_thread () from /lib64/libpthread.so.0                                 
+#7  0x00000034bc2e893d in clone () from /lib64/libc.so.6                                              
+
+----
+
+/lab/testtools/rhel664/dallas/testRelease/3R1_eruitfe_numa/3pp/ltt/bin/ltt -c 7E06 -n 4 -- -p 3 -i 1 --pid-file /var/run/ltt.pid --config="(0,0,2),(0,1,10),(0,2,12),(0,3,14),(1,0,1),(1,1,9),(1,2,11),(1,3,13)" --log-server=10.130.46.6 --oam-lcores="{0, 3}, {5}, {7}" > /var/log/ltt.log 2>&1 3>&1 &'
+
+/lab/testtools/rhel664/dallas/testRelease/3R1_eruitfe_numa/3pp/ltt/bin/ltt -c 7E06 -n 4 -- -p 3 -i 1 --pid-file /var/run/ltt.pid --config="(0,0,2),(0,1,10),(0,2,12),(0,3,14),(1,0,1),(1,1,9),(1,2,11),(1,3,13)" --log-server=10.130.46.6 --oam-lcores="{0, 3}, {5}, {7}" > /var/log/ltt.log 2>&1 3>&1
+
+ltt_port_core_mask=7E06
+config='"(0,0,2),(0,1,10),(0,2,12),(0,3,14),(1,0,1),(1,1,9),(1,2,11),(1,3,13)"'
+
+----
+
+- 070320117
+
+Initializing LTT log system                            
+init ltt log mgr
+ltt log mananger connected to [10.130.46.6]            
+@parse_log_config_file: open LOG configure file failed
+
+ 0x00000000004e708e in tx_misc_send_packet (pkt=0x7ff98e4ffb80, port=0 '\000') at transmitter.c:117
+ 0x00000000004f3afb in vnet_send_packet (pkt=0x7ff98e4ffb80, pkt_type=1, portid=0) at vnet.c:160   
+ 0x00000000005cf1a2 in tap_egress (portid=0) at tuntap.c:249                                       
+ 0x00000000005cf1fc in tap_loop (arg=0x0) at tuntap.c:264                                          
+ 0x00000034bc607aa1 in start_thread () from /lib64/libpthread.so.0                                 
+ 0x00000034bc2e893d in clone () from /lib64/libc.so.6                                              
+
+0x7ff9a40911c0
+0x7ff9a4090880
+0x7ff9a408ff40
+
+Num     Type           Disp Enb Address            What                                               
+2       breakpoint     keep y   0x00000000005cdf06 in tap_init at tuntap.c:101                        
+        breakpoint already hit 1 time                                                                 
+3       breakpoint     keep y   0x00000000005cf220 in tap_loop at tuntap.c:268                        
+        breakpoint already hit 23 times                                                               
+4       breakpoint     keep y   0x00000000005d52f1 in tap_parse_config at tuntap.c:353                
+        breakpoint already hit 1 time                                                                 
+5       breakpoint     keep y   0x00000000004e6f1b in tx_misc_send_packet at transmitter.c:88         
+        breakpoint already hit 6 times                                                                
+6       breakpoint     keep y   0x00000000005c1086 in init_misc_txq at dpdkenv.c:714                  
+7       breakpoint     keep y   0x00000000004327cb in dpdk_setup_misc_tx_queue_conf at ltt_config.c:63
+8       breakpoint     keep y   0x00000000005cf0a3 in tap_egress at tuntap.c:231                      
+        breakpoint already hit 39 times                                                               
+
+----
+
+- 07042017
+
+ERROR     07-04 09:35:55.926 gtp_path_mgmt  The peer 6.12.0.1 <-> 5.0.0.2 set to invalid as retries rea
+ched max 4.
+
+ERROR     07-04 09:46:01.643 LTT_1          normal raw payload flow miss:
+ERROR     07-04 09:46:01.643 LTT_1           flow miss key  src: 24.0.0.2 dst: 192.0.106.62
+ERROR     07-04 09:46:01.643 LTT_1          ipv4 pkt proto id 6
+
+> flow = flow4_lookup_flow(table->flow4, &mkey);
+(gdb) bt                                                                                           
+#0  0x0000000000551c3e in _vnet_gtpu_vport_recv (vport=0x7f639c09dd40, pkt=0x7f65f93b3ec0,         
+    arg=0x7f6c3a391608) at vport_vnet.c:175                                                        
+#1  0x000000000053939e in vport_recv (vport=0x7f639c09dd40, pkt=0x7f65f93b3ec0, arg=0x7f6c3a391608)
+    at vport.c:68                                                                                  
+#2  0x00000000004f3e42 in vnet_raw_vdev_xmit (vdev=0x7f5f99200740, pkt=0x7f65f93b3ec0,             
+    metadata=0x7f6c3a391608) at vnet.c:269                                                         
+#3  0x00000000004f4103 in vnet_bond_vdev_xmit (vdev=0x7f6657c022c0, pkt=0x7f65f93b3ec0,            
+    metadata=0x7f6c3a391608) at vnet.c:311                                                         
+#4  0x00000000004f4c22 in vnet_dev_xmit (vdev=0x7f6657c022c0, pkt=0x7f65f93b3ec0,                  
+    metadata=0x7f6c3a391608) at vnet.c:556                                                         
+#5  0x00000000004bd8bc in gtpu_recv (pkt=0x7f65f93b3ec0, cxt=0x7f6c3a391790) at gtp_proto.c:137    
+#6  0x00000000004e7aec in hook_gtpu (pkt=0x7f65f93b3ec0, cxt=0x7f6c3a391790) at udp_proto.c:89     
+#7  0x00000000004e799a in udp_recv (pkt=0x7f65f93b3ec0, cxt=0x7f6c3a391790) at udp_proto.c:64      
+#8  0x00000000004ca253 in ipv4_recv (pkt=0x7f65f93b3ec0, cxt=0x7f6c3a391790) at ipv4_proto.c:97    
+#9  0x00000000004acf52 in eth_recv (pkt=0x7f65f93b3ec0, cxt=0x7f6c3a391790) at eth_proto.c:69      
+#10 0x00000000004f5656 in receive_packet_pmd (pkt=0x7f65f93b3ec0, rxq_id=0, portid=0) at vnet.c:748
+#11 0x00000000004f3d41 in vnet_receive_packet (qconf=0xa0cc40 <s_lcore_conf+142848>,               
+    pkts_burst=0x18005c0 <g_instance_array+5440>, max_pkts=32) at vnet.c:203                       
+#12 0x00000000004d8a2f in do_receive (receiver=0x18005b0 <g_instance_array+5424>, max_pkts=32)     
+    at receiver.c:41                                                                               
+#13 0x0000000000571bdc in instance_schedule () at instance.c:212                                   
+#14 0x000000000066c9d5 in eal_thread_loop ()                                                       
+#15 0x00000034bc607aa1 in start_thread () from /lib64/libpthread.so.0                              
+#16 0x00000034bc2e893d in clone () from /lib64/libc.so.6                                           
+
+----
+
+- 07052017
+
+    dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[0] dp_version[0] ext_val32[275411678]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[0] dp_version[0] ext_val32[275411678]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[912] dp_version[0] ext_val32[0]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[912] dp_version[0] ext_val32[0]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[275411678]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[275411678]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[0] dp_version[0] ext_val32[278483809]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[0] dp_version[0] ext_val32[278483809]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[927] dp_version[0] ext_val32[0]
+    
+    Program terminated with signal SIGSEGV, Segmentation fault.                                       
+    #0  0x0000000000503446 in dp_add_flow (update=0 '\000', socket_id=0, dz_id=0, dp_id=475,          
+        dp_version=0, key=0x7fc70a1f9ea0, acts=0x7fc70a1fa111, meta=0x7fc70a1fa175) at datapath.c:405 
+    405     datapath.c: No such file or directory.                                                    
+    (gdb) bt                                                                                          
+    #0  0x0000000000503446 in dp_add_flow (update=0 '\000', socket_id=0, dz_id=0, dp_id=475,          
+        dp_version=0, key=0x7fc70a1f9ea0, acts=0x7fc70a1fa111, meta=0x7fc70a1fa175) at datapath.c:405 
+    #1  0x000000000055fe06 in vsctrl_add_flow (meta=0x7fc70a1f9f30) at vswitch_controller.c:197       
+    #2  0x000000000049dd0a in handle_flow_operation_req (reply=0x7fc70a1fa7b0, request=0x7fc70a1fb210)
+        at up_agent.c:753                                                                             
+    #3  0x000000000049ecfe in handle_up_req (request=0x7fc70a1fb210, conn_idx=0) at up_agent.c:972    
+    #4  0x000000000049cb1a in recv_handler (buffer=0x7fc70a1fb210 "", conn_idx=0, n=1632)             
+        at up_agent.c:421                                                                             
+    #5  0x000000000049c92f in up_connection_handler (arg=0x7fcddde00040) at up_agent.c:373            
+    #6  0x00000034bc607aa1 in start_thread () from /lib64/libpthread.so.0                             
+    #7  0x00000034bc2e893d in clone () from /lib64/libc.so.6                                          
+
+    Breakpoint 1, dp_add_flow (update=0 '\000', socket_id=0, dz_id=0, dp_id=0, dp_version=0,          
+        key=0x7f2862bfaea0, acts=0x7f2862bfaf7b, meta=0x7f2862bfafdf) at datapath.c:372               
+    372     datapath.c: No such file or directory.                                                    
+    (gdb) c                                                                                           
+    Continuing.                                                                                       
+                                                                                                      
+    Breakpoint 1, dp_add_flow (update=0 '\000', socket_id=0, dz_id=0, dp_id=0, dp_version=0,          
+        key=0x7f2862bfaea0, acts=0x7f2862bfb046, meta=0x7f2862bfb0aa) at datapath.c:372               
+    372     in datapath.c                                                                             
+    (gdb)                                                                                             
+    Continuing.                                                                                       
+                                                                                                      
+    Breakpoint 1, dp_add_flow (update=0 '\000', socket_id=0, dz_id=0, dp_id=831, dp_version=0,        
+        key=0x7f2862bfaea0, acts=0x7f2862bfb111, meta=0x7f2862bfb175) at datapath.c:372               
+    372     in datapath.c                                                                             
+    (gdb)                                                                                             
+    Continuing.                                                                                       
+                                                                                                      
+    Program received signal SIGSEGV, Segmentation fault.                                              
+    0x0000000000503446 in dp_add_flow (update=0 '\000', socket_id=0, dz_id=0, dp_id=831, dp_version=0,
+        key=0x7f2862bfaea0, acts=0x7f2862bfb111, meta=0x7f2862bfb175) at datapath.c:405               
+    405     in datapath.c                                                                             
+    (gdb)                                                                                             
+    Continuing.                                                                                       
+                                                                                                      
+    Program received signal SIGSEGV, Segmentation fault.                                              
+    0x0000000000503446 in dp_add_flow (update=0 '\000', socket_id=0, dz_id=0, dp_id=831, dp_version=0,
+        key=0x7f2862bfaea0, acts=0x7f2862bfb111, meta=0x7f2862bfb175) at datapath.c:405               
+    405     in datapath.c                                                                             
+
+    ERROR     07-05 11:57:59.038 MS-group 1     SubSystem_1-ApInstance_1: Cannot perform 'run_resolved_payl
+    oad_ipv6_pfx_chk_internal'. Wrong MS-state: registered,PdpId: 1. MS-Id: 1, IMSI: 100260000000001, MS-st
+    ate: registered, Active contexts: [], Ongoing: nothing, Last event: none @ 07-05 11:57:58, Last TCs: [{
+    159,1,109} @ 11:57:59]
+    
+    ERROR     07-05 11:55:42.986 LTT_1          @gtpc_recv: no device found to handle pkt
+    ERROR     07-05 11:56:03.036 LTT_1          @gtpc_recv: no device found to handle pkt
+    ERROR     07-05 11:56:23.086 LTT_1          @gtpc_recv: no device found to handle pkt
+    ERROR     07-05 11:56:43.136 LTT_1          @gtpc_recv: no device found to handle pkt
+    
+    up_custom_filter_message (np=0x7f7185752cc0) at up_custom.c:147                                   
+    0x0000000000565dfa in agent_handle_non_payload (np=0x7f7185752cc0) at agent.c:157                 
+    0x000000000056028e in vsctrl_non_payload_handler (type=NP_RAW_FLOW_MISS, pkt=0x7f651c65f400,      
+    arg=0x0) at vswitch_controller.c:252                                                              
+    0x0000000000552d9f in _vnet_rawip_vport_recv (vport=0x7f6ba3a002c0, pkt=0x7f651c65f400, arg=0x0)  
+    at vport_vnet.c:445                                                                               
+    0x0000000000539436 in vport_recv (vport=0x7f6ba3a002c0, pkt=0x7f651c65f400, arg=0x0) at vport.c:68
+    0x00000000004f3e99 in vnet_raw_vdev_xmit (vdev=0x7f6ba3a000c0, pkt=0x7f651c65f400, metadata=0x0)  
+    at vnet.c:269                                                                                     
+    0x00000000004f4c79 in vnet_dev_xmit (vdev=0x7f6ba3a000c0, pkt=0x7f651c65f400, metadata=0x0)       
+    at vnet.c:556                                                                                     
+    0x00000000004ca401 in hook_ipv4 (pkt=0x7f651c65f400, cxt=0x7f7185753790) at ipv4_proto.c:136      
+    0x00000000004ca22e in ipv4_recv (pkt=0x7f651c65f400, cxt=0x7f7185753790) at ipv4_proto.c:87       
+    0x00000000004acfa9 in eth_recv (pkt=0x7f651c65f400, cxt=0x7f7185753790) at eth_proto.c:69         
+    0x00000000004f56ad in receive_packet_pmd (pkt=0x7f651c65f400, rxq_id=0, portid=1) at vnet.c:748   
+    0x00000000004f3d98 in vnet_receive_packet (qconf=0xa0fb40 <s_lcore_conf+154752>,                  
+    pkts_burst=0x1800800 <g_instance_array+5888>, max_pkts=32) at vnet.c:203                          
+    0x00000000004d8a86 in do_receive (receiver=0x18007f0 <g_instance_array+5872>, max_pkts=32)        
+    at receiver.c:41                                                                                  
+    0x0000000000571cb3 in instance_schedule () at instance.c:212                                      
+    0x000000000066c9f5 in eal_thread_loop ()                                                          
+    0x00000034bc607aa1 in start_thread () from /lib64/libpthread.so.0                                 
+    0x00000034bc2e893d in clone () from /lib64/libc.so.6                                              
+
+----
+
+- 07062017
+
+1. 查看flowmiss是否也是同样的问题
+
+    yes, log is restored in /repo/eruitfe/log/[ltt/dallas_msg]_default_flow_miss.log
+1. 改回tap0, tap1全偶数core试试, 并且将add_flow传下来的所有socket_id都置为0
+
+    ltt_port_core_mask=1554
+    config='"(0,0,2),(0,1,10),(0,2,12),(1,0,4),(1,1,6),(1,2,8)"'
+1. 问问凌云
+
+----
+
+- 07072017
+
+    ---------------------------------------------------------------------------            
+    Dallas version: 3R1_LLV016_eadghhk                                                     
+    Beam dir:       not available                                                          
+    Config dir:     not available                                                          
+    ---------------------------------------------------------------------------            
+    LTT version:    0.50                                                                   
+    DPDK version:   16.07                                                                  
+    ---------------------------------------------------------------------------            
+    DPDK server:    tool-03-201 tool-03-202 tool-03-203 tool-03-204 tool-03-205 tool-03-206
+    ---------------------------------------------------------------------------            
+    System state:   initializing                                                           
+    ---------------------------------------------------------------------------            
+    Running tests:                                                                         
+    none                                                                                   
+    ---------------------------------------------------------------------------            
+
+
+DEBUG     07-07 12:07:41.442 LTT_3          @_sal_vport_recv zone:1 dp:0 version:0 vport:0 lcore_id: 19
+ socket_id: 1
+ERROR     07-07 12:07:41.442 LTT_3          sal recv flow miss src: 2a01:3:2a01:dd6d:bb86:a91e:b82:a6c6
+ dst: 2a00:198:1c00::241:5bbb
+ERROR     07-07 12:07:41.442 LTT_3          @_sal_vport_recv, flow not found, @ DZ[1] DP[0] version[0]
+VPORT[0] fp[279432251]
+
+dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[0] dp_version[0] ext_val32[279432251]key->src_ip: 421034
+212211091871341693011130166198key->dst_ip: 4201152280000000260104239                                   
+dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[0] dp_version[0] ext_val32[279432251]key->src_ip: 421034
+212211091871341693011130166198key->dst_ip: 420115228000000026591187                                    
+dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[279432251]key->src_ip: 420115
+2280000000260104239key->dst_ip: 421034212211091871341693011130166198                                   
+dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[279432251]key->src_ip: 420115
+228000000026591187key->dst_ip: 421034212211091871341693011130166198                                    
+
+----
+
+- 07112017
+
+dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[0] dp_version[0] ext_val32[270615084]key->src_ip: 421034
+20223614820913264920819890key->dst_ip: 4201152000000001412614
+dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[0] dp_version[0] ext_val32[270615084]key->src_ip: 421034
+20223614820913264920819890key->dst_ip: 42011520000000012012614
+dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[304] dp_version[0] ext_val32[0]key->src_ip: 420115200000
+0001412614key->dst_ip: 42103420223614820913264920819890
+dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[304] dp_version[0] ext_val32[0]key->src_ip: 420115200000
+00012012614key->dst_ip: 42103420223614820913264920819890
+dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]key->src_ip: 42103420223614
+820913264920819890key->dst_ip: 4201152000000001412614
+dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]key->src_ip: 42103420223614
+820913264920819890key->dst_ip: 42011520000000012012614
+dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[270615084]key->src_ip: 420115
+2000000001412614key->dst_ip: 42103420223614820913264920819890
+dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[270615084]key->src_ip: 420115
+20000000012012614key->dst_ip: 42103420223614820913264920819890
+
+7471 dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[0] dp_version[0] ext_val32[270615084]key->src_ip: 42103420223614820913264920819890key->dst_ip: 42011520000000012012614
+
+7475 dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]key->src_ip: 42103420223614820913264920819890key->dst_ip: 42011520000000012012614
+
+8661 sal recv flow miss: 42103420223614820913264920819890 42011520000000012012614
+8662 @_sal_vport_recv, flow not found, @ DZ[1] DP[0] version[0] VPORT[0] fp[270615084]
+
+9380 42103420223614820913264920819890 42011520000000012012614
+9381 @_sal_vport_recv, flow not found, @ DZ[1] DP[0] version[0] VPORT[0] fp[270615084]
+
+9924 42103420223614820913264920819890 42011520000000012012614
+9925 @_sal_vport_recv, flow not found, @ DZ[1] DP[0] version[0] VPORT[0] fp[270615084]
+
+ERROR     07-11 07:52:31.351 LTT_1          Replay Rx unexpected direction, recv_pktid:[4], sent
+_pktid:[4], capture file:[/lab/epg_st_utils/captures/latest/sequences/http/24512_HTTP_2017021703
+0425_0.cap], replay id:[466] sent_ts[439995] resend_ts[439995] @[35046439581509136] sessionid[11
+63149101638877184]
+
+
+
+
+3223 _sal_vport_recv@NUMA: sal recv flow miss: version: 6, 2a1032a01b654144fdc7ed33156 2a0198000000000
+     96fed3
+3224 @_sal_vport_recv, flow not found, @ DZ[1] DP[0] version[0] VPORT[0] fp[270614856]
+
+#0  _sal_vport_recv (vport=0x7f6961405f80, pkt=0x7f696d40f780, arg=0x7f6b84ccf36c) at vport_sal.c:136
+#1  0x00000000005396f3 in vport_recv (vport=0x7f6961405f80, pkt=0x7f696d40f780, arg=0x7f6b84ccf36c)
+    at vport.c:68
+#2  0x0000000000589d5e in sal_vdev_xmit (vdev=0x7f62d81cfcc0, pkt=0x7f696d40f780,
+    metadata=0x7f6b84ccf36c) at sal.c:642
+#3  0x0000000000589e64 in sal_dev_xmit (vdev=0x7f62d81cfcc0, pkt=0x7f696d40f780,
+    metadata=0x7f6b84ccf36c) at sal.c:704
+#4  0x000000000057e0d8 in socket_send (socket=0x7f6b84ccf340, pkt=0x7f696d40f780) at sal.c:95
+#5  0x000000000058932b in sal_socket_send (socket=0x7f6b84ccf340, pkt=0x7f696d40f780) at sal.c:455
+#6  0x00000000004930cb in send_packet (session=0x7f6f191ffc80) at replay_session.c:583
+#7  0x0000000000493280 in try_to_send_packet (session=0x7f6f191ffc80) at replay_session.c:603
+#8  0x000000000049361e in replay_session_execute (session=0x7f6f191ffc80) at replay_session.c:704
+#9  0x000000000059995e in RPS::run (this=0x1622500 <g_rps_array+96>, times=1) at rps.cc:111
+#10 0x00000000005720e7 in instance_schedule () at instance.c:221
+#11 0x000000000066ce95 in eal_thread_loop ()
+#12 0x00000034bc607aa1 in start_thread () from /lib64/libpthread.so.0
+#13 0x00000034bc2e893d in clone () from /lib64/libc.so.6
+
+----
+
+- 07122017
+
+2598 send_packet@NUMA: flow_idx: 1, flow.id: 270615627, flow.dir: 0 2a1032a05e050ae1a4ef6561c0 2a0198
+     0000000021e7729
+2599 _sal_vport_recv@NUMA: sal recv flow miss: version: 6, 2a1032a05e050ae1a4ef6561c0 2a0198000000002
+     1e7729
+2600 @_sal_vport_recv, flow not found, @ DZ[1] DP[0] version[0] VPORT[0] fp[270615627]
+
+2578 dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[0] dp_version[0] ext_val32[270615627]key->src_ip:
+      2a1032a05e050ae1a4ef6561c0key->dst_ip: 2a01980000000021e7729
+
+2582 dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]key->src_ip: 2a1032a
+      05e050ae1a4ef6561c0key->dst_ip: 2a01980000000021e7729
+
+----
+
+- 07132017
+
+ERROR     07-13 08:03:24.923 epgtool1031-30:DPN_(1.1.0)  InputByteStream can't find the IE : 8
+ERROR     07-13 08:03:24.923 epgtool1031-30:DPN_(1.1.0)  InputByteStream can't find the IE : 2
+ERROR     07-13 08:03:24.923 epgtool1031-30:DPN_(1.1.0)  InputByteStream can't find the IE : 5
+ERROR     07-13 08:03:24.923 epgtool1031-30:DPN_(1.1.0) HandleRouteQueryResp Fail 10
+
+ 5341 ERROR     07-13 12:12:45.869 LTT_1          vnet_bond_vdev_xmit  src: 5.24.0.1 dst: 6.192.16.247
+ 5342 ERROR     07-13 12:12:45.869 LTT_1          vnet_bond_vdev_xmit  src: 5.24.0.1 dst: 6.192.16.167
+ 5343 ERROR     07-13 12:12:45.869 LTT_1          @vnet_bond_vdev_xmit find iDEV failed
+ 5344 ERROR     07-13 12:12:45.869 LTT_1          @vnet_bond_vdev_xmit find iDEV failed
+
+5336 ERROR     07-13 12:12:45.863 LTT_1          @gtpu_recv: no route(device) found to handle pkt
+
+@vnet_bond_vdev_xmit find iDEV failed
+
+LTT_LOG(DEBUG, VNET, "@vnet_bond_vdev_xmit pos:%d\n", pos);
+
+----
+
+3668 ERROR     07-14 09:34:05.233 LTT_3          @gtpu_recv: no route(device) found to handle pkt
+3669 ERROR     07-14 09:34:05.238 LTT_3          @gtpu_recv: no route(device) found to handle pkt
+3670 ERROR     07-14 09:34:05.239 LTT_3          @gtpu_recv: no route(device) found to handle pkt
+
+386496 ERROR     07-14 09:35:13.234 LTT_3          vnet_bond_vdev_xmit@NUMA pos:20
+
+
+session_id from create session type check
+
+ERROR     07-16 13:30:32.548 epgtool9-21:DPN_(2.1.0) AddDataPath@NUMA: zoneId: 1, numaId: 24
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -764,7 +764,196 @@ If no argument index list is given to the nonnull attribute, all pointer argumen
 
 https://www.gnu.org/software/libc/manual/html_node/index.html#SEC_Contents
 
-##Signal Handling
+****
+
+#Non-Local Exits
+
+Sometimes when your program detects an unusual situation inside a deeply nested set of function calls, you would like to be able to immediately return to an outer level of control. This section describes how you can do such non-local exits using the setjmp and longjmp functions. 
+
+##Intro
+
+As an example of a situation where a non-local exit can be useful, suppose you have an interactive program that has a “main loop” that prompts for and executes commands. Suppose the “read” command reads input from a file, doing some lexical analysis and parsing of the input while processing it. If a low-level input error is detected, it would be useful to be able to return immediately to the “main loop” instead of having to make each of the lexical analysis, parsing, and processing phases all have to explicitly deal with error situations initially detected by nested calls.
+
+(On the other hand, if each of these phases has to do a substantial amount of cleanup when it exits—such as closing files, deallocating buffers or other data structures, and the like—then it can be more appropriate to do a normal return and have each phase do its own cleanup, because a non-local exit would bypass the intervening phases and their associated cleanup code entirely. Alternatively, you could use a non-local exit but do the cleanup explicitly either before or after returning to the “main loop”.)
+
+In some ways, a non-local exit is similar to using the ‘return’ statement to return from a function. *But while ‘return’ abandons only a single function call, transferring control back to the point at which it was called, a non-local exit can potentially abandon many levels of nested function calls*.
+
+You identify return points for non-local exits by calling the function `setjmp`. This function saves information about the execution environment in which the call to `setjmp` appears in an object of type `jmp_buf`. Execution of the program continues normally after the call to `setjmp`, but if an exit is later made to this return point by calling `longjmp` with the corresponding `jmp_buf` object, control is transferred back to the point where `setjmp` was called. The return value from `setjmp` is used to distinguish between an ordinary return and a return made by a call to `longjmp`, so calls to `setjmp` usually appear in an ‘if’ statement.
+
+Here is how the example program described above might be set up:
+
+    #include <setjmp.h>
+    #include <stdlib.h>
+    #include <stdio.h>
+    
+    jmp_buf main_loop;
+    
+    void
+    abort_to_main_loop (int status)
+    {
+      longjmp (main_loop, status);
+    }
+    
+    int
+    main (void)
+    {
+      while (1)
+        if (setjmp (main_loop))
+          puts ("Back at main loop....");
+        else
+          do_command ();
+    }
+    
+    
+    void
+    do_command (void)
+    {
+      char buffer[128];
+      if (fgets (buffer, 128, stdin) == NULL)
+        abort_to_main_loop (-1);
+      else
+        exit (EXIT_SUCCESS);
+    }
+
+The function `abort_to_main_loop` causes an immediate transfer of control back to the main loop of the program, no matter where it is called from.
+
+The flow of control inside the main function may appear a little mysterious at first, but it is actually a common idiom with setjmp. A normal call to setjmp returns zero, so the “else” clause of the conditional is executed. If `abort_to_main_loop` is called somewhere within the execution of `do_command`, then it actually appears as if the same call to `setjmp` in `main` were returning a second time with a value of -1.
+
+So, the general pattern for using setjmp looks something like:
+
+    if (setjmp (buffer))
+      /* Code to clean up after premature return. */
+      …
+    else
+      /* Code to be executed normally after setting up the return point. */
+
+----
+
+##Details of Non-Local Exits
+
+Here are the details on the functions and data structures used for performing non-local exits. These facilities are declared in `setjmp.h`. 
+
+- Data Type: `jmp_buf`
+
+    Objects of type `jmp_buf` hold the state information to be restored by a non-local exit. The contents of a `jmp_buf` identify a specific place to return to. 
+
+- Macro: `int setjmp (jmp_buf state)`
+
+    Preliminary: | MT-Safe | AS-Safe | AC-Safe | See POSIX Safety Concepts.
+
+    When called normally, `setjmp` stores information about the execution state of the program in state and returns zero. If `longjmp` is later used to perform a non-local exit to this state, `setjmp` returns a nonzero value. 
+
+- Function: `void longjmp (jmp_buf state, int value)`
+
+    Preliminary: | MT-Safe | AS-Unsafe plugin corrupt lock/hurd | AC-Unsafe corrupt lock/hurd | See POSIX Safety Concepts.
+
+    This function restores current execution to the state saved in `state`, and continues execution from the call to `setjmp` that established that return point. Returning from `setjmp` by means of `longjmp` returns the `value` argument that was passed to `longjmp`, rather than 0. (But if value is given as 0, setjmp returns 1). 
+
+There are a lot of obscure but important restrictions on the use of `setjmp` and `longjmp`. Most of these restrictions are present because non-local exits require a fair amount of magic on the part of the C compiler and can interact with other parts of the language in strange ways.
+
+The `setjmp` function is actually a macro without an actual function definition, so you shouldn’t try to ‘#undef’ it or take its address. In addition, calls to setjmp are safe in only the following contexts:
+
+    - As the test expression of a selection or iteration statement (such as ‘if’, ‘switch’, or ‘while’).
+    - As one operand of an equality or comparison operator that appears as the test expression of a selection or iteration statement. The other operand must be an integer constant expression.
+    - As the operand of a unary ‘!’ operator, that appears as the test expression of a selection or iteration statement.
+    - By itself as an expression statement. 
+
+*Return points are valid only during the dynamic extent of the function that called setjmp to establish them*. If you longjmp to a return point that was established in a function that has already returned, unpredictable and disastrous things are likely to happen.
+
+You should use a nonzero `value` argument to `longjmp`. While `longjmp` refuses to pass back a zero argument as the return value from setjmp, this is intended as a safety net against accidental misuse and is not really good programming style.
+
+When you perform a non-local exit, accessible objects generally retain whatever values they had at the time `longjmp` was called. The exception is that the values of automatic variables local to the function containing the `setjmp` call that have been changed since the call to `setjmp` are indeterminate, unless you have declared them `volatile`. 
+
+![setjmp.jpg](./img/Cpp/setjmp.jpg)
+
+
+----
+
+##Non-Local Exits and Signals
+
+In BSD Unix systems, `setjmp` and `longjmp` also save and restore the set of blocked signals; see Blocking Signals. However, the POSIX.1 standard requires `setjmp` and `longjmp` not to change the set of blocked signals, and provides an additional pair of functions (`sigsetjmp` and `siglongjmp`) to get the BSD behavior.
+
+The behavior of `setjmp` and `longjmp` in the GNU C Library is controlled by feature test macros; see Feature Test Macros. The default in the GNU C Library is the POSIX.1 behavior rather than the BSD behavior.
+
+The facilities in this section are declared in the header file `setjmp.h`.
+
+- Data Type: `sigjmp_buf`
+
+    This is similar to `jmp_buf`, except that it can also store state information about the set of blocked signals. 
+
+- Function: `int sigsetjmp (sigjmp_buf state, int savesigs)`
+
+    Preliminary: | MT-Safe | AS-Unsafe lock/hurd | AC-Unsafe lock/hurd | See POSIX Safety Concepts.
+
+    This is similar to `setjmp`. If `savesigs` is nonzero, the set of blocked signals is saved in state and will be restored if a `siglongjmp` is later performed with this state. 
+
+Function: `void siglongjmp (sigjmp_buf state, int value)`
+
+    Preliminary: | MT-Safe | AS-Unsafe plugin corrupt lock/hurd | AC-Unsafe corrupt lock/hurd | See POSIX Safety Concepts.
+
+    This is similar to `longjmp` except for the type of its state argument. If the `sigsetjmp` call that set this state used a nonzero savesigs flag, `siglongjmp` also restores the set of blocked signals. 
+
+----
+
+##Complete Context Control
+
+The Unix standard provides one more set of functions to control the execution path and these functions are more powerful than those discussed in this chapter so far. These functions were part of the original System V API and by this route were added to the Unix API. Besides on branded Unix implementations these interfaces are not widely available. Not all platforms and/or architectures the GNU C Library is available on provide this interface. Use `configure` to detect the availability.
+
+Similar to the `jmp_buf` and `sigjmp_buf` types used for the variables to contain the state of the `longjmp` functions, the interfaces of interest here have an appropriate type as well. Objects of this type are normally much larger since more information is contained. The type is also used in a few more places as we will see. The types and functions described in this section are all defined and declared respectively in the `ucontext.h` header file. 
+
+- Data Type: `ucontext_t`
+
+    The `ucontext_t` type is defined as a structure with at least the following elements:
+
+    - `ucontext_t *uc_link`
+
+        This is a pointer to the next context structure which is used if the context described in the current structure returns.
+    - `sigset_t uc_sigmask`
+
+        Set of signals which are blocked when this context is used.
+    - `stack_t uc_stack`
+
+        Stack used for this context. The value need not be (and normally is not) the stack pointer. See Signal Stack.
+    - `mcontext_t uc_mcontext`
+
+        This element contains the actual state of the process. The `mcontext_t` type is also defined in this header but the definition should be treated as opaque. Any use of knowledge of the type makes applications less portable.
+
+Objects of this type have to be created by the user. The initialization and modification happens through one of the following functions: 
+
+- Function: `int getcontext (ucontext_t *ucp)`
+
+    Preliminary: | MT-Safe race:ucp | AS-Safe | AC-Safe | See POSIX Safety Concepts.
+
+    The `getcontext` function initializes the variable pointed to by ucp with the context of the calling thread. The context contains the content of the registers, the signal mask, and the current stack. Executing the contents would start at the point where the `getcontext` call just returned.
+
+    The function returns 0 if successful. Otherwise it returns -1 and sets errno accordingly. 
+
+The `getcontext` function is similar to `setjmp` but it does not provide an indication of whether `getcontext` is returning for the first time or whether an initialized context has just been restored. If this is necessary the user has to determine this herself. This must be done carefully since the context contains registers which might contain register variables. This is a good situation to define variables with `volatile`. 
+
+Once the context variable is initialized it can be used as is or it can be modified using the `makecontext` function. The latter is normally done when implementing co-routines or similar constructs. 
+
+- Function: `void makecontext (ucontext_t *ucp, void (*func) (void), int argc, …)`
+
+    Preliminary: | MT-Safe race:ucp | AS-Safe | AC-Safe | See POSIX Safety Concepts.
+
+    The `ucp` parameter passed to makecontext shall be initialized by a call to `getcontext`. The context will be modified in a way such that if the context is resumed it will start by calling the function `func` which gets `argc` integer arguments passed. The integer arguments which are to be passed should follow the `argc` parameter in the call to makecontext.
+
+    Before the call to this function the `uc_stack` and `uc_link` element of the `ucp` structure should be initialized. The `uc_stack` element describes the stack which is used for this context. No two contexts which are used at the same time should use the same memory region for a stack.
+
+    The `uc_link` element of the object pointed to by `ucp` should be a pointer to the context to be executed when the function `func` returns or it should be a null pointer. See `setcontext` for more information about the exact use. 
+
+Compatibility note: The current Unix standard is very imprecise about the way the stack is allocated. All implementations seem to agree that the `uc_stack` element must be used but the values stored in the elements of the `stack_t` value are unclear. The GNU C Library and most other Unix implementations require the ss_sp value of the uc_stack element to point to the base of the memory region allocated for the stack and the size of the memory region is stored in ss_size. There are implementations out there which require ss_sp to be set to the value the stack pointer will have (which can, depending on the direction the stack grows, be different). This difference makes the makecontext function hard to use and it requires detection of the platform at compile time. 
+
+...
+
+
+----
+
+
+
+
+
+#Signal Handling
 
 A signal is a software interrupt delivered to a process. The operating system uses signals to report exceptional situations to an executing program. Some signals report errors such as references to invalid memory addresses; others report asynchronous events, such as disconnection of a phone line.
 
@@ -796,11 +985,11 @@ Each of these kinds of events (excepting explicit calls to kill and raise) gener
 
 In general, the events that generate signals fall into three major categories: errors, external events, and explicit requests.
 
-An error means that a program has done something invalid and cannot continue execution. But not all kinds of errors generate signals—in fact, most do not. For example, opening a nonexistent file is an error, but it does not raise a signal; instead, open returns -1. *In general, errors that are necessarily associated with certain library functions are reported by returning a value that indicates an error. The errors which raise signals are those which can happen anywhere in the program, not just in library calls. These include division by zero and invalid memory addresses*.
+- An error means that a program has done something invalid and cannot continue execution. But not all kinds of errors generate signals—in fact, most do not. For example, opening a nonexistent file is an error, but it does not raise a signal; instead, open returns -1. *In general, errors that are necessarily associated with certain library functions are reported by returning a value that indicates an error. The errors which raise signals are those which can happen anywhere in the program, not just in library calls. These include division by zero and invalid memory addresses*.
 
-An external event generally has to do with I/O or other processes. These include the arrival of input, the expiration of a timer, and the termination of a child process.
+- An external event generally has to do with I/O or other processes. These include the arrival of input, the expiration of a timer, and the termination of a child process.
 
-An explicit request means the use of a library function such as kill whose purpose is specifically to generate a signal.
+- An explicit request means the use of a library function such as kill whose purpose is specifically to generate a signal.
 
 Signals may be generated synchronously or asynchronously. A synchronous signal pertains to a specific action in the program, and is delivered (unless blocked) during that action. Most errors generate signals synchronously, and so do explicit requests by a process to generate a signal for that same process. On some machines, certain kinds of hardware errors (usually floating-point exceptions) are not reported completely synchronously, but may arrive a few instructions later.
 
@@ -828,6 +1017,355 @@ If you raise a “program error” signal by explicit request, and this terminat
 
 ----
 
+##Standard Signals
+
+This section lists the names for various standard kinds of signals and describes what kind of event they mean. Each signal name is a macro which stands for a positive integer—the signal number for that kind of signal. Your programs should never make assumptions about the numeric code for a particular kind of signal, but rather refer to them always by the names defined here. This is because the number for a given kind of signal can vary from system to system, but the meanings of the names are standardized and fairly uniform.
+
+The signal names are defined in the header file `signal.h`.
+
+Macro: int NSIG
+
+    The value of this symbolic constant is the total number of signals defined. Since the signal numbers are allocated consecutively, NSIG is also one greater than the largest defined signal number. 
+
+----
+
+###Program Error Signals
+
+The following signals are generated when a serious program error is detected by the operating system or the computer itself. In general, all of these signals are indications that your program is seriously broken in some way, and there’s usually no way to continue the computation which encountered the error. 
+
+Some programs handle program error signals in order to tidy up before terminating; for example, programs that turn off echoing of terminal input should handle program error signals in order to turn echoing back on. The handler should end by specifying the default action for the signal that happened and then reraising it; this will cause the program to terminate with that signal, as if it had not had a handler. (See Termination in Handler.) 
+
+Termination is the sensible ultimate outcome from a program error in most programs. However, programming systems such as Lisp that can load compiled user programs might need to keep executing even if a user program incurs an error. These programs have handlers which use `longjmp` to return control to the command level.
+
+The default action for all of these signals is to cause the process to terminate. If you block or ignore these signals or establish handlers for them that return normally, your program will probably break horribly when such signals happen, unless they are generated by raise or kill instead of a real error.
+
+When one of these program error signals terminates a process, it also writes a *core dump* file which records the state of the process at the time of termination. The core dump file is named *core* and is written in whichever directory is current in the process at the time. (On GNU/Hurd systems, you can specify the file name for core dumps with the environment variable COREFILE.) The purpose of core dump files is so that you can examine them with a debugger to investigate what caused the error. 
+
+- Macro: int SIGFPE
+
+    The SIGFPE signal reports a fatal arithmetic error
+
+- Macro: int SIGILL
+
+    The name of this signal is derived from "illegal instruction"
+
+- Macro: int SIGSEGV
+
+    This signal is generated when a program tries to read or write outside the memory that is allocated for it, or to write memory that can only be read. (Actually, the signals only occur when the program goes far enough outside to be detected by the system’s memory protection mechanism.) The name is an abbreviation for “segmentation violation”.
+    
+    Common ways of getting a SIGSEGV condition include dereferencing a null or uninitialized pointer, or when you use a pointer to step through an array, but fail to check for the end of the array. It varies among systems whether dereferencing a null pointer generates SIGSEGV or SIGBUS. 
+
+- Macro: int SIGBUS
+
+    This signal is generated when an invalid pointer is dereferenced. Like SIGSEGV, this signal is typically the result of dereferencing an uninitialized pointer. The difference between the two is that SIGSEGV indicates an invalid access to valid memory, while SIGBUS indicates an access to an invalid address. In particular, SIGBUS signals often result from dereferencing a misaligned pointer, such as referring to a four-word integer at an address not divisible by four. (Each kind of computer has its own requirements for address alignment.)
+
+    The name of this signal is an abbreviation for “bus error”. 
+
+- Macro: int SIGABRT
+
+    This signal indicates an error detected by the program itself and reported by calling abort. See Aborting a Program. 
+
+----
+
+###Termination Signals
+
+----
+
+###ALarm Signals
+
+----
+
+###Asynchronous I/O Signals
+
+----
+
+###Job Control Signals
+
+----
+
+###Operation Error Signals
+
+----
+
+###Miscellaneous Signals
+
+----
+
+###Signal Messages
+
+----
+
+##Specifying Signal Actions
+
+The simplest way to change the action for a signal is to use the signal function. You can specify a built-in action (such as to ignore the signal), or you can establish a handler.
+
+The GNU C Library also implements the more versatile sigaction facility. This section describes both facilities and gives suggestions on which to use when. 
+
+###Basic Signal Handling
+
+The `signal` function provide a simple interface for establshing an action for a particular signal. The function and associated macros are declared in the header file `signal.h`.
+
+- Data Type: `sighandler_t`
+
+    This is the type of signal hander functions. Signal handler takes one integer argument specifying the signal number, and have return type `void`. So, you should define handler functions like this:
+            
+        void handler (int signum) { … }
+    
+    The name `sighandler_t` for this data type is a GNU extension.
+
+- Function: `sighandler_t signal (int signum, sighandler_t action)`
+
+    Preliminary: | MT-Safe sigintr | AS-Safe | AC-Safe | See POSIX Safety Concepts.
+        
+    The `signal` function establishes `action` as the action for the signal `signum`.
+        
+    The first argument, `signum`, identifies the signal whose behavior you want to control, and should be a signal number. The proper way to specify a signal number is with one of the symbolic signal names (see Standard Signals)—don’t use an explicit number, because the numerical code for a given kind of signal may vary from operating system to operating system.
+        
+    The second argument, action, specifies the action to use for the signal signum. This can be one of the following: 
+    
+    - `SIG_DFL`
+        
+        `SIG_DFL` specifies the default action for the particular signal. The default actions for various kinds of signals are stated in Standard Signals.
+    - `SIG_IGN`
+        
+        `SIG_IGN` specifies that the signal should be ignored.
+        
+        Your program generally should not ignore signals that represent serious events or that are normally used to request termination. You cannot ignore the SIGKILL or SIGSTOP signals at all. You can ignore program error signals like SIGSEGV, but ignoring the error won’t enable the program to continue executing meaningfully. Ignoring user requests such as SIGINT, SIGQUIT, and SIGTSTP is unfriendly.
+        
+        When you do not wish signals to be delivered during a certain part of the program, the thing to do is to block them, not ignore them. See Blocking Signals.
+    -`handler`
+        
+        Supply the address of a handler function in your program, to specify running this handler as the way to deliver the signal.
+        
+        For more information about defining signal handler functions, see Defining Handlers. 
+    
+    > If you set the action for a signal to SIG_IGN, or if you set it to SIG_DFL and the default action is to ignore that signal, then any pending signals of that type are discarded (even if they are blocked). Discarding the pending signals means that they will never be delivered, not even if you subsequently specify another action and unblock this kind of signal.
+    
+    The `signal` function returns the action that was previously in effect for the specified `signum`. You can save this value and restore it later by calling `signal` again.
+    
+    If `signal` can’t honor the request, it returns `SIG_ERR` instead. The following `errno` error conditions are defined for this function: 
+    
+    - `EINVAL`
+    
+        You specified an invalid signum; or you tried to ignore or provide a handler for `SIGKILL` or `SIGSTOP`. 
+
+----
+
+
+Here is a simple example of setting up a handler to delete temporary files when certain fatal signals happen:
+
+    #include <signal.h>
+    
+    void
+    termination_handler (int signum)
+    {
+      struct temp_file *p;
+    
+      for (p = temp_file_list; p; p = p->next)
+        unlink (p->name);
+    }
+    
+    int
+    main (void)
+    {
+      …
+      if (signal (SIGINT, termination_handler) == SIG_IGN)
+        signal (SIGINT, SIG_IGN);
+      if (signal (SIGHUP, termination_handler) == SIG_IGN)
+        signal (SIGHUP, SIG_IGN);
+      if (signal (SIGTERM, termination_handler) == SIG_IGN)
+        signal (SIGTERM, SIG_IGN);
+      …
+    }
+
+Note that if a given signal was previously set to be ignored, this code avoids altering that setting. This is because non-job-control shells often ignore certain signals when starting children, and it is important for the children to respect this.
+
+We do not handle `SIGQUIT` or the program error signals in this example because these are designed to provide information for debugging (a core dump), and the temporary files may give useful information.
+
+----
+
+- Function: `sighandler_t sysv_signal (int signum, sighandler_t action)`
+
+    Preliminary: | MT-Safe | AS-Safe | AC-Safe | See POSIX Safety Concepts.
+
+    The `sysv_signal` implements the behavior of the standard `signal` function as found on SVID systems. The difference to BSD systems is that the handler is deinstalled after a delivery of a signal.
+
+    Compatibility Note: As said above for `signal`, this function should be avoided when possible. `sigaction` is the preferred method. 
+
+- Function: `sighandler_t ssignal (int signum, sighandler_t action)`
+
+    Preliminary: | MT-Safe sigintr | AS-Safe | AC-Safe | See POSIX Safety Concepts.
+
+    The `ssignal` function does the same thing as `signal`; it is provided only for compatibility with SVID. 
+
+- Macro: `sighandler_t SIG_ERR`
+
+    The value of this macro is used as the return value from signal to indicate an error. 
+
+----
+
+###Advanced Signal Handling
+
+The `sigaction` function has the same basic effect as `signal`: to specify how a signal should be handled by the process. However, `sigaction` offers more control, at the expense of more complexity. In particular, `sigaction` allows you to specify additional flags to control when the signal is generated and how the handler is invoked. 
+
+The `sigaction` function is declared in `signal.h`. 
+
+
+- Data Type: `struct sigaction`
+
+    Structures of type `struct sigaction` are used in the `sigaction` function to specify all the information about how to handle a particular signal. This structure contains at least the following members:
+    
+    - `sighandler_t sa_handler`
+    
+        This is used in the same way as the action argument to the signal function. The value can be SIG_DFL, SIG_IGN, or a function pointer. See Basic Signal Handling.
+    - `sigset_t sa_mask`
+    
+        This specifies a set of signals to be blocked while the handler runs. Blocking is explained in Blocking for Handler. Note that the signal that was delivered is automatically blocked by default before its handler is started; this is true regardless of the value in sa_mask. If you want that signal not to be blocked within its handler, you must write code in the handler to unblock it.
+    - `int sa_flags`
+    
+        This specifies various flags which can affect the behavior of the signal. These are described in more detail in Flags for Sigaction. 
+
+- Function: `int sigaction (int signum, const struct sigaction *restrict action, struct sigaction *restrict old-action)`
+
+    Preliminary: | MT-Safe | AS-Safe | AC-Safe | See POSIX Safety Concepts.
+
+    The `action` argument is used to set up a new action for the signal `signum`, while the `old-action` argument is used to return information about the action previously associated with this signal. (In other words, old-action has the same purpose as the signal function’s return value—you can check to see what the old action in effect for the signal was, and restore it later if you want.)
+
+    Either `action` or `old-action` can be a null pointer. If `old-action` is a null pointer, this simply suppresses the return of information about the old action. If `action` is a null pointer, the action associated with the signal signum is unchanged; this allows you to inquire about how a signal is being handled without changing that handling.
+
+    The return value from sigaction is zero if it succeeds, and -1 on failure. The following errno error conditions are defined for this function:
+
+    - EINVAL
+
+        The signum argument is not valid, or you are trying to trap or ignore `SIGKILL` or `SIGSTOP`. 
+
+----
+
+###Interaction of `signal` and `sinaction`
+
+It’s possible to use both the `signal` and `sigaction` functions within a single program, but you have to be careful because they can interact in slightly strange ways.
+
+The `sigaction` function specifies more information than the `signal` function, so the return value from signal cannot express the full range of `sigaction` possibilities. Therefore, if you use `signal` to save and later reestablish an action, it may not be able to reestablish properly a handler that was established with `sigaction`.
+
+To avoid having problems as a result, always use `sigaction` to save and restore a handler if your program uses sigaction at all. Since `sigaction` is more general, it can properly save and reestablish any action, regardless of whether it was established originally with `signal` or `sigaction`.
+
+On some systems if you establish an action with `signal` and then examine it with `sigaction`, the handler address that you get may not be the same as what you specified with `signal`. It may not even be suitable for use as an action argument with `signal`. But you can rely on using it as an argument to `sigaction`. This problem never happens on GNU systems.
+
+So, you’re better off using one or the other of the mechanisms consistently within a single program.
+
+Portability Note: The basic `signal` function is a feature of ISO C, while `sigaction` is part of the POSIX.1 standard. If you are concerned about portability to non-POSIX systems, then you should use the `signal` function instead. 
+
+----
+
+###`sigaction` Function Example
+
+
+In Basic Signal Handling, we gave an example of establishing a simple handler for termination signals using signal. Here is an equivalent example using sigaction:
+
+    #include <signal.h>
+    
+    void
+    termination_handler (int signum)
+    {
+      struct temp_file *p;
+    
+      for (p = temp_file_list; p; p = p->next)
+        unlink (p->name);
+    }
+    
+    int
+    main (void)
+    {
+      …
+      struct sigaction new_action, old_action;
+    
+      /* Set up the structure to specify the new action. */
+      new_action.sa_handler = termination_handler;
+      sigemptyset (&new_action.sa_mask);
+      new_action.sa_flags = 0;
+    
+      sigaction (SIGINT, NULL, &old_action);
+      if (old_action.sa_handler != SIG_IGN)
+        sigaction (SIGINT, &new_action, NULL);
+      sigaction (SIGHUP, NULL, &old_action);
+      if (old_action.sa_handler != SIG_IGN)
+        sigaction (SIGHUP, &new_action, NULL);
+      sigaction (SIGTERM, NULL, &old_action);
+      if (old_action.sa_handler != SIG_IGN)
+        sigaction (SIGTERM, &new_action, NULL);
+      …
+    }
+
+The program just loads the `new_action` structure with the desired parameters and passes it in the sigaction call. The usage of sigemptyset is described later; see Blocking Signals.
+
+As in the example using `signal`, we avoid handling `signals` previously set to be ignored. Here we can avoid altering the signal handler even momentarily, by using the feature of sigaction that lets us examine the current action without specifying a new one.
+
+Here is another example. It retrieves information about the current action for `SIGINT` without changing that action.
+
+    struct sigaction query_action;
+    
+    if (sigaction (SIGINT, NULL, &query_action) < 0)
+      /* sigaction returns -1 in case of error. */
+    else if (query_action.sa_handler == SIG_DFL)
+      /* SIGINT is handled in the default, fatal manner. */
+    else if (query_action.sa_handler == SIG_IGN)
+      /* SIGINT is ignored. */
+    else
+      /* A programmer-defined signal handler is in effect. */
+
+----
+
+###Flags for sigaction
+
+The `sa_flags` member of the `sigaction` structure is a catch-all for special features. Most of the time, `SA_RESTART` is a good value to use for this field.
+
+The value of `sa_flags` is interpreted as a bit mask. Thus, you should choose the flags you want to set, OR those flags together, and store the result in the `sa_flags` member of your sigaction structure.
+
+Each signal number has its own set of flags. *Each call to `sigaction` affects one particular signal number, and the flags that you specify apply only to that particular signal*.
+
+In the GNU C Library, establishing a handler with `signal` sets all the flags to zero except for `SA_RESTART`, whose value depends on the settings you have made with `siginterrupt`. See Interrupted Primitives, to see what this is about.
+
+These macros are defined in the header file `signal.h`.
+
+- Macro: int SA_NOCLDSTOP
+
+    This flag is meaningful only for the `SIGCHLD` signal. When the flag is set, the system delivers the signal for a terminated child process but not for one that is stopped. By default, `SIGCHLD` is delivered for both terminated children and stopped children.
+
+    Setting this flag for a signal other than `SIGCHLD` has no effect. 
+
+- Macro: int SA_ONSTACK
+
+    If this flag is set for a particular signal number, the system uses the signal stack when delivering that kind of signal. See Signal Stack. If a signal with this flag arrives and you have not set a signal stack, the system terminates the program with `SIGILL`. 
+
+- Macro: int SA_RESTART
+
+    This flag controls what happens when a signal is delivered during certain primitives (such as open, read or write), and the signal handler returns normally. There are two alternatives: the library function can resume, or it can return failure with error code `EINTR`.
+
+    The choice is controlled by the `SA_RESTART` flag for the particular kind of signal that was delivered. If the flag is set, returning from a handler resumes the library function. If the flag is clear, returning from a handler makes the function fail. See Interrupted Primitives. 
+
+----
+
+###Initial Signal Actions
+
+When a new process is created (see Creating a Process), it inherits handling of signals from its parent process. However, when you load a new process image using the exec function (see Executing a File), any signals that you’ve defined your own handlers for revert to their `SIG_DFL` handling. (If you think about it a little, this makes sense; the handler functions from the old program are specific to that program, and aren’t even present in the address space of the new program image.) Of course, the new program can establish its own handlers.
+
+When a program is run by a shell, the shell normally sets the initial actions for the child process to `SIG_DFL` or `SIG_IGN`, as appropriate. It’s a good idea to check to make sure that the shell has not set up an initial action of `SIG_IGN` before you establish your own signal handlers.
+
+Here is an example of how to establish a handler for `SIGHUP`, but not if `SIGHUP` is currently ignored:
+
+    struct sigaction temp;
+    
+    sigaction (SIGHUP, NULL, &temp);
+    
+    if (temp.sa_handler != SIG_IGN)
+      {
+        temp.sa_handler = handle_sighup;
+        sigemptyset (&temp.sa_mask);
+        sigaction (SIGHUP, &temp, NULL);
+      }
+
+----
+
 ##Defining Signal Handlers
 
 This section describes how to write a signal handler function that can be established with the `signal` or `sigaction` functions.
@@ -845,11 +1383,11 @@ You need to take special care in writing handler functions because they can be c
 
 ###Signal Handlers that Return
 
-Handlers which return normally are usually used for signals such as `SIGALRM` and the I/O and interprocess communication signals. But a handler for SIGINT might also return normally after setting a flag that tells the program to exit at a convenient time. 
+Handlers which return normally are usually used for signals such as `SIGALRM` and the I/O and interprocess communication signals. But a handler for `SIGINT` might also return normally after setting a flag that tells the program to exit at a convenient time. 
 
 It is not safe to return normally from the handler for a program error signal, because the behavior of the program when the handler function returns is not defined after a program error. See Program Error Signals.
 
-*Handlers that return normally must modify some global variable in order to have any effect*. Typically, the variable is one that is examined periodically by the program during normal operation. Its data type should be sig_atomic_t for reasons described in Atomic Data Access. 
+*Handlers that return normally must modify some global variable in order to have any effect*. Typically, the variable is one that is examined periodically by the program during normal operation. Its data type should be `sig_atomic_t` for reasons described in Atomic Data Access. 
 
 Here is a simple example of such a program. It executes the body of the loop until it has noticed that a SIGALRM signal has arrived. This technique is useful because it allows the iteration in progress when the signal arrives to complete before the loop exits. 
 
@@ -942,6 +1480,8 @@ There are two ways to avoid this problem.
 1. One is to block the signal for the parts of the program that update important data structures. Blocking the signal delays its delivery until it is unblocked, once the critical updating is finished. See Blocking Signals.
 1. The other way is to re-initialize the crucial data structures in the signal handler, or to make their values consistent. 
 
+Here is a rather schematic example showing the reinitialization of one global variable. 
+
     #include <signal.h>
     #include <setjmp.h>
     
@@ -994,7 +1534,7 @@ What happens if another signal arrives while your signal handler function is run
 
 When the handler for a particular signal is invoked, that signal is automatically blocked until the handler returns. *That means that if two signals of the same kind arrive close together, the second one will be held until the first has been handled*. (The handler can explicitly unblock the signal using sigprocmask, if you want to allow more signals of this type to arrive; see Process Signal Mask.)
 
-However, your handler can still be interrupted by delivery of another kind of signal. To avoid this, you can use the `sa_mask` member of the action structure passed to sigaction to explicitly specify which signals should be blocked while the signal handler runs. These signals are in addition to the signal for which the handler was invoked, and any other signals that are normally blocked by the process. See Blocking for Handler.
+However, your handler can still be interrupted by delivery of another kind of signal. To avoid this, you can use the `sa_mask` member of the action structure passed to `sigaction` to explicitly specify which signals should be blocked while the signal handler runs. These signals are in addition to the signal for which the handler was invoked, and any other signals that are normally blocked by the process. See Blocking for Handler.
 
 When the handler returns, the set of blocked signals is restored to the value it had before the handler ran. So using `sigprocmask` inside the handler only affects what signals can arrive during the execution of the handler itself, not what signals can arrive once the handler returns.
 
@@ -1003,6 +1543,10 @@ When the handler returns, the set of blocked signals is restored to the value it
 ----
 
 ###Signals Close Together Merge into One
+
+
+
+
 
 
 
@@ -1209,4 +1753,5 @@ auto_ptr对象间的赋值是一个需要特别注意的地方。简单说来资
 
 ****
 
+ERROR     07-16 13:30:32.548 epgtool9-21:DPN_(2.1.0) AddDataPath@NUMA: zoneId: 1, numaId: 24
 

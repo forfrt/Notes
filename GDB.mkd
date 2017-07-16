@@ -386,5 +386,11 @@ GDB有能力在你调试程序的时候处理任何一种信号，你可以告诉GDB需要处理哪一种信号。你
 #栈
 
 
+****
+
+#Debugging with GDB
+
+https://sourceware.org/gdb/onlinedocs/gdb/index.html#Top
+
 
 

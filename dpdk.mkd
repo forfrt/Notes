@@ -205,7 +205,9 @@ To prepare a target without building it, for example, if the configuration chang
 
     make config T=x86_64-native-linuxapp-gcc
 
-> Any kernel modules to be used, e.g. igb_uio, kni, must be compiled with the same kernel as the one running on the target. If the DPDK is not being built on the target machine, the RTE_KERNELDIR environment variable should be used to point the compilation at a copy of the kernel version to be used on the target machine.
+> Any kernel modules to be used, e.g. igb_uio, kni, must be compiled with the same kernel as the one running on the target. If the DPDK is not being built on the target machine, the *RTE_KERNELDIR* environment variable should be used to point the compilation at a copy of the kernel version to be used on the target machine.
+
+    export RTE_KERNELDIR=/usr/src/kernels/2.6.32-573.el6.x86_64/
 
 Once the target environment is created, the user may move to the target environment directory and continue to make code changes and re-compile. The user may also make modifications to the compile-time DPDK configuration by editing the .config file in the build directory. (This is a build-local copy of the defconfig file from the top- level config directory).
 
@@ -1002,7 +1004,7 @@ rte_malloc()函数调用关系如下图：
     }
 
 - malloc_heap_init()：主要是为struct malloc_heap数据结构的各个成员变量赋初始值，并将该堆的状态设置为INITIALISED。
-- malloc_heap_add_memzone()：调用rte_memzone_reserve()，在rte_config.mem_config->memzone[]中分配合适大小的内存。分配的内存的大小是mz_size = MAX(min_size, 11M)，其中，min_size = size + align + MALLOC_ELEM_OVERHEAD * 2; size是rte_malloc()指定的需要分配内存的大小。如果memzone[]中没有合适的内存块，将mz_size减半，再次查找。
+- malloc_heap_add_memzone()：调用rte_memzone_reserve()，在rte_config.mem_config->memzone[]中分配合适大小的内存。分配的内存的大小是mz_size = MAX(min_size, 11M)，其中，min_size = size + align + MALLOC_ELEM_OVERHEAD * 2; size是rte_malloc()指定的需要分配内存的大小。如果memzone[]中没有合适的内存块，将mz_size减半，再次查找。 (MALLOC_ELEM_OVERHEAD=128)
 
     do {
         mz = rte_memzone_reserve(mz_name, mz_size, numa_socket,
@@ -1018,6 +1020,43 @@ malloc_elem_alloc()：查找到合适大小的内存块后，将这一块内存�
 ![rte_malloc_2](./img/Dpdk/rte_malloc_2.jpg)
 
 ****
+
+#DPDK内存管理-----(四) rte_mbuf
+
+本文主要介绍rte_mbuf与rte_mempool数据结构之间的组织关系、以及网卡接收到的数据是如何存储在rte_mbuf中的。
+
+#rte_mbuf、rte_mempool及网卡收到的数据包在内存中的组织结构
+
+![rte_mbuf1.jpg]()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
