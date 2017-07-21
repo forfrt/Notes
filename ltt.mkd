@@ -273,6 +273,7 @@ Dallas有三种case:
 ##Dallas Build
 
     setup_15Aspace
+    setup_Dallas1_space
     export LTT_REPO=/repo/eruitfe/ltt_ng
     cd $MK
     make clean; make
@@ -392,6 +393,12 @@ Dallas有三种case:
     
     lts_get_subscriber
 
+----
+
+##Dallas check status
+
+    lts_pmshow -f /var/log/dallas_pm.log.1 -l |grep SGW
+    lts_pmshow -f /var/log/dallas_pm.log.1 -c 2498  
 
 ----
 
@@ -1664,23 +1671,112 @@ LTT_LOG(DEBUG, VNET, "@vnet_bond_vdev_xmit pos:%d\n", pos);
 
 ----
 
+#07172017
+
 3668 ERROR     07-14 09:34:05.233 LTT_3          @gtpu_recv: no route(device) found to handle pkt
 3669 ERROR     07-14 09:34:05.238 LTT_3          @gtpu_recv: no route(device) found to handle pkt
 3670 ERROR     07-14 09:34:05.239 LTT_3          @gtpu_recv: no route(device) found to handle pkt
 
 386496 ERROR     07-14 09:35:13.234 LTT_3          vnet_bond_vdev_xmit@NUMA pos:20
 
-
 session_id from create session type check
 
 ERROR     07-16 13:30:32.548 epgtool9-21:DPN_(2.1.0) AddDataPath@NUMA: zoneId: 1, numaId: 24
 
+----
 
+#07182017
 
+ERROR     07-18 09:07:54.472 LTT_1          replay_session_execute: resending timeout: profile_i
+d[7002],                            session_id[1158137407380389888] resend_pktid[408] flow_idx[1
+]
 
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
 
+Normal merge conflict for 'src/app/dummy_session.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
 
+Normal merge conflict for 'src/app/payload.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
 
+Normal merge conflict for 'src/app/payload_pool.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/app/session_ctl.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/common/ltt_config.h':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/instance/instance.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/network/vnet.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/om/cp_agent.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/om/up_agent.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/rps/rps.cc':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/sal/sal.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+----
+
+lts_get_ms_groups_range                  
+lts_run_mobiles ' 2380171, 1, [104, 158]'
+lts_get_subscriber                       
+lts_get_subscriber 2380171               
+lts_run_tm '[82]'                        
+lts_msgshow                              
+lts_msgshow > msgshow                    
+vim msgshow                              
+vim /autott/dallas/dallas.mobile         
+lts_system_setup -deinstall              
+history                                 
+
+----
+
+#07202017
+
+divided s_sal.lock into MAX_NUMA parts
+
+ERROR     07-21 04:21:15.104 LTT_3          replay_session_execute: resending timeout: profile_id[3123]
+, session_id[1155474033735630848] resend_pktid[11] flow_idx[0]
+ERROR     07-21 04:21:15.112 MS-group 29    SubSystem_3-ApInstance_6: MsId: 594307, PayloadSessionId 10
+091183 done failed, Payload Profile Index: 3123, result: [0,1]
+INFO      07-21 04:21:15.206 dsyslog        Client connection accepted in STATUSLOG from 10.132.161.200
+ERROR     07-21 04:21:15.190 LTT_2          replay_session_execute: resending timeout: profile_id[3123]
+, session_id[1153464087825350656] resend_pktid[11] flow_idx[0]
 
 
 
