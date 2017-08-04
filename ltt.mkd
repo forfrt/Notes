@@ -361,8 +361,6 @@ Dallas有三种case:
     lts_run_tm '{perc, 10} , all'
     lts_run_tm '104833,100'
 
-
-
     lts_control stop
 
 ```
@@ -387,9 +385,17 @@ Dallas有三种case:
     show chassis
     reload card all
     
+----
+
+##Dallas Environment Troubleshooting
+
     start oam-cli
     ManagedElement=1, Epg=1, Node=1
     status
+
+    configure
+    ManagedElement=1,Epg=1,Node=1,FaultManagement=1
+    activeNotifications
     
     lts_get_subscriber
 
@@ -399,6 +405,15 @@ Dallas有三种case:
 
     lts_pmshow -f /var/log/dallas_pm.log.1 -l |grep SGW
     lts_pmshow -f /var/log/dallas_pm.log.1 -c 2498  
+
+----
+
+##Dallas capture traffic
+
+ssh epgtool9-20
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV015/3pp/ltt/util/exe /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV015/3pp/ltt/util/itc.py -i 0, 1 -e  ''
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV015/3pp/ltt/util/exe /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV015/3pp/ltt/util/itc.py stop
+/lab/j20/testtools/binaries/rhel6.x86_64/onewireshark/ws.sh & 
 
 ----
 
@@ -1149,7 +1164,7 @@ session_find_by_id从app.c放到了payload_pool.c
 
 偶数dp放在numa 0上, 奇数dp放在numa 1上
 
-5306, 30720
+5360, 30720
 6996, 32944
 7282, 33320
 9939, 37200
@@ -1161,7 +1176,7 @@ session_find_by_id从app.c放到了payload_pool.c
 
 ----
 
-2605,  30720
+2632,  30720
 3450,  32944
 3593,  33320
 4966.5, 37200
@@ -1778,6 +1793,39 @@ INFO      07-21 04:21:15.206 dsyslog        Client connection accepted in STATUS
 ERROR     07-21 04:21:15.190 LTT_2          replay_session_execute: resending timeout: profile_id[3123]
 , session_id[1153464087825350656] resend_pktid[11] flow_idx[0]
 
+----
+
+#07272017
+
+ 9d7881f 2017-07-24 | <PCDALNGEN-859> [fix replay tgnat] [Xiaoming Song] (HEAD, tag: 3R1_LLV025, origin/master, origin/HEAD)
+ 0d325cb 2017-07-20 | <PCDALNGEN-861>:[TC18129.1 fix txq full retry issue by delay n us in while loop] [Canxing Bu]
+ 2fa96ca 2017-07-21 | <PCDALNGEN-864> [fix flow table destroy memory leak] [Xiaoming Song]
+ 82d3e2b 2017-07-17 | <PCDALNGEN-858>:[fix sal del socket failed for APR] [Canxing Bu] (tag: 3R1_LLV024)
+ 4a1a1d2 2017-07-13 | <PCDALNGEN-856>:[TC18129.1 fix crash due to txq full and remove qsbr] [Canxing Bu] (tag: 3R1_LLV023)
+ 1109baf 2017-07-12 | <PCDALNGEN-851>:Increase SAL mempool size [Jack MIN]
+ 55b740a 2017-06-21 | <PCDALNGEN-801>:[Replay Sending Pattern Fix] [Jack MIN] (tag: 3R1_LLV022)
+ 0bb1d56 2017-05-16 | fast path: hyper cache implementation [Canxing Bu]
+ 047058a 2017-06-27 | <PCDALNGEN-831> [ipv6 fragment error] [Xiaoming Song] (tag: 3R1_LLV021, tag: 3R1_LLV020, tag: 3R1_LLV019)
+ af789f5 2017-06-16 | <PCDALNGEN-683> [increase up_agent MQ] [Xiaoming Song] (tag: 3R1_LLV018)
+ 4c7c1ef 2017-06-16 | <PCDALNGEN-751>:[opt session struct, RPS and custom payload] [Canxing Bu]
+ 84e5ba6 2017-04-21 | <PCDALNGEN-720>:[fix reasseble fragmented pkt for DL raw udp] [Canxing Bu] (tag: 3R1_LLV017, tag: 3R1_LLV016, tag: 3R1_LLV015)
+ 8a6aec4 2017-06-01 | <PCDALNGEN-717> [fix si_compare failed] [Xiaoming Song]
+ b30789f 2017-05-06 | <PCDALNGEN-753>:[change same direction rule and add_debug_log] [Canxing Bu] (tag: 3R1_LLV014)
+ de6bb75 2017-05-18 | <PCDALNGEN-426>:[Fixed misplaced conditional statement as well as precision loss problem] [Ruitao Feng] (tag: 3R1_LLV013, tag: 3R1_LLV012)
+ 40e17c8 2017-05-18 | <PCDALNGEN-773>:[LTT crashed due to recv error gtpc pkt] [Canxing Bu] (tag: 3R1_LLV011)
+ 8504a22 2017-05-16 | fix modify ip address log format [Xiaoming Song] (tag: 3R1_LLV010, tag: 3R1_LLV009, tag: 3R1_LLV008)
+ f33cfcc 2017-04-26 | modify ip address log format [Xiaoming Song]
+ 0b349d1 2017-05-11 | FIX: Initialize g_lcores_usages for interval value [Jack MIN]
+ 0d06b82 2017-05-12 | <PCDALNGEN-747>: [LTT command didn't worked with command 'exe'] [Heng Yin] (tag: 3R1_LLV007)
+ 30266fc 2017-05-05 | <PCDALNGEN-703>:[Added Error Indiction Counter in GET_APP_STATS_REP Message] [Ruitao Feng] (tag: 3R1_LLV006, tag: 3R1_LLV005)
+ a974e89 2017-05-09 | <PCDALNGEN-723>:[up agent rcu lock issue fix] [Canxing Bu] (tag: 3R1_LLV004)
+ d63e4d4 2017-04-28 | Fix ITC with multiple segments [Canxing Bu]
+ 3e8f5de 2017-05-04 | <PCDALNGEN-667>:[Lcore Usage] [Jack MIN] (tag: 3R1_LLV003)
+ ec7bf78 2017-05-02 | <PCDALNGEN-743>:[change RTE_MAX_MEMZONE to 16384 for create hash failed case] [Canxing Bu] (tag: RC1_0_0055, tag: 3R1_LLV002, tag: 3R1_LLV001, tag: 3R1_LLV000)
+ 71200e9 2017-04-27 | <PCDALNGEN-739>:[increase default dp capacity and sal capacity for Max PDP case] [Canxing Bu] (tag: RC1_0_0054)
+ 770a0c8 2017-04-26 | <PCDALNGEN-732>:[Add MTU Setting Support] [Canxing Bu]
+ a0a8f54 2017-04-12 | txq full retry more times and add debug log [Canxing Bu] (tag: RC1_0_0053, tag: RC1_0_0052, tag: RC1_0_0051, tag: RC1_0_0050)
+ 8f9414e 2017-04-13 | <PCDALNGEN-575>:[modify dummy packet size] [Xiaoming Song]
 
 
 
