@@ -66,7 +66,7 @@ OR
     `vim /var/www/<my-project-name>/django.wsgi`
     > wsgi, the Web Server Gateway Interface, is a specification for simple and universal interface between *web server* and *web applications or frameworks for the  Python programming language [wsgi_wiki](http://en.wikipedia.org/wiki/Web_Server_Gateway_Interface).
 
-        In details, the directory added to sys.path would be the directory containing the package for package for the django site crated by running`django-admin.py startproject mysite`
+        In details, the directory added to sys.path would be the directory containing the package for package for the django site crated by running `django-admin.py startproject mysite`
 
 1. mod-wsgi adapter to configure Django in Apache install wsgi lib like below.
 
@@ -81,6 +81,23 @@ OR
     [Django1.3.1 インストール+テスト](https://gist.github.com/makotoworld/1437054)
     [*Django on Apache_modwsgi*](https://code.google.com/p/modwsgi/wiki/QuickConfigurationGuide#Delegation_To_Daemon_Process)
     [*Django on Apache_cnblogs*](http://www.cnblogs.com/restran/archive/2011/12/28/2305307.html)
+
+OR
+
+    LoadModule wsgi_module /usr/lib64/httpd/modules/mod_wsgi.so
+
+    WSGIScriptAlias /       /home/forfrt/Projects/charity/charity/wsgi.py
+    WSGIPythonPath  /home/forfrt/Projects/charity
+
+    <Directory /home/forfrt/Projects/charity>
+        <Files wsgi.py>
+                Require all granted
+        </Files>
+    </Directory>
+
+    WSGIDaemonProcess 0.0.0.0 python-path=/home/forfrt/Projects/charity
+    WSGIProcessGroup 0.0.0.0
+
 ----
 
 ###Configuring PostgreSQL
@@ -113,10 +130,14 @@ urls.py
         ('^hello/$', hello),
     )
 
+----
+
 ##Python搜索路径
 即使用import语句时Python所查找的系统目录清单
 
 可以通过`import sys`&`print sys.path`查看
+
+----
 
 ##Django是怎么处理请求的
 
@@ -137,6 +158,8 @@ urls.py
         now = datetime.datetime.now()
         html = "<html><body>It is now %s.</body></html>" % now
         return HttpResponse(html)
+
+----
 
 ##URL配置和松耦合
 
