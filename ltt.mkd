@@ -246,6 +246,10 @@ Ordinarily, a limitation of SMP is that as microprocessors are added, the shared
 
 #Structure
 
+----
+
+##Dallas Run
+
 Dallas有三种case:
 1. function case
 
@@ -322,6 +326,14 @@ Dallas有三种case:
 
 ----
 
+#Dallas Training for ST
+
+\\vhub.mo.sw.ericsson.se\proj\pcn\DALLAS\Dallas Training for ST\GGSN_EPG\LN
+https://play.ericsson.net/media/t/0_4f33fp3d
+http://epgst-competence.mo.sw.ericsson.se/?q=node/7
+
+----
+
 ##Dallas Install
 
 ```
@@ -373,7 +385,7 @@ Dallas有三种case:
 1. View Dallas Backbone configuration
 1. View Dallas log messages
 1. View Ltt log messages
-1. View Dallas vlan configurations used in step 3
+1. View Dallas vlan configurations used in step 
 
 ----
 
@@ -410,10 +422,10 @@ Dallas有三种case:
 
 ##Dallas capture traffic
 
-ssh epgtool9-20
-/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV015/3pp/ltt/util/exe /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV015/3pp/ltt/util/itc.py -i 0, 1 -e  ''
-/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV015/3pp/ltt/util/exe /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV015/3pp/ltt/util/itc.py stop
-/lab/j20/testtools/binaries/rhel6.x86_64/onewireshark/ws.sh & 
+    ssh epgtool9-20
+    /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV015/3pp/ltt/util/exe /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV015/3pp/ltt/util/itc.py -i 0, 1 -e  ''
+    /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV015/3pp/ltt/util/exe /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV015/3pp/ltt/util/itc.py stop
+    /lab/j20/testtools/binaries/rhel6.x86_64/onewireshark/ws.sh & 
 
 ----
 
@@ -444,7 +456,8 @@ https://pdupc-jira.mo.sw.ericsson.se/secure/RapidBoard.jspa
 
 ----
 
-#Configurations
+#Dallas Configurations
+
 1. 查看/修改ltt reserve了多少内存
 
     htop
@@ -454,8 +467,10 @@ https://pdupc-jira.mo.sw.ericsson.se/secure/RapidBoard.jspa
     //! This file is unlikely be changed with this command. In this case, you should 
     change the value of system_profile file and restart dallas project (lts_system_setup -deinstall & lts_system_setup -install)
 
+1. 通过tunnel id计算ms id
 
-1. 
+    teid=32bytes---》 十六进制 取后27位-1---》再转十进制 
+1070322
 
 ----
 
@@ -1827,12 +1842,230 @@ ERROR     07-21 04:21:15.190 LTT_2          replay_session_execute: resending ti
  a0a8f54 2017-04-12 | txq full retry more times and add debug log [Canxing Bu] (tag: RC1_0_0053, tag: RC1_0_0052, tag: RC1_0_0051, tag: RC1_0_0050)
  8f9414e 2017-04-13 | <PCDALNGEN-575>:[modify dummy packet size] [Xiaoming Song]
 
+----
 
+#08092017
 
+eselnts1396(rebase)> git pull origin master --rebase                          
+From ssh://selngerrit.mo.sw.ericsson.se:29418/pc/dallas/ltt_ng
+ * branch            master     -> FETCH_HEAD
+First, rewinding head to replay your work on top of it...
+Applying: numa for review
+Using index info to reconstruct a base tree...
+M       src/app/Makefile
+M       src/app/app.c
+M       src/app/app.h
+M       src/app/app_stats.c
+M       src/app/app_stats.h
+M       src/app/dummy_session.c
+M       src/app/dummy_session.h
+M       src/app/payload.c
+M       src/app/payload.h
+M       src/app/payload_pool.c
+M       src/app/replay_session.c
+M       src/app/replay_status.h
+M       src/app/session_ctl.c
+M       src/app/session_ctl.h
+M       src/common/Makefile
+M       src/common/ltt_config.c
+M       src/common/ltt_config.h
+M       src/common/ltt_rcu_hash.c
+M       src/common/ltt_rcu_hash.h
+M       src/common/ltt_util.c
+M       src/common/ltt_util.h
+M       src/dataplane/dpdkenv.c
+M       src/instance/agent.c
+M       src/instance/agent.h
+M       src/instance/instance.c
+M       src/instance/instance.h
+M       src/itc/itc.c
+M       src/main.c
+M       src/network/ipv4/ipv4.c
+M       src/network/ipv4/ipv4_fragment.c
+M       src/network/ipv6/ipv6.c
+M       src/network/ipv6/ipv6_fragment.c
+M       src/network/proto/gre_proto.c
+M       src/network/proto/gre_proto.h
+M       src/network/proto/gtp_proto.c
+M       src/network/proto/gtp_proto.h
+M       src/network/proto/ipv6_proto.c
+M       src/network/proto/ipv6_proto.h
+M       src/network/proto/udp_proto.c
+M       src/network/proto/udp_proto.h
+M       src/network/route.h
+M       src/network/transmitter.c
+M       src/network/vnet.c
+M       src/network/vnet.h
+M       src/om/cp_agent.c
+M       src/om/jobtracker_agent.c
+M       src/om/up_agent.c
+M       src/om/up_agent.h
+M       src/rps/bsharp_tree.cc
+M       src/rps/bsharp_tree.hh
+M       src/rps/cc_deps.hh
+M       src/rps/rps.cc
+M       src/rps/rps.hh
+M       src/rps/timetable.cc
+M       src/rps/timetable.hh
+M       src/sal/sal.c
+M       src/tuntap/tuntap.c
+M       src/upservice/custom_service.c
+M       src/upservice/up_custom.h
+M       src/vswitch/flow.c
+M       src/vswitch/flow_ipv4.c
+M       src/vswitch/vport_vnet.c
+M       src/vswitch/vswitch_controller.c
+M       src/vswitch/vswitch_controller.h
+M       tools/console/statistic/jobtracker.py
+M       tools/console/upservice/flow.py
+M       tools/util/jobtracker.py
+.git/rebase-apply/patch:61: trailing whitespace.
+LTT            ^             |^       |           ^
+.git/rebase-apply/patch:62: trailing whitespace.
+Replay         |             ||       |           |
+.git/rebase-apply/patch:76: trailing whitespace.
+CPPFLAGS= -g $(LINUXFLG) $(LOCAL_CPPFLAGS)
+.git/rebase-apply/patch:177: trailing whitespace.
 
+.git/rebase-apply/patch:540: trailing whitespace.
+    printf("%s@NUMA: instance[%d] lcore[%u] session[%lu]\n",
+warning: squelched 53 whitespace errors
+warning: 58 lines add whitespace errors.
+Falling back to patching base and 3-way merge...
+Auto-merging src/vswitch/vswitch_controller.h
+CONFLICT (content): Merge conflict in src/vswitch/vswitch_controller.h
+Auto-merging src/vswitch/vswitch_controller.c
+CONFLICT (content): Merge conflict in src/vswitch/vswitch_controller.c
+Auto-merging src/vswitch/vport_vnet.c
+Auto-merging src/vswitch/flow_ipv4.c
+Auto-merging src/vswitch/flow.c
+Auto-merging src/sal/sal.c
+CONFLICT (content): Merge conflict in src/sal/sal.c
+Auto-merging src/rps/rps.hh
+Auto-merging src/rps/rps.cc
+Auto-merging src/om/up_agent.h
+Auto-merging src/om/up_agent.c
+CONFLICT (content): Merge conflict in src/om/up_agent.c
+Auto-merging src/om/cp_agent.c
+Auto-merging src/network/vnet.c
+CONFLICT (content): Merge conflict in src/network/vnet.c
+Auto-merging src/network/transmitter.c
+Auto-merging src/network/proto/gtp_proto.c
+Auto-merging src/network/ipv4/ipv4.c
+Auto-merging src/instance/instance.h
+Auto-merging src/instance/instance.c
+CONFLICT (content): Merge conflict in src/instance/instance.c
+Auto-merging src/instance/agent.h
+Auto-merging src/instance/agent.c
+CONFLICT (content): Merge conflict in src/instance/agent.c
+Auto-merging src/dataplane/dpdkenv.c
+Auto-merging src/common/ltt_rcu_hash.h
+Auto-merging src/common/ltt_rcu_hash.c
+Auto-merging src/common/ltt_config.h
+CONFLICT (content): Merge conflict in src/common/ltt_config.h
+Auto-merging src/common/ltt_config.c
+Auto-merging src/common/hyper_cache.c
+CONFLICT (add/add): Merge conflict in src/common/hyper_cache.c
+Auto-merging src/app/session_ctl.h
+CONFLICT (content): Merge conflict in src/app/session_ctl.h
+Auto-merging src/app/session_ctl.c
+CONFLICT (content): Merge conflict in src/app/session_ctl.c
+Auto-merging src/app/replay_session.c
+CONFLICT (content): Merge conflict in src/app/replay_session.c
+Auto-merging src/app/payload_pool.c
+CONFLICT (content): Merge conflict in src/app/payload_pool.c
+Auto-merging src/app/payload.h
+Auto-merging src/app/payload.c
+Auto-merging src/app/dummy_session.c
+CONFLICT (content): Merge conflict in src/app/dummy_session.c
+Auto-merging src/app/app.h
+Auto-merging src/app/app.c
+CONFLICT (content): Merge conflict in src/app/app.c
+error: Failed to merge in the changes.
+Patch failed at 0001 numa for review
+The copy of the patch that failed is found in: .git/rebase-apply/patch
 
+When you have resolved this problem, run "git rebase --continue".
+If you prefer to skip this patch, run "git rebase --skip" instead.
+To check out the original branch and stop rebasing, run "git rebase --abort".
 
+instance_get_id() vs instance_get_instanceid_by_lcore
 
+check instance_allocate, instance_init as well as instance_schedule to verify if the relationship
+between instance_id and instance_lcore_id is always updated in qconf object
+
+----
+
+- 08112017
+
+dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[1114] dp_version[0] ext_val32[0]                 key->sr
+c_ip: f24d0ade, key->dst_ip: 9770c02c
+dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[1114] dp_version[0] ext_val32[0]key->src_ip: 2a022280000
+00023ab0a6key->dst_ip: 2a104100104ba6f7baceb39a592
+
+flow miss key (ipv4): f24d0ade f24d0ade                                                                
+_vnet_gtpu_vport_recv@NUMA: flow miss dz[0], dp[1114], vport[0], dp_ver[0], key payload_id[0] flow miss
+, received teid[806807284]                                                                             
+
+gtpu flow miss key src: 222.10.77.242 dst: 44.192.112.151
+
+up_custom_add_context@NUMA: sessctl_sid_to_instanceid@NUMA: s_socket_conf[0]->core_num: 10             
+s_socket_conf[0]->cores:|8||10||12||14||16||18||20||22||24||26|                                        
+sessctl_sid_to_instanceid@NUMA: GET_PAYLOAD_ID(580505030948290560): 135159360                          
+sessctl_sid_to_instanceid@NUMA: s_socket_conf[0]->core_num: 10             s_socket_conf[0]->cores:|8||
+10||12||14||16||18||20||22||24||26|                                                                    
+sessctl_sid_to_instanceid@NUMA: GET_PAYLOAD_ID(580505030948290560): 135159360                          
+TABLE: rte_table_hash_create_key8_lru: Hash table memory footprint is 33554560 bytes                   
+sessctl_sid_to_instanceid@NUMA: s_socket_conf[0]->core_num: 10             s_socket_conf[0]->cores:|8||
+10||12||14||16||18||20||22||24||26|                                                                    
+sessctl_sid_to_instanceid@NUMA: GET_PAYLOAD_ID(580505030948290560): 135159360                          
+sessctl_sid_to_instanceid@NUMA: s_socket_conf[0]->core_num: 10             s_socket_conf[0]->cores:|8||
+10||12||14||16||18||20||22||24||26|                                                                    
+sessctl_sid_to_instanceid@NUMA: GET_PAYLOAD_ID(580505030948290560): 135159360                          
+ipv4_lookup_output@NUMA: out_port: [0], lcore_id: [12],             result.flags: [A]                  
+ipv4_lookup_output@NUMA: out_port: [0], lcore_id: [12],             result.flags: [B]                  
+ipv4_lookup_output@NUMA: out_port: [0], lcore_id: [12],             result.flags: [B]                  
+ipv4_lookup_output@NUMA: out_port: [0], lcore_id: [12],             result.flags: [B]                  
+_vnet_gtpu_vport_recv@NUMA: table: [0x7f65bbfb7000], socket_id: [1], vport_id: [0], dp_id: [370]       
+flow miss key (ipv4): 6f8d08de 864aa02c                                                                
+
+----
+
+ _vnet_gre_vport_recv@NUMA: table: [(nil)], socket_id: [0], vport_id: [0], dp_id: [2313]
+ _vnet_gre_vport_recv@NUMA: table_b: [(nil)], socket_id: [1], vport_id: [0], dp_id: [2313]
+ _vnet_gre_vport_recv@NUMA: flow_table miss dz[0], dp[2313], vport[0], dp_ver[0], key payload_id[0] flow miss, received teid[270292791]
+ flow_table miss key: 2a0222c000000038e55e 2a104010017eea2674c7a30c784
+
+ dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[2313] dp_version[0] ext_val32[0]key->src_ip: 2a0222c000000038e55ekey->dst_ip: 2a104010017eea2674c7a30c784
+ dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]key->src_ip: 2a104010017eea2674c7a30c784key->dst_ip: 2a0222c000000038e55e
+ dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[270292790]key->src_ip: 2a0222c000000038e55ekey->dst_ip: 2a104010017eea2674c7a30c784
+
+----
+
+vlan0108:1002 Link encap:Ethernet  HWaddr 3C:FD:FE:A1:7D:D8
+          inet addr:11.0.8.2  Bcast:0.0.0.0  Mask:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+
+p1p1      Link encap:Ethernet  HWaddr 3C:FD:FE:A1:7D:D8
+          inet6 addr: fe80::3efd:feff:fea1:7dd8/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:5576508765 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:5259882227 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:4225539829510 (3.8 TiB)  TX bytes:3937195646141 (3.5 TiB)
+
+p3p1      Link encap:Ethernet  HWaddr 3C:FD:FE:A1:7D:50
+          inet6 addr: fe80::3efd:feff:fea1:7d50/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:5564444538 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:5841657112 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:4210699820250 (3.8 TiB)  TX bytes:4676666260576 (4.2 TiB)
+
+dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[0] dp_version[0] ext_val32[806376690]                 key->src_ip: 200a02c, key->dst_ip: 6e820fde 
+dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[2119] dp_version[0] ext_val32[0]                 key->src_ip: 6e820fde, key->dst_ip: 200a02c      
+dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]                 key->src_ip: 200a02c, key->dst_ip: 6e820fde         
+dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[806376690]                 key->src_ip: 6e820fde, key->dst_ip: 200a02c 
 
 
 
