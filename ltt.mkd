@@ -396,7 +396,27 @@ http://epgst-competence.mo.sw.ericsson.se/?q=node/7
     lts_run_load '1,1000,[104,{158,cont}],100' 
     show chassis
     reload card all
-    
+
+----
+
+#Dallas Configurations
+
+1. 查看/修改ltt reserve了多少内存
+
+    htop
+    cat /proc/meminfo
+    vim /var/dallas/system_profile
+    echo 10240 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+    //! This file is unlikely be changed with this command. In this case, you should 
+    change the value of system_profile file and restart dallas project (lts_system_setup -deinstall & lts_system_setup -install)
+
+1. 通过tunnel id计算ms id
+
+    teid=32bytes---》 十六进制 取后27位-1---》再转十进制 
+
+1. 查看网卡对应的物理属性( numa_node... )
+    /sys/class/net/eth0/device
+
 ----
 
 ##Dallas Environment Troubleshooting
@@ -423,8 +443,8 @@ http://epgst-competence.mo.sw.ericsson.se/?q=node/7
 ##Dallas capture traffic
 
     ssh epgtool9-20
-    /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV015/3pp/ltt/util/exe /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV015/3pp/ltt/util/itc.py -i 0, 1 -e  ''
-    /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV015/3pp/ltt/util/exe /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV015/3pp/ltt/util/itc.py stop
+    /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV025/3pp/ltt/util/exe /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV025/3pp/ltt/util/itc.py -i 0, 1 -e  ''
+    /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV025/3pp/ltt/util/exe /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV025/3pp/ltt/util/itc.py stop
     /lab/j20/testtools/binaries/rhel6.x86_64/onewireshark/ws.sh & 
 
 ----
@@ -453,24 +473,6 @@ http://epgst-competence.mo.sw.ericsson.se/?q=node/7
 
 ##Dallas Jira Dashboard
 https://pdupc-jira.mo.sw.ericsson.se/secure/RapidBoard.jspa 
-
-----
-
-#Dallas Configurations
-
-1. 查看/修改ltt reserve了多少内存
-
-    htop
-    cat /proc/meminfo
-    vim /var/dallas/system_profile
-    echo 10240 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
-    //! This file is unlikely be changed with this command. In this case, you should 
-    change the value of system_profile file and restart dallas project (lts_system_setup -deinstall & lts_system_setup -install)
-
-1. 通过tunnel id计算ms id
-
-    teid=32bytes---》 十六进制 取后27位-1---》再转十进制 
-1070322
 
 ----
 
@@ -2066,6 +2068,283 @@ dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[0] dp_version[0] ext_val32[806376
 dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[2119] dp_version[0] ext_val32[0]                 key->src_ip: 6e820fde, key->dst_ip: 200a02c      
 dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]                 key->src_ip: 200a02c, key->dst_ip: 6e820fde         
 dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[806376690]                 key->src_ip: 6e820fde, key->dst_ip: 200a02c 
+
+----
+
+2017-08-23 04:38 PM
+
+comm_log_eth_addr(ERROR, VNET, " src ", result.ifaddr);
+comm_log_eth_addr(ERROR, VNET, " dst ", result.next_hop);
+
+printf("%s@NUMA vlan id[%d], ifindex[%u], ifname[%s]\n",
+        __func__, result.vlan_id, result.ifindex, result.ifname);
+printf("%s@NUMA: tx src&dst: %x %x \n", __func__, ipv4->src_addr, ipv4->dst_addr);
+
+----
+
+2017-08-24 03:14 PM
+
+struct TunnelInfo {                    struct TunnelInfo {                               
+    uint32_t teid;                         uint32_t teid;                                
+    union {                                union {                                       
+        uint16_t flags;                        uint16_t flags;                           
+        struct {                               struct {                                  
+            uint8_t flags;                         uint8_t flags;                        
+            uint8_t type;     /----                uint8_t type;                         
+        } gtp;                \----            } gtp;                                    
+    } u;                                   } u;                                          
+    struct IpAddr src_ip;                  struct IpAddr src_ip;                         
+    struct IpAddr dst_ip;                  struct IpAddr dst_ip;                         
+    uint16_t src_port;                     uint16_t src_port;                            
+    uint16_t dst_port;                     uint16_t dst_port;                            
+                                                                                         
+    //! Only for test                                                                    
+    uint64_t timestamp;                                                                  
+    uint8_t rxq_id;                                                                      
+    uint8_t in_port;                                                                     
+};                                     };                                                
+
+----
+
+2017-08-29 01:58 PM
+
+Initializing port[0]: nb_rxq[10] nb_txq[21] mtu[1522] Address:3C:FD:FE:A1:7D:50
+Setup TxQueue[0] on Core[8] Socket[0] TxQueue[0] on Port[0] Core[8] Socket[0] successful
+
+Initializing port[1]: nb_rxq[10] nb_txq[21] mtu[1522] Address:3C:FD:FE:A1:7D:D8
+Setup TxQueue[0] on Core[8] Socket[1] TxQueue[0] on Port[1] Core[8] Socket[1] successful
+
+----
+
+Initializing port[0]: nb_rxq[10] nb_txq[21] mtu[1522] Address:3C:FD:FE:A1:7D:50
+Setup TxQueue[0] on Core[8] Socket[0] TxQueue[0] on Port[0] Core[8] Socket[0] successful
+
+Initializing port[1]: nb_rxq[10] nb_txq[21] mtu[1522] Address:3C:FD:FE:A1:7D:D8
+Setup TxQueue[0] on Core[8] Socket[1] TxQueue[0] on Port[1] Core[8] Socket[1] successful
+
+
+ltt: transmitter.c:95: tx_misc_send_packet: Assertion `0' failed.
+
+----
+
+_vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[1], rxq_id[0],         
+table[0x7f7090b85940], table_b[(nil)], socket_id[0],             dz[0],
+dp[1256], vport[0], dp_ver[0],                                         
+_vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[1],               
+rxq_id[0],                 table[0x7f7090b85940], table_b[(nil)],      
+socket_id[0],                 dz[0], dp[1256], vport[0],               
+dp_ver[0],                 key payload_id[0], received teid[806199784] 
+flow_table miss key: d2af09de 700802c                                  
+gtpu flow miss key src: 222.9.175.210 dst: 44.128.0.7                  
+
+ ipv4_lookup_output@NUMA vlan id[108], out_port[0], ifname[vlan0108: 
+ 1002],             lcore_id:[18], result.flags:[B]                  
+ ipv4_lookup_output@NUMA: tx src&dst: d2af09de 700802c               
+
+----
+
+21695 _vnet_gre_vport_recv@NUMA: FLOW_TABLE MISS: in_port[150], rxq_id[176],                 table[0x7fe50667bdc0], table_b[(nil)], socket_id[1],                 dz[0], dp[2591], vport[0], dp_ver[0],
+                 key payload_id[0], received teid[270287636]
+21696 flow_table miss key: f2760fde 600002c
+21697 gre flow miss  src: 222.15.118.242 dst: 44.0.0.6 _sal_vport_send: socket missed! session id: 270287635
+
+21693 ipv4_lookup_output@NUMA vlan id[133], out_port[1], ifname[vlan0133:1002],             lcore_id:[27], result.flags:[A]
+21694 ipv4_lookup_output@NUMA: tx src&dst: f2760fde 600002c
+
+----
+
+21713 ipv4_lookup_output@NUMA vlan id[133], out_port[1], ifname[vlan0133:1002],             lcore_id:[8], result.flags:[B]
+21714 ipv4_lookup_output@NUMA: tx src&dst: 39380dde f00802c
+
+21722 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7fe522175f80], table_b[(nil)], socket_id[1], lcore_id[14],                 dz[0], dp[1925], vport[0], dp_ve
+      r[0],                 key payload_id[0], received teid[806067499]
+21723 flow_table miss key: 39380dde f00802c
+21724 gtpu flow miss key src: 222.13.56.57 dst: 44.128.0.15
+
+----
+
+1502242 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[0], rxq_id[0],             table[(nil)], table_b[(nil)], socket_id[0], lcoreid[24],             dz[0], dp[1105], vport[0], dp_ver[0],
+1502243 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7ef6fe4de280], table_b[(nil)], socket_id[1], lcore_id[24],                 dz[0], dp[1105], vport[0], dp
+        ver[0],                 key payload_id[0], received teid[805533762]
+1502244 flow_table miss key: 2a0222c00000001b1a4c4 2a10410001c320c6dee9b899c4
+1502245 gtpu flow miss key src: 2a00:222:c00::1b1:a4c4 dst: 2a01:4:1000:1:c320:c6de:e9b8:99c4
+
+1501854 ipv6_lookup_output@NUMA vlan id[133], out_port[1], ifname[vlan0133],             lcore_id:[14], result.flags:[B]
+1501855 ipv6_lookup_output@NUMA: tx src&dst: 2a0222c00000001b1a4c4 2a10410001c320c6dee9b899c4
+
+----
+
+2017-08-30 10:25 AM
+
+ltt_0829_2.log
+
+1494049 _vnet_gtpu_vport_recv: dz[0], dp[1073], vport[0], dp_ver[0], key payload_id[0] flow miss, received teid[806378413]                                                                 
+1494050 gtpu flow miss key src: 2a00:222:c00::73:4306 dst: 2a01:4:1200:1:910d:fea8:8b43:4d52                                                                                               
+1494051 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[0], rxq_id[0],             table[0x7f06eae24c00], table_b[(nil)], socket_id[1], lcoreid[19],             dz[0], dp[1073], vport[0],
+        dp_ver[0],                                                                                                                                                                         
+1494052 _vnet_gtpu_vport_recv: dz[0], dp[1073], vport[0], dp_ver[0], key payload_id[0] flow miss, received teid[806378413]                                                                 
+1494053 gtpu flow miss key src: 2a00:222:c00::73:4306 dst: 2a01:4:1200:1:910d:fea8:8b43:4d52                                                                                               
+1494054 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[0], rxq_id[0],             table[0x7f06eae24c00], table_b[(nil)], socket_id[1], lcoreid[19],             dz[0], dp[1073], vport[0],
+        dp_ver[0],                                                                                                                                                                         
+1494055 gtpu flow miss key src: 2a00:222:c00::73:4306 dst: 2a01:4:1200:1:910d:fea8:8b43:4d52                                                                                               
+
+dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[1073] dp_version[0] ext_val32[0]key->src_ip: 2a0222c0000000073436key->dst_ip: 2a1041200191dfea88b434d52     
+dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]key->src_ip: 2a1041200191dfea88b434d52key->dst_ip: 2a0222c0000000073436        
+dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[806378412]key->src_ip: 2a0222c0000000073436key->dst_ip: 2a1041200191dfea88b434d52
+
+
+1519379 NUMA@_sal_vport_recv zone:0 dp:0 version:0 vport:0 lcore_id: 16 socket_id: 0
+
+1519384 ipv6_lookup_output@NUMA vlan id[104], out_port[0], ifname[vlan0104],             lcore_id:[16], result.flags:[B]
+1519385 ipv6_lookup_output@NUMA: tx src&dst: 2a2060c0200000000140 2a2050180000000001
+1519386 ipv6_lookup_output@NUMA vlan id[126], out_port[1], ifname[vlan0126],             lcore_id:[16], result.flags:[B]
+1519387 ipv6_lookup_output@NUMA: tx src&dst: 2a2060830000000005 2a205020000000001
+
+----
+
+1508321 NUMA@_sal_vport_recv zone:1 dp:0 version:0 vport:0 lcore_id: 25 socket_id: 1
+
+ipv4_lookup_output@NUMA vlan id[133], out_port[1], ifname[vlan0133:1002],             lcore_id:[25], result.flags:[A]
+ipv4_lookup_output@NUMA: tx src&dst: 54c80dde 300c02c
+
+ipv6_lookup_output@NUMA vlan id[101], out_port[0], ifname[vlan0101],             lcore_id:[25], result.flags:[B]
+ipv6_lookup_output@NUMA: tx src&dst: 2a|2|0|6|0|8|20|0|0|0|0|0|0|0|0|51| 2a|2|0|5|0|2|0|0|0|0|0|0|0|0|0|1|
+
+----
+
+2017-08-31 03:36 PM
+
+1510850 _vnet_gtpu_vport_recv: dz[0], dp[1301], vport[0], socket_id[1], dp_ver[0], key payload_id[0] f
+        low miss, received teid[806434453]
+1510851 gtpu flow miss key src: 2a00:222:c00::19b:d3c5 dst: 2a01:4:1200:c:43c1:6254:3dfe:9712
+1510852 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[1], rxq_id[0],             table[0x7efc6388210
+        0], table_b[(nil)], socket_id[1], lcoreid[21],             dz[0], dp[1301], vport[0], dp_ver[0
+        ],
+1510853 gtpu flow miss key src: 2a00:222:c00::19b:d3c5 dst: 2a01:4:1200:c:43c1:6254:3dfe:9712
+
+ltt_0830_1_1
+
+1507126 _vnet_gre_vport_recv@NUMA: FLOW_TABLE: in_port[102], rxq_id[176],             table[(nil)], table_b[(nil)], socket_id[0], lcoreid[24],             dz[0], dp[2625], vport[0], dp_ver[0],
+1507127 _vnet_gre_vport_recv@NUMA: FLOW_TABLE MISS: in_port[102], rxq_id[176],                 table[0x7f31265e0080], table_b[(nil)], socket_id[1], lcore_id[24],                 dz[0], dp[2625], vport[0],
+        dp_ver[0],                 key payload_id[0], received teid[270287637]
+1507128 flow_table miss key: IPv6 222.15.117.52IPv6 44.0.0.2
+1507129 gre flow miss  src: 222.15.117.52 dst: 44.0.0.2 _sal_vport_send: socket missed! session id: 270287636
+
+1510072 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[0], rxq_id[0],             table[(nil)], table_b[(nil)], socket_id[0], lcoreid[10],             dz[0], dp[1089], vport[0], dp_ver[0],
+1510073 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7f3166384080], table_b[(nil)], socket_id[1], lcore_id[10],                 dz[0], dp[1089], vport[0], dp
+        ver[0],                 key payload_id[0], received teid[270254775]
+1510074 flow_table miss key: IPv6 222.13.86.24IPv6 97.121.128.1
+1510075 gtpu flow miss key src: 222.13.86.24 dst: 97.121.128.1
+
+----
+
+2017-09-01 10:31 AM
+
+ltt_0901_1.log
+
+13380114 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[1], rxq_id[0],             table[(nil)], table_b[(nil)], socket_id[1], lcoreid[11],             dz[1], dp[816], vport[0], dp_ver[0],              
+13380115 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[1], rxq_id[0],                 table[0x7fbc18cb1800], table_b[(nil)], socket_id[0], lcore_id[23],                 dz[0], dp[1116], vport[0], 
+         dp_ver[0],                 key payload_id[0], received teid[536935644]                                                                                                                            
+13380116 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[0], rxq_id[0],             table[(nil)], table_b[(nil)], socket_id[0], lcoreid[20],             dz[1], dp[453], vport[0], dp_ver[0],              
+13380117 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7fafaf8ffdc0], table_b[(nil)], socket_id[1], lcore_id[20],                 dz[1], dp[453], vport[0],  
+         dp_ver[0],                 key payload_id[0], received teid[58]                                                                                                                                   
+13380118 flow_table miss key: IPv6 2a01:101:1892:400e::IPv6 2a00:222:c00::273:84e1                                                                                                                         
+13380119 IPv4 14.142.192.58                                                                                                                                                                                
+
+13377530 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7fafaf104940], table_b[(nil)], socket_id[1], lcore_id[10],                 dz[1], dp[465], vport[0],
+         dp_ver[0],                 key payload_id[0], received teid[325]                                                                                                                                
+13380120 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7fafaf104940], table_b[(nil)], socket_id[1], lcore_id[10],                 dz[1], dp[465], vport[0],  
+         dp_ver[0],                 key payload_id[0], received teid[325]                                                                                                                                  
+
+
+
+13379743 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[1], rxq_id[0],             table[(nil)], table_b[(nil)], socket_id[1], lcoreid[23],             dz[0], dp[2174], vport[0], dp_ver[0],
+
+13379411 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[1], rxq_id[0],                 table[0x7fbbecc7cf40], table_b[(nil)], socket_id[0], lcore_id[23],                 dz[0], dp[2174], vport[0], dp_ver[0],                 key payload_id[0], received teid[806150224]
+
+13230475_vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[1], rxq_id[0],                 table[0x7fbbecc7cf40], table_b[(nil)], socket_id[0], lcore_id[23], dz[0], dp[2174], vport[0], dp_ver[0],                 key payload_id[0], received teid[270389206]
+
+13379759 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[1], rxq_id[0],                 table[0x7fbbecc7cf40], table_b[(nil)], socket_id[0], lcore_id[23],                 dz[0],          dp[2174], vport[0], dp_ver[0],                 key payload_id[0], received teid[270389206]
+
+13380121 gtpu flow miss key src: 2a00:222:800::291:29f0 dst: 2a01:4:1100:41c9:466:71fc:c8f9:fd8a
+
+13233076 ipv6_lookup_output@NUMA vlan id[108], out_port[0], ifname[vlan0108],             lcore_id:[18], result.flags:[A]
+13233077 ipv6_lookup_output@NUMA: tx src&dst: 2a00:222:800::291:29f0 2a01:4:1100:41c9:466:71fc:c8f9:fd8a                 
+
+13233054 NUMA@_sal_vport_recv zone:1 dp:0 version:0 vport:0 lcore_id: 18 socket_id: 0
+13233059 _sal_vport_recv@NUMA src&dst: IPv6 2a00:222:800::291:29f0IPv6 2a01:4:1100:41c9:466:71fc:c8f9:fd8a
+
+13082740 dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[2174] dp_version[0] ext_val32[0] src&dst: IPv6 2a00:222:800::291:29f0IPv6 2a01:4:1100:41c9:466:71fc:c8f9:fd8a
+
+----
+
+1486232 gtpu flow miss key src: 2a00:222:c00::1f0:4b1d dst: 2a01:4:1100:3:1695:72ac:ea44:41c8
+
+1511851 ipv6_lookup_output@NUMA vlan id[133], out_port[1], ifname[vlan0133],             lcore_id:[11], result.flags:[A]
+1511852 ipv6_lookup_output@NUMA: tx src&dst: 2a00:222:c00::1f0:4b1d 2a01:4:1100:3:1695:72ac:ea44:41c8                   
+
+1511850 _sal_vport_recv@NUMA src&dst: IPv6 2a00:222:c00::1f0:4b1dIPv6 2a01:4:1100:3:1695:72ac:ea44:41c8
+
+----
+
+4258277 gtpu flow miss key src: 2a01:101:8a2:9:: dst: 2a00:222:c00::32b:ad30
+
+4212359 dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[0] dp_version[0] ext_val32[537403579] src&dst: IPv6 2a01:101:8a2:9::IPv6 2a00:222:c00::32b:ad30
+4212363 dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[441] dp_version[0] ext_val32[0] src&dst: IPv6 2a01:101:8a2:9::IPv6 2a00:222:c00::32b:ad30
+4212469 _sal_vport_recv@NUMA src&dst: IPv6 2a01:101:8a2:9::IPv6 2a00:222:c00::32b:ad30
+
+----
+
+2017-09-04 09:31 AM
+
+4217974 NUMA@_sal_vport_recv zone:1 dp:0 version:0 vport:0 lcore_id: 15 socket_id: 1
+4217975 _sal_vport_recv@NUMA src&dst: IPv6 2a00:222:c00::13a:dd68IPv6 2a01:4:1000:1cde:3eca:7190:9457:5b00              
+
+4217976 ipv6_lookup_output@NUMA vlan id[133], out_port[1], ifname[vlan0133],             lcore_id:[15], result.flags:[A]
+4217977 ipv6_lookup_output@NUMA: tx src&dst: 2a00:222:c00::13a:dd68 2a01:4:1000:1cde:3eca:7190:9457:5b00                
+
+4217978 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[0], rxq_id[0],             table[(nil)], table_b[(nil)], socket_id[0], lcoreid[10],             dz[0], dp[723], vport[0], dp_ver[0],
+4217979 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7fb0894f4200], table_b[(nil)], socket_id[1], lcore_id[10],                 dz[0], dp[723], vport[0],
+        dp_ver[0],                 key payload_id[0], received teid[805623602]
+4217980 flow_table miss key: IPv6 2a00:222:c00::13a:dd68IPv6 2a01:4:1000:1cde:3eca:7190:9457:5b00
+
+----
+
+2017-09-05 02:41 PM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
