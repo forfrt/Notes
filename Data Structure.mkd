@@ -1,0 +1,881 @@
+
+
+#B tree
+
+##前言
+
+动态查找树主要有：二叉查找树（Binary Search Tree），平衡二叉查找树（Balanced Binary Search Tree），红黑树(Red-Black Tree )，B-tree/B+-tree/ B*-tree (B~Tree)。前三者是典型的二叉查找树结构，其查找的时间复杂度O(log2N)与树的深度相关，那么降低树的深度自然会提高查找效率。
+
+但是咱们有面对这样一个实际问题：就是大规模数据存储中，实现索引查询这样一个实际背景下，树节点存储的元素数量是有限的（如果元素数量非常多的话，查找就退化成节点内部的线性查找了），这样导致二叉查找树结构由于树的深度过大而造成磁盘I/O读写过于频繁，进而导致查询效率低下（为什么会出现这种情况，待会在外部存储器-磁盘中有所解释），那么如何减少树的深度（当然是不能减少查询的数据量），一个基本的想法就是：采用多叉树结构（由于树节点元素数量是有限的，自然该节点的子树数量也就是有限的）。
+
+也就是说，因为磁盘的操作费时费资源，如果过于频繁的多次查找势必效率低下。那么如何提高效率，即如何避免磁盘过于频繁的多次查找呢？根据磁盘查找存取的次数往往由树的高度所决定，所以，只要我们通过某种较好的树结构减少树的结构尽量减少树的高度，那么是不是便能有效减少磁盘查找存取的次数呢？那这种有效的树结构是一种怎样的树呢？
+
+这样我们就提出了一个新的查找树结构——多路查找树。根据平衡二叉树的启发，自然就想到平衡多路查找树结构，也就是这篇文章所要阐述的第一个主题B~tree，即B树结构(后面，我们将看到，B树的各种操作能使B树保持较低的高度，从而达到有效避免磁盘过于频繁的查找存取操作，从而有效提高查找效率)。
+
+----
+
+##外存储器--磁盘
+
+计算机存储设备一般分为两种：内存储器(main memory)和外存储器(external memory)。 内存存取速度快，但容量小，价格昂贵，而且不能长期保存数据(在不通电情况下数据会消失)。
+
+外存储器—磁盘是一种直接存取的存储设备(DASD)。它是以存取时间变化不大为特征的。可以直接存取任何字符组，且容量大、速度较其它外存设备更快。
+
+###磁盘的构造
+
+磁盘是一个扁平的圆盘(与电唱机的唱片类似)。盘面上有许多称为磁道的圆圈，数据就记录在这些磁道上。磁盘可以是单片的，也可以是由若干盘片组成的盘组，每一盘片上有两个面。如下图11.3中所示的6片盘组为例，除去最顶端和最底端的外侧面不存储数据之外，一共有10个面可以用来保存信息。
+
+![活动头盘示意图.jpg](./img/Data Structure and Algorithm/活动头盘示意图.jpg)
+
+当磁盘驱动器执行读/写功能时。盘片装在一个主轴上，并绕主轴高速旋转，当磁道在读/写头(又叫磁头) 下通过时，就可以进行数据的读 / 写了。
+
+一般磁盘分为固定头盘(磁头固定)和活动头盘。
+
+1. 固定头盘的每一个磁道上都有独立的磁头，它是固定不动的，专门负责这一磁道上数据的读/写。
+
+2. 活动头盘 (如上图)的磁头是可移动的。每一个盘面上只有一个磁头(磁头是双向的，因此正反盘面都能读写)。它可以从该面的一个磁道移动到另一个磁道。所有磁头都装在同一个动臂上，因此不同盘面上的所有磁头都是同时移动的(行动整齐划一)。当盘片绕主轴旋转的时候，磁头与旋转的盘片形成一个圆柱体。各个盘面上半径相同的磁道组成了一个圆柱面，我们称为柱面 。因此，柱面的个数也就是盘面上的磁道数。 
+
+----
+
+###磁盘的读/写原理和效率
+
+磁盘上数据必须用一个三维地址唯一标示：柱面号、盘面号、块号(磁道上的盘块)。
+
+读/写磁盘上某一指定数据需要下面3个步骤：
+1.  首先移动臂根据柱面号使磁头移动到所需要的柱面上，这一过程被称为定位或查找 。
+2.  如上图11.3中所示的6盘组示意图中，所有磁头都定位到了10个盘面的10条磁道上(磁头都是双向的)。这时根据盘面号来确定指定盘面上的磁道。
+3. 盘面确定以后，盘片开始旋转，将指定块号的磁道段移动至磁头下。
+
+经过上面三个步骤，指定数据的存储位置就被找到。这时就可以开始读/写操作了。
+
+访问某一具体信息，由3部分时间组成：
+- 查找时间(seek time) Ts: 完成上述步骤(1)所需要的时间。这部分时间代价最高，最大可达到0.1s左右。
+- 等待时间(latency time) Tl: 完成上述步骤(3)所需要的时间。由于盘片绕主轴旋转速度很快，一般为7200转/分(电脑硬盘的性能指标之一, 家用的普通硬盘的转速一般有5400rpm(笔记本)、7200rpm几种)。因此一般旋转一圈大约0.0083s。
+- 传输时间(transmission time) Tt: 数据通过系统总线传送到内存的时间，一般传输一个字节(byte)大概0.02us=2*10^(-8)s
+
+磁盘读取数据是以盘块(block)为基本单位的。位于同一盘块中的所有数据都能被一次性全部读取出来。而磁盘IO代价主要花费在查找时间Ts上。因此我们应该尽量将相关信息存放在同一盘块，同一磁道中。或者至少放在同一柱面或相邻柱面上，以求在读/写信息时尽量减少磁头来回移动的次数，避免过多的查找时间Ts。
+
+所以，在大规模数据存储方面，大量数据存储在外存磁盘中，而在外存磁盘中读取/写入块(block)中某数据时，首先需要定位到磁盘中的某块，如何有效地查找磁盘中的数据，需要一种合理高效的外存数据结构，就是下面所要重点阐述的B-tree结构，以及相关的变种结构：B+-tree结构和B*-tree结构。
+
+----
+
+##B- 树
+
+###什么是B-树
+
+我们知道，B 树是为了磁盘或其它存储设备而设计的一种多叉（下面你会看到，相对于二叉，B树每个内结点有多个分支，即多叉）平衡查找树。与本blog之前介绍的红黑树很相似，但在降低磁盘I/0操作方面要更好一些。许多数据库系统都一般使用B树或者B树的各种变形结构，如下文即将要介绍的B+树，B*树来存储信息。
+
+B树与红黑树最大的不同在于，B树的结点可以有许多子女，从几个到几千个。那为什么又说B树与红黑树很相似呢?因为与红黑树一样，一棵含n个结点的B树的高度也为O（lgn），但可能比一棵红黑树的高度小许多，应为它的分支因子比较大。所以，B树可以在O（logn）时间内，实现各种如插入（insert），删除（delete）等动态集合操作。
+
+如下图所示，即是一棵B树，一棵关键字为英语中辅音字母的B树，现在要从树种查找字母R（包含n[x]个关键字的内结点x，x有n[x]+1]个子女（也就是说，一个内结点x若含有n[x]个关键字，那么x将含有n[x]+1个子女）。所有的叶结点都处于相同的深度，带阴影的结点为查找字母R时要检查的结点）：
+
+![B-tree](./img/Data Structure and Algirithm/B tree.jpg)
+
+According to Knuth's definition, a B-tree of order m is a tree which satisfies the following properties:
+1. Every node has at most m children.
+2. Every non-leaf node (except root) has at least ⌈m/2⌉ children.
+3. The root has at least two children if it is not a leaf node.
+4. A non-leaf node with k children contains k−1 keys.
+5. All leaves appear in the same level
+
+----
+
+用阶定义的B树
+
+B树又叫平衡多路查找树。一棵m阶的B 树 (注：切勿简单的认为一棵m阶的B树是m叉树，虽然存在四叉树，八叉树，KD树，及vp/R树/R*树/R+树/X树/M树/线段树/希尔伯特R树/优先R树等空间划分树，但与B树完全不等同)的特性如下：
+
+1. 树中每个结点最多含有m个孩子（m>=2）；
+1. 除根结点和叶子结点外，其它每个结点至少有[ceil(m / 2)]个孩子（其中ceil(x)是一个取上限的函数）；
+1. 若根结点不是叶子结点，则至少有2个孩子（特殊情况：没有孩子的根结点，即根结点为叶子结点，整棵树只有一个根节点）；
+1. 所有叶子结点都出现在同一层，叶子结点不包含任何关键字信息(可以看做是外部接点或查询失败的接点，实际上这些结点不存在，指向这些结点的指针都为null)；（读者反馈@冷岳：这里有错，叶子节点只是没有孩子和指向孩子的指针，这些节点也存在，也有元素。@研究者July：其实，关键是把什么当做叶子结点，因为如红黑树中，每一个NULL指针即当做叶子结点，只是没画出来而已）。
+1. 每个非终端结点中包含有n个关键字信息： (n，P0，K1，P1，K2，P2，......，Kn，Pn)。其中：
+    1. Ki (i=1...n)为关键字，且关键字按顺序升序排序K(i-1)< Ki。
+    1. Pi为指向子树根的接点，且指针P(i-1)指向子树种所有结点的关键字均小于Ki，但都大于K(i-1)。 
+    1. 关键字的个数n必须满足： [ceil(m / 2)-1]<= n <= m-1。如下图所示：
+
+----
+
+##B树的类型和节点定义
+
+#define m 1024
+struct BTNode;
+typedef struct BTNode* PBTNode;
+
+struct BTNode{
+    int keyNum;
+    PBTNode parent;
+    PBTNode *ptr;
+    KeyType *key;
+}
+typedef struct BTNode *BTree;
+typedef BTree *PBTree;
+
+----
+
+##文件查找的具体过程
+
+![B-Tree&Blocks.jpg](B-Tree&Blocks.jpg)
+
+为了简单，这里用少量数据构造一棵3叉树的形式，实际应用中的B树结点中关键字很多的。上面的图中比如根结点，其中17表示一个磁盘文件的文件名；小红方块表示这个17文件内容在硬盘中的存储位置；p1表示指向17左子树的指针。
+
+其结构可以简单定义为：
+
+    typedef struct {
+        int  file_num; /*文件数*/
+        char * file_name[max_file_num]; /*文件名(key)*/
+         BTNode * BTptr[max_file_num+1]; /*指向子节点的指针*/
+         FILE_HARD_ADDR offset[max_file_num]; /*文件在硬盘中的存储位置*/
+    }BTNode;
+
+假如每个盘块可以正好存放一个B树的结点（正好存放2个文件名）。那么一个BTNODE结点就代表一个盘块，而子树指针就是存放另外一个盘块的地址
+
+下面，咱们来模拟下查找文件29的过程：
+1. 根据根结点指针找到文件目录的根磁盘块1，将其中的信息导入内存。【磁盘IO操作 1次】    
+1. 此时内存中有两个文件名17、35和三个存储其他磁盘页面地址的数据。根据算法我们发现：17<29<35，因此我们找到指针p2。
+1. 根据p2指针，我们定位到磁盘块3，并将其中的信息导入内存。【磁盘IO操作 2次】    
+1. 此时内存中有两个文件名26，30和三个存储其他磁盘页面地址的数据。根据算法我们发现：26<29<30，因此我们找到指针p2。
+1. 根据p2指针，我们定位到磁盘块8，并将其中的信息导入内存。【磁盘IO操作 3次】    
+1. 此时内存中有两个文件名28，29。根据算法我们查找到文件名29，并定位了该文件内存的磁盘地址。
+
+分析上面的过程，发现需要3次磁盘IO操作和3次内存查找操作。关于内存中的文件名查找，由于是一个有序表结构，可以利用折半查找提高效率。至于IO操作是影响整个B树查找效率的决定因素。
+
+当然，如果我们使用平衡二叉树的磁盘存储结构来进行查找，磁盘4次，最多5次，而且文件越多，B树比平衡二叉树所用的磁盘IO操作次数将越少，效率也越高。
+
+----
+
+##B树的高度
+
+根据上面的例子我们可以看出，对于辅存做IO读的次数取决于B树的高度。而B树的高度由什么决定的呢？
+
+若B树某一非叶子节点包含N个关键字，则此非叶子节点含有N+1个孩子结点，而所有的叶子结点都在第I层，我们可以得出：
+
+1. 因为根至少有两个孩子，因此第2层至少有两个结点。
+1. 除根和叶子外，其它结点至少有┌m/2┐个孩子，
+1. 因此在第3层至少有2*┌m/2┐个结点，
+1. 在第4层至少有2*(┌m/2┐^2)个结点，
+1. 在第 I 层至少有2*(┌m/2┐^(l-2) )个结点，于是有： N+1 ≥ 2*┌m/2┐I-2；
+1. 考虑第L层的结点个数为N+1，那么2*(┌m/2┐^(l-2)）≤N+1，也就是L层的最少结点数刚好达到N+1个，即： I≤ log┌m/2┐((N+1)/2 )+2；
+
+这个B树的高度公式从侧面显示了B树的查找效率是相当高的。
+曾在一次面试中被问到，一棵含有N个总关键字数的m阶的B树的最大高度是多少?答曰：log_ceil（m/2）(N+1)/2 + 1 （上面中关于m阶B树的第1点特性已经提到：树中每个结点含有最多含有m个孩子，即m满足：ceil(m/2)<=m'<=m。而树中每个结点含孩子数越少，树的高度则越大，故如此）。在2012微软4月份的笔试中也问到了此问题。
+
+----
+
+#B+-tree
+
+B+-tree：是应文件系统所需而产生的一种B-tree的变形树。
+
+一棵m阶的B+树和m阶的B树的异同点在于：
+1. 有n棵子树的结点中含有n-1 个关键字；
+2. 所有的叶子结点中包含了全部关键字的信息，及指向含有这些关键字记录的指针，且叶子结点本身依关键字的大小自小而大的顺序链接。 (而B 树的叶子节点并没有包括全部需要查找的信息)
+3. 所有的非终端结点可以看成是索引部分，结点中仅含有其子树根结点中最大（或最小）关键字。 (而B 树的非终节点也包含需要查找的有效信息)
+
+![B*-Tree.jpg](./img/Data Structure and Algorithm/B*-Tree.jpg)
+
+----
+
+为什么说B+-tree比B 树更适合实际应用中操作系统的文件索引和数据库索引？
+
+1. B+-tree的磁盘读写代价更低
+
+    B+-tree的内部结点并没有指向关键字具体信息的指针。因此其内部结点相对B 树更小。如果把所有同一内部结点的关键字存放在同一盘块中，那么盘块所能容纳的关键字数量也越多。一次性读入内存中的需要查找的关键字也就越多。相对来说IO读写次数也就降低了。
+
+    举个例子，假设磁盘中的一个盘块容纳16bytes，而一个关键字2bytes，一个关键字具体信息指针2bytes。一棵9阶B-tree(一个结点最多8个关键字)的内部结点需要2个盘快。而B+ 树内部结点只需要1个盘快。当需要把内部结点读入内存中的时候，B 树就比B+ 树多一次盘块查找时间(在磁盘中就是盘片旋转的时间)。
+
+2. B+-tree的查询效率更加稳定
+
+由于非终结点并不是最终指向文件内容的结点，而只是叶子结点中关键字的索引。所以任何关键字的查找必须走一条从根结点到叶子结点的路。所有关键字查询的路径长度相同，导致每一个数据的查询效率相当。
+
+----
+
+#B-Trees
+
+http://cis.stvincent.edu/html/tutorials/swd/btree/btree.html
+
+##Introduction
+A B-tree is a specialized multiway tree designed especially for use on disk. In a B-tree each node may contain a large number of keys. The number of subtrees of each node, then, may also be large. A B-tree is designed to branch out in this large number of directions and to contain a lot of keys in each node so that the height of the tree is relatively small. This means that only a small number of nodes must be read from disk to retrieve an item. The goal is to get fast access to the data, and with disk drives this means reading a very small number of records. Note that a large node size (with lots of keys in the node) also fits with the fact that with a disk drive one can usually read a fair amount of data at once. 
+
+
+##Definitions
+A multiway tree of order m is an ordered tree where each node has at most m children. For each node, if k is the actual number of children in the node, then k - 1 is the number of keys in the node. If the keys and subtrees are arranged in the fashion of a search tree, then this is called a multiway search tree of order m.
+
+For example, the following is a multiway search tree of order 4. Note that the first row in each node shows the keys, while the second row shows the pointers to the child nodes. 
+
+Of course, in any useful application there would be a record of data associated with each key, so that the first row in each node might be an array of records where each record contains a key and its associated data. 
+
+Another approach would be to have the first row of each node contain an array of records where each record contains a key and a record number for the associated data record, which is found in another file. This last method is often used when the data records are large. The example software will use the first method. 
+
+![multiway.gif](./img/Data Structure and Algorithm/multiway.gif)
+
+----
+
+ What does it mean to say that the keys and subtrees are "arranged in the fashion of a search tree"? Suppose that we define our nodes as follows:
+
+    typedef struct
+       {
+       int Count;         // number of keys stored in the current node
+       ItemType Key[3];   // array to hold the 3 keys
+       long Branch[4];    // array of fake pointers (record numbers)
+       } NodeType;
+
+Then a multiway search tree of order 4 has to fulfill the following conditions related to the ordering of the keys:
+
+1. The keys in each node are in ascending order.
+2. At every given node (call it Node) the following is true:
+
+    1. The subtree starting at record Node.Branch[0] has only keys that are less than Node.Key[0].
+    1. The subtree starting at record Node.Branch[1] has only keys that are greater than Node.Key[0] and at the same time less than Node.Key[1].
+    1. The subtree starting at record Node.Branch[2] has only keys that are greater than Node.Key[1] and at the same time less than Node.Key[2].
+    1. The subtree starting at record Node.Branch[3] has only keys that are greater than Node.Key[2].
+
+----
+
+ A B-tree of order m is a multiway search tree of order m such that:
+
+- All leaves are on the bottom level.
+- All internal nodes (except perhaps the root node) have at least ceil(m / 2) (nonempty) children.
+- The root node can have as few as 2 children if it is an internal node, and can obviously have no children if the root node is a leaf (that is, the whole tree consists only of the root node).
+- Each leaf node (other than the root node if it is a leaf) must contain at least ceil(m / 2) - 1 keys.
+
+A B-tree is a fairly well-balanced tree by virtue of the fact that all leaf nodes must be at the bottom. Condition (2) tries to keep the tree fairly bushy by insisting that each node have at least half the maximum number of children. This causes the tree to "fan out" so that the path from root to leaf is very short even in a tree that contains a lot of data. 
+
+----
+
+##Example B-Tree
+
+The following is an example of a B-tree of order 5. This means that (other that the root node) all internal nodes have at least ceil(5 / 2) = ceil(2.5) = 3 children (and hence at least 2 keys). Of course, the maximum number of children that a node can have is 5 (so that 4 is the maximum number of keys). According to condition 4, each leaf node must contain at least 2 keys. In practice B-trees usually have orders a lot bigger than 5. 
+
+![btree1.gif](./img/Data Structure and Algorithm/btree1.gif)
+
+----
+
+##Operations on a B-Tree
+
+###Inserting a New Item
+
+ According to Kruse (see reference at the end of this file) the insertion algorithm proceeds as follows: 
+
+When inserting an item, first do a search for it in the B-tree. If the item is not already in the B-tree, this unsuccessful search will end at a leaf. If there is room in this leaf, just insert the new item here.  
+
+Note that this may require that some existing keys be moved one to the right to make room for the new item. If instead this leaf node is full so that there is no room to add the new item, then the node must be "split" with about half of the keys going into a new node to the right of this one. The median (middle) key is moved up into the parent node. (Of course, if that node has no room, then it may have to be split as well.) Note that when adding to an internal node, not only might we have to move some keys one position to the right, but the associated pointers have to be moved right as well. If the root node is ever split, the median key moves up into a new root node, thus causing the tree to increase in height by one.
+
+Let's work our way through an example similar to that given by Kruse. Insert the following letters into what is originally an empty B-tree of order 5: C N G A H E K Q M F W L T Z D P R X Y S Order 5 means that a node can have a maximum of 5 children and 4 keys. All nodes other than the root must have a minimum of 2 keys. The first 4 letters get inserted into the same node, resulting in this picture: 
+
+![btreea.gif](./img/Data Structure and Algorithm/btreea.gif)
+
+When we try to insert the H, we find no room in this node, so we split it into 2 nodes, moving the median item G up into a new root node. Note that in practice we just leave the A and C in the current node and place the H and N into a new node to the right of the old one. 
+
+![btreeb.gif](./img/Data Structure and Algorithm/btreeb.gif)
+
+Inserting E, K, and Q proceeds without requiring any splits: 
+
+![btreec.gif](./img/Data Structure and Algorithm/btreec.gif)
+
+Inserting M requires a split. Note that M happens to be the median key and so is moved up into the parent node. 
+
+![btreed.gif](./img/Data Structure and Algorithm/btreed.gif)
+
+The letters F, W, L, and T are then added without needing any split. 
+
+![btreee.gif](./img/Data Structure and Algorithm/btreee.gif)
+
+When Z is added, the rightmost leaf must be split. The median item T is moved up into the parent node. Note that by moving up the median key, the tree is kept fairly balanced, with 2 keys in each of the resulting nodes. 
+
+![btreef.gif](./img/Data Structure and Algorithm/btreef.gif)
+
+The insertion of D causes the leftmost leaf to be split. D happens to be the median key and so is the one moved up into the parent node. The letters P, R, X, and Y are then added without any need of splitting: 
+
+![btreeg.gif](./img/Data Structure and Algorithm/btreeg.gif)
+
+Finally, when S is added, the node with N, P, Q, and R splits, sending the median Q up to the parent. However, the parent node is full, so it splits, sending the median M up to form a new root node. Note how the 3 pointers from the old parent node stay in the revised node that contains D and G. 
+
+![btreeh.gif](./img/Data Structure and Algorithm/btreeh.gif)
+
+----
+
+###Deleting an Item
+
+In the B-tree as we left it at the end of the last section, delete H. Of course, we first do a lookup to find H. Since H is in a leaf and the leaf has more than the minimum number of keys, this is easy. We move the K over where the H had been and the L over where the K had been. This gives: 
+
+![btreei.gif](./img/Data Structure and Algorithm/btreei.gif)
+
+----
+
+Next, delete the T. Since T is not in a leaf, we find its successor (the next item in ascending order), which happens to be W, and move W up to replace the T. That way, what we really have to do is to delete W from the leaf, which we already know how to do, since this leaf has extra keys. In ALL cases we reduce deletion to a deletion in a leaf, by using this method. 
+
+![btreej.gif](./img/Data Structure and Algorithm/btreej.gif)
+
+----
+
+Next, delete R. Although R is in a leaf, this leaf does not have an extra key; the deletion results in a node with only one key, which is not acceptable for a B-tree of order 5. If the sibling node to the immediate left or right has an extra key, we can then borrow a key from the parent and move a key up from this sibling. In our specific case, the sibling to the right has an extra key. So, the successor W of S (the last key in the node where the deletion occurred), is moved down from the parent, and the X is moved up. (Of course, the S is moved over so that the W can be inserted in its proper place.) 
+
+![btreek.gif](./img/Data Structure and Algorithm/btreek.gif)
+
+----
+
+Finally, let's delete E. This one causes lots of problems. Although E is in a leaf, the leaf has no extra keys, nor do the siblings to the immediate right or left. In such a case the leaf has to be combined with one of these two siblings. This includes moving down the parent's key that was between those of these two leaves. In our example, let's combine the leaf containing F with the leaf containing A C. We also move down the D. 
+
+![btreel.gif](./img/Data Structure and Algorithm/btreel.gif)
+
+----
+
+Of course, you immediately see that the parent node now contains only one key, G. This is not acceptable. If this problem node had a sibling to its immediate left or right that had a spare key, then we would again "borrow" a key. Suppose for the moment that the right sibling (the node with Q X) had one more key in it somewhere to the right of Q. We would then move M down to the node with too few keys and move the Q up where the M had been. However, the old left subtree of Q would then have to become the right subtree of M. In other words, the N P node would be attached via the pointer field to the right of M's new location. Since in our example we have no way to borrow a key from a sibling, we must again combine with the sibling, and move down the M from the parent. In this case, the tree shrinks in height by one. 
+
+![btreem.gif](./img/Data Structure and Algorithm/btreem.gif)
+
+----
+
+#AVL Trees
+
+##The Concept
+
+These are self-adjusting, height-balanced binary search trees and are named after the inventors: Adelson-Velskii and Landis. A balanced binary search tree has Theta(lg n) height and hence Theta(lg n) worst case lookup and insertion times. However, ordinary binary search trees have a bad worst case. When sorted data is inserted, the binary search tree is very unbalanced, essentially more of a linear list, with Theta(n) height and thus Theta(n) worst case insertion and lookup times. AVL trees overcome this problem
+
+----
+
+##Definitions
+
+The height of a binary tree is the maximum path length from the root to a leaf. A single-node binary tree has height 0, and an empty binary tree has height -1. As another example, the following binary tree has height 3. 
+
+                     7
+
+                  /     \
+
+                3         12
+
+              /         /    \
+
+             2        10      20
+
+                     /  \
+
+                    9    11
+
+An AVL tree is a binary search tree in which every node is height balanced, that is, the difference in the heights of its two subtrees is at most 1. *The balance factor of a node is the height of its right subtree minus the height of its left subtree*. An equivalent definition, then, for an AVL tree is that it is a binary search tree in which each node has a balance factor of -1, 0, or +1. Note that a balance factor of -1 means that the subtree is left-heavy, and a balance factor of +1 means that the subtree is right-heavy. For example, in the following AVL tree, note that the root node with balance factor +1 has a right subtree of height 1 more than the height of the left subtree. (The balance factors are shown at the top of each node.) 
+
+                                    +1
+                                    30
+
+                                /        \
+
+                             -1            0
+                             22            62
+
+                           /             /     \
+
+                         0             +1       -1
+                         5             44       95
+
+                                         \     /
+                                          0   0
+                                          51  77
+
+The idea is that an AVL tree is close to being completely balanced. Hence it should have Theta(lg n) height (it does - always) and so have Theta(lg n) worst case insertion and lookup times. An AVL tree does not have a bad worst case, like a binary search tree which can become very unbalanced and give Theta(n) worst case lookup and insertion times. The following binary search tree is not an AVL tree. Notice the balance factor of -2 at node 70. 
+
+                                    -1
+                                    100
+
+                                /         \
+
+                             -2             -1
+                             70             150
+                                      
+                          /    \          /     \
+
+                       +1       0       +1        0
+                       30      80      130       180
+
+                     /    \               \     
+                    0      -1              0   
+                   10      40              140
+                          /
+                         0
+                        36 
+
+----
+
+##Inserting a New Item
+
+Initially, a new item is inserted just as in a binary search tree. *Note that the item always goes into a new leaf*. The tree is then readjusted as needed in order to maintain it as an AVL tree. There are three main cases to consider when inserting a new node. 
+
+###Case 1:
+
+A node with balance factor 0 changes to +1 or -1 when a new node is inserted below it. No change is needed at this node. Consider the following example. Note that after an insertion one only needs to check the balances along the path from the new leaf to the root. 
+
+
+                                     0
+                                    40
+
+                                /        \
+
+                             +1            0
+                             20            50
+
+                               \         /     \
+
+                                0       0        0
+                                30     45       70
+
+
+ After inserting 60 we get:
+
+                                    +1
+                                    40
+
+                                /        \
+
+                             +1            +1
+                             20            50
+
+                               \         /     \
+
+                                0       0       -1
+                                30     45       70
+                                               /
+                                              0
+
+----
+
+###Case 2:
+
+A node with balance factor -1 changes to 0 when a new node is inserted in its right subtree. (Similarly for +1 changing to 0 when inserting in the left subtree.) No change is needed at this node. Consider the following example.
+
+                                    -1
+                                    40
+
+                                /        \
+
+                             +1            0
+                             20            50
+
+                           /   \         /     \
+
+                          0     0       0        0
+                         10     30     45       70
+                               /  \
+                              0    0
+                             22    32
+
+ After inserting 60 we get:
+
+                                     0 <-- the -1 changed to a 0 (case 2)
+                                    40
+
+                                /        \
+
+                             +1            +1 <-- an example of case 1
+                             20            50
+
+                           /   \         /     \
+
+                          0     0       0       -1 <-- an example of case 1
+                         10     30     45       70
+                               /  \            /
+                              0    0          0
+                             22    32         60
+
+----
+
+###Case 3:
+
+A node with balance factor -1 changes to -2 when a new node is inserted in its left subtree. (Similarly for +1 changing to +2 when inserting in the right subtree.) Change is needed at this node. The tree is restored to an AVL tree by using a rotation. 
+
+####Subcase A:
+
+This consists of the following situation, where P denotes the parent of the subtree being examined, LC is P's left child, and X is the new node added. Note that inserting X makes P have a balance factor of -2 and LC have a balance factor of -1. The -2 must be fixed. This is accomplished by doing a right rotation at P. Note that rotations do not mess up the order of the nodes given in an inorder traversal. This is very important since it means that we still have a legitimate binary search tree. (Note, too, that the mirror image situation is also included under subcase A.) 
+
+                              (rest of tree)
+                                     |
+                                    -2
+                                     P
+
+                                /        \
+
+                             -1           sub
+                             LC           tree   
+                                           of
+                           /   \         height
+                                            n
+                        sub     sub
+                        tree    tree      
+                         of      of
+                       height  height
+                          n       n
+                         /
+                        X
+
+
+The fix is to use a single right rotation at node P. (In the mirror image case a single left rotation is used at P.) This gives the following picture. 
+
+                              (rest of tree)
+                                     |
+                                     0
+                                    LC
+
+                                /        \
+
+                             sub           P
+                             tree         
+                              of         /    \ 
+                            height       
+                              n       sub     sub  
+                             /        tree    tree
+                            X          of      of
+                                     height  height
+
+ Consider the following more detailed example that illustrates subcase A.
+
+                                    -1 
+                                    80
+
+                                /        \
+
+                             -1            -1
+                             30            100
+
+                           /   \         /
+
+                          0     0       0
+                         15     40     90 
+                        /  \       
+                       0    0      
+                      10    20     
+
+ We then insert 5 and then check the balance factors from the new leaf up toward the root. (Always check from the bottom up.)
+
+                                    -2
+                                    80
+
+                                /        \
+
+                             -2            -1
+                             30            100
+
+                           /   \         /
+
+                         -1     0       0
+                         15     40     90 
+                        /  \       
+                      -1    0      
+                      10    20     
+                     /
+                    0
+                    5
+
+ This reveals a balance factor of -2 at node 30 that must be fixed. (Since we work bottom up, we reach the -2 at 30 first. The other -2 problem will go away once we fix the problem at 30.) The fix is accomplished with a right rotation at node 30, leading to the following picture.
+
+                                    -1 
+                                    80
+
+                                /        \
+
+                              0            -1
+                             15            100
+
+                           /   \         /
+
+                         -1     0       0
+                         10     30     90 
+                        /      /  \
+                       0      0    0
+                       5     20    40
+
+Recall that the mirror image situation is also included under subcase A. The following is a general illustration of this situation. The fix is to use a single left rotation at P. See if you can draw a picture of the following after the left rotation at P. Then draw a picture of a particular example that fits our general picture below and fix it with a left rotation. 
+
+                              (rest of tree)
+                                     |
+                                    +2
+                                     P
+
+                                /        \
+
+                              sub         +1
+                             tree         RC
+                              of
+                            height      /    \
+                              n
+                                      sub     sub
+                                      tree    tree      
+                                       of      of
+                                     height   height
+                                        n       n
+                                                 \
+                                                  X
+
+----
+
+####Subcase B:
+
+This consists of the following situation, where P denotes the parent of the subtree being examined, LC is P's left child, NP is the node that will be the new parent, and X is the new node added. X might be added to either of the subtrees of height n-1. Note that inserting X makes P have a balance factor of -2 and LC have a balance factor of +1. The -2 must be fixed. This is accomplished by doing a double rotation at P (explained below). (Note that the mirror image situation is also included under subcase B.)
+
+                              (rest of tree)
+                                     |
+                                    -2
+                                     P
+
+                                /        \
+
+                             +1           sub
+                             LC           tree   
+                                           of
+                           /    \         height
+                                            n
+                       sub       -1
+                       tree      NP
+                        of      /  \
+                      height   sub  sub
+                        n     tree  tree
+                               n-1   n-1
+                               /
+                              X
+
+ The fix is to use a double right rotation at node P. A double right rotation at P consists of a single left rotation at LC followed by a single right rotation at P. (In the mirror image case a double left rotation is used at P. This consists of a single right rotation at the right child RC followed by a single left rotation at P.) In the above picture, the double rotation gives the following (where we first show the result of the left rotation at LC, then a new picture for the result of the right rotation at P).
+
+                              (rest of tree)
+                                     |
+                                    -2
+                                     P
+
+                                /        \
+
+                             -2           sub
+                             NP           tree   
+                                           of
+                           /    \         height
+                                            n
+                        0        sub
+                       LC        tree
+                     /    \       n-1
+                   sub    sub
+                  tree    tree
+                   of      n-1   
+                 height    /
+                   n      X
+
+ Finally we have the following picture after doing the right rotation at P.
+
+                              (rest of tree)
+                                     |
+                                     0
+                                    NP
+
+                                /        \
+
+                              0            +1 
+                             LC             P
+                                         
+                           /    \         /    \
+                                         
+                        sub     sub      sub   sub
+                       tree     tree    tree   tree
+                        of       n-1     n-1    of
+                      height     /            height
+
+ Consider the following concrete example of subcase B.
+
+                                    -1
+                                    80
+
+                                /        \
+
+                              0             0
+                             30            100
+
+                           /   \         /     \
+
+                         -1     0       0       0
+                         20     50     90      120
+                        /      /  \
+                       0      0    0 
+                      10     40    60
+
+After inserting 55, we get a problem, a balance factor of -2 at the root node, as seen below.
+
+                                    -2
+                                    80
+
+                                /        \
+
+                             +1             0
+                             30            100
+
+                           /   \         /     \
+
+                         -1     +1      0       0
+                         20     50     90      120
+                        /      /  \
+                       0      0    -1
+                      10     40    60
+                                  /
+                                 0
+                                 55
+
+As discussed above, this calls for a double rotation. First we do a single left rotation at 30. This gives the following picture. 
+
+                                    -2
+                                    80
+
+                                /        \
+
+                             -1             0
+                             50            100
+
+                           /   \         /     \
+
+                        -1      -1      0       0
+                        30      60     90      120
+                       /  \    /
+                      -1   0  0 
+                      20  40  55 
+                     /          
+                    0           
+                   10  
+
+ Finally, the right rotation at 80 restores the binary search tree to be an AVL tree. The resulting picture is shown below.
+
+                                     0
+                                    50
+
+                                /        \
+
+                             -1             0
+                             30            80 
+
+                           /   \         /     \
+
+                         -1     0      -1       0
+                         20     40     60      100
+                        /             /       /   \
+                       0             0       0     0
+                      10             55      90   120
+
+****
+
+#Hash Tables
+
+A hash table is one way to create a table (sometimes called a dictionary). Typical operations are Empty, Insert, and Retrieve. The idea is that a table is a place to store data records, each containing a key value as well as other data fields (or field), so as to easily retrieve the data later by supplying a key value. The Retrieve function supplies the entire matching record of data.
+
+##What is a Hash Table?
+
+One way to create a table, either on disk or in main memory, is to use a hash table. The goal of a hash table is to get Theta(1) lookup time, that is, constant lookup time. Rather than having to proceed through a Theta(n) sequence of comparisons as in linear search, or a Theta(lg n) sequence of comparisons as in binary search, a hash table will usually complete a lookup after just one comparison! Sometimes, however, two comparisons (or even more) are needed. A hash table thus delivers (almost) the ideal lookup time. The trade-off is that to get this great lookup time memory space is wasted. This may well be a good trade-off, however, as memory is cheap.
+
+The idea is that we store records of data in the hash table, which is either an array (when main memory is used), or a file (if disk space is used). Each record has a key field and an associated data field. The record is stored in a location that is based on its key. The function that produces this location for each given key is called a hash function. 
+
+Let's suppose that each key field contains an integer and the data field a string (array of characters type of string). One possible hash function is hash(key) = key % prime.
+
+Recall that % is the mod operator that gives the remainder after integer division. The constant prime holds some prime number that is the length of the table. (For technical reasons, a prime number works better.) Perhaps we are storing our hash table in an array and use prime = 101. This means that our table can hold up to 101 records, at indices 0 through 100. If we want to insert 225 into the table we compute hash(225) as 225 % 101 = 23 and store the record containing key value 225 at index 23 in the array. Of course, if this location already contains a record, then we have a problem (called a collision). More on collisions later!
+
+If we go to look up the record with key 225, we again calculate hash(225) and get 23. We go to index 23, check that the record at that position has key value 225, and copy that record. There it is: one comparison and we completed our lookup. The situation is even more dramatic when using a file, since disk access is so much slower and every new record that has to be read adds appreciably to the lookup time. Here the hash function values are record numbers not array indices, but it works very much the same. To look up 225, we find hash(225) = 23, read record 23 from the file, check that this record does indeed have key value 225 and we are done! Only one record had to be read! 
+
+----
+
+##Collisions
+
+When inserting items into a hash table, it sometimes happens that an item to be inserted hashes to the same location as an item already in the table. (Note that some method is needed to distinguish locations in use from unused locations.) The new item typically is inserted somewhere else, though we must be sure that there is still a way (and a fairly fast way) to look up the item. Here are several ways of handling collisions: 
+
+###Rehash function
+
+A second function can be used to select a second table location for the new item. If that location is also in use, the rehash function can be applied again to generate a third location, etc. The rehash function has to be such that when we use it in the lookup process we again generate the same sequence of locations. Since the idea in a hash table is to do a lookup by only looking at one location in the table, rehashing should be minimized as much as possible. In the worst case, when the table is completely filled, one could rehash over and over until every location in the table has been tried. The running time would be horrible! 
+
+###Linked list approach (separate chaining)
+
+All items that hash to the same location can be inserted in a linked list whose front pointer is stored in the given location. If the data is on disk, the linked list can be imitated by using record numbers instead of actual pointers. On disk, the hash table file would be a file of fake pointers (record numbers). Each record number would be for a record in another file, a file of nodes, where each node has a next field containing the number of the next record in the list.
+
+###Linked list inside the table (coalesced hashing)
+
+Here each table entry is a record containing one item that hashed to this location and a record number for another item in the table that hashed to this location, which may have the record number of another that hashed to the same spot, etc. We are again using a linked list, but this list is stored within the table, whereas in the method above the list was external to the table, which only stored the front pointer for each list. Items beyond the first may be stored in an overflow area of the table (sometimes called the cellar) so as not to take up regular table space. This is the approach that I took in the example program that goes with this section. It is recommended that the overflow area take only about 15% of the space available for the table (the regular table area and overflow area combined).
+
+###Buckets
+Sometimes each location in the table is a bucket which will hold a fixed number of items, all of which hashed to this same location. This speeds up lookups because there is probably no need to go look at another location. However, a bucket could fill up so that new insertions that hash to this location will need some other collision handler, such as one of the above methods. 
+
+----
+
+##Example Using Linear Probing
+
+A simple rehash function is rehash(k) = (k + 1) % prime, where prime is the prime number giving the maximum number of items in the table. This is sometimes called linear probing, since when an item hashes to a location k that is already in use, the rehash function then tells us to try k + 1, the next location (unless k + 1 would be off the end of the table, in which case the rehash function sends us back to the start of the table at index 0). The next location tried would normally be k + 2, then k + 3, etc. Trying successive locations like this is simple, but it leads to clustering problems. When several items hash to the same location they build up a cluster of items that are side-by-side in the table. Any new item that hashes to any of these locations has to be rehashed and moved to the end of the cluster. Insertions to these locations tend to be slower as do lookups of the data stored there. This is because we are getting away from our goal of checking one location and finding our data item. The number of rehashes needed should be kept as small as possible. In the worst case, a table that is full except for one location just before the cluster would require Theta(n) rehashes as successive locations are tried (with wrap-around to index 0) until that one empty location is found.
+
+Suppose we use integer key values, prime = 5, and the following functions: 
+
+    hash(key) = key % prime;
+    rehash(k) = (k + 1) % prime;
+
+If we insert a record with key value of 27, we compute hash(27) = 2 and thus get the following table. Nothing is shown in the data field in order not to complicate the drawing. The -1 in various key fields is used to show that this location is empty.
+
+![hash table 1](./img/Data Structure and Algorithm/hash1.gif)
+
+ Next, suppose we insert a record with key value 99. We compute hash(99) = 4, and so insert at index 4, giving:
+
+![hash table 2](./img/Data Structure and Algorithm/hash2.gif)
+
+Now, let's insert a record with key value 32. Since hash(32) = 2, we try location 2. It is in use, since the key value already stored there is not -1. We then compute rehash(2) = 3 and check location 3. It is empty, so we insert at index 3 as shown below. 
+
+![hash table 3](./img/Data Structure and Algorithm/hash3.gif)
+
+Suppose we now try to look up the 32. Since hash(32) is 2, we check location 2. The key there does not match 32, so we know we must try the rehash function. Since rehash(2) = 3, we try location 3. The key value at index 3 matches, so we copy record 3. (Note that the lookup operation follows the same "rehash path" that was used when the record was inserted in the first place.)
+
+Now suppose we try to look up 18. Since hash(18) = 3, we try index 3, but the key value there does not match. So, we try rehash(3) = 4, but the key value at index 4 does not match either. Next we try rehash(4) = 0, but this location has key -1, which indicates an empty location. We stop searching as soon as we reach an empty location and conclude that 18 is NOT FOUND in the table.
+
+Next, let's insert 77. Since hash(77) = 2 we try index 2, but find it occupied. Thus we try rehash(2) = 3, but that location is in use. Next we try rehash(3) = 4, but that location is in use as well. Finally, rehash(4) = 0 gives us an empty location. We insert 77 at index 0. 
+
+![hash table 4](./img/Data Structure and Algorithm/hash4.gif)
+
+Note the long rehash path used in inserting the 77. It will be the same long path used when looking up 77 later. The cluster starting at index 2 and extending to index 4 (and now back to index 0) is getting in the way of our goal of fast lookup. *This is one reason that hash tables are deliberately left somewhat empty. That helps to eliminate the need for rehashing for most lookups and to reduce the number of rehash attempts needed in the other lookups*. In the above example, note that inserting one more item would fill the table. Having a hash table that full is not desirable. Some check should be made to make sure, however, that any attempt to insert into a full table is rejected immediately. There is no need to rehash to every location in the table before concluding that there is no room; just have a counter and check that. 
+
+----
+
+##Deleting
+
+How one does deletion depends on the design of the hash table. If some sort of linked list was used, then it amounts to a deletion of a node from a linked list. If a design like that in the example above was used, then one just marks a deleted location as "deleted". In our example we could use a flag of -2 to stand for "deleted". For example, let's delete the record containing 32. First we do a lookup to find the location in the usual way: hash(32) = 2, rehash(2) = 3. We mark the table as follows:
+
+![hash table 5](./img/Data Structure and Algorithm/hash5.gif)
+
+Does this mess up our lookups? Looking up 27 or 99 works normally, since each of these hashes directly to the correct location. Let's try 77. Since hash(77) = 2, we try index 2, but find no match. Then rehash(2) = 3, but location 3 is marked as deleted. Although we stop a lookup when we reach an empty location (-1), it is clear that we must continue when reaching a deleted location (-2). Thus we try rehash(3) = 4, but again have no match. Finally, rehash(4) = 0 gives us the location of the desired 77. Lookups, then, have to continue until we find a match, an empty location, or until we have tried every location in the table (for a full table -- if we were crazy enough to produce such a thing). 
+
+----
+
+##Hash Functions
+
+A good hash function should be quick to compute, produce all possible indices from 0 to prime - 1, and should minimize collisions. For integer keys, hash(key) = key % prime is one simple hash function. Hashing by nonlinear table lookup is a more advanced method and one that is fast if properly implemented. For string keys, some method of converting the string to an integer is usually used, followed by taking result % prime to cut the integer value down to size. One also needs to worry about integer overflow. The hash value should ideally depend on every bit of the key. It is not good to ignore part of the key as that may lead to several keys that hash to the same location.
+
+Here is one method for strings. Let's suppose that the strings only contain the letters of the alphabet, in upper case. In other words, we have the letters A through Z. We can translate the individual letters to the integers 0 through 25. Then we treat the string as a base 26 number. For example, CPU would be the base 26 number with digits 2, 15, 20. The decimal value of this number is `2(26^2) + 15(26) + 20`. All computations are done % prime, both to avoid overflow, and because the final hash value must fit the range 0 to prime - 1. For example, if prime = 101, we would get `26^2 % 101 = 676 % 101 = 70`. Then `2(26^2) % 101 = 39`. The `15(26) % 101 = 390 % 101 = 87`. Thus we get `(39 + 87) % 101 = 126 % 101 = 25`. The final hash value is thus `(25 + 20) % 101 = 45`. If your strings include more of the ASCII character set than this, you might want to use the ASCII value of each letter instead of mapping A to 0, B to 1, etc.
+
+A folding method is sometimes used to hash integers. Here the key is chopped into two or more parts and the parts recombined in some easy manner. For example, suppose the keys are 9 digit longs, such as 542981703. Chop this into 3 equal-length pieces and add them together: `542 + 981 + 703`, taking the sum % prime to cut the answer down to size.
+
+Above it was stated that the size of the hash table should be prime. A particularly bad choice for the size of the table is a small power j of 2 or a small power i of 10. In the first case, say with j = 8, any binary numbers that have the same low order 8 bits would hash to the same location. Similarly with the second case, if i = 3 say, then any decimal numbers with the same last 3 digits would hash to the same location.
+
+If you use something like the above hash function for strings and aren't careful about the size of the hash table, there can be significant problems. Suppose we convert each letter to its ASCII value and treat each string as a base 256 number. Further suppose that we choose 255 as the size of the hash table. Then `hash("mac") = [109(256^2) + 97(256) + 99] % 255` since the ASCII values of m, a, and c are 109, 97, and 99 respectively. However, since 256 mod 255 = 1, that hash value simplifies to (109 + 97 + 99) % 255. If we permute the letters of our string, perhaps to "cam", we get `hash("cam") = [99(256^2) + 97(256) + 109] % 255 = (99 + 97 + 109) % 255`. Thus hash("mac") = hash("cam"). Any permutation of these 3 letters generates the same hash value, and inserting any two of them into your hash table produces a collision.
+
+Note that if the radix happened to be 42 instead of 256 and we used a hash table size of 1 less, giving 41 which is prime, we would still have the above problem that permutations of the same letters hash to the same location. So, we actually need the table size p to be more than simply a prime. Some authors (such as Gregory L. Heileman in Data Structures, Algorithms, and Object-Oriented Programming, McGraw Hill (1996), p 222) say that *you should choose a prime p such that p does not divide any small power of the radix plus or minus any small non-negative integer. Radix 42 and p = 41 fail to satisfy that condition since 41 = 42^1 - 1, and 41 certainly divides 41*.
+
+In general, finding a good hash function is both important and tricky. It is important because it strongly affects the efficiency of your hash table. It is tricky because there are so many conditions to satisfy and complications to avoid. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

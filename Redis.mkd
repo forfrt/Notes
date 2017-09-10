@@ -1,0 +1,507 @@
+
+#Redis设计与实现
+
+#简单动态字符串
+
+Redis没有直接使用C语言传统字符串, 而是自己构建了一种叫做SDS, 简单动态字符串的抽象类型, 并将SDS用作Redis的默认字符串表示.
+
+在Redis里面, C字符串只会作为string literal用在一些无需对字符串值进行修改的地方, 比如打印日志:
+
+    redisLog(REDIS_WARNING, "Redis is now ready to exit, bye bye...");
+
+当Redis需要的不只是一个string literal, 而是一个可以被修改的字符串值时, Redis就会使用SDS来表示字符串值. 比如在Redis数据库中, 包含字符串的键值对在底层都是用SDS实现的
+
+    redis> SET msg "hello world"
+
+那么Redis在数据库中创建一个新的键值对:
+- key是一个字符串对象, 对象的底层实现是一个保存着字符串"msg"的SDS
+- value也是一个字符串对象, 底层实现是一个保存着字符串"hello world"的SDS
+
+
+    redis> RPUS fruits "apple" "banana" "cherry"
+
+- key是一个字符串对象, 对象的底层实现是一个保存着字符串"fruits"的SDS
+- value也是一个列表对象, 列表对象包含了三个字符串对象, 分别有三个SDS实现.
+
+*除了用来保存数据库中的字符串值之外, SDS还被用作缓冲区* (buffer): AOF模块中的AOF缓冲区, 以及客户端状态中的输入缓冲区, 都是由SDS实现的
+
+----
+
+##SDS的定义
+
+每个sds.h/sdshdr结构表示一个SDS值:
+
+    struct sdshdr{
+        int len;        //! buf中已占用空间的长度
+        int free;       //! buf中剩余可用空间的长度
+        char buf[];     //! 数据空间
+    }
+
+    sdshdr
+        free    0
+        len     5
+        buf     | 'R'| 'e'| 'd' |'i'| 's'| '\0'|
+
+- free=0, 表示这个SDS没有分配任何未使用空间
+- len=5, 表示这个SDS保存了一个5字节唱的字符串
+- buf是一个char数组, 保存着"Redis"的5个字符以及空字符'\0'
+
+SDS遵循C字符串以空字符结尾的管理, 保存空字符的1个字节空间不计算在SDS的len属性中. 并且为空字符分配额外1字节空间, 以及添加空字符到字符串末尾等操作, 都是由SDS函数自动完成的. 所以这个空字符对于SDS使用者来说是完全透明的.
+
+遵循空字符结尾这一管理的好处是车,SDS可以直接重用一部分C字符串函数库里面的函数
+
+    sdshdr
+        free    5
+        len     5
+        buf     | 'R'| 'e'| 'd' |'i'| 's'| '\0'|  |  |  |  |  |
+
+这个SDS为buf数组分配了5字节未使用空间, 所以它的free属性为5.
+
+----
+
+##SDS与C字符串的区别
+
+###常数复杂度获取字符串长度
+
+因为C字符串并不记录自身长度信息, 所以为了获取一个C字符串长度, 程序必须遍历整个字符串, 对遇到的每个字符进行技术, 知道遇到代表字符串结尾的空字符为止, 复杂度为O(N).
+
+SDS在len属性中基础了SDS本身长度, 所以获取一个SDS长度的复杂度仅为O(1).
+
+设置与更新SDS长度的工作是由SDS的API在执行时自动完成的, 使用SDS无需进行任何手动修改长度的工作.
+
+----
+
+###杜绝缓冲区溢出
+
+`<string.h>/strcat`函数可以将src字符串的内容拼接到dest字符串的末尾. 由于C字符串不记录自身长度, 所以`strcat`假定用户在执行这个函数时, 已经为dest分配了足够多的内存, 可以容纳src字符串中的所有内容. 一旦这个假定不成立, 就会产生缓冲区溢出.
+
+假设内存中紧邻着两个C字符串s1, s2. s1中保存着"Redis", s2中"MongoDB"
+
+    | R | E | D | I | S | \0 | M | O | N | G | O | D | B | \0 |
+
+如果执行:
+
+    strcat(s1, "Cluster);
+
+则会:
+    | R | E | D | I | S |   | C | l | u | s | t | e | r | \0 |
+
+而SDS API需要对SDS进行修改时, API会先检查SDS空间是否满足修改所需的要求, 如果不满足的话, API会自动将SDS空间扩展至执行修改所需的大小, 然后才执行实际修改操作.
+
+----
+
+###检查修改字符串时带来的内存冲分配次数
+
+因为C字符串的长度与底层数组的长度之间存在关联性, 因此每次增长或缩短一个C字符串, 程序都要对保存这个C字符串的数组进行一次内存重分配.
+
+因为内存重分配设计复杂的算法, 并且可能需要执行系统调用, 所以它通常是一个比较耗时的操作
+
+SDS通过未使用空间接触了字符串长度和底层数组长度之间的关联. buf数组长度不一定是字符数量+1, 而是字符数量+free+1. 由此, SDS实现了空间预分配和惰性空间释放两种优化策略
+1. 空间预分配
+
+    空间预分配用于优化SDS字符串增长操作; 当SDS的API对一个SDS进行修改, 并且需要对SDS进行空间扩展时. API不仅会分配所需空间, 并且还会扩展free空间. 扩展大小公式为:
+
+    - 如果对SDS进行修改后, SDS len依旧小于1MB, 那么程序分配和len属性同样大小的free空间.
+    - 如果对SDS进行修改后, SDS len大于1MB, 那么程序分配1MB的free空间.
+
+    而如果未使用空间充足的话, API就会直接使用未分配空间, 无需执行内存重分配.
+
+2. 惰性空间释放
+
+    如果SDS API需要缩短SDS保存的字符串时, 程序并不理解使用内存重分配回收空出来的空间, 而是使用free属性将这些空间的数量记录下来, 等待未来使用.
+
+    通过惰性空间释放策略, SDS避免了缩短字符串所需的内存重分配操作, 并为江来可能的增长操作提供了优化.
+
+    与此同时, SDS也提供了相应的API, 让我们可以在有需要时, 真正释放SDS未使用空间, 所以不用担心惰性空间释放策略造成内存浪费.
+
+----
+
+###二进制安全
+
+C字符串中的字符必须符合某种编码, 并出去结尾不能出现空字符串, 因此只能保存文本数据, 而不能保存图片, 音频, 视频, 压缩文件这样的二进制数据
+
+为了确保Redis可以适用于不同使用场景, SDS API都是binary-safe. 所有SDS API都会以处理二进制的方式处理SDS存放在buf数组中的数据, 而不会对其中数据做出任何限制.
+
+----
+
+###兼容部分C字符串函数
+
+虽然SDS的API都是binary safe, 但它们一样遵循C字符串以空字符结尾的管理: 这些API总会将SDS保存的数据末尾设置为空字符, 并总会在为buf数组分配空间时多分配一个字节来容纳这个空字符
+
+----
+
+###SDS API
+
+- `sdsnew`
+- `sdsempty`
+- `sdsfree`
+- `sdslen`
+- `sdslen`
+- `sdsavail`
+- `sdsdup`
+- `sdsclear`
+- `sdscat`
+- `sdscatsds`
+- `sdscpy`
+- `sdsgrowzero`
+- `sdsrange`
+- `sdstrim`
+- `sdscmp`
+
+----
+
+#链表
+
+redis在链表键, 发布与订阅, 慢查询, 监视器等功能用到了链表, Redis服务器本身还使用链表来保存多个客户端的状态信息, 以及使用链表来构建客户端输出缓冲区.
+
+##链表及链表节点的实现
+
+链表节点结构`adlist.h/listNode`:
+
+    typedef struct listNode {
+        struct listNode *prev;      //! 前置节点
+        struct listNode *next;      //! 后置节点
+        void *value;                //! 节点的值
+    } listNode;
+
+链表结构`adlist.h/list`:
+
+    typedef struct list {                   //! 双向无环链表
+        listNode *head;                     //! 表头节点
+        listNode *tail;                     //! 表尾节点
+        void *(*dup)(void *ptr);            //! 节点值复制函数
+        void (*free)(void *ptr);            //! 节点值释放函数
+        int (*match)(void *ptr, void *key); //! 节点值对比函数
+        unsigned long len;                  //! 链表所包含的节点数量
+    } list;
+
+其中:
+
+- `dup`用于复制链表节点保存的值
+- `free`用于释放链表节点保存的值
+- `match`用于比对链表节点所保存的值和另一个值是否相等
+
+----
+
+##链表和链表节点的API
+
+Nothing worth to be mentioned
+
+----
+
+#字典
+
+Redis的数据库就是使用字典作为底层实现的, 对数据库的增删查改操作也是构建在对字典的操作上的. 此外, 字典还是哈希键的底层实现之一. 当一个哈希键包含的键值对比较多, 又或者键值对中的元素都是比较长的字符串时, Reids就会使用字典来作为哈希键的底层实现.
+
+##字典的实现
+
+Redis的字典使用哈希表作为底层实现, 包含多个哈希表节点, 每一个节点保存字典中的一个键值对
+
+###哈希表
+
+`dict.h/dctht`:
+
+    /* This is our hash table structure. Every dictionary has two of this as we
+     * implement incremental rehashing, for the old to the new table. */
+     */
+    typedef struct dictht {
+        dictEntry **table;              //! 哈希表数组
+        unsigned long size;             //! 哈希表大小
+        unsigned long sizemask;         //! 哈希表大小掩码，用于计算索引值, 总是等于 size - 1
+        unsigned long used;             //! 该哈希表已有节点的数量
+    } dictht;
+
+- table属性是一个数组, 其中每一个元素都是指向dict.h/dictEntry结构的执政. 每个dictEntry结构保存着一个键值对.
+- size记录了哈希表的大小
+- used记录了哈希表目前已有节点的数量
+- sizemask值总是为size-1, 和哈希值一起决定一个键应该被放到table数组的那一个索引上
+
+----
+
+###哈希表节点
+
+dict.h/dictEntry
+
+    /*
+     * 哈希表节点
+     */
+    typedef struct dictEntry {
+        void *key;                      //! 键
+        union {                         //! 值
+            void *val;
+            uint64_t u64;
+            int64_t s64;
+        } v;
+        struct dictEntry *next;         //! 指向下个哈希表节点，形成链表
+    } dictEntry;
+
+- key属性保存着key-value中的key
+- v属性保存着key-value中的value
+- next属性, 指向另一个哈希表节点的指针, 这个指针可以将多个哈希值相同的键值对连接在一起, 以此来解决键冲突 (collision) 的问题
+
+----
+
+###字典
+
+    typedef struct dict {
+        dictType *type;                 //! 类型特定函数
+        void *privdata;                 //! 私有数据
+        dictht ht[2];                   //! 哈希表
+        int rehashidx;                  /* rehashing not in progress if rehashidx == -1 */
+                                        //! rehash 索引 当 rehash 不在进行时，值为 -1
+        int iterators;                  /* number of iterators currently running */
+                                        //! 目前正在运行的安全迭代器的数量
+    } dict;
+
+- type和privdata属性是针对不同类型的键值对, 为穿件多态字典而设置的
+- type属性是一个dictType的指针 每一个dictType结构保存了一簇用于操作特定类型键值对的函数, Redis会为用处不同的字典设置不同的类型特定函数
+- privdata属性则保存了需要传给那些类型特定函数的可选参数
+- ht属性是一个包含两项的数组, 数组中每一项都是一个dictht哈希表. 一般情况下, 字典只是用ht[0]哈希表, ht[1]哈希表只会在对ht[0]进行rehash时使用
+- rehashidx, 记录了rehash目前的进度, 如果目前没有进行rehash, 那么它的值为-1
+
+----
+
+    /*
+     * 字典类型特定函数
+     */
+    typedef struct dictType {
+        unsigned int (*hashFunction)(const void *key);                              //! 计算哈希值的函数
+        void *(*keyDup)(void *privdata, const void *key);                           //! 复制键的函数
+        void *(*valDup)(void *privdata, const void *obj);                           //! 复制值的函数
+        int (*keyCompare)(void *privdata, const void *key1, const void *key2);      //! 对比键的函数
+        void (*keyDestructor)(void *privdata, void *key);                           //! 销毁键的函数
+        void (*valDestructor)(void *privdata, void *obj);                           //! 销毁值的函数
+    } dictType;
+
+----
+
+##Hash算法
+
+当要将一个新的键值对添加到字典里面时, 程序需要先根据key-value的key计算出hash值和索引值, 然后再根据索引值, 酱包含新key-value的dictEntry放在哈希表数组的指定索引上
+
+    hash=dict->type->hashFunction(key)
+    index=hash&dict->[x].sizemask
+
+当字典被用作数据库的底层实现, 或者哈希键的底层实现时, Redis使用MurmurHash2算法来计算键的Hash值
+
+> 这种算法的有点是: 及时输出的键是有规律的, 算法仍能给出一个很好的随机分布性, 并且算法计算速度也很快
+
+----
+
+##解决key冲突 (collision)
+
+当有两个或以上数量的key被分配到哈希表数组的同一个索引上面时, 我们称这些键发生了冲突 (collision)
+
+Redis的哈希表使用链地址法 (separate chaining) 来解决键冲突, 每个哈希表节点都有一个next指针, 多个哈希表节点可以用next指针构成一个单向链表, 被分配到同一个索引的多个节点可以这个单向链表连接起来, 这就解决了键冲突的问题
+
+因为dictEntry节点诸城的链表没有只想链表表尾的指针, 所以为了速度考虑, 程序总是将新节点添加到链表的表头位置 (复杂度为O(1)), 排在其他已有节点前面
+
+----
+
+##rehash
+
+随着操作的不断执行, 哈希表的key-value会逐渐增多或减少, 为了让哈希表的负载因子 (load factor) 为承载一个合理的范围内, 当哈希表保存的key-value数量太多或太少. 程序需要对哈希表的大小进行相应的扩展或收缩.
+
+扩展和收缩哈希表的工作可以通过执行rehash (重新散列) 操作来完成, Redis对字典哈希表执行rehash的步骤如下:
+
+1. 为字典的ht[1]哈希表分配空间, 这个哈希表的空间大小取决于要执行的操作, 以及ht[0]当前包含的key-value数量 ( 也就是ht[0].used)
+
+    - 如果执行的是扩展操作, 那么ht[1]的大小为第一个大于等于ht[0].used*2的2^n
+    - 如果执行的是收缩操作, 那么ht[1]的大小为第一个大于等于ht[0].used的2^n
+2. 将保存在ht[0]种的所有key-value rehash到ht[1]上, 即重新计算key的哈希值和索引值, 然后将key-value放置在ht[1]哈希表的指定位置
+3. 当ht[0]包含的所有key-value都迁移到ht[1]之后, 释放ht[0], 并将ht[1]设置为ht[0], 并在ht[1]新创建一个空白哈希表, 为下一次rehash做准备
+
+----
+
+当以下条件任意一个被满足时, 程序会自动开始对哈希表执行扩展操作:
+1. 服务器目前没有执行BGSAVE或者BGREWRITEAOF命令, 并且哈希表的负载因子大于等于1
+2. 服务器目前正在执行BG或者BGREWRITEAOF命令, 并且负载因子>=5
+
+    load_factor=ht[0].used/ht[0].size
+
+根据BGSAVE命令或BGREWRITEAOF命令是否正在执行, 服务器执行扩展操作所需的负载因子并不相同, 这是因为在执行BGSAVE命令或BGREWRITEAOF命令的过程中, Redis需要创建当前服务器进程的子进程, 而大多数操作系统都采用写时复制 (copy-on-write) 技术来优化子进程的使用效率, 所以在子进程存在的期间, 服务器会提高执行扩展操作所需的负载因子, 从而尽可能避免在子进程存在期间进行哈希表扩展操作, 这可以避免不必要的内存写入操作, 最大限度地节约内存
+
+另一方面, 当哈希表的负载因子小雨0.1时, 程序自动开始对哈希表执行收缩操作
+
+----
+
+##渐进式rehash
+
+扩展或收缩哈希表需要将ht[0]里面的所有key-value rehash到ht[1]里面, 但是, 这个rehash动作并不是一次性, 集中式的完成的, 而是分多次, 渐进式完成的.
+
+因为, 哈希表中保存的key-value如果很多, 那么一次性酱这些key-value全部rehash到ht[1], 庞大的计算量可能会导致服务器在一段时间内停止服务
+
+1. 为ht[1]分配空间, 让字典同事持有ht[0]和ht[1]两个哈希表
+2. 在字典中维持一个索引计数器标量rehashidx, 并将它的值设置为0, 表示rehash工作正式开始. 
+3. 在rehash进行期间, 每次对字典执行添加, 删除, 查找或者更新操作时, 程序除了执行指定的操作外, 还会顺带将ht[0]哈希表在rehashidx索引上的key-value rehash到ht[1]; *当rehash工作完成之后, 程序将rehashidx属性值+1*
+4. 知道ht[0]所有的key-value都被rehash到ht[1], 这时程序将rehashidx属性设为-1, 表示rehash操作已完成
+
+> 渐进式rehash的好处在于, 采用了分而治之的方式, 将rehash key-value所需的计算工作均摊到对字典的每个添加, 删除, 查找, 更新操作上, 从而避免了集中式rehash带来的庞大计算量
+
+因为在进行渐进式rehash的过程中, 字典会同事使用ht[0]和ht[1]两个哈希表, 所以在渐进式rehash进行期间, 字典的删除, 查找, 更新等操作都会在两个哈希表上进行.
+
+另外, 在渐进式rehash执行期间, 新添加到字典的key-value一律只会保存在ht[1]中
+
+----
+
+#跳跃表
+
+跳跃表是一种有序数据结构, 通过在每个节点中维持多个指向其他节点的指针, 从而达到快速访问节点的目的
+
+跳跃表支持平均O(logN), 最坏O(N)复杂度的节点查找, 还可以通过顺序性操作来批量处理节点
+
+大部分情况下, 跳跃表效率可以与平衡树媲美, 并且实现更简单
+
+Redis使用跳跃表作为有序集合key的底层实现之一. 如果有序集合的元素数量比较多, 成员又是比较长的字符串, 则会使用跳跃表来作为有序集合key的底层实现
+
+和链表, 字典等数据结构被广泛应用在redis内部不同, redis只在两个地方用到了跳跃表, 一个是实现有序集合键, 另一个是在集群节点中用作内部数据结构.
+
+----
+
+##跳跃表的实现
+
+Redis的跳跃表由redis.h/zskiplistNode和redis.h/zkiplist两个结构定义. 其中zskiplistNode结构用于表示跳跃节点, 而zskiplist结构则用于保存跳跃表节点的相关信息.
+
+    typedef struct zskiplist {
+    
+        // 表头节点和表尾节点
+        struct zskiplistNode *header, *tail;
+    
+        // 表中节点的数量
+        unsigned long length;
+    
+        // 表中层数最大的节点的层数
+        int level;
+    } zskiplist;
+
+zskiplistNode结构包含以下属性:
+
+     typedef struct zskiplistNode {
+    
+         // 成员对象
+         robj *obj;
+    
+         // 分值
+         double score;
+    
+         // 后退指针
+         struct zskiplistNode *backward;
+    
+         // 层
+         struct zskiplistLevel {
+    
+             // 前进指针
+             struct zskiplistNode *forward;
+    
+             // 跨度
+             unsigned int span;
+    
+         } level[];
+     } zskiplistNode;
+
+注意表头节点和其他节点的构造是一样的, 表头节点也有后退指针, 分值和成员对象, 不过表头节点的这些属性都不会被用到.
+
+----
+
+###跳跃表节点
+
+1. 层
+
+    跳跃表节点的level数组可以包含多个元素, 每个元素都包含一个指向其他节点的指针, 可以通过这些层来加快访问其他节点的速度.
+    每次创建一个新跳跃表节点时, 程序都会根据power law随机生成一个介于1到32之间的值作为level数组的大小, 也就是层的高度
+    
+2. 前进指针
+3. 跨度
+
+    层的跨度用来记录两个节点之间的距离:
+    指向NULL的所有前进指针的跨度都为0, 因为它们没有连向任何节点
+
+    遍历只是用前进指针就可以了, 跨度其实是计算rank的: 在查找某个节点的过程中, 将沿途访问过的所有层的跨度累积起来, 得到的结果就是目标节点在跳跃表中的排位
+    
+4. 后退指针 节点的后退指针用于从表尾向表头方向访问节点, 因为每个节点只有一个后退指针, 所以每次只能后退至前一个节点
+5. 分值
+
+    是一个double类型的浮点数, 跳跃表所有节点都按照分值大小来排序
+6. 成员对象, 只想一个字符串对象, 而字符串对象保存着一个SDS值.
+
+同一个跳跃表中, 各个节点保存的成员对象必须是唯一的, 但是多个节点保存的分值却可以是相同的: 分值相同的节点按照成员对象在字典序中的大小来进行排序
+
+----
+
+###跳跃表
+
+1. header和tail指针分别指向表头和表尾
+1. length属性来记录节点的数量
+1. level属性用于获取跳跃表中层高最大的那个节点的层数
+
+****
+
+#整数集合
+
+当一个集合只包含整数值元素, 并且这个集合的元素数量不多时, Redis就会使用整数集合作为集合键的底层实现
+
+##整数集合的实现
+
+    typedef struct intset {
+    ----
+        // 编码方式
+        uint32_t encoding;
+    
+        // 集合包含的元素数量
+        uint32_t length;
+    
+        // 保存元素的数组
+        int8_t contents[];
+    
+    } intset;
+
+1. contents: 是整数集合的底层实现, 各个项在数组中按照值的大小有序排列, 并数组中不包含任何重复项
+2. length: 元素数量, 也是contents数组长度
+3. encoding: 虽然inset结构将contents声明为int8_t类型的数组, 但实际上contents数组的真正类型取决于encoding属性的值
+
+----
+
+##升级
+
+每当我们将一个新元素添加到整数集合里面, 别情新元素的类型比整数集合现有所有元素的类型都要长的时候, 整数集合需要先进行升级:
+
+1. 根据新元素类型, 扩展整数集合底层数组的空间大小, 并为新元素分配空间
+2. 将现有元素转换成新元素相同类型, 并放到正确的位置上, 同时保持底层数组的有序性不变
+3. 将新元素添加到底层数组里面
+
+
+因为每次向整数集合添加新元素都可能引起升级, 而每次升级都需要对底层数组中已有的所有元素进行类型转换, 所以向整数集合添加新元素的时间复杂度为O(N)
+
+----
+
+##升级的好处
+
+1. 提升灵活性
+2. 节约内存
+
+----
+
+##降级
+
+整数集合不支持降级操作, 一旦进行过升级, 就会一直保持升级后状态.
+
+****
+
+#压缩列表
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,147 @@
+#Skip Lists: A Probabilistic Alternative to Balanced Trees
+
+- Binary trees can be used for representing abstract data types such as dictionaries and ordered lists. They work well when the elements are inserted in a random order.  Some sequences of operations, such as inserting the elements in order, produce degenerate data structures that give very poor performance. 
+
+    If it were possible to randomly permute the list of items to be inserted, trees would work well with high probability for any input sequence. *In most cases queries must be answered on-line, so randomly permuting the input is impractical. Balanced tree algorithms re-arrange the tree as operations are performed to maintain certain balance conditions and assure good performance*.
+
+- Skip lists are a probabilistic alternative to balanced trees. Skip lists are balanced by consulting a random number generator. Although skip lists have bad worst-case performance, no input sequence consistently produces the worst-case performance (much like quicksort when the pivot element is chosen randomly). It is very unlikely a skip list data structure will be significantly unbalanced (e.g., for a dictionary of more than 250 elements, the chance that a search will take more than 3 times the expected time is less than one in a million).  
+
+    Skip lists have balance properties similar to that of search trees built by random insertions, yet do not require insertions to be random.
+
+Balancing a data structure probabilistically is easier than explicitly maintaining the balance. For many applications, skip lists are a more natural representation than trees, also leading to simpler algorithms. 
+
+The simplicity of skip list algorithms makes them easier to implement and provides significant constant factor speed improvements over balanced tree and self-adjusting tree algorithms
+
+Skip lists are also very space efficient. They can easily be configured to require an average of 1 1/3 pointers per element (or even less) and do not require balance or priority information to be stored with each node
+
+----
+
+#Skip Lists
+![./img/Data structure and Algorithm/Linked lists with additional pointers.jpg]
+
+We might need to examine every node of the list when searching a linked list (Figure 1a). If the list is stored in sorted order and every other node of the list also has a pointer to the node two ahead it in the list (Figure 1b), we have to examine no more than n/2 + 1 nodes (where n is the length of the list).  Also giving every fourth node a pointer four ahead (Figure 1c) requires that no more than n/4 + 2 nodes be examined.  If every (2i)th node has a pointer 2i nodes ahead (Figure 1d), the number of nodes that must be examined can be reduced to log2 n while only doubling the number of pointers. *This data structure could be used for fast searching, but insertion and deletion would be impractical*.
+
+A node that has k forward pointers is called a level k node.  If every (2^i)th node has a pointer 2^i nodes ahead, then levels of nodes are distributed in a simple pattern: 50% are level 1, 25% are level 2, 12.5% are level 3 and so on. 
+
+What would happen if the levels of nodes were chosen randomly, but in the same proportions (e.g., as in Figure 1e)? *A node’s ith forward pointer, instead of pointing 2^i–1 nodes ahead, points to the next node of level i or higher.* Insertions or deletions would require only local modifications; the level of a node, chosen randomly when the node is inserted, need never change. Some arrangements of levels would give poor execution times, but we will see that such arrangements are rare. Because these data structures are linked lists with extra pointers that skip over intermediate nodes, I named them skip lists.
+
+----
+
+#Skip List Algorithm
+
+Each element is represented by a node, the level of which is chosen randomly when the node is inserted without regard for the number of elements in the data structure. A level i node has i forward pointers, indexed 1 through i.
+
+Levels are capped at some appropriate constant MaxLevel. 
+
+The level of a list is the maximum level currently in the list (or 1 if the list is empty).  The header of a list has forward pointers at levels one through MaxLevel.  The header of a list has forward pointers at levels one through MaxLevel. 
+
+##Initialization
+
+An element NIL is allocated and given a key greater than any legal key. All levels of all skip lists are terminated with NIL.  A new list is initialized so that the the level of the list is equal to 1 and all forward pointers of the list’s header point to NIL
+
+----
+
+##Search Algorithm
+
+An element NIL is allocated and given a key greater than any legal key. All levels of all skip lists are terminated with NIL.  A new list is initialized so that the the level of the list is equal to 1 and all forward pointers of the list’s header point to NIL
+
+    Search(list, searchKey)
+        x := list→header
+        -- loop invariant: x→key < searchKey
+        for i := list→level downto 1 do
+            while x→forward[i]→key < searchKey do
+                x := x→forward[i]
+        -- x→key < searchKey ≤ x→forward[1]→key
+        x := x→forward[1]
+        if x→key = searchKey then return x→value
+        else return failure
+
+----
+
+##Insertion and Deletion Algorithms
+
+![Insertion](./img/Data Structure and Algorithm/Insertion of Skip List.png)
+
+To insert or delete a node, we simply search and splice, as shown in Figure 3. Figure 4 gives algorithms for insertion and deletion. A vector update is maintained so that when the search is complete (and we are ready to perform the splice), update[i] contains a pointer to the rightmost node of level i or higher that is to the left of the location of the insertion/deletion
+
+If an insertion generates a node with a level greater than the previous maximum level of the list, we update the maximum level of the list and initialize the appropriate portions of the update vector. After each deletion, we check if we have deleted the maximum element of the list and if so, decrease the maximum level of the list
+
+    Insert(list, searchKey, newValue)
+        local update[1..MaxLevel]
+        x := list→header
+        for i := list→level downto 1 do
+            while x→forward[i]→key < searchKey do
+                x := x→forward[i]
+            -- x→key < searchKey ≤ x→forward[i]→key
+            update[i] := x
+        x := x→forward[1]
+        
+        if x→key = searchKey then x→value := newValue
+        else
+            lvl := randomLevel()
+            if lvl > list→level then
+                for i := list→level + 1 to lvl do
+                    update[i] := list→header
+    list→level := lvl
+    x := makeNode(lvl, searchKey, value)
+    for i := 1 to level do
+    x→forward[i] := update[i]→forward[i]
+    update[i]→forward[i] := x
+    Delete(list, searchKey)
+    local update[1..MaxLevel]
+    x := list→header
+    for i := list→level downto 1 do
+    while x→forward[i]→key < searchKey do
+    x := x→forward[i]
+    update[i] := x
+    x := x→forward[1]
+    if x→key = searchKey then
+    for i := 1 to list→level do
+    if update[i]→forward[i] ≠ x then break
+    update[i]→forward[i] := x→forward[i]
+    free(x)
+    while list→level > 1 and
+    list→header→forward[list→level] = NIL do
+    list→level := list→level – 1
+----
+
+##Choosing a Random Level
+
+Initially, we discussed a probability distribution where half of the nodes that have level i pointers also have level i+1 pointers. To get away from magic constants, we say that a fraction p of the nodes with level i pointers also have level i+1 pointers. (for our original discussion, p = 1/2). Levels are generated randomly by an algorithm equivalent to the one in Figure 5.  *Levels are generated without reference to the number of elements in the list*
+
+----
+
+##At what level do we start a search? Defining L(n)
+
+In a skip list of 16 elements generated with p = 1/2, we might happen to have 9 elements of level 1, 3 elements of level 2, 3 elements of level 3 and 1 element of level 14 (this would be very unlikely, but it could happen)
+
+Where should we start the search? Our analysis suggests that ideally we would start a search at the level L where we expect 1/p nodes. This happens when L = log_1/p n. Since we will be referring frequently to this formula, we will use L(n) to denote log_1/p n.
+
+There are a number of solutions to the problem of deciding how to handle the case where there is an element with an unusually large level in the list
+
+- `Don’t worry, be happy`. Simply start a search at the highest level present in the list. As we will see in our analysis, the probability that the maximum level in a list of n elements is significantly larger than L(n) is very small. *Starting a search at the maximum level in the list does not add more than a small constant to the expected search time*. This is the approach used in the algorithms described in this paper.
+- `Use less than you are given`. Although an element may contain room for 14 pointers, we don’t need to use all 14. We can choose to utilize only L(n) levels. There are a number of ways to implement this, but they all complicate the algorithms and do not noticeably improve performance, so this approach is not recommended.  
+- `Fix the dice`. If we generate a random level that is more than one greater than the current maximum level in the list, we simply use one plus the current maximum level in the list as the level of the new node. In practice and intuitively, this change seems to work well. However, it totally destroys our ability to analyze the resulting algorithms, since the level of a node is no longer completely random. Programmers should probably feel free to implement this, purists should avoid it
+
+----
+
+##Determining MaxLevel
+
+Since we can safely cap levels at L(n), we should choose MaxLevel = L(N) (where N is an upper bound on the number of elements in a skip list). If p = 1/2, using MaxLevel = 16 is appropriate for data structures containing up to 216 elements.  
+
+----
+
+##ANALYSIS OF SKIP LIST ALGORITHMS
+
+*The time required to execute the Search, Delete and Insert operations is dominated by the time required to search for the appropriate element*. For the Insert and Delete operations, there is an additional cost proportional to the level of the node being inserted or deleted. The time required to find an element is proportional to the length of the search path, which is determined by the pattern in which elements with different levels appear as we traverse the list
+
+----
+
+##Probabilistic Philosophy
+
+The structure of a skip list is determined only by the number
+
+
+
+
+
