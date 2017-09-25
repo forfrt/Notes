@@ -259,7 +259,6 @@ Dallas有三种case:
     只跑一个caselist, 但可以定制case调度的频繁度, 测单种caselist的极限性能
 
 1. tm case
-
     用一个算法, 模拟现网cp/up traffic情况
     用户需要写比较复杂的配置文件, 定义好模拟的现网中有什么node, 每个node是什么接口, 地址怎么分布, 以及一共有多少用户, 有哪些用户属性
     用户属性包括它支持怎样的特性 (这个用户是什么policy, 是什么地区码, 有多少个session, 多少个bearer, 以及bearer支持什么样的payload profile (描述payload的速度, 类型dummy/replay等等) ) 和payload
@@ -284,9 +283,7 @@ Dallas有三种case:
     make dist
 
     cd /proj/pcn/lts/user/dallas_r15b/releases/
-    
     tar xvf 19089_CXP9011454_eruitfe.tar.Z
-    
     cp -rp 19089_CXP9011454_eruitfe /lab/testtools/rhel664/dallas/testRelease/Dallas_15B_eruitfe_sdk
     /lab/gw_test_framework/epglib2/bin/lab_storage_sync sync --src SERO --dest SELN /lab/testtools/rhel664/dallas/testRelease/Dallas_15B_eruitfe_sdk
     or
@@ -370,6 +367,7 @@ http://epgst-competence.mo.sw.ericsson.se/?q=node/7
     lts_get_subscriber 948578
     lts_run_mobiles '948578, 1, [{160, 1, 83}]'
     lts_run_mobiles '1,1,[{159,1,109}]'
+    lts_run_load '1, 2000000, [104,{158,cont}], 10000'
     lts_run_tm '{perc, 10} , all'
     lts_run_tm '104833,100'
 
@@ -420,7 +418,7 @@ http://epgst-competence.mo.sw.ericsson.se/?q=node/7
 ----
 
 ##Dallas Environment Troubleshooting
-
+/lab/j20/testtools/binaries/rhel6.x86_64/onewireshark/ws.sh &
     start oam-cli
     ManagedElement=1, Epg=1, Node=1
     status
@@ -461,7 +459,8 @@ http://epgst-competence.mo.sw.ericsson.se/?q=node/7
     git branch --set-upstream-to=origin/dallas_15b sdk_parser
     git pull --rebase
 
-    git push origin HEAD:refs/for/dallas_15b/sdk_parser 
+    git push origin HEAD:refs/for/master
+    git push origin HEAD:refs/for/master
 ```
 
 ----
@@ -2310,7 +2309,45 @@ ltt_0901_1.log
 
 ----
 
-2017-09-05 02:41 PM
+2017-09-12 04:26 PM
+
+21099 dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[0] dp_version[0] ext_val32[268435457] src&dst: IPv4 44.96.0.2 IPv4 222.12.1.242
+21100 dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[1281] dp_version[0] ext_val32[0] src&dst: IPv4 222.12.1.242 IPv4 44.96.0.2
+21101 dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[0] src&dst: IPv4 44.96.0.2 IPv4 222.12.1.242
+21102 dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[268435457] src&dst: IPv4 222.12.1.242 IPv4 44.96.0.2
+
+----
+
+2017-09-13 09:36 AM
+
+1490442 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7f831bd2f0c0], table_b[(nil)], socket_id[1], lcore_id[8],                 dz[0], dp[1309], vport[0],
+        dp_ver[0],                 key payload_id[0], received teid[806709362]                                                                                                                          
+1490443 GTPU flow_table miss key: IPv4 222.13.220.31 IPv4 44.192.0.19                                                                                                                                   
+
+1489901 ipv4_lookup_output@NUMA vlan id[233], out_port[1], ifname[vlan0233:1002],             lcore_id:[14], result.flags:[B]
+1489902 ipv4_lookup_output@NUMA: tx src&dst: IPv4 222.13.220.31 IPv4 44.192.0.19                                             
+
+
+1511980 dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[0] dp_version[0] ext_val32[806709361] src&dst: IPv4 44.192.0.19 IPv4 222.13.220.31
+1511981 dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[1309] dp_version[0] ext_val32[0] src&dst: IPv4 222.13.220.31 IPv4 44.192.0.19     
+1511982 dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[0] src&dst: IPv4 44.192.0.19 IPv4 222.13.220.31        
+1511983 dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[806709361] src&dst: IPv4 222.13.220.31 IPv4 44.192.0.19
+
+NUMA@_sal_vport_recv zone:1 dp:0 version:0 vport:0 lcore_id: 15 socket_id: 1
+1512049 _sal_vport_recv@NUMA src&dst: IPv4 222.13.220.31 IPv4 44.192.0.19
+
+1512075 ipv4_lookup_output@NUMA vlan id[233], out_port[1], ifname[vlan0233:1002],             lcore_id:[15], result.flags:[A]                                                                           
+1512076 ipv4_lookup_output@NUMA: tx src&dst: IPv4 222.13.220.31 IPv4 44.192.0.19                                                                                                                        
+
+1512077 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[0], rxq_id[0],             table[(nil)], table_b[(nil)], socket_id[0], lcoreid[8],             dz[0], dp[1309], vport[0], dp_ver[0],
+1512078 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7f831bd2f0c0], table_b[(nil)], socket_id[1], lcore_id[8],                 dz[0], dp[1309], vport[0],
+        dp_ver[0],                 key payload_id[0], received teid[806709362]
+1512079 GTPU flow_table miss key: IPv4 222.13.220.31 IPv4 44.192.0.19
+
+----
+
+1534788 NUMA@_sal_vport_recv zone:0 dp:0 version:0 vport:0 lcore_id: 15 socket_id: 1
+1534789 _sal_vport_recv@NUMA src&dst: IPv4 44.192.0.19 IPv4 222.13.220.31           
 
 
 

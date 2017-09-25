@@ -220,8 +220,321 @@ R-B Tree，全称是Red-Black Tree，又称为“红黑树”，它一种特殊�
                else (same as then clause with "right" and "left" exchanged)        // 若 “x”是“它父节点的右孩子”，将上面的操作中“right”和“left”交换位置，然后依次执行。
         color[x] ← BLACK
 
+----
+
+#Heaps and Heapsort
+
+##Sorting Revisited
+
+One of the typical tasks in a Data Structure course is to compare the running times of various sort algorithms. This can be done using analysis of algorithms techniques. For example, we already know that bubblesort is Theta(n^2), but quicksort is Theta(n * lg(n)), both in the average case. 
+
+Another way to compare sort routines is to actually run several of them on the same set of test data. Rather than have to write all of the code for this ourselves, an easy way to do this is to visit Jason Harrison's sorting animation Web site. Once at this site, click on the picture for each sort routine that you wish to run. This will download a Java routine that will perform the sort and display the sorting progress visually. You will, of course, need to use a browser that is Java-enabled. Which sort performs best? Do you see an obvious speed difference between some of the sorts? 
+
+##Definitions
+
+Recall that in a binary tree each node can have a left child node and/or a right child node. A leaf is a node with no children.
+
+An almost complete binary tree is a binary tree in which the following 3 conditions hold: 
+1. all the leaves are at the bottom level or the bottom 2 levels, 
+1. all the leaves are in the leftmost possible positions, 
+1. and (except possibly for the bottom level) all levels are completely filled with nodes.
+
+Here are some examples of almost complete binary trees. Note that there is no particular ordering of the letters. 
+
+                 R
+
+             /       \
+
+           G            A
+
+         /   \        /
+
+        T     W     G
 
 
+                 K
+
+             /       \
+
+           L           C
+
+        /    \       /    \
+
+      B       T     Q       Z
+
+    /   \
+
+   D     P
+
+ The following example is a complete binary tree. (Of course, it is also fits the definition of almost complete. Any complete binary tree is automatically almost complete.)
+
+                  G
+
+               /     \
+
+             R         T
+
+           /   \     /   \
+
+          V     E   S     N
+
+The following binary trees are not almost complete:
+
+                  W
+
+               /     \
+
+             T         P
+
+           /   \         \
+
+          H     K         V    (V should be pushed to the left)
+
+
+                  M
+
+               /     \
+
+             E         L
+
+           /   \     /
+
+          I     R   Y        (this level should be completely filled)
+
+        /   \
+
+       S     C
+
+
+                  H
+
+               /     \
+
+             N         D
+
+                     /   \
+
+                    R     V     (R and V should be pushed left, under N)
+
+
+                  A
+
+               /     \
+
+             G        J     (there are leaves at 3 levels)
+
+           /   \    
+
+          Y     O   
+
+        /   \
+
+       B     Z
+
+----
+
+##What is a Heap?
+
+Definition: A minimal heap (descending heap) is an almost complete binary tree in which the value at each parent node is less than or equal to the values in its child nodes.
+
+Obviously, the minimum value is in the root node. Note, too, that any path from a leaf to the root passes through the data in descending order.
+
+Here is an example of a minimal heap:
+
+                  C
+
+               /     \
+
+             H         K
+
+           /   \     /
+
+          L     I   M
+
+----
+
+##Storage of Heap Data
+
+The typical storage method for a heap, or any almost complete binary tree, works as follows. Begin by numbering the nodes level by level from the top down, left to right. For example, consider the following heap. The numbering has been added below the nodes.
+
+                  C
+                  0
+               /     \
+
+             H         K
+             1         2
+           /   \     /
+
+          L     I   M
+          3     4   5
+
+Then store the data in an array as shown below:
+
+![array drawing](./img/cpp/array_drawing.gif)
+
+The advantage of this method over using the usual pointers and nodes is that there is no wasting of space due to storing two pointer fields in each node. Instead, starting with the current index, CI, one calculates the index to use as follows: 
+
+    Parent(CI) = (CI - 1) / 2
+    RightChild(CI) = 2 * (CI + 1)
+    LeftChild(CI) = 2 * CI + 1
+
+For example, if we start at node H (with index 1), the right child is at index 2 * (1 + 1) = 4, that is, node I. 
+
+----
+
+##Inserting into a Heap
+
+This is done by temporarily pacing the new item at the end of the heap  and then calling a FilterUp routine to make any needed adjustments on the path from this leaf to the roof. For examplee, let's insert E into the following heap:
+
+                  C
+
+               /     \
+
+             H         K
+
+           /   \     /
+
+          L     I   M
+
+First, temporarily place E in the next available position:
+
+                  C
+
+               /     \
+
+             H         K
+
+           /   \     /   \
+
+          L     I   M     E
+
+Of course, the new tree might not be a heap. The `FilterUp` routine now checks the parent, K, and sees that things would be out of order as they are. So K is moved down to where E was. Then the parent above that, C, is checked. It is in order relative to the target item E, so the C is not moved down. The hole left behind is filled with E, then, as this is the correct position for it.
+
+                  C
+
+               /     \
+
+             H         E
+
+           /   \     /   \
+
+          L     I   M     K
+
+For practice, let's take the above heap and insert another item, D. First, place D temporarily in the next available position: 
+
+                  C
+
+               /     \
+
+             H         E
+
+           /   \     /   \
+
+          L     I   M     K
+
+        /
+
+       D
+
+Then the `FilterUp` routine checks the parent, L, and discovers that L must be moved down. Then the parent above that, H, is checked. it too mush be moved down. Finally C is checked, but it is OK where it is. The hole left where the H had been is where the target D is then inserted.
+
+Things have now been adjusted so that we again have a heap!
+
+----
+
+##Removing from a Heap
+
+We always remove the item from the root. That way we always get the smallest item. The problem is then how to adjust the binary tree so that we again have a heap (with on less item).
+
+The algorithm works like this: First, remove the root item and replace it temporarily with the item in the last position. Call this replacement the target. A `FilterDown` routine is then used to check the path from the root to a leaf for the correct position for this target. The path is chosen by always selecting the smaller child at each node. For example, let's remove the C from this heap: 
+
+                  C
+
+               /     \
+
+             D         E
+
+           /   \     /   \
+
+          H     I   M     K
+
+        /
+
+       L
+
+ First we remove the C and replace it with the last item (the target), L:
+
+                  L
+
+               /     \
+
+             D         E
+
+           /   \     /   \
+
+          H     I   M     K
+
+ The smaller child of L is D. Since D is out of order compared to the target L, we move D up. The smaller child under where D had been is H. When H is compared to L we see that the H too needs to be moved up. Since we are now at a leaf, this empty leaf is where the target L is put.
+
+                  D
+
+               /     \
+
+             H         E
+
+           /   \     /   \
+
+          L     I   M     K
+
+----
+
+ For another example, let's remove the E from the following heap:
+
+                  E
+
+               /     \
+
+             G         K
+
+           /   \     /   \
+
+         J      N   K     X
+
+        / \    /
+
+       X   Y  P
+
+First remove the E and replace it with the target P (the last item):
+
+                  P
+
+               /     \
+
+             G         K
+
+           /   \     /   \
+
+         J      N   K     X
+
+        / \ 
+
+       X   Y
+
+Now use the `FilterDown` routine to filter the P down to its correct position by checking the smaller child, G, which should be moved up, and then the smaller child below that, J, which should also be moved up. Finally, the smaller child, X, under where J had been is checked, but it does not get moved since it is OK relative to the target P. The P is then placed in the empty node above X. We then have the following heap: 
+
+                  G
+
+               /     \
+
+             J         K
+
+           /   \     /   \
+
+         P      N   K     X
+
+        / \ 
+
+       X   Y
 
 
 
