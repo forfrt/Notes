@@ -1,0 +1,697 @@
+
+#Protocol
+
+TLS is a cryptographic protocol designed to secure a conversation that consists of an arbitrary number of messages between two parties. In this chapter, I discuss the most recent protocol version¡ªTLS 1.2¡ªwith a brief mention of earlier protocol versions where appropriate.  
+
+The best way to learn about TLS is to observe real-life traffic. My favorite approach is to use the network-capture tool Wireshark, which comes with a TLS protocol parser: point your favorite browser at a secure web site, tell Wireshark to monitor the connection (it¡¯s best to restrict the capture to just one hostname and port 443), and observe the protocol messages.
+
+After you¡¯re reasonably happy with your understanding of TLS (don¡¯t try too hard to learn it all; it¡¯s very hard to understand every feature, because there are so many of them), you¡¯ll be free to roam the various RFCs and even lurk on the key mailing lists. My two favorite places are the TLS working group document page,2 where you can find the list of key documents and new proposals, and the TLS working group mailing list,3 where you can follow the discussions about the future direction of TLS.
+
+##Record Protocol##
+
+At a high level, TLS is implemented via the record protocol, which is in charge of transporting¡ª and optionally encrypting¡ªall lower-level messages exchanged over a connection.  Each TLS record starts with a short header, which contains information about the record content type (or subprotocol), protocol version, and length. Message data follows the header.
+
+At a high level, TLS is implemented via the record protocol, which is in charge of transporting¡ª and optionally encrypting¡ªall lower-level messages exchanged over a connection.  Each TLS record starts with a short header, which contains information about the record content type (or subprotocol), protocol version, and length. Message data follows the header.
+
+![TLS Record](./img/Cryptography/TLS_Record.png)
+
+----
+
+More formally, the TLS record fields are defined as follows:
+
+    struct {
+        uint8 major;
+        uint8 minor;
+    } ProtocolVersion;
+    
+    enum {
+        change_cipher_spec (20),
+        alert (21),
+        handshake (22),
+        application_data (23)
+    } ContentType;
+    
+    struct {
+        ContentType type;
+        ProtocolVersion version;
+        uint16 length; /* Maximum length is 2^14 (16,384) bytes. */
+        opaque fragment[TLSPlaintext.length];
+    } TLSPlaintext;
+    
+In addition to the visible fields, each TLS record is also assigned a unique 64-bit sequence number, which is not sent over the wire. Each side has its own sequence number and keeps track of the number of records sent by the other side. These values are used as part of the defense against replay attacks. You¡¯ll see how that works later on.
+
+----
+
+The record protocol is a useful protocol abstraction that takes care of several important, high-level aspects of the communication.
+
+1. Message transport
+   
+    The record protocol transports opaque data buffers submitted to it by other protocol layers. If a buffer is longer than the record length limit (16,384 bytes), the record protocol fragments it into smaller chunks. The opposite is also possible; smaller buffers belonging to the same subprotocol can be combined in a single record.
+    
+2. Encryption and integrity validation
+
+    Initially, on a brand new connection, messages are transported without any protection.  (Technically, the TLS_NULL_WITH_NULL_NULL cipher suite is used.) *This is necessary so that the first negotiation can take place*. However, once the handshake is complete, the record layer starts to apply encryption and integrity validation according to the negotiated connection parameters.
+    
+3. Compression
+
+    Transparent compression of data prior to encryption sounds nice in theory, but it was never very common in practice, mainly because everyone was already compressing their outbound traffic at the HTTP level. This feature suffered a fatal blow in 2012, when the CRIME attack exposed it as insecure.5 It¡¯s now no longer used.
+    
+4. Extensibility
+
+    The record protocol takes care of data transport and encryption, but delegates all other features to subprotocols. This approach makes TLS extensible, because new subprotocols can be added easily. With encryption handled by the record protocol, all subprotocols are automatically protected using the negotiated connection parameters.
+    
+The main TLS specification defines four core subprotocols: 
+
+1. handshake protocol, 
+2. change cipher spec protocol, 
+3. application data protocol, 
+4. and alert protocol.
+
+----
+
+##Handshake Protocol##
+
+The handshake is the most elaborate part of the TLS protocol, during which the sides negotiate connection parameters and perform authentication. This phase usually requires six to ten messages, depending on which features are used. There can be many variations in the exchange, depending on the configuration and supported protocol extensions. In practice, we see three common flows: (1) full handshake with server authentication, (2) abbreviated handshake that resumes an earlier session, and (3) handshake with client and server authentication.  
+Handshake protocol messages start with a header that carries the message type (one byte) and length (three bytes). The remainder of the message depends on the message type:
+
+    struct {
+        HandshakeType msg_type;
+        uint24 length;
+        HandshakeMessage message;
+    } Handshake;
+    
+----
+
+##Full Handshake##
+
+Every TLS connection begins with a handshake. If the client hasn¡¯t previously established a session with the server, the two sides will execute a full handshake in order to negotiate a TLS session. During this handshake, the client and the server will perform four main activities:
+
+1. Exchange capabilities and agree on desired connection parameters.
+2. Validate the presented certificate(s) or authenticate using other means.
+3. Agree on a shared master secret that will be used to protect the session.
+4. Verify that the handshake messages haven¡¯t been modified by a third party.
+
+> In practice, steps 2 and 3 are part of a single step called key exchange (or, more generally, key establishment). I prefer to keep them separate in order to emphasize that the security of the protocol depends on correct authentication, which effectively sits outside TLS. Without authentication, an active network attacker can interject herself into the conversation and pose as the other side.
+
+In this section, I discuss the most commonly seen TLS handshake, one between a client that¡¯s not authenticated and a server that is. The subsequent sections handle alternative protocol flows: client authentication and session resumption.
+
+![TLS Handshake](TLS Handshake.png)
+
+1. Client begins a new handshake and submits its capabilities to the server.
+2. Server selects connection parameters.
+3. Server sends its certificate chain (only if server authentication is required).
+4. Depending on the selected key exchange, the server sends additional information required to generate the master secret.
+5. Server indicates completion of its side of the negotiation.
+6. Client sends additional information required to generate the master secret.
+7. Client switches to encryption and informs the server.
+8. Client sends a MAC of the handshake messages it sent and received.
+9. Server switches to encryption and informs the client.
+10. Server sends a MAC of the handshake messages it received and sent.
+
+----
+
+##Clinet Hello##
+
+The ClientHello message is always the first message sent in a new handshake. It¡¯s used to communicate client capabilities and preferences to the server. Clients send this message at the beginning of a new connection, when they wish to renegotiate, or in response to a server¡¯s renegotiation request (indicated by a HelloRequest message).
+
+In the following example, you can see what a ClientHello message could look like. I reduced the amount of information presented for the sake of brevity, but all of the key elements are included.
+
+    Handshake protocol: ClientHello
+        Version: TLS 1.2
+        Random
+            Client time: May 22, 2030 02:43:46 GMT
+            Random bytes: b76b0e61829557eb4c611adfd2d36eb232dc1332fe29802e321ee871
+        Session ID: (empty)
+        Cipher Suites
+            Suite: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+            Suite: TLS_DHE_RSA_WITH_AES_128_GCM_SHA256
+            Suite: TLS_RSA_WITH_AES_128_GCM_SHA256
+            Suite: TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
+            Suite: TLS_DHE_RSA_WITH_AES_128_CBC_SHA
+            Suite: TLS_RSA_WITH_AES_128_CBC_SHA
+            Suite: TLS_RSA_WITH_3DES_EDE_CBC_SHA
+            Suite: TLS_RSA_WITH_RC4_128_SHA
+        Compression methods
+            Method: null
+        Extensions
+            Extension: server_name
+                Hostname: www.feistyduck.com
+        Extension: renegotiation_info
+        Extension: elliptic_curves
+            Named curve: secp256r1
+            Named curve: secp384r1
+        Extension: signature_algorithms
+            Algorithm: sha1/rsa
+            Algorithm: sha256/rsa
+            Algorithm: sha1/ecdsa
+            Algorithm: sha256/ecdsa
+    
+1. Protocol version
+
+    Protocol version indicates the best protocol version the client supports.
+    
+2. Random
+
+    The random field contains 32 bytes of data. Of those, 28 bytes are randomly generated.  The remaining four bytes carry additional information influenced by the client¡¯s clock.
+    
+    Both client and server contribute random data during the handshake. The randomness makes each handshake unique and plays a key role in authentication by preventing replay attacks and verifying the integrity of the initial data exchange.
+    
+3. Session ID
+
+    On the first connection, the session ID field is empty, indicating that the client doesn¡¯t wish to resume an existing session. On subsequent connections, the ID field can contain the session¡¯s unique identifier, enabling the server to locate the correct session state in its cache. The session ID typically contains 32 bytes of randomly generated data and isn¡¯t valuable in itself.
+    
+4. Cipher suites
+
+    The cipher suite block is a list of all cipher suites supported by the client in order of preference.
+    
+5. Compression
+
+    Clients can submit one or more supported compression methods. The default compression method null indicates no compression.
+    
+6. Extensions
+
+    The extension block contains an arbitrary number of extensions that carry additional data. I discuss the most commonly seen extensions later in this chapter.
+    
+----
+
+##ServerHello##
+
+The purpose of the ServerHello message is for the server to communicate the selected connection parameters back to the client. This message is similar in structure to ClientHello but contains only one option per field:
+
+    Handshake protocol: ServerHello
+        Version: TLS 1.2
+        Random
+            Server time: Mar 10, 2059 02:35:57 GMT
+            Random bytes: 8469b09b480c1978182ce1b59290487609f41132312ca22aacaf5012
+        Session ID: 4cae75c91cf5adf55f93c9fb5dd36d19903b1182029af3d527b7a42ef1c32c80
+        Cipher Suite: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        Compression method: null
+        Extensions
+            Extension: server_name
+            Extension: renegotiation_info
+
+The server isn¡¯t required to support the same best version supported by the client. If it doesn¡¯t, it offers some other protocol version in the hope that the client will accept it.
+    
+----
+
+##Certificate##
+
+The Certificate message is typically used to carry the server¡¯s X.509 certificate chain. Certificates are provided one after another, in ASN.1 DER encoding. The main certificate must be sent first, with all of the intermediary certificates following in the correct order. The root can and should be omitted, because it serves no purpose in this context.
+
+The server must ensure that it sends a *certificate appropriate for the selected cipher suite*.  For example, the public key algorithm must match that used in the suite. In addition, *some key exchange mechanisms depend upon certain data being embedded in the certificate, and the certificates must be signed with algorithms supported by the client. All of this implies that the server could be configured with multiple certificates (each with a potentially different chain).
+
+This Certificate message is optional, because not all suites use authentication and because there are some authentication methods that don¡¯t require certificates. Furthermore, although the default is to use X.509 certificates other forms of identification can be carried in this message; some suites rely on PGP keys.8
+
+----
+
+##ServerKeyExchange##
+
+The purpose of the ServerKeyExchange message is to carry additional data needed for key exchange. Its contents vary and depend on the negotiated cipher suite. In some cases, the server is not required to send anything, which means that the ServerKeyExchange message is not sent at all.
+
+----
+
+##ServerHelloDone##
+
+ServerHelloDone is a signal that the server has sent all intended handshake messages. After this, the server waits for further messages from the client.
+
+----
+
+##ClientKeyExchange##
+
+The ClientKeyExchange message carries the client¡¯s contribution to the key exchange. It¡¯s a mandatory message whose contents depend on the negotiated cipher suite.
+
+----
+
+##ChangeCipherSpec##
+
+The ChangeCipherSpec message is a signal that the sending side obtained enough information to manufacture the connection parameters, generated the encryption keys, and *is switching to encryption*. Client and server both send this message when the time is right.
+
+> ChangeCipherSpec is not a handshake message. Rather, it¡¯s implemented as the only message in its own subprotocol. One consequence of this decision is that this message is not part of the handshake integrity validation mechanism. This makes TLS more difficult to implement correctly; in June 2014 OpenSSL disclosed that it had been incorrectly handling ChangeCipherSpec messages, leaving it open to active network attacks.
+
+----
+
+##Finished##
+
+The Finished message is the signal that the handshake is complete. Its contents are encrypted, which allows both sides to securely exchange the data required to verify the integrity of the entire handshake.
+
+This message carries the verify_data field, which is *a hash of all handshake messages as each side saw them mixed in with the newly negotiated master secret*. This is done via a pseudorandom function (PRF), which is designed to produce an arbitrary amount of pseudorandom data. I describe the PRF later in this chapter. The Hash function is the same as in the PRF unless the negotiated suite specifies a different algorithm. The calculations are the same in both cases, although each side uses a different label: ¡°client finished¡± for the client and ¡°server finished¡± for the server:
+
+    verify_data = PRF(master_secret, finished_label, Hash(handshake_messages))
+    
+Because the Finished messages are encrypted and their integrity guaranteed by the negotiated MAC algorithm, an active network attacker can¡¯t change the handshake messages and then forge the correct verify_data values.
+
+The attacker could also try to find a set of forged handshake messages that have exactly the same verify_data values as the genuine messages. That¡¯s not an easy attack in itself, but because the hashes are mixed in with the master secret (which the attacker doesn¡¯t know) she can¡¯t even attempt that approach.
+
+----
+
+##Client Authentication##
+
+Although authentication of either side is optional, server authentication is almost universally required. If the server selects a suite that isn¡¯t anonymous, it¡¯s required to follow up with its certificate chain in the Certificate message.
+
+In contrast, the server requests client authentication by sending a **CertificateRequest** message that lists acceptable client certificates. In response, the client sends the certificate in its own **Certificate** message (in the same format used by the server for its certificates) and then proves possession of the corresponding private key with a **CertificateVerify** message.
+
+![TSL Handshake with Client Authentication](./img/Cryptography/TSL Handshake with Client Authentication)
+
+Only an authenticated server is allowed to request client authentication. For this reason, this option is known as mutual authentication.
+
+###CertificateRequest###
+
+With the CertificateRequest message, the server requests client authentication and communicates acceptable certificate public key and signature algorithms to the client. Optionally, it can also send its list of acceptable issuing certification authorities, indicated by using their distinguished names:
+
+    struct {
+        ClientCertificateType certificate_types;
+        SignatureAndHashAlgorithm supported_signature_algorithms;
+        DistinguishedName certificate_authorities;
+    } CertificateRequest;
+
+----
+
+###CertificateVerify###
+
+The client uses the **CertificateVerify** message to prove the possession of the private key corresponding to the public key in the previously sent client certificate. This message contains a signature of all the handshake messages exchanged until this point:
+
+----
+
+###Session Resumption###
+
+The full handshake is an elaborate protocol that requires many handshake messages and two network round-trips before the client can start sending application data. In addition, the cryptographic operations carried out during the handshake often require intensive CPU processing. Authentication, usually in the form of client and server certificate validation (and revocation checking), requires even more effort. Much of this overhead can be avoided with an abbreviated handshake.
+
+The original session resumption mechanism is based on both the client and the server keeping session security parameters for a period of time after a fully negotiated connection is terminated. A server that wishes to use session resumption *assigns it a unique identifier called the session ID*. The server then sends the session ID back to the client in the ServerHello message. (You can see this in the example in the previous section.) 
+
+A client that wishes to resume an earlier session submits the appropriate session ID in its ClientHello. If the server is willing to resume that session, it returns the same session ID in the ServerHello, generates a new set of keys using the previously negotiated master secret, switches to encryption, and sends its Finished message. The client, when it sees that the session is being resumed, does the same. The result is a short handshake that requires only one network round-trip.
+
+![Session_Resumption](./img/Cryptography/Session_Resumption)
+
+The alternative to server-side session caching and resumption is to use session tickets, introduced by RFC 4507 in 2006 and subsequently updated by RFC 5077 in 2008. In this case, all state is kept by the client (the mechanism is similar to HTTP cookies), but the message flow is otherwise the same.
+
+----
+
+###Key Exchange###
+
+The key exchange is easily the most interesting part of the handshake. In TLS, *the security of the session depends on a 48-byte shared key called the master secret*. The goal of key exchange is to generate another value, the premaster secret, which is the value from which the master secret is constructed.
+
+TLS supports many key exchange algorithms in order to support various certificate types, public key algorithms, and key establishment protocols. Some are defined in the main TLS protocol specification, but many more are defined elsewhere. You can see the most commonly used algorithms in the following table.
+
+    | dh_anon     | Diffie-Hellman (DH) key exchange without authentication                           |
+    | dhe_rsa     | Ephemeral DH key exchange with RSA authentication                                 |
+    | ecdh_anon   | Ephemeral Elliptic Curve DH (ECDH) key exchange without authentication (RFC 4492) |
+    | ecdhe_rsa   | Ephemeral ECDH key exchange with RSA authentication (RFC 4492)                    |
+    | ecdhe_ecdsa | Ephemeral ECDH key exchange with ECDSA authentication (RFC 4492)                  |
+    | krb5        | Kerberos key exchange (RFC 2712)                                                  |
+    | rsa         | RSA key exchange and authentication                                               |
+    | psk         | Pre-Shared Key (PSK) key exchange and authentication (RFC 4279)                   |
+    | dhe_psk     | Ephemeral DH key exchange with PSK authentication (RFC 4279)                      |
+    | rsa_psk     | PSK key exchange and RSA authentication (RFC 4279)                                |
+    | srp         | Secure Remote Password (SRP) key exchange and authentication (RFC 5054)           |
+    
+Which key exchange is used depends on the negotiated suite. Once the suite is known, both sides know which algorithm to follow. In practice, there are four main key exchange algorithms:
+
+1. RSA
+
+    RSA is effectively the standard key exchange algorithm. It¡¯s universally supported but suffers from one serious problem: its design allows a passive attacker to decrypt all encrypted data, provided she has access to the server¡¯s private key. Because of this, the RSA key exchange is being slowly replaced with other algorithms, those that support forward secrecy. The RSA key exchange is a key transport algorithm; the client generates the premaster secret and transports it to the server, encrypted with the server¡¯s public key.
+    
+2. DHE_RSA
+
+    Ephemeral Diffie-Hellman (DHE) key exchange is a well-established algorithm. It¡¯s liked because it provides forward secrecy but disliked because it¡¯s slow. DHE is a key agreement algorithm; the negotiating parties both contribute to the process and agree on a common key. In TLS, DHE is commonly used with RSA authentication.
+    
+3. ECDHE_RSA and ECDHE_ECDSA
+
+    Ephemeral elliptic curve Diffie-Hellman (ECDHE) key exchange is based on **elliptic curve cryptography**, which is relatively new. It¡¯s liked because it¡¯s fast and provides forward secrecy. It¡¯s well supported only by modern clients. ECDHE is a key agreement algorithm conceptually similar to DHE. In TLS, ECDHE can be used with either RSA or ECDSA authentication.
+    
+----
+
+No matter which key exchange is used, the server has the opportunity to speak first by sending its ServerKeyExchange message:
+
+    struct {
+        select (KeyExchangeAlgorithm) {
+            case dh_anon:
+                ServerDHParams params;
+            case dhe_rsa:
+                ServerDHParams params;
+                Signature params_signature;
+            case ecdh_anon:
+                ServerECDHParams params;
+            case ecdhe_rsa:
+            case ecdhe_ecdsa:
+                ServerECDHParams params;
+                Signature params_signature;
+            case rsa:
+            case dh_rsa:
+            /* no message */
+        };
+    } ServerKeyExchange;
+
+As you can see in the message definition, there are several algorithms for which there is nothing for the server to send. This will be the case when all the required information is already available elsewhere. Otherwise, the server sends its key exchange parameters. Crucially, the server also sends a signature of the parameters, which is used for authentication.  Using the signature, the client is able to verify that it¡¯s talking to the party that holds the private key corresponding to the public key from the certificate.
+
+----
+
+The ClientKeyExchange message is always required; the client uses it to sends its key exchange parameters:
+
+    struct {
+        select (KeyExchangeAlgorithm) {
+            case rsa:
+                EncryptedPreMasterSecret;
+            case dhe_dss:
+            case dhe_rsa:
+            case dh_dss:
+            case dh_rsa:
+            case dh_anon:
+                ClientDiffieHellmanPublic;
+            case ecdhe:
+                ClientECDiffieHellmanPublic;
+        } exchange_keys;
+    } ClientKeyExchange;
+    
+----
+
+###RSA Key Exchange###
+
+The RSA key exchange is quite straightforward; the client generates a premaster secret (a 46- byte random number), encrypts it with the server¡¯s public key, and sends it in the **ClientKeyExchange** message. To obtain the premaster secret, the server only needs to decrypt the message. TLS uses the RSAES-PKCS1-v1_5 encryption scheme, which is defined in RFC 3447.11
+
+> The RSA key exchange can operate in this way because the RSA algorithm can be used for encryption and digital signing. Other popular key types, such as DSA (DSS) and ECDSA, can be used only for signing.
+
+The simplicity of the RSA key exchange is also its principal weakness. The premaster secret is encrypted with the server¡¯s public key, which usually remains in use for several years.  Anyone with access to the corresponding private key can recover the premaster secret and construct the same master secret, compromising session security.
+
+The attack doesn¡¯t have to happen in real time. A powerful adversary could establish a longterm operation to record all encrypted traffic and wait patiently until she obtains the key.  For example, advances in computer power could make it possible to brute-force the key. Alternatively, the key could be obtained using legal powers, coercion, bribery, or by breaking into a server that uses it. After the key compromise, it¡¯s possible to decrypt all previously recorded traffic.
+
+The other common key exchange mechanisms used in TLS don¡¯t suffer from this problem and are said to support forward secrecy. When they are used, each connection uses an independent master secret. A compromised server key could be used to impersonate the server but couldn¡¯t be used to retroactively decrypt any traffic.
+
+----
+
+###Diffie-Hellman Key Exchange###
+
+The Diffie-Hellman (DH) key exchange is a key agreement protocol that allows two parties to establish a shared secret over an insecure communication channel
+
+> The shared secret negotiated in this way is safe from passive attacks, but an active attacker could hijack the communication channel and pretend to be the other party.  This is why the DH key exchange is commonly used with authentication.
+
+Without going into the details of the algorithm, the trick is to use a mathematical function that¡¯s easy to calculate in one direction but very difficult to reverse, even when some of the aspects of the exchange are known. The best analogy is that of color mixing: if you have two colors, you can easily mix them to get a third color, but it¡¯s very difficult to determine the exact color shades that contributed to the mix.
+
+The DH key exchange requires six parameters; two (dh_p and dh_g) are called domain parameters and are selected by the server. During the negotiation, the client and server each generate two additional parameters. Each side sends one of its parameters (dh_Ys and dh_Yc) to the other end, and, with some calculation, they arrive at the shared key.
+
+Ephemeral Diffie-Hellman (DHE) key exchange takes place when none of the parameters are reused. In contrast, there are some DH key exchange approaches in which some of the parameters are static and embedded in the server and client certificates. In this case, the result of the key exchange is always the same shared key, which means that there is no forward secrecy.
+
+TLS supports static DH key exchanges, but they¡¯re not used. When a DHE suite is negotiated, the server sends all of its parameters in the **ServerDHParams** block:
+
+    struct {
+        opaque dh_p;
+        opaque dh_g;
+        opaque dh_Ys;
+    } ServerDHParams;
+    
+The client, in response, sends its public parameter (dh_Yc):
+
+    struct {
+        select (PublicValueEncoding) {
+            case implicit:
+                /* empty; used when the client's public
+                parameter is embedded in its certificate */
+            case explicit:
+                opaque dh_Yc;
+        } dh_public;
+    } ClientDiffieHellmanPublic;
+    
+There are some practical problems with the DH exchange as it's currently used.
+
+1. DH parameter security
+
+    The security of the DH key exchange depends on the quality of the domain parameters.  A server could send weak or insecure parameters and compromise the security of the session. This issue was highlighted in the Triple Handshake Attack research paper, which covered weak DH parameters used as one of the attack vectors.14
+
+2. DH parameter negotiation
+
+    TLS doesn¡¯t provide facilities for the client to communicate the strength of DH parameters it¡¯s willing to use. For example, some clients might want to avoid using weak parameters, or alternately, they might not be able to support stronger parameters. Because of this, a server that chooses a DHE suite can effectively only ¡°hope¡± that the DH parameters will be acceptable to the client.
+    
+    Historically speaking, DH parameters have been largely ignored and their security neglected. Many libraries and servers use weak DH parameters by default and often don't provide a means to configure DH parameters strength. For this reason, it's not uncommon to see server using weak 1024-bit parameters and insecure 768- and even 512-bit parameters. More recently, some platforms have started using strong parameters.
+    
+These problems could be addressed by stanardizing a set of domain parameters of varying strengths and extending TLS to enable clients to communicate their preferences.
+
+----
+
+###Elliptic Curve Diffie-Hellman Key Exchange###
+
+The ephemeral elliptic curve Diffie-Hellman (ECDH) key exchange is conceptually similar to DH, but it uses a different mathematical foundation at the core. As the name implies, ECDHE is based on elliptic curve (EC) cryptography.
+
+An ECDH key exchange takes place over a specific elliptic curve, which is for the server to define. The curve takes the role of domain parameters in DH. In theory, static ECDH key exchange is supported, but in practice only the ephemeral variant (ECDHE) is used.
+
+The server starts the key exchange by submitting its selected elliptic curve and public parameter (EC point):
+
+    struct {
+        ECParameters curve_parameter;
+        ECPoint public;
+    } ServerECDHParams;
+    
+The server can specify an arbitrary (explicit) curve for the key exchange, but this facility is not used in TLS. Instead, the server will specify a named curve, which is a reference to one of the possible predefined parameters:
+
+    struct {
+        ECCurveType curve_type;
+        select (curve_type){
+            case explicit_prime:
+                /* ommited for clarity */
+            case explicit_char2:
+                /* ommited for clarity */
+            case named_curve:
+                NamedCurve namedcurve;
+        }
+    
+    }
+    
+The client then submits its own public parameter. After that, the calculation take place to arrive at the premaster secret:
+
+The client then submits its own public parameter. After that, the calculations take place to arrive at the premaster secret:
+
+        struct {
+        select (PublicValueEncoding) {
+            case implicit:
+            /* empty */
+            case explicit:
+                ECPoint ecdh_Yc;
+        } ecdh_public;
+    } ClientECDiffieHellmanPublic;
+
+The use of predefined parameters, along with the elliptic_curve extension that clients can use to submit supported curves, enables the server to select a curve that both sides support.  You¡¯ll find more information on the available named curves later in the section called ¡°Elliptic Curve Capabilities¡±.
+
+----
+
+##Authentication##
+
+In TLS, authentication is tightly coupled with key exchange in order to *avoid repetition of costly cryptographic operations*. In most cases, the basis for authentication will be public key cryptography (most commonly RSA, but sometimes ECDSA) supported by certificates.  Once the certificate is validated, the client has a known public key to work with. After that, it¡¯s down to the particular key exchange method to use the public key in some way to authenticate the other side.
+
+During the RSA key exchange, the client generates a random value as the premaster secret and *sends it encrypted with the server¡¯s public key*. The server, which is in possession of the corresponding private key, decrypts the message to obtain the premaster secret. The authentication is implicit: *it is assumed that only the server in possession of the corresponding private key can retrieve the premaster secret, construct the correct session keys, and produce the correct Finished message*.
+
+During the DHE and ECDHE exchanges, the server contributes to the key exchange with its parameters. The parameters are signed with its private key. The client, which is in possession of the corresponding public key (obtained from the validated certificate), can verify that the parameters genuinely arrived from the intended server.
+
+----
+
+##Encryption##
+
+TLS can encrypt data in a variety of ways, using ciphers such 3DES, AES, ARIA, CAMELLIA, RC4, and SEED. AES is by far the most popular cipher. Three types of encryption are supported: stream, block, and authenticated encryption. In TLS, integrity validation is part of the encryption process; it¡¯s handled either explicitly at the protocol level or implicitly by the negotiated cipher.
+
+----
+
+###Stream Encryption###
+
+When a stream cipher is used, encryption consists of two steps. In the first step, a MAC of the record sequence number, header, and plaintext is calculated. The inclusion of the header in the MAC ensures that the unencrypted data in the header can¡¯t be tampered with. The inclusion of the sequence number in the MAC ensures that the messages can¡¯t be replayed.  In the second step, the plaintext and the MAC are encrypted to form ciphertext.  
+
+![TLS_Stream_Encryption.png](TLS_Stream_Encryption.png)
+
+> A suite that uses integrity validation but no encryption is implemented in the same way as encryption using a stream cipher. The plaintext is simply copied to the TLS record, but the MAC is calculated as described here.
+
+----
+
+###Block Encryption###
+
+When block ciphers are used, encryption is somewhat more involved, because it¡¯s necessary to work around the properties of block encryption. The following steps are required:
+
+1. Calculate a MAC of the sequence number, header, and plaintext.
+2. Construct padding to ensure that the length of data prior to encryption is a multiple of the cipher block size (usually 16 bytes).
+3. Generate an unpredictable initialization vector (IV) of the same length as the cipher block size. The IV is used to ensure that the encryption is not **deterministic**.
+4. Use the CBC block mode to encrypt plaintext, MAC, and padding.
+5. Send the IV and ciphertext together.
+
+![TLS_Block_Encryption.png](TLS_Block_Encryption.png)
+
+This process is known as MAC-then-encrypt, and it has been a source of many problems. In TLS 1.1 and newer versions, each record includes an explicit IV. TLS 1.0 and older versions use implicit IVs (the encrypted block from the previous TLS record is used as the IV for the next), but that approach was found to be insecure in 2011
+
+The other problem is that the MAC calculation doesn¡¯t include padding, leaving an opportunity for an active network attacker to attempt padding oracle attacks, which were also successfully demonstrated against TLS.17 The issue here is that the protocol specifies a block encryption approach that¡¯s difficult to implement securely in practice. As far as we know, current implementations are not obviously vulnerable at the moment, but this is a weak spot that leaves many uneasy
+
+A proposal for a different arrangement called encrypt-then-MAC has recently been submitted for publication.18 In this alternative approach, plaintext and padding are first encrypted and then fed to the MAC algorithm. This ensures that the active network attacker can¡¯t manipulate any of the encrypted data.
+
+----
+
+###Authenticated Encryption###
+
+Authenticated ciphers combine encryption and integrity validation in one algorithm. Their full name is **authenticated encryption with associated data** (AEAD). On the surface, they appear to be a cross between stream ciphers and block ciphers. They don¡¯t use padding19 and initialization vectors, but they do use a special value called **nonce**, which must be unique.  TLS supports GCM and CCM authenticated ciphers, but only the former are currently used in practice. The process is somewhat simpler than with block ciphers:
+
+1. Generate a unique 64-bit nonce.
+1. Encrypt plaintext with the authenticated encryption algorithm; *at the same time feed it the sequence number and record header for it to take into account as additional data for purposes of integrity validation*.
+1. Send the nonce and ciphertext together.
+
+Authenticated encryption is currently favored as the best encryption mode available in TLS, because it avoids the issues inherent with the MAC-then-encrypt approach.
+
+----
+
+##Renegotiation##
+
+Most TLS connections start with a handshake, proceed to exchange application data, and shutdown the conversation at the end. When renegotiation is requested, a new handshake takes place to agree on new connection security parameters. There are several cases in which this feature might be useful:
+
+- Client certificates
+
+    Client certificates are not used often, but some sites use them because they provide two-factor authentication. There are two ways to deploy client certificates. You can require them for all connections to a site, but this approach is not very friendly to those who don¡¯t (yet) have a certificate; without a successful connection, you can¡¯t send them any information and instructions. Handling error conditions is equally impossible. For this reason, many operators prefer to allow connections to the root of the web site without a certificate and designate a subsection in which a client certificate is required. When a user attempts to navigate to the subsection, the server issues a request to renegotiate and then requests a client certificate.
+    
+- Information hiding
+
+    Such a two-step approach to enabling client certificates has an additional advantage: the second handshake is encrypted, which means that a passive attacker can¡¯t monitor the negotiation and, crucially, can¡¯t observe the client certificates. This addresses a potentially significant privacy issue, because client certificates usually contain identifying information. For example, the Tor protocol can use renegotiation in this way.
+    
+- Change of encryption strength
+
+    Back in the day, when web site encryption was brand new (and very CPU intensive) it was common to see sites *split their encryption configuration into two levels*. You would use weaker encryption by default but require strong encryption in certain areas.  21 As with client certificates, this feature is implemented via renegotiation. When you attempt to cross into the more secure subsection of the web site, the server requests stronger security.
+    
+In addition, there are two situation in which renegotiation is required by the procotol, although neither is likely to occur in practice.
+
+- Server-Gated Crypto
+
+    Back in the 1990s, when the United States did not allow export of strong cryptography, a feature called Server-Gated Crypto (SGC) was used to enable US vendors to ship strong cryptography worldwide but enable it only for selected (mostly financial) US web sites. Browsers would use weak cryptography by default, upgrading to strong cryptography after encountering a special certificate. This upgrade was entirely client controlled, and it was implemented via renegotiation. Only a few selected CAs were allowed to issue the special certificates. Cryptography export restrictions were relaxed in 2000, making SGC obsolete.
+    
+- TLS record counter overflow
+
+    Internally, TLS packages data into records. Each record is assigned a unique 64-bit sequence number, which grows over time as records are exchanged. Client and server use one sequence number each for the records they send. The protocol mandates renegotiation if a sequence number is close to overflowing. However, because the counter is a very large number, overflows are unlikely in practice.
+    
+- The protocol allows the client to request renegotiation at any time simply by sending a new **ClientHello** message, exactly as when starting a brand-new connection. This is known as **client-initiated** renegotiation
+
+- If the server wishes to renegotiate, it sends a **HelloRequest** protocol message to the client; that¡¯s a signal to the client to stop sending application data and initiate a new handshake.  This is known as **server-initiated renegotiation**.
+
+Renegotiation, as originally designed, is insecure and can be abused by an active network attacker in many ways. The weakness was discovered in 200922 and corrected with the introduction of the renegotiation_info extension, which I discuss later in this chapter.
+
+----
+
+##Application Data Protocol##
+
+The application data protocol carries application messages, which are just buffers of data as far as TLS is concerned. These messages are packaged, fragmented, and encrypted by the record layer, using the current connection security parameters.
+
+##Alert Protocol##
+
+Alerts are intended to use a simple notification mechanism to inform the other side in the communication of exceptional circumstances. They¡¯re generally used for error messages, with the exception of **close_notify**, which is used during connection shutdown. Alerts are very simple and contain only two fields:
+
+    struct {
+        AlertLevel level;
+        AlertDescription description;
+    } Alert;
+    
+The AlertLevel field carries the alert severity, which can be either `warning` or `fatal`. The AlertDescription is simply an alert code; for better or worse, there are no facilities to convey arbitrary information, for example, an actual error message.
+
+Fatal messages result in an immediate termination of the current connection and invalidation of the session (ongoing connections of the same session may continue, but the session can no longer be resumed). The side sending a warning notification doesn¡¯t terminate the connection, but the receiving side is free to react to the warning by sending a fatal alert of its own.
+
+----
+
+##Connection Closure##
+
+Closure alerts are used to shutdown a TLS connection in an orderly fashion. Once one side decides that it wants to close the connection, it sends a **close_notify** alert. The other side, upon receiving the alert, discards any pending writes and sends a **close_notify** alert of its own. If any messages arrive after the alerts, they are ignored.
+
+This simple shutdown protocol is necessary in order to avoid truncation attacks, in which an active network attacker interrupts a conversation midway and blocks all further messages.  Without the shutdown protocol, the two sides can¡¯t determine if they are under attack or if the conversation is genuinely over.
+
+----
+
+##Cryptographic Operations##
+
+This section contains a brief discussion of several important aspects of the protocol: the pseudorandom function, master secret construction, and the generation of connection keys.  
+
+###Pseudorandom Function###
+
+In TLS, a **pseudorandom function** (PRF) is used to generate arbitrary amounts of pseudorandom data. The PRF takes a secret, a seed, and a unique label. From TLS 1.2 onwards, all cipher suites are required to explicitly specify their PRF. All TLS 1.2 suites use a PRF based on HMAC and SHA256; the same PRF is used with older suites when they are negotiated with TLS 1.2.
+
+TLS 1.2 defines a PRF based on a data expansion function P_hash, which uses HMAC and any hash function:
+
+    P_hash(secret, seed) = HMAC_hash(secret, A(1) + seed) +
+    HMAC_hash(secret, A(2) + seed) +
+    HMAC_hash(secret, A(3) + seed) + ...
+    
+The A(i) function is defined as follows:
+
+    A(1) = HMAC_hash(secret, seed)
+    A(2) = HMAC_hash(secret, A(1))
+    ...
+    A(i) = HMAC_hash(secret, A(i-1))
+
+The PRF is a wrapper around P_hash that combines the label with the seed:
+
+    PRF(secret, label, seed) = P_hash(secret, label + seed)
+    
+The introduction of a seed and a label allows the same secret to be reused in different contexts to produce different outputs (because the label and the seed are different).
+
+----
+
+###Master Secrate###
+
+As you saw earlier, the output from the key exchange process is the premaster secret. This value is further processed, using the PRF, to produce a 48-byte (384-bit) master secret:
+
+    master_secret = PRF(pre_master_secret, "master secret",
+        ClientHello.random + ServerHello.random)
+        
+The processing occurs because the premaster secret might differ in size depending on the key exchange method used. Also, because the client and server random fields are used as the seed, the master secret is also effectively random23 and bound to the negotiated handshake.
+
+The binding between the master secret and the handshake has been shown to be insufficient because it relies only on the exchanged random values. An attacker can observe and replicate these values to create multiple sessions that share the same master key. This weakness has been exploited by the Triple Handshake Attack mentioned earlier
+
+----
+
+###Key Generation###
+
+The key material needed for a connection is generated in a single PRF invocation based on the master secret and seeded with the client and server random values:
+
+    key_block = PRF(SecurityParameters.master_secret,
+        "key expansion",
+        SecurityParameters.server_random +
+        SecurityParameters.client_random)
+        
+The key block, which varies in size depending on the negotiated parameters, is divided into up to six keys: two MAC keys, two encryption keys, and two initialization vectors (only when needed; stream ciphers don¡¯t use IV). AEAD suites don¡¯t use MAC keys. Different keys are used for different operations, which is recommended to prevent unforeseen interactions between cryptographic primitives when the key is shared. Also, because the client and the server have their own sets of keys, a message produced by one can¡¯t be interpreted to have been produced by the other. This design decision makes the protocol more robust.
+
+> When resuming a session, the same session master key is used during the key block generation. However, the PRF is seeded with the client and server random values from the current handshake. Because these random values are different in every handshake, the keys are also different every time.  
+
+----
+
+###Cipher Suite###
+
+As you have seen, TLS allows for a great deal of flexibility in implementing the desired security properties. It¡¯s effectively a framework for creating actual cryptographic protocols. Although previous versions hardcoded some cryptographic primitives into the protocol, TLS 1.2 is fully configurable. *A cipher suite is a selection of cryptographic primitives and other parameters that define exactly how security will be implemented*. A suite is defined roughly by the following attributes:
+
+- Authentication method
+- Key exchange method
+- Encryption algorithm
+- Encryption key size
+- Cipher mode (when applicable)
+- MAC algorithm (when applicable)
+- PRF (TLS 1.2 only¡ªdepends on the protocol otherwise)
+- Hash function used for the Finished message (TLS 1.2)
+- Length of the verify_data structure (TLS 1.2)
+
+Cipher suite names tend to be long and descriptive and pretty consistent: they are made from the names of the key exchange method, authentication method, cipher definition, and optional MAC or PRF algorithm.24
+
+![TLS_Cipher_Suite.png](TLS_Cipher_Suite.png)
+
+Although a suite name is not sufficient to convey all security parameters, the most important ones are easy to deduce. The information on the remaining parameters can be found in the RFC that carries the suite definition. You can see the security properties of a few selected suites in the following table. At the time of writing, there are more than 300 official cipher suites, which is too many to list here. For the complete list, head to the official TLS page over at IANA.
+
+TLS1.2-additional custom parameters and authenticate suites -> fully decode cipher suite name
+
+- Authenticated suites combine authentication and encryption in the cipher, which means that integrity validation need not be performed at the TLS level. GCM suites use the last segment to indicate the PRF instead of the MAC algorithm. CCM suites omit this last segment completely.  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

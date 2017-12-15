@@ -35,27 +35,30 @@
 30. [[BSE(The Bristol Stock Exchange)]]
 31. [[Makefile]]
 32. [[Markdown]]
-33. [[Mercurial]]
-34. [[Multi-precision multiplication]]
-35. [[MongoDB]]
-36. [[Node.js]]
-37. [[Nginx]]
-38. [[PHP]]
-39. [[PHP Sandbox]]
-40. [[PHP_SourceCode]]
-41. [[PHP_Ext]]
-42. [[PostgreSQL]]
-43. [[Socket]]
-44. [[Software Configuration Tool]]
-45. [[STL]]
-46. [[Windows Batch Processing]]
-47. [[Web Shell]]
+33. [Maven](Maven)
+35. [[Mercurial]]
+36. [[Multi-precision multiplication]]
+37. [[MongoDB]]
+38. [[Node.js]]
+39. [[Nginx]]
+40. [[PHP]]
+41. [[PHP Sandbox]]
+42. [[PHP_SourceCode]]
+43. [[PHP_Ext]]
+44. [[PostgreSQL]]
+45. [[Socket]]
+46. [[Software Configuration Tool]]
+47. [[STL]]
+48. [WAM](WAM)
+49. [[Web Shell]]
+50. [[Windows Batch Processing]]
 
 ##Theory
 
 1. [3gpp](3gpp)
-1. [[Algorithmic and Economic Aspects of the Internet]]
 1. [[Advanced Computer Architecture]]
+1. [[Algorithmic and Economic Aspects of the Internet]]
+1. [[Artificial Intelligence]]
 1. [[BigTable]]
 1. [[Cloud Computing]]
 1. [[Coding]]
@@ -72,17 +75,19 @@
 1. [[Linux]]
 1. [[Linux Shell]]
 1. [[Japanese]]
-1. [[Microservice]]
-1. [[Modern Cryptography]]
-1. [[MindMapping]]
-1. [[System Security]]
-1. [[Watermaking]]
-1. [[小鹤双拼]]
-1. [[Artificial Intelligence]]
+2. [json ld](json-ld)
+3. [[Microservice]]
+4. [[Modern Cryptography]]
+5. [[MindMapping]]
 1. [[SLAM]]
+6. [[System Security]]
+7. [UMA](UMA)
+8. [[Watermaking]]
+9. [[小鹤双拼]]
 
 ##Books
 
+1. [Ivan Ristic-Bulletproof SSL and TLS_ Understanding and Deploying SSL_TLS and PKI to Secure Servers and Web Applications-Feisty Duck (2014)](Ivan Ristic-Bulletproof SSL and TLS_ Understanding and Deploying SSL_TLS and PKI to Secure Servers and Web Applications-Feisty Duck (2014))
 1. [[Linux Network Programming]]
 1. [[The Linux Programmer's Guide]]
 2. [Object-oriented Programming in ANSI-C](Object-oriented Programming in ANSI-C)
@@ -92,13 +97,15 @@
 
 ##Articles
 
-1. [[Webhsell威胁情报分析]]
-2. [[Webshell文件名]]
-4. [[Webshell路径]]
-5. [[A SANDBOX-BASED APPROACH TO THE DEOBFUSCATION AND DISSECTION OF PHP-BASED MALWARE]]
-6. [[CVE-2015-4852_breenmachine]]
-7. [Linux内核的5个子系统](Linux内核的5个子系统)
-9. [浅谈内存布局](浅谈内存布局)
+1. [[A SANDBOX-BASED APPROACH TO THE DEOBFUSCATION AND DISSECTION OF PHP-BASED MALWARE]]
+1. [[CVE-2015-4852_breenmachine]]
+3. [DID Spec-Implementers Draft 01](DID Spec-Implementers Draft 01)
+4. [How Sovrin works](How Sovrin works)
+5. [Linux内核的5个子系统](Linux内核的5个子系统)
+6. [Method For Generating Public and Private Key Pairs Without Using a Passpharase](Method For Generating Public and Private Key Pairs Without Using a Passpharase)
+7. [Practical Byzantine Fault Tolerance](Practical Byzantine Fault Tolerance)
+9. [[Webhsell威胁情报分析]]
+11. [浅谈内存布局](浅谈内存布局)
 
 ##Work
 
@@ -106,6 +113,8 @@
 1. [[问题]]
 1. [[补丁]]
 1. [[Password]]
+8. [[Webshell文件名]]
+9. [[Webshell路径]]
 
 ##Course
 
@@ -136,6 +145,8 @@
 1. [[Ossim]]
 1. [[vArmour]]
 1. [[青藤云安全]]
+10. [uPort Whitepaper](uPort Whitepaper)
+8. [PikcioChain](PikcioChain)
 
 # Sources
 

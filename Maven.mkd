@@ -1,0 +1,65 @@
+
+#Welcome to Apache Maven
+
+Apache Maven is a software project management and comprehension tool. Based on the concept of a project object model (POM), Maven can manage a project's build, reporting and documentation from a central piece of information. 
+
+****
+
+#Maven¡¯s Objectives
+
+Maven¡¯s primary goal is to allow a developer to comprehend the complete state of a development effort in the shortest period of time. In order to attain this goal there are several areas of concern that Maven attempts to deal with:
+
+- Making the build process easy
+- Providing a uniform build system
+- Providing quality project information
+- Providing guidelines for best practices development
+- Allowing transparent migration to new features
+
+----
+
+##Making the build process easy
+
+While using Maven doesn¡¯t eliminate the need to know about the underlying mechanisms, Maven does provide a lot of shielding from the details.
+
+----
+
+##Providing a uniform build system
+
+Maven allows a project to build using its project object model (POM) and a set of plugins that are shared by all projects using Maven, providing a uniform build system. Once you familiarize yourself with how one Maven project builds you automatically know how all Maven projects build saving you immense amounts of time when trying to navigate many projects.
+
+----
+
+##Providing quality profject information
+
+Maven provides plenty of useful project information that is in part taken from your POM and in part generated from your project¡¯s sources. For example, Maven can provide:
+
+- Change log document created directly from source control
+- Cross referenced sources
+- Mailing lists
+- Dependency list
+- Unit test reports including coverage
+
+As Maven improves the information set provided will improve, all of which will be transparent to users of Maven.
+
+Other products can also provide Maven plugins to allow their set of project information alongside some of the standard information given by Maven, all still based on the POM.
+
+----
+
+##Providing guidelines for best practices development
+
+Maven aims to gather current principles for best practices development, and make it easy to guide a project in that direction.
+
+For example, specification, execution, and reporting of unit tests are part of the normal build cycle using Maven. Current unit testing best practices were used as guidelines:
+
+- Keeping your test source code in a separate, but parallel source tree
+- Using test case naming conventions to locate and execute tests
+- Have test cases setup their environment and don¡¯t rely on customizing the build for test preparation.
+
+Maven also aims to assist in project workflow such as release management and issue tracking.
+
+Maven also suggests some guidelines on how to layout your project¡¯s directory structure so that once you learn the layout you can easily navigate any other project that uses Maven and the same defaults.
+
+
+****
+
+#Running Apache Maven

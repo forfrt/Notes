@@ -233,4 +233,3 @@ The kernel stores permission information for IPC objects in a structure of type 
 All of the above are fairly self-explanatory. Stored along with the IPC key of the object is information about both the creator and owner of the object (they may be different). The octal access modes are also stored here, as an unsigned short. Finally, the slot usage sequence number is stored at the end. Each time an IPC object is closed via a system call (destroyed), this value gets incremented by the maximum number of IPC objects that can reside in a system. Will you have to concern yourself with this value? No. 
 
 
-

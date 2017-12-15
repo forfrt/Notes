@@ -1,0 +1,141 @@
+
+#JUnit是什么
+
+JUnit是用于编写和运行可重复的自动化测试的开源测试框架， 这样可以保证我们的代码按预期工作。JUnit可广泛用于工业和作为支架(从命令行)或IDE(如Eclipse)内单独的Java程序。
+
+JUnit提供：
+
+- 断言测试预期结果。
+- 测试功能共享通用的测试数据。
+- 测试套件轻松地组织和运行测试。
+- 图形和文本测试运行。
+
+JUnit用于测试：
+
+- 整个对象
+- 对象的一部分 - 交互的方法或一些方法
+- 几个对象之间的互动(交互)
+
+----
+
+##JUnit的特点
+
+- JUnit是用于编写和运行测试的开源框架。
+- 提供了注释，以确定测试方法。
+- 提供断言测试预期结果。
+- 提供了测试运行的运行测试。
+- JUnit测试让您可以更快地编写代码，提高质量
+- JUnit是优雅简洁。它是不那么复杂以及不需要花费太多的时间。
+- JUnit测试可以自动运行，检查自己的结果，并提供即时反馈。没有必要通过测试结果报告来手动梳理。
+- JUnit测试可以组织成测试套件包含测试案例，甚至其他测试套件。
+- Junit显示测试进度的，如果测试是没有问题条形是绿色的，测试失败则会变成红色。
+
+****
+
+#JUnit sample
+
+首先，我们将介绍一个测试类：
+
+Calculate.java
+
+    package com.yiibai.junit;
+    
+    public class Calculate {
+    
+        public int sum(int var1, int var2) {
+            System.out.println("相加的值是: " + var1 + " + " + var2);
+            return var1 + var2;
+        }
+    
+    }
+    
+我们将创建另一个类包括方法，将测试之前的类(在此情况下，我们只有一个方法进行测试)中每一个的方法。这是使用的最常见的方式。当然，如果一个方法非常复杂且要扩展，我们可以在一个以上的试验方法来测试这一复杂方法。创建测试用例的详细信息将显示在下面的部分。下面，有一个类是：CalculateTest.java，它具有我们的测试类的角色的代码
+
+CalculateTest.java
+
+    package com.yiibai.junit;
+    
+    import static org.junit.Assert.*;
+    import org.junit.Test;
+    
+    public class CalculateTest {
+    
+        Calculate calculation = new Calculate();
+        int sum = calculation.sum(2, 5);
+        int testSum = 7;
+    
+        @Test
+        public void testSum() {
+            System.out.println("@Test sum(): " + sum + " = " + testSum);
+            assertEquals(sum, testSum);
+        }
+    }
+
+首先，我们可以看到，有一个@Test的注解在 testSum()方法的上方。 这个注释指示该公共无效(public void)方法它所附着可以作为一个测试用例。因此，testSum()方法将用于测试公开方法 sum() 。 我们还可以观察一个方法 assertEquals(sum, testsum)。 assertEquals ([String message], object expected, object actual) 方法持有两个对象作为输入，并断言这两个对象相等。
+
+如果要运行测试类，右键点击测试类，并选择 Run As -> Junit Test, 该程序的输出将类似于如下： 
+
+    相加的值是: 2 + 5
+    @Test sum(): 7 = 7
+
+****
+
+#JUnit Annotation
+
+- @Test public void method() 
+
+    测试注释指示该公共无效方法它所附着可以作为一个测试用例。
+- @Before public void method() 
+
+    Before注释表示，该方法必须在类中的每个测试之前执行，以便执行测试某些必要的先决条件。
+- @BeforeClass public static void method() 
+
+    BeforeClass注释指出这是附着在静态方法必须执行一次并在类的所有测试之前。发生这种情况时一般是测试计算共享配置方法(如连接到数据库)。
+- @After public void method() 
+
+    After 注释指示，该方法在执行每项测试后执行(如执行每一个测试后重置某些变量，删除临时变量等)
+- @AfterClass public static void method() 
+
+    当需要执行所有的测试在JUnit测试用例类后执行，AfterClass注解可以使用以清理建立方法，(从数据库如断开连接)。注意：附有此批注(类似于BeforeClass)的方法必须定义为静态。
+- @Ignore public static void method() 
+
+    当想暂时禁用特定的测试执行可以使用忽略注释。每个被注解为@Ignore的方法将不被执行。 
+    
+****
+
+#JUnit Assertion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
