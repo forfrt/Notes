@@ -263,13 +263,13 @@ using namespace std;
 
 ----
 
-将基类析构函数生命为虚析构函数，
+将基类析构函数声明为虚析构函数，
 
 我们需要做的就是修改Base 类中的析构函数，在～前面加上virtual
 
 我们在基类中将析构函数标明为虚函数，就表示在使用析构函数时，是采用动态联编的。那么delete basePtr的时候不再是采用静态联编直接在编译的时候确定basePtr指向的析构函数，而是在运行的时候根据 指向的类型来调用析构函数。
 
-> 如果你在 派生类中 分配了 内存空间的话，没有将基类的析构函数声明为虚析构函数，很容易发生内存泄漏事件
+> 如果你在派生类中分配了内存空间的话，没有将基类的析构函数声明为虚析构函数，很容易发生内存泄漏事件
 
 > 当你的基类的析构函数不为虚的话，其子类中所有的成员变量的类中分配的内存也将可能泄漏
 
@@ -557,13 +557,14 @@ tagMyStruct称为“tag”，即“标签”，实际上是一个临时名字，
 
 另外，extern也可用来进行链接指定。  
 
+> 与extern对应的关键字是static，被它修饰的全局变量和函数只能在本模块中使用。因此，一个函数或变量只可能被本模块使用时，其不可能被extern “C”修饰。
+
 ##extern "C"
 
 C++语言在编译的时候为了解决函数的多态问题，会将函数名和参数联合起来生成一个中间的函数名称，而C语言则不会，因此会造成链接时找不到对应函数的情况，此时C函数就需要用extern “C”进行链接指定，这告诉编译器，请保持我的名称，不要给我生成用于链接的中间函数名。  
 
 C语言中不支持extern "C"声明，在.c文件中包含了extern "C"时会出现编译语法错误。
 
-> 与extern对应的关键字是static，被它修饰的全局变量和函数只能在本模块中使用。因此，一个函数或变量只可能被本模块使用时，其不可能被extern “C”修饰。
 
 ###extern "C" 使用要点
 1. 可以是单一语句
@@ -598,6 +599,27 @@ C语言中不支持extern "C"声明，在.c文件中包含了extern "C"时会出
 
 ----
 
+##static 
+
+###Static Variable
+
+1. A static variable inside a function keeps its value between invocations.
+1. A static global variable or a function is "seen" only in the file it's declared in
+
+----
+
+###Static Function in C
+
+Is used widely as an "access control" feature. If you have a .c file( more precisely, compilation unit) implementing some functionality, it usually exposes only a few "public" functions to users. The rest of its functions should be made static, so that the user won't be able to access them. This is encapsulation, a good practice.
+
+----
+
+###Static Function in Cpp
+
+
+
+----
+
 ##inline
 
 在c++中，为了解决一些频繁调用的小函数大量消耗栈空间或者是叫栈内存的问题，特别的引入了inline修饰符，表示为内联函数。  
@@ -622,22 +644,25 @@ inline的使用是有所限制的，inline只适合函数体内代码简单的�
 (1) 出现问题：在此程序中存在着宏定义命令，宏N代表的字符串是2+2，在程序中有对宏N的使用，一般同学在读该程序时，容易产生的问题是先求解N为2＋2＝4，然后在程序中计算a时使用乘法，即N*N=4*4=16,其实该题的结果为8，为什么结果有这么大的偏差?
 (2)问题解析：如1节所述，宏展开是在预处理阶段完成的，这个阶段把替换文本只是看作一个字符串，并不会有任何的计算发生，在展开时是在宏N出现的地方 只是简单地使用串2＋2来代替N，并不会增添任何的符号，所以对该程序展开后的结果是a=2+2*2+2，计算后=8，这就是宏替换的实质，如何写程序才 能完成结果为16的运算呢？
 (3)解决办法：将宏定义写成如下形式
-#define   N   (2+2)
+
+    #define   N   (2+2)
 这样就可替换成(2+2)*(2+2)=16
 2.2 带参数的宏定义出现的问题
 在带参数的宏定义的使用中，极易引起误解。例如我们需要做个宏替换能求任何数的平方，这就需要使用参数，以便在程序中用实际参数来替换宏定义中的参数。一般学生容易写成如下形式：
-#define   area(x)   x*x
+
+    #define   area(x)   x*x
 这在使用中是很容易出现问题的，看如下的程序
-void main()
-{
-int   y=area(2+2);
-printf(“%d”,y);
+
+    void main()
+    {
+        int   y=area(2+2);
+        printf(“%d”,y);
     }
 按理说给的参数是2+2，所得的结果应该为4*4=16，但是错了，因为该程序的实际结果为8，仍然是没能遵循纯粹的简单替换的规则，又是先计算再替换 了，在这道程序里，2+2即为area宏中的参数，应该由它来替换宏定义中的x，即替换成2+2*2+2=8了。那如果遵循(1)中的解决办法，把2+2 括起来，即把宏体中的x括起来，是否可以呢？#define   area(x) (x)*(x)，对于area(2+2)，替换为(2+2)*(2+2)=16，可以解决，但是对于area(2+2)/area(2+2)又会怎么样 呢，有的学生一看到这道题马上给出结果，因为分子分母一样，又错了，还是忘了遵循先替换再计算的规则了，这道题替换后会变为 (2+2)*(2+2)/(2+2)*(2+2)即4*4/4*4按照乘除运算规则，结果为16/4*4=4*4=16，那应该怎么呢？解决方法是在整个 宏体上再加一个括号，即#define   area(x) ((x)*(x))，不要觉得这没必要，没有它，是不行的。
 
 ----
 
-和 #define 宏不同的是，内联函数总是对参数只精确地进行一次求值，从而避免了那声名狼藉的宏错误。换句话说，调用内联函数和调用正规函数是等价的，差别仅仅是更快  
+和`#define`宏不同的是，内联函数总是对参数只精确地进行一次求值，从而避免了那声名狼藉的宏错误。换句话说，调用内联函数和调用正规函数是等价的，差别仅仅是更快  
 
 和宏不同的，还有内联函数的参数类型被检查，并且被正确地进行必要的转换。  
 
@@ -648,7 +673,6 @@ printf(“%d”,y);
     {
         // ...
     } 
-
 
 ----
 
@@ -703,6 +727,117 @@ printf(“%d”,y);
 回到内联上来：*一个函数是否内联只是实现细节*，不会改变函数调用的可见语义（即含义）。因此inline关键字应该和函数定义放在一起，而不是在类的public声明区。  
 
 ----
+
+##预处理
+
+###`#define`
+
+`#define`命令是C语言中的一个宏定义命令，它用来将一个标识符定义为一个字符串，该标识符被称为宏名，被定义的字符串称为替换文本。
+该命令有两种格式：一种是简单的宏定义，另一种是带参数的宏定义。
+1. 简单的宏定义：
+    `#define`   <宏名>　　<字符串>
+    `#define` PI 3.1415926
+1. 带参数的宏定义
+    `#define`   <宏名> (<参数表>)   <宏体>
+    `#define`   A(x) x
+
+一个标识符被宏定义后，该标识符便是一个宏名。这时，在程序中出现的是宏名，在该程序被编译前，先将宏名用被定义的字符串替换，这称为宏替换，替换后才进行编译，宏替换是简单的替换。
+
+----
+
+####特殊的`#define`
+
+1. `#define Conn(x,y) x##y`
+
+    `x##y`表示什么？表示x连接y
+    `int n = Conn(123,456);`    结果就是n=123456;
+
+1. `#define ToChar(x) #@x`
+
+    `#@x`，其实就是给x加上单引号，结果返回是一个const char
+    `char a = ToChar(1);`   结果就是a='1';
+
+    > 但是如果你的参数超过四个字符，编译器就给给你报错了！error C2015: too many characters in constant   ：P
+
+1. `#define ToString(x) #x`
+
+    `char* str = ToString(123132);就成了str="123132";`
+
+----
+
+- #define xxx() ()
+- #define xxx() {} //!多条语句大括号
+
+    标准C支持的
+
+- #define xxx() ({})
+
+    GCC新增的功能，主要为了防止宏展开出现问题，默认展开时是要加上一个;的，容易出问题。
+    > 最后一个式子的返回值作为宏函数的返回值。
+
+----
+
+###`#undef`
+
+`#undef`是在后面取消以前定义的宏定义
+该指令的形式为 `#undef 标识符`
+
+----
+
+###`#typedef`
+
+Typedef 声明有助于创建平台无关类型，甚至能隐藏复杂和难以理解的语法。不管怎样，使用 typedef 能为代码带来意想不到的好处，通过本文你可以学习用 typedef 避免缺欠，从而使代码更健壮
+
+typedef 声明，简称 typedef，为现有类型创建一个新的名字
+
+　typedef 使用最多的地方是创建易于记忆的类型名，用它来归档程序员的意图。类型出现在所声明的变量名字中，位于 ''typedef'' 关键字右边。例如：`typedef int size;`   
+
+----
+
+记住：不管什么时候，只要为指针声明 typedef，那么都要在最终的 typedef 名称中加一个 const，以使得该指针本身是常量，而不是对象
+
+    typedef const char * cpstr;   
+    int mystrcmp(cpstr, cpstr); // 现在是正确的  
+
+****
+
+#Gcc
+
+##Delaring Attributes of Functions
+
+In GNU C, you can use function attributes to declare certain things about functions called in your program which help the compiler optimize calls and check your code more carefully. For example, you can use attributes to declare that a function never returns (noreturn), returns a value depending only on its arguments (pure), or has printf-style arguments (format). 
+
+You can also use attributes to control memory placement, code generation options or call/return conventions within the function being annotated. Many of these attributes are target-specific. For example, many targets support attributes for defining interrupt handler functions, which typically must follow special register usage and return conventions. 
+
+Function attributes are introduced by the __attribute__ keyword on a declaration, followed by an attribute specification inside double parentheses. You can specify multiple attributes in a declaration by separating them by commas within the double parentheses or by immediately following an attribute declaration with another attribute declaration. See Attribute Syntax, for the exact rules on attribute syntax and placement. 
+
+GCC also supports attributes on variable declarations (see Variable Attributes), labels (see Label Attributes), enumerators (see Enumerator Attributes), statements (see Statement Attributes), and types (see Type Attributes). 
+
+https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#Common-Function-Attributes
+
+###alias
+
+###aligned
+
+###`nonnull(arg-index, ...)`
+
+The nonnull attribute specifies that some function parameters should be non-null pointers. For instance, the declaration: 
+
+    extern void *
+    my_memcpy (void *dest, const void *src, size_t len)
+            __attribute__((nonnull (1, 2)));
+
+causes the compiler to check that, in calls to my_memcpy, arguments dest and src are non-null. If the compiler determines that a null pointer is passed in an argument slot marked as non-null, and the -Wnonnull option is enabled, a warning is issued. The compiler may also choose to make optimizations based on the knowledge that certain function arguments will never be null. 
+
+If no argument index list is given to the nonnull attribute, all pointer arguments are marked as non-null. To illustrate, the following declaration is equivalent to the previous example: 
+
+    extern void *
+    my_memcpy (void *dest, const void *src, size_t len)
+            __attribute__((nonnull));
+
+****
+
+#设计模式
 
 ##RAII
 
@@ -762,219 +897,4 @@ STL容器是基于值语义的，在容器内部，对象是常被复制的。�
 > 作为替代，还可以使用非拷贝行为的容器：boost::ptr_map<Identifier,Resource> map;
 
 ****
-
-##预处理
-
-###`#define`
-
-`#define`命令是C语言中的一个宏定义命令，它用来将一个标识符定义为一个字符串，该标识符被称为宏名，被定义的字符串称为替换文本。
-该命令有两种格式：一种是简单的宏定义，另一种是带参数的宏定义。
-1. 简单的宏定义：
-    `#define`   <宏名>　　<字符串>
-    `#define` PI 3.1415926
-1. 带参数的宏定义
-    `#define`   <宏名> (<参数表>)   <宏体>
-    `#define`   A(x) x
-
-一个标识符被宏定义后，该标识符便是一个宏名。这时，在程序中出现的是宏名，在该程序被编译前，先将宏名用被定义的字符串替换，这称为宏替换，替换后才进行编译，宏替换是简单的替换。
-
-----
-
-####特殊的`#define`
-
-1. `#define Conn(x,y) x##y`
-
-    `x##y`表示什么？表示x连接y
-    `int n = Conn(123,456);`    结果就是n=123456;
-
-1. `#define ToChar(x) #@x`
-
-    `#@x`，其实就是给x加上单引号，结果返回是一个const char
-    `char a = ToChar(1);`   结果就是a='1';
-
-    > 但是如果你的参数超过四个字符，编译器就给给你报错了！error C2015: too many characters in constant   ：P
-
-1. `#define ToString(x) #x`
-
-    `char* str = ToString(123132);就成了str="123132";`
-
-----
-
-- #define xxx() ()
-- #define xxx() {} //!多条语句大括号
-
-    标准C支持的
-
-- #define xxx() ({})
-
-    GCC新增的功能，主要为了防止宏展开出现问题，默认展开时是要加上一个;的，容易出问题。
-    > 最后一个式子的返回值作为宏函数的返回值。
-
-----
-
-###`#undef`
-
-#undef 是在后面取消以前定义的宏定义
-该指令的形式为
-#undef 标识符
-
-----
-
-###`#typedef`
-
-Typedef 声明有助于创建平台无关类型，甚至能隐藏复杂和难以理解的语法。不管怎样，使用 typedef 能为代码带来意想不到的好处，通过本文你可以学习用 typedef 避免缺欠，从而使代码更健壮
-
-typedef 声明，简称 typedef，为现有类型创建一个新的名字
-
-　typedef 使用最多的地方是创建易于记忆的类型名，用它来归档程序员的意图。类型出现在所声明的变量名字中，位于 ''typedef'' 关键字右边。例如：`typedef int size;`   
-
-----
-
-记住：不管什么时候，只要为指针声明 typedef，那么都要在最终的 typedef 名称中加一个 const，以使得该指针本身是常量，而不是对象
-
-    typedef const char * cpstr;   
-    int mystrcmp(cpstr, cpstr); // 现在是正确的  
-
-****
-
-#C Standard library:STL
-
-##<errno.h>/<cerrno>
-
-errno.h 是C语言C标准函式库里的标头档，定义了通过错误码来回报错误资讯的宏：  
-errno宏定义为一个int型态的左值, 包含任何函式使用errno功能所产生的上一个错误码。  
-
-----
-
-##<stdio.h>/<cstdio>
-
-###printf
-
-####转换说明符 
-
-- `%a`      浮点数、十六进制数字和p-记数法（Ｃ９９）  
-- `%A`　　　浮点数、十六进制数字和p-记法（Ｃ９９）  
-- `%c`　　　一个字符　  
-- `%d`　　　有符号十进制整数　  
-- `%e`　　　浮点数、e-记数法  
-- `%E`　　　浮点数、Ｅ-记数法  
-- `%f`　　　浮点数、十进制记数法　　  
-- `%g`　　　根据数值不同自动选择％f或％e．  
-- `%G`　　　根据数值不同自动选择％f或％e.  
-- `%i`      有符号十进制数（与％d相同）  
-- `%o`　　　无符号八进制整数  
-- `%p`　　　指针　　　　  
-- `%s`　　　字符串  
-- `%u`　　　无符号十进制整数  
-- `%x`　　　使用十六进制数字０f的无符号十六进制整数　  
-- `%X`　　　使用十六进制数字０f的无符号十六进制整数  
-- `%%`　　　打印一个百分号  
-- `%n`      The corresponding argument must be a pointer to a signed int.
-
-        `sscanf(str, "0x%x%n", &a, &b);`
-        `printf("blah %n blah \n", &val); printf("val=%d\n", val);`
-
-----
-
-####长度修饰符 
-
-常用的长度修饰符有两种：
-
-1. l（长）表示按长整型量输出
-1. h（短）表示按短整型量输出。
-
-> 可以和输出转换说明符d、f、u等连用
-
-----
-
-####宽度修饰符和精度修饰符 
-
-宽度修饰符用来指定printf（）函数输出数据的占位宽度，用一个十进制整数表示输出数据的位数，插在百分号%与转换说明符之间，其作用是控制打印数据的宽度，也称为“域宽”。
-
-也可以在prinf函数中指定输出数据的精度。以一个小数点开始，后紧跟着一个十进制整数表示精度，插在百分号%与转换说明符之间。对于不同数据类型，精度的含义也不相同：在使用%d时，精度表示最少要打印的数字的个数。在使用%f、%e、%E时，精度是小数点后面显示的数字个数。在使用%s时，精度表示输出的字符串中字符的个数。
-
-
-1. %md
-
-    以宽度m输出整型数，不足m位数时左侧补以空格。 
-
-1. %0md
-
-    以宽度m输出整型数，不足m位数时左侧补以0（零）。 
-
-1. %m.nf
-
-    以宽度m输出实型数，小数位数为n位。 
-
-1. %ms
-
-    以宽度m输出字符串，不足m位数时左侧补以空格。 
-
-1. %m.ns
-
-    以宽度m输出字符串左侧的n个字符，不足m位数时左侧补以空格。
-
-----
-
-####标志修饰符 
-
-在printf 函数中，可以使用标志修饰符控制输出格式。
-
-- `-`
-
-    “左对齐”方式：输出数据左对齐，右侧补空格。缺省时输出数据则为右对齐，左补格。 
-
-- `+`
-
-    输出数据为正时，在数据之前显示一个+号，为负时，在数据之前显示一个-号。 
-
-- `#`
-
-    输出数据为八进制时加前缀0，为十六进制时前缀0x。 
-
-- `空格`
-
-    输出数据为正值时，在数据之前打印空格，为负时，数据之前显示一个-号。
-
-----
-
-
-
-
-##<memory>
-
-###auto_ptr
-
-auto_ptr是这样一种指针：它是“它所指向的对象”的拥有者。这种拥有具有唯一性，即一个对象只能有一个拥有者，严禁一物二主。当auto_ptr指针被摧毁时，它所指向的对象也将被隐式销毁，即使程序中有异常发生，auto_ptr所指向的对象也将被销毁。
-
-----
-
-关于auto_ptr的几种注意事项：
-
-1. auto_ptr不能共享所有权。
-2. auto_ptr不能指向数组
-3. auto_ptr不能作为容器的成员。
-4. 不能通过赋值操作来初始化auto_ptr
-
-        std::auto_ptr<int> p(new int(42));     //OK
-        std::auto_ptr<int> p = new int(42);    //ERROR
-    这是因为auto_ptr构造函数被定义为explicit
-
-5. 不要把auto_ptr放入容器
-
-> 智能指针通过RAII来确保内存资源的安全，也间接地使得对象上的RAII得到实施
-
-> 这里的RAII并不是十分严格：对象（所占的内存也是资源）的创建（资源获取）是在构造函数之外进行的。广义上，我们也把它划归RAII范畴。
-
-> Matthew Wilson在《Imperfect C++》一书中，将其独立出来，称其为RRID（Resource Release Is Destruction）。
-
-----
-
-auto_ptr对象间的赋值是一个需要特别注意的地方。简单说来资源代理对象间赋值的语义不满足“赋值相等”，其语义是资源管理权的转移。
-
-    int a;  int b = 10;  a = b; //这句话执行后 a == b 但对于资源代理对象，这是不满足的，比如：
-    auto_ptr<int> a(null);  auto_ptr<int> b(new int(123));  a = b; //这句话执行后a != b，赋值的语义是b把资源的管理权交给了a 
-
-****
-
 

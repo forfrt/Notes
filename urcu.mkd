@@ -1,0 +1,904 @@
+
+#Userspace RCU
+
+http://liburcu.org/
+
+liburcu is a LGPLv2.1 userspace RCU (read-copy-update) library. This data synchronization library provides read-side access which scales linearly with the number of cores. 
+
+liburcu-cds provides efficient data structures based on RCU and lock-free algorithms. Those structures include hash tables, queues, stacks, and doubly-linked lists. 
+
+Initial motivation for creating the userspace RCU library: The userspace RCU library was initially needed for the LTTng userspace tracer port. The userspace tracer implementation is therefore the motivation and first user of liburcu. 
+
+----
+
+#What is RCU, Fundamentally?#
+
+https://lwn.net/Articles/262464/
+
+##Introduction##
+
+Read-copy update (RCU) is a synchronization mechanism that was added to the Linux kernel in October of 2002. RCU achieves scalability improvements by allowing reads to occur concurrently with update. In contrast with conventional locking primitives that ensure mutual exclusion among concurrent threads regardless of whether they be readers or updaters, or with reader-writer locks that allow concurrent reads but not in the presence of updates. *RCU supports concurrency between a single updater and multiple readers*. RCU ensures that reads are coherent by maintaining multiple versions of objects and ensuring that they are not freed up until all pre-existing read-side critical sections complete. RCU defines and uses efficient and scalable mechanisms for publishing and reading new versions of an object, and also for deferring the collection of old versions. These mechanisms distribute the work among read and update paths in such a way as to make read paths extremely fast. In some cases (non-preemptable kernels), RCU's read-side primitives have zero overhead. 
+
+> Quick Quiz 1: But doesn't seqlock also permit readers and updaters to get work done concurrently? 
+
+> Answer: Yes and no. Although seqlock readers can run concurrently with seqlock writers, whenever this happens, the `read_seqretry()` primitive will force the reader to retry. This means that any work done by a seqlock reader running concurrently with a seqlock updater will be discarded and redone. So seqlock readers can run concurrently with updaters, but they cannot actually get any work done in this case.
+ 
+> In contrast, RCU readers can perform useful work even in presence of concurrent RCU updaters. 
+
+This leads to the question "what exactly is RCU?", and perhaps also to the question "how can RCU possibly work?" (or, not infrequently, the assertion that RCU cannot possibly work). This document addresses these questions from a fundamental viewpoint; later installments look at them from usage and from API viewpoints. This last installment also includes a list of references. 
+
+RCU is made up of three fundamental mechanisms, the first being used for insertion, the second being used for deletion, and the third being used to allow readers to tolerate concurrent insertions and deletions. These mechanisms are described in the following sections, which focus on applying RCU to linked lists: 
+
+1. Publish-Subscribe Mechanism (for insertion)
+1. Wait For Pre-Existing RCU Readers to Complete (for deletion)
+1. Maintain Multiple Versions of Recently Updated Objects (for readers) 
+
+These sections are followed by concluding remarks and the answers to the Quick Quizzes. 
+
+----
+
+##Publish-Subscribe Mechanaism##
+
+One key attribute of RCU is the ability to safely scan data, even though that data is being modified concurrently. To provide this ability for concurrent insertion, RCU uses what can be thought of as a publish-subscribe mechanism. For example, consider an initially NULL global pointer gp that is to be modified to point to a newly allocated and initialized data structure. The following code fragment (with the addition of appropriate locking) might be used for this purpose: 
+
+    struct foo {
+        int a;
+        int b;
+        int c;
+    };
+    struct foo *gp = NULL;
+    
+    /* . . . */
+    p = kmalloc(sizeof(*p), GFP_KERNEL);
+    p->a = 1;
+    p->b = 2;
+    p->c = 3;
+    gp = p;
+
+Unfortunately, *there is nothing forcing the compiler and CPU to execute the last four assignment statements in order*. If the assignment to gp happens before the initialization of p's fields, then concurrent readers could see the uninitialized values. *Memory barriers are required to keep things ordered, but memory barriers are notoriously difficult to use*. We therefore encapsulate them into a primitive rcu_assign_pointer() that has publication semantics. The last four lines would then be as follows: 
+
+    p->a = 1;
+    p->b = 2;
+    p->c = 3;
+    rcu_assign_pointer(gp, p);
+
+The `rcu_assign_pointer()` would publish the new structure, forcing both the compiler and the CPU to execute the assignment to `gn` after the assighments to the fields referenced by `p`.
+
+However, it is not sufficient to only enforce ordering at the updater, as the reader must enforce proper ordering as well. Consider for example the follwing code fragment
+
+    p = gp;
+    if (p != NULL) {
+      do_something_with(p->a, p->b, p->c);
+    }
+
+Although this code fragment might well seem immune to misordering. Unfortunately, the DEC Alpha CPU and value-speculation compiler optimizations can, believe it or not, cause the value of p->a, p->b, and p->c to be fetched before the value of p! This is perhaps easiest to see in the case of value-speculation comipler optimizations, where the compiler guesses the value of `p`, fetches p->a, p->b, and p->c, then fetches the actual value of `p` in order to check whether its guess was correct. This sort of optimization is quite aggressive, perhaps insanely so, but does actually occur in the context of profile-driven optimization.
+
+Clearly, we need to prevent this sort of skullduggery on the part of both the compiler and the CPU. The `rcu_dereference()` primitives uses whatever memory-barrier instructions and compiler directives are required for this purpose:
+
+    rcu_read_lock();
+    p=rcu_dereference(gp);
+    if(p!=NULL){
+        do_something_with(p->a, p->b, p->c);
+    }
+    rcu_read_unlock();
+
+The `rcu_dereference()` primitive can thus be thought of as subscribing to a given value of the specified pointer, guaranteeing that subsequent dereference operations will see any initialization that occurred before the corresponding publish (rcu_assign_pointer()) operation. The rcu_read_lock() and rcu_read_unlock() calls are absolutely required: they define the extent of the RCU read-side critical section. Their purpose is explained in the next section, however, they never spin or block, nor do they prevent the list_add_rcu() from executing concurrently. In fact, in non-CONFIG_PREEMPT kernels, they generate absolutely no code.
+
+----
+
+Although `rcu_assign_pointer()` and `rcu_dereference()` can in theory be used to construct any conceivable RCU-protected data structure, in practice it is often better to use higher-level constructs. Therefore, the `rcu_assign_pointer()` and `rcu_dereference()` primitives have been embedded in special RCU variants of Linux's list-manipulation API. Linux has two variants of doubly linked list, the circular `struct list_head` and the linear `struct hlist_head/struct hlist_node` pair. The former is laid out as follows, where the green boxes represent the list header and the blue boxes represent the elements in the list. 
+
+![Linux_list_head](./img/Cpp/Linux_list.jpg)
+
+Adapting the pointer-publish example for the linked list gives the following:
+
+    struct foo {
+      struct list_head list;
+      int a;
+      int b;
+      int c;
+    };
+    LIST_HEAD(head);
+    
+    /* . . . */
+    
+    p = kmalloc(sizeof(*p), GFP_KERNEL);
+    p->a = 1;
+    p->b = 2;
+    p->c = 3;
+    list_add_rcu(&p->list, &head);
+
+Line 15 must be protected by some synchronization mechanism (most commonly some sort of lock) to prevent multiple `list_add()` instances from executing concurrently. However, such synchronization does not prevent this `list_add()` from executing concurrently with RCU readers. 
+
+Subscribing to an RCU-protected list is straightforward:
+
+    rcu_read_lock();
+    list_for_each_entry_rcu(p, head, list) {
+      do_something_with(p->a, p->b, p->c);
+    }
+    rcu_read_unlock();
+
+The `list_add_rcu()` primitive publishes an entry into the specified list, guaranteeing that the corresponding `list_for_each_entry_rcu()` invocation will properly subscribe to this same entry. 
+
+> Quick Quiz 2: What prevents the `list_for_each_entry_rcu()` from getting a segfault if it happens to execute at exactly the same time as the *list_add_rcu()*? 
+
+> Answer: *On all systems running Linux, loads from and stores to pointers are atomic*, that is, if a store to a pointer occurs at the same time as a load from that same pointer, the load will return either the initial value or the value stored, never some bitwise mashup of the two. In addition, the `list_for_each_entry_rcu()` always proceeds forward through the list, never looking back. Therefore, the `list_for_each_entry_rcu()` will either see the element being added by `list_add_rcu()`, or it will not, but either way, it will see a valid well-formed list. 
+
+----
+
+Linux's other doubly linked list, the hlist, is a linear list, which means that it needs only one pointer for the header rather than the two required for the circular list. Thus, use of hlist can halve the memory consumption for the hash-bucket arrays of large hash tables. 
+
+![Linux_hlist](./img/Cpp/Linux_hlist.jpg)
+
+Linux's other doubly linked list, the hlist, is a linear list, which means that it needs only one pointer for the header rather than the two required for the circular list. Thus, use of hlist can halve the memory consumption for the hash-bucket arrays of large hash tables. 
+
+Publishing a new element to an RCU-protected hlist is quite similar to doing so for the circular list:
+
+    struct foo {
+      struct hlist_node *list;
+      int a;
+      int b;
+      int c;
+    };
+    HLIST_HEAD(head);
+    
+    /* . . . */
+    
+    p = kmalloc(sizeof(*p), GFP_KERNEL);
+    p->a = 1;
+    p->b = 2;
+    p->c = 3;
+    hlist_add_head_rcu(&p->list, &head);
+
+As before, line 15 must be protected by some sort of synchronization mechanism, for example, a lock.
+
+Subscribing to an RCU-protected hlist is also similar to the circular list: 
+
+    rcu_read_lock();
+    hlist_for_each_entry_rcu(p, q, head, list) {
+      do_something_with(p->a, p->b, p->c);
+    }
+    rcu_read_unlock();
+
+> Quick Quiz 3: Why do we need to pass two pointers into `hlist_for_each_entry_rcu()` when only one is needed for `list_for_each_entry_rcu()`? 
+
+> Answer: Because in an hlist it is necessary to check for NULL rather than for encountering the head. (Try coding up a single-pointer `hlist_for_each_entry_rcu()`. If you come up with a nice solution, it would be a very good thing!) 
+
+The set of RCU publish and subscribe primitives are shown in the following table, along with additional primitives to "unpublish", or retract: 
+
+    Category 	    Publish 	                Retract 	                    Subscribe
+    Pointers 	    rcu_assign_pointer() 	    rcu_assign_pointer(..., NULL) 	rcu_dereference()
+    Lists 	        list_add_rcu()
+                    list_add_tail_rcu()
+                    list_replace_rcu() 	        list_del_rcu() 	                list_for_each_entry_rcu()
+    Hlists 	        hlist_add_after_rcu()
+                    hlist_add_before_rcu()
+                    hlist_add_head_rcu()
+                    hlist_replace_rcu() 	    hlist_del_rcu() 	            hlist_for_each_entry_rcu()
+
+Note that the `list_replace_rcu()`, `list_del_rcu()`, `hlist_replace_rcu()`, and `hlist_del_rcu()` APIs add a complication. When is it safe
+to free up the data element that was replaced or removed? In particular, how can we possibly know when all the readers have released their 
+references to that data element?
+
+----
+
+##Wait for Pre-Existing RCU Readers to Complete
+
+In its most basic form, RCU is a way of waiting for things to finish. Of course, there are a great many other ways of waiting for things to finish, including reference counts, reader-writer locks, events, and so on. *The great advantage of RCU is that it can wait for each of (say) 20,000 different things without having to explicitly track each and every one of them, and without having to worry about the performance degradation, scalability limitations, complex deadlock scenarios, and memory-leak hazards that are inherent in schemes using explicit tracking*. 
+
+In RCU's case, the things waited on are called "RCU read-side critical sections". *An RCU read-side critical section starts with an `rcu_read_lock()` primitive, and ends with a corresponding `rcu_read_unlock()` primitive*. RCU read-side critical sections can be nested, and may contain pretty much any code, as long as that code does not explicitly block or sleep (although a special form of RCU called "SRCU" does permit general sleeping in SRCU read-side critical sections). If you abide by these conventions, you can use RCU to wait for any desired piece of code to complete. 
+
+RCU accomplishes this feat by indirectly determining when these other things have finished, as has been described elsewhere for RCU Classic and realtime RCU.
+
+In particular, as shown in the following figure, RCU is a way of waiting for pre-existing RCU read-side critical sections to completely finish, including memory operations executed by those critical sections. 
+
+![GracePeriodGood.png](./img/Cpp/GracePeriodGood.png)
+
+However, note that RCU read-side critical sections that begin after the beginning of a given grace period can and will extend beyond the end of that grace period. 
+
+The following pseudocode shows the basic form of algorithms that use RCU to wait for readers: 
+
+1. Make a change, for example, replace an element in a linked list.
+1. Wait for all pre-existing RCU read-side critical sections to completely finish (for example, by using the synchronize_rcu() primitive). The key observation here is that subsequent RCU read-side critical sections have no way to gain a reference to the newly removed element.
+1. Clean up, for example, free the element that was replaced above. 
+
+The following code fragment, adapted from those in the previous section, demonstrates this process, with field a being the search key: 
+
+    struct foo {
+      struct list_head list;
+      int a;
+      int b;
+      int c;
+    };
+    LIST_HEAD(head);
+    
+    /* . . . */
+    
+    p = search(head, key);
+    if (p == NULL) {
+      /* Take appropriate action, unlock, and return. */
+    }
+    q = kmalloc(sizeof(*p), GFP_KERNEL);
+    *q = *p;
+    q->b = 2;
+    q->c = 3;
+    list_replace_rcu(&p->list, &q->list);
+    synchronize_rcu();
+    kfree(p);
+
+Lines 19, 20, and 21 implement the three steps called out above. Lines 16-19 gives RCU ("read-copy update") its name: while permitting concurrent reads, line 16 copies and lines 17-19 do an update. 
+
+`The synchronize_rcu()` primitive might seem a bit mysterious at first. After all, it must wait for all RCU read-side critical sections to complete, and, as we saw earlier, the `rcu_read_lock()` and `rcu_read_unlock()` primitives that delimit RCU read-side critical sections don't even generate any code in non-`CONFIG_PREEMPT` kernels! 
+
+There is a trick, and the trick is that RCU Classic read-side critical sections delimited by `rcu_read_lock()` and `rcu_read_unlock()` are *not permitted to block or sleep*. Therefore, when a given CPU executes a context switch, we are guaranteed that any prior RCU read-side critical sections will have completed. This means that as soon as each CPU has executed at least one context switch, all prior RCU read-side critical sections are guaranteed to have completed, meaning that `synchronize_rcu()` can safely return. 
+
+Thus, RCU Classic's synchronize_rcu() can conceptually be as simple as the following:
+
+    1 for_each_online_cpu(cpu)
+    2   run_on(cpu);
+
+Here, `run_on()` switches the current thread to the specified CPU, which forces a context switch on that CPU. The `for_each_online_cpu()` loop therefore forces a context switch on each CPU, thereby guaranteeing that all prior RCU read-side critical sections have completed, as required. Although this simple approach works for kernels in which preemption is disabled across RCU read-side critical sections, in other words, for non-`CONFIG_PREEMPT` and `CONFIG_PREEMPT` kernels, it does not work for `CONFIG_PREEMPT_RT` realtime (-rt) kernels. Therefore, realtime RCU uses a different approach based loosely on reference counters. 
+
+Of course, the actual implementation in the Linux kernel is much more complex, as it is required to handle interrupts, NMIs, CPU hotplug, and other hazards of production-capable kernels, but while also maintaining good performance and scalability. Realtime implementations of RCU must additionally help provide good realtime response, which rules out implementations (like the simple two-liner above) that rely on disabling preemption. 
+
+Although it is good to know that there is a simple conceptual implementation of synchronize_rcu(), other questions remain. For example, what exactly do RCU readers see when traversing a concurrently updated list? This question is addressed in the following section. 
+
+----
+
+##Maintain Multiple Versions of Recently Updated Objects##
+
+This section demonstrates how RCU maintains multiple versions of lists to accommodate synchronization-free readers. Two examples are presented showing how an element that might be referenced by a given reader must remain intact while that reader remains in its RCU read-side critical section. The first example demonstrates deletion of a list element, and the second example demonstrates replacement of an element. 
+
+----
+
+###Example 1: Maintaining Multiple Versions During Deletion###
+
+
+To start the "deletion" example, we will modify lines 11-21 in the example in the previous section as follows:
+
+    1 p = search(head, key);
+    2 if (p != NULL) {
+    3   list_del_rcu(&p->list);
+    4   synchronize_rcu();
+    5   kfree(p);
+    6 }
+
+The initial state of the list, including the pointer p, is as follows. 
+
+![MultiVersion1.jpg](./img/Cpp/MultiVersion1.jpg)
+
+The triples in each element represent the values of fields a, b, and c, respectively. The red borders on each element indicate that readers might be holding references to them, and because readers do not synchronize directly with updaters, readers might run concurrently with this entire replacement process. Please note that we have omitted the backwards pointers and the link from the tail of the list to the head for clarity. 
+
+After the `list_del_rcu()` on line 3 has completed, the 5,6,7 element has been removed from the list, as shown below. Since readers do not synchronize directly with updaters, readers might be concurrently scanning this list. These concurrent readers might or might not see the newly removed element, depending on timing. However, readers that were delayed (e.g., due to interrupts, ECC memory errors, or, in CONFIG_PREEMPT_RT kernels, preemption) just after fetching a pointer to the newly removed element might see the old version of the list for quite some time after the removal. Therefore, we now have two versions of the list, one with element 5,6,7 and one without. The border of the 5,6,7 element is still red, indicating that readers might be referencing it. 
+
+![MultiVersionDelete2.jpg](./img/Cpp/MultiVersionDelete2.jpg)
+
+Please note that readers are not permitted to maintain references to element 5,6,7 after exiting from their RCU read-side critical sections. Therefore, once the synchronize_rcu() on line 4 completes, so that all pre-existing readers are guaranteed to have completed, there can be no more readers referencing this element, as indicated by its black border below. We are thus back to a single version of the list. 
+
+![MultiVersionDelete3.jpg](./img/Cpp/MultiVersionDelete3.jpg)
+
+At this point, the 5,6,7 element may safely be freed, as shown below: 
+
+![MultiVersionDelete4.jpg](./img/Cpp/MultiVersionDelete4.jpg)
+
+At this point, we have completed the deletion of element 5,6,7. The following section covers replacement. 
+
+###Example 2: Maintaining Multiple Versions During Replacement###
+
+To start the replacement example, here are the last few lines of the example in the previous section:
+
+    1 q = kmalloc(sizeof(*p), GFP_KERNEL);
+    2 *q = *p;
+    3 q->b = 2;
+    4 q->c = 3;
+    5 list_replace_rcu(&p->list, &q->list);
+    6 synchronize_rcu();
+    7 kfree(p);
+
+The initial state of the list, including the pointer p, is the same as for the deletion example: 
+
+![MultiVersion1.jpg](./img/Cpp/MultiVersion1.jpg)
+
+As before, the triples in each element represent the values of fields a, b, and c, respectively. The red borders on each element indicate that readers might be holding references to them, and because readers do not synchronize directly with updaters, readers might run concurrently with this entire replacement process. Please note that we again omit the backwards pointers and the link from the tail of the list to the head for clarity.
+
+Line 1 kmalloc()s a replacement element, as follows: 
+
+![MultiVersion2.jpg](./img/Cpp/MultiVersion2.jpg)
+
+Line 2 copies the old element to the new one: 
+
+![MultiVersion3.jpg](./img/Cpp/MultiVersion3.jpg)
+
+Line 3 updates q->b to the value "2": 
+
+![MultiVersion4.jpg](./img/Cpp/MultiVersion4.jpg)
+
+Line 4 updates q->c to the value "3": 
+
+![MultiVersion5.jpg](./img/Cpp/MultiVersion5.jpg)
+
+Now, line 5 does the replacement, so that the new element is finally visible to readers. At this point, as shown below, we have two versions of the list. Pre-existing readers might see the 5,6,7 element, but new readers will instead see the 5,2,3 element. But any given reader is guaranteed to see some well-defined list. 
+
+![MultiVersion6.jpg](./img/Cpp/MultiVersion6.jpg)
+
+After the `synchronize_rcu()` on line 6 returns, a grace period will have elapsed, and so all reads that started before the `list_replace_rcu()` will have completed. In particular, any readers that might have been holding references to the 5,6,7 element are guaranteed to have exited their RCU read-side critical sections, and are thus prohibited from continuing to hold a reference. Therefore, there can no longer be any readers holding references to the old element, as indicated by the thin black border around the 5,6,7 element below. As far as the readers are concerned, we are back to having a single version of the list, but with the new element in place of the old. 
+
+![MultiVersion7.jpg](./img/Cpp/MultiVersion7.jpg)
+
+After the kfree() on line 7 completes, the list will appear as follows: 
+
+![MultiVersion8.jpg](./img/Cpp/MultiVersion8.jpg)
+
+Despite the fact that RCU was named after the replacement case, the vast majority of RCU usage within the Linux kernel relies on the simple deletion case shown in the previous section. 
+
+These examples assumed that a mutex was held across the entire update operation, which would mean that there could be at most two versions of the list active at a given time.
+
+Quick Quiz 4: How would you modify the deletion example to permit more than two versions of the list to be active?
+
+Quick Quiz 5: How many RCU versions of a given list can be active at any given time? 
+
+----
+
+##Conclusion##
+
+This article has described the three fundamental components of RCU-based algorithms:
+1. a publish-subscribe mechanism for adding new data,
+1. a way of waiting for pre-existing RCU readers to finish, and
+1. a discipline of maintaining multiple versions to permit change without harming or unduly delaying concurrent RCU readers. 
+
+Quick Quiz 6: How can RCU updaters possibly delay RCU readers, given that the rcu_read_lock() and rcu_read_unlock() primitives neither spin nor block?
+
+These three RCU components allow data to be updated in face of concurrent readers, and can be combined in different ways to implement a surprising variety of different types of RCU-based algorithms, some of which will be the topic of the next installment in this "What is RCU, Really?" series. 
+****
+
+#What is difference between the RCU (read-copy-update) and the sequential locks in Linux Kernel#
+
+Both of the mechanism deals with Reader-Writers Problem.
+
+RCU (Read-Copy-Update) Locks allows reads to occur concurrently with updates. Let us have a pointer `ptr` pointing to the shared data. Reader works by reading the data pointed by the `ptr`. And Update is done by first allocating data and then setting the value of `ptr` to the newly allocated data. As you can see, *setting value of a location in memory is an atomic operation so, no locks are required*. But there are other concerns. At any time more than one readers could be reading the data pointed by the same pointer, in that case freeing this data would give some unexpected results. So, RCU ensures that data are not freed up until all pre-existing read-side critical sections complete.
+
+RCU is made up of three fundamental mechanisms,
+1. Publish Subscripe Mechanism (for insertion)
+1. Wait for Pre-Existing RCU readers to complete (for deletion)
+1. Maintain multiple versions of recently update objects (to allow readers to tolerate concurrent insertions and deletions)
+
+Sequential Locks are something like Database's Timestamp based Protocol. It contains a lock to synchronize between writers and a sequence number used for both readers and writers. Whenever writer updates the shared data, it increments the  sequence number, both after acquiring the lock and before releasing the  lock. Reader will read the sequence number before and after reading the  shared data. If the sequence number is odd on either occasion, it means the lock is acquired by the writer while the reader was reading data and data may have changed. And if the sequence numbers are different, a writer has changed the  data while it was being read. In either case readers retry, until they read the same even sequence number before and  after.
+You can see that, now reader doesn't have to use a lock to read the data. It just has to read the sequence number which is a very small operation. The reader will never blocks. Also, writers doesn't wait for the readers. So there cannot be any starvation of readers or writers.
+
+Now we are in a position to make some differences between two schemes.
+
+- With RCU, you can concurrently update data containing pointers but in SeqLock you cannot. Because, it may happen the reader has dereferenced the pointer and reading data pointed by it but in the middle of this process writer just invalidate it.
+- It may seem to you that in Seqlock and in RCU both readers and writers can work concurrently? Well, no. In Seqlock whenever a reading is working and a writer steps in then according to the protocol reader has to retry because data may have been changed by the writer in that time. So, both reader and writer can concurrently run but cannot work concurrently.
+- In contrast, RCU readers can perform useful work even in presence of concurrent RCU updaters.
+- Although, in Seqlock writers requires locking but in RCU both readers and writers can altogether avoid it.
+- Both of them works best when there are few writers but more readers.
+
+****
+
+#Difference between Read-Copy-Update and Reader-Writer-Lock?
+
+- Read-Copy-Update (RCU): is not same as reader-writer lock, here are some of the points I can think off:
+
+    1. Separates update and reclamation information, where both readers and writers could avoid locking altogether.
+    1. From implementation point of view, RCU is suitable for dynamically allocated data structures, such as linked lists, as the writer does not modify the data in-place, but instead allocates a new element which it initializes with the updated data. The old element is replaced with the new element using an atomic pointer and then new readers will see the newly updated data. Drawback is that old reader will still see the old copy of the data. The old copy must be tracked, and readers must notify the RCU infrastructure that the read is complete, so old data can be reclaimed.
+
+- Read-writer-lock: Here a writer prevents another reader or another writer from acquiring the lock, while it has aquired the lock already. Multiple readers can acquire a lock simultaneous, provided no writer has taken the lock. 
+
+
+
+
+
+
+
+****
+
+#理解memory barrier ( 内存屏障 ) #
+
+http://blog.csdn.net/world_hello_100/article/details/50131497
+
+##Introduction##
+
+程序在运行时内存实际的访问顺序和程序代码编写的访问顺序不一定一致，这就是内存乱序访问。内存乱序访问行为出现的理由是为了提升程序运行时的性能。内存乱序访问主要发生在两个阶段：
+
+1. 编译时，编译器优化导致内存乱序访问（指令重排）
+1. 运行时，多 CPU 间交互引起内存乱序访问
+
+Memory barrier 能够让 CPU 或编译器在内存访问上有序。一个 Memory barrier 之前的内存访问操作必定先于其之后的完成。Memory barrier 包括两类：
+
+1. 编译器 barrier
+1. CPU Memory barrier
+
+很多时候，编译器和 CPU 引起内存乱序访问不会带来什么问题，但一些特殊情况下，程序逻辑的正确性依赖于内存访问顺序，这时候内存乱序访问会带来逻辑上的错误，例如：
+
+    // thread 1
+    while (!ok);
+    do(x);
+     
+    // thread 2
+    x = 42;
+    ok = 1;
+
+此段代码中，ok 初始化为 0，线程 1 等待 ok 被设置为 1 后执行 do 函数。假如说，线程 2 对内存的写操作乱序执行，也就是 x 赋值后于 ok 赋值完成，那么 do 函数接受的实参就很可能出乎程序员的意料，不为 42。
+
+----
+
+##编译时内存乱序访问##
+
+在编译时，编译器对代码做出优化时可能改变实际执行指令的顺序（例如 gcc 下 O2 或 O3 都会改变实际执行指令的顺序）：
+
+    // test.cpp
+    int x, y, r;
+    void f()
+    {
+        x = r;
+        y = 1;
+    }
+
+编译器优化的结果可能导致 y = 1 在 x = r 之前执行完成。首先直接编译此源文件：
+
+    g++ -S test.cpp
+
+得到相关的汇编代码如下：
+
+    movl    r(%rip), %eax
+    movl    %eax, x(%rip)
+    movl    $1, y(%rip)
+
+这里我们看到，x = r 和 y = 1 并没有乱序。现使用优化选项 O2（或 O3）编译上面的代码（g++ -O2 -S test.cpp），生成汇编代码如下：
+
+    movl    r(%rip), %eax
+    movl    $1, y(%rip)
+    movl    %eax, x(%rip)
+
+我们可以清楚的看到经过编译器优化之后 movl $1, y(%rip) 先于 movl %eax, x(%rip) 执行。避免编译时内存乱序访问的办法就是使用编译器 barrier（又叫优化 barrier）。Linux 内核提供函数 barrier() 用于让编译器保证其之前的内存访问先于其之后的完成。内核实现 barrier() 如下（X86-64 架构）：
+
+    #define barrier() __asm__ __volatile__("" ::: "memory")
+
+现在把此编译器 barrier 加入代码中：
+
+    int x, y, r;
+    void f()
+    {
+        x = r;
+        __asm__ __volatile__("" ::: "memory");
+        y = 1;
+    }
+
+这样就避免了编译器优化带来的内存乱序访问的问题了（如果有兴趣可以再看看编译之后的汇编代码）。本例中，我们还可以使用 volatile 这个关键字来避免编译时内存乱序访问（而无法避免后面要说的运行时内存乱序访问）。volatile 关键字能够让相关的变量之间在内存访问上避免乱序，这里可以修改 x 和 y 的定义来解决问题：
+
+    volatile int x, y;
+    int r;
+    void f()
+    {
+        x = r;
+        y = 1;
+    }
+
+现加上了 volatile 关键字，这使得 x 相对于 y、y 相对于 x 在内存访问上有序。在 Linux 内核中，提供了一个宏 ACCESS_ONCE 来避免编译器对于连续的 ACCESS_ONCE 实例进行指令重排。其实 ACCESS_ONCE 实现源码如下：
+
+    #define ACCESS_ONCE(x) (*(volatile typeof(x) *)&(x))
+
+此代码只是将变量 x 转换为 volatile 的而已。现在我们就有了第三个修改方案：
+
+    int x, y, r;
+    void f()
+    {
+        ACCESS_ONCE(x) = r;
+        ACCESS_ONCE(y) = 1;
+    }
+
+到此基本上就阐述完了我们的编译时内存乱序访问的问题。下面开始介绍运行时内存乱序访问。
+
+----
+
+##运行时内存乱序访问##
+
+在运行时，CPU 虽然会乱序执行指令，但是在单个 CPU 的上，硬件能够保证程序执行时所有的内存访问操作看起来像是按程序代码编写的顺序执行的，这时候 Memory barrier 没有必要使用（不考虑编译器优化的情况下）。这里我们了解一下 CPU 乱序执行的行为。在乱序执行时，一个处理器真正执行指令的顺序由可用的输入数据决定，而非程序员编写的顺序。
+早期的处理器为有序处理器（In-order processors），有序处理器处理指令通常有以下几步：
+
+    1. 指令获取
+    1. 如果指令的输入操作对象（input operands）可用（例如已经在寄存器中了），则将此指令分发到适当的功能单元中。如果一个或者多个操作对象不可用（通常是由于需要从内存中获取），则处理器会等待直到它们可用
+    1. 指令被适当的功能单元执行
+    1. 功能单元将结果写回寄存器堆（Register file，一个 CPU 中的一组寄存器）
+
+相比之下，乱序处理器（Out-of-order processors）处理指令通常有以下几步：
+
+    1. 指令获取
+    1. 指令被分发到指令队列
+    1. 指令在指令队列中等待，直到输入操作对象可用（一旦输入操作对象可用，指令就可以离开队列，即便更早的指令未被执行）
+    1. 指令被分配到适当的功能单元并执行
+    1. 执行结果被放入队列（而不立即写入寄存器堆）
+    1. 只有所有更早请求执行的指令的执行结果被写入寄存器堆后，指令执行的结果才被写入寄存器堆（执行结果重排序，让执行看起来是有序的）
+
+从上面的执行过程可以看出，乱序执行相比有序执行能够避免等待不可用的操作对象（有序执行的第二步）从而提高了效率。现代的机器上，处理器运行的速度比内存快很多，有序处理器花在等待可用数据的时间里已经可以处理大量指令了。
+
+现在思考一下乱序处理器处理指令的过程，我们能得到几个结论：
+
+    1. 对于单个 CPU 指令获取是有序的（通过队列实现）
+    1. 对于单个 CPU 指令执行结果也是有序返回寄存器堆的（通过队列实现）
+
+由此可知，在单 CPU 上，不考虑编译器优化导致乱序的前提下，多线程执行不存在内存乱序访问的问题。我们从内核源码也可以得到类似的结论（代码不完全的摘录）：
+
+    #ifdef CONFIG_SMP
+    #define smp_mb() mb()
+    #else
+    #define smp_mb() barrier()
+    #endif
+
+这里可以看到，如果是 SMP 则使用 mb，mb 被定义为 CPU Memory barrier（后面会讲到），而非 SMP 时，直接使用编译器 barrier。
+
+在多 CPU 的机器上，问题又不一样了。每个 CPU 都存在 cache（cache 主要是为了弥补 CPU 和内存之间较慢的访问速度），当一个特定数据第一次被特定一个 CPU 获取时，此数据显然不在 CPU 的 cache 中（这就是 cache miss）。此 cache miss 意味着 CPU 需要从内存中获取数据（这个过程需要 CPU 等待数百个周期），此数据将被加载到 CPU 的 cache 中，这样后续就能直接从 cache 上快速访问。当某个 CPU 进行写操作时，它必须确保其他的 CPU 已经将此数据从它们的 cache 中移除（以便保证一致性），只有在移除操作完成后此 CPU 才能安全的修改数据。显然，存在多个 cache 时，我们必须通过一个 cache 一致性协议来避免数据不一致的问题，而这个通讯的过程就可能导致乱序访问的出现，也就是这里说的运行时内存乱序访问。这里不再深入讨论整个细节，这是一个比较复杂的问题，有兴趣可以研究 http://www.rdrop.com/users/paulmck/scalability/paper/whymb.2010.06.07c.pdf 一文，其详细的分析了整个过程。
+
+现在通过一个例子来说明多 CPU 下内存乱序访问：
+
+    // test2.cpp
+    #include <pthread.h>
+    #include <assert.h>
+     
+    // -------------------
+    int cpu_thread1 = 0;
+    int cpu_thread2 = 1;
+     
+    volatile int x, y, r1, r2;
+     
+    void start()
+    {
+        x = y = r1 = r2 = 0;
+    }
+     
+    void end()
+    {
+        assert(!(r1 == 0 && r2 == 0));
+    }
+     
+    void run1()
+    {
+        x = 1;
+        r1 = y;
+    }
+     
+    void run2()
+    {
+        y = 1;
+        r2 = x;
+    }
+     
+    // -------------------
+    static pthread_barrier_t barrier_start;
+    static pthread_barrier_t barrier_end;
+     
+    static void* thread1(void*)
+    {
+        while (1) {
+            pthread_barrier_wait(&barrier_start);
+            run1();
+            pthread_barrier_wait(&barrier_end);
+        }
+     
+        return NULL;
+    }
+     
+    static void* thread2(void*)
+    {
+        while (1) {
+            pthread_barrier_wait(&barrier_start);
+            run2();
+            pthread_barrier_wait(&barrier_end);
+        }
+     
+        return NULL;
+    }
+     
+    int main()
+    {
+        assert(pthread_barrier_init(&barrier_start, NULL, 3) == 0);
+        assert(pthread_barrier_init(&barrier_end, NULL, 3) == 0);
+     
+        pthread_t t1;
+        pthread_t t2;
+        assert(pthread_create(&t1, NULL, thread1, NULL) == 0);
+        assert(pthread_create(&t2, NULL, thread2, NULL) == 0);
+     
+        cpu_set_t cs;
+        CPU_ZERO(&cs);
+        CPU_SET(cpu_thread1, &cs);
+        assert(pthread_setaffinity_np(t1, sizeof(cs), &cs) == 0);
+        CPU_ZERO(&cs);
+        CPU_SET(cpu_thread2, &cs);
+        assert(pthread_setaffinity_np(t2, sizeof(cs), &cs) == 0);
+     
+        while (1) {
+            start();
+            pthread_barrier_wait(&barrier_start);
+            pthread_barrier_wait(&barrier_end);
+            end();
+        }
+     
+        return 0;
+    }
+
+这里创建了两个线程来运行测试代码（需要测试的代码将放置在 run 函数中）。我使用了 pthread barrier（区别于本文讨论的 Memory barrier）主要为了让两个子线程能够同时运行它们的 run 函数。此段代码不停的尝试同时运行两个线程的 run 函数，以便得出我们期望的结果。在每次运行 run 函数前会调用一次 start 函数（进行数据初始化），run 运行后会调用一次 end 函数（进行结果检查）。run1 和 run2 两个函数运行在哪个 CPU 上则通过 cpu_thread1 和 cpu_thread2 两个变量控制。
+
+先编译此程序：`g++ -lpthread -o test2 test2.cpp`（这里未优化，目的是为了避免编译器优化的干扰）。需要注意的是，两个线程运行在两个不同的 CPU 上（CPU 0 和 CPU 1）。只要内存不出现乱序访问，那么 r1 和 r2 不可能同时为 0，因此断言失败表示存在内存乱序访问。编译之后运行此程序，会发现存在一定概率导致断言失败。为了进一步说明问题，我们把 cpu_thread2 的值改为 0，换而言之就是让两个线程跑在同一个 CPU 下，再运行程序发现断言不再失败。
+
+最后，我们使用 CPU Memory barrier 来解决内存乱序访问的问题（X86-64 架构下）：
+
+    int cpu_thread1 = 0;
+    int cpu_thread2 = 1;
+     
+    void run1()
+    {
+        x = 1;
+        __asm__ __volatile__("mfence" ::: "memory");
+        r1 = y;
+    }
+     
+    void run2()
+    {
+        y = 1;
+        __asm__ __volatile__("mfence" ::: "memory");
+        r2 = x;
+    }
+
+准备使用 Memory barrier
+
+Memory barrier 常用场合包括：
+
+    实现同步原语（synchronization primitives）
+    实现无锁数据结构（lock-free data structures）
+    驱动程序
+
+实际的应用程序开发中，开发者可能完全不知道 Memory barrier 就可以开发正确的多线程程序，这主要是因为各种同步机制中已经隐含了 Memory barrier（但和实际的 Memory barrier 有细微差别），这就使得不直接使用 Memory barrier 不会存在任何问题。但是如果你希望编写诸如无锁数据结构，那么 Memory barrier 还是很有用的。
+
+这里内存操作有序。然而在 Alpha CPU 上，存在依赖的内存读取操作不一定有序，需要使用数据依赖 barrier（由于 Alpha 不常见，这里就不详细解释了）。
+
+    通用 barrier，保证读写操作有序的，mb() 和 smp_mb()
+    写操作 barrier，仅保证写操作有序的，wmb() 和 smp_wmb()
+    读操作 barrier，仅保证读操作有序的，rmb() 和 smp_rmb()
+
+注意，所有的 CPU Memory barrier（除了数据依赖 barrier 之外）都隐含了编译器 barrier。这里的 smp 开头的 Memory barrier 会根据配置在单处理器上直接使用编译器 barrier，而在 SMP 上才使用 CPU Memory barrier（也就是 mb()、wmb()、rmb()，回忆上面相关内核代码）。
+
+最后需要注意一点的是，CPU Memory barrier 中某些类型的 Memory barrier 需要成对使用，否则会出错，详细来说就是：一个写操作 barrier 需要和读操作（或数据依赖）barrier 一起使用（当然，通用 barrier 也是可以的），反之依然。
+
+##Memory barrier 的范例
+
+读内核代码进一步学习 Memory barrier 的使用。
+Linux 内核实现的无锁（只有一个读线程和一个写线程时）环形缓冲区 kfifo 就使用到了 Memory barrier，实现源码如下：
+
+    /*
+     * A simple kernel FIFO implementation.
+     *
+     * Copyright (C) 2004 Stelian Pop <stelian@popies.net>
+     *
+     * This program is free software; you can redistribute it and/or modify
+     * it under the terms of the GNU General Public License as published by
+     * the Free Software Foundation; either version 2 of the License, or
+     * (at your option) any later version.
+     *
+     * This program is distributed in the hope that it will be useful,
+     * but WITHOUT ANY WARRANTY; without even the implied warranty of
+     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     * GNU General Public License for more details.
+     *
+     * You should have received a copy of the GNU General Public License
+     * along with this program; if not, write to the Free Software
+     * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+     *
+     */
+     
+    #include <linux/kernel.h>
+    #include <linux/module.h>
+    #include <linux/slab.h>
+    #include <linux/err.h>
+    #include <linux/kfifo.h>
+    #include <linux/log2.h>
+     
+    /**
+     * kfifo_init - allocates a new FIFO using a preallocated buffer
+     * @buffer: the preallocated buffer to be used.
+     * @size: the size of the internal buffer, this have to be a power of 2.
+     * @gfp_mask: get_free_pages mask, passed to kmalloc()
+     * @lock: the lock to be used to protect the fifo buffer
+     *
+     * Do NOT pass the kfifo to kfifo_free() after use! Simply free the
+     * &struct kfifo with kfree().
+     */
+    struct kfifo *kfifo_init(unsigned char *buffer, unsigned int size,
+                             gfp_t gfp_mask, spinlock_t *lock)
+    {
+        struct kfifo *fifo;
+     
+        /* size must be a power of 2 */
+        BUG_ON(!is_power_of_2(size));
+     
+        fifo = kmalloc(sizeof(struct kfifo), gfp_mask);
+        if (!fifo)
+            return ERR_PTR(-ENOMEM);
+     
+        fifo->buffer = buffer;
+        fifo->size = size;
+        fifo->in = fifo->out = 0;
+        fifo->lock = lock;
+     
+        return fifo;
+    }
+    EXPORT_SYMBOL(kfifo_init);
+     
+    /**
+     * kfifo_alloc - allocates a new FIFO and its internal buffer
+     * @size: the size of the internal buffer to be allocated.
+     * @gfp_mask: get_free_pages mask, passed to kmalloc()
+     * @lock: the lock to be used to protect the fifo buffer
+     *
+     * The size will be rounded-up to a power of 2.
+     */
+    struct kfifo *kfifo_alloc(unsigned int size, gfp_t gfp_mask, spinlock_t *lock)
+    {
+        unsigned char *buffer;
+        struct kfifo *ret;
+     
+        /*
+         * round up to the next power of 2, since our 'let the indices
+         * wrap' technique works only in this case.
+         */
+        if (!is_power_of_2(size)) {
+            BUG_ON(size > 0x80000000);
+            size = roundup_pow_of_two(size);
+        }
+     
+        buffer = kmalloc(size, gfp_mask);
+        if (!buffer)
+            return ERR_PTR(-ENOMEM);
+     
+        ret = kfifo_init(buffer, size, gfp_mask, lock);
+     
+        if (IS_ERR(ret))
+            kfree(buffer);
+     
+        return ret;
+    }
+    EXPORT_SYMBOL(kfifo_alloc);
+     
+    /**
+     * kfifo_free - frees the FIFO
+     * @fifo: the fifo to be freed.
+     */
+    void kfifo_free(struct kfifo *fifo)
+    {
+        kfree(fifo->buffer);
+        kfree(fifo);
+    }
+    EXPORT_SYMBOL(kfifo_free);
+     
+    /**
+     * __kfifo_put - puts some data into the FIFO, no locking version
+     * @fifo: the fifo to be used.
+     * @buffer: the data to be added.
+     * @len: the length of the data to be added.
+     *
+     * This function copies at most @len bytes from the @buffer into
+     * the FIFO depending on the free space, and returns the number of
+     * bytes copied.
+     *
+     * Note that with only one concurrent reader and one concurrent
+     * writer, you don't need extra locking to use these functions.
+     */
+    unsigned int __kfifo_put(struct kfifo *fifo,
+                             const unsigned char *buffer, unsigned int len)
+    {
+        unsigned int l;
+     
+        len = min(len, fifo->size - fifo->in + fifo->out);
+     
+        /*
+         * Ensure that we sample the fifo->out index -before- we
+         * start putting bytes into the kfifo.
+         */
+     
+        smp_mb();
+     
+        /* first put the data starting from fifo->in to buffer end */
+        l = min(len, fifo->size - (fifo->in & (fifo->size - 1)));
+        memcpy(fifo->buffer + (fifo->in & (fifo->size - 1)), buffer, l);
+     
+        /* then put the rest (if any) at the beginning of the buffer */
+        memcpy(fifo->buffer, buffer + l, len - l);
+     
+        /*
+         * Ensure that we add the bytes to the kfifo -before-
+         * we update the fifo->in index.
+         */
+     
+        smp_wmb();
+     
+        fifo->in += len;
+     
+        return len;
+    }
+    EXPORT_SYMBOL(__kfifo_put);
+     
+    /**
+     * __kfifo_get - gets some data from the FIFO, no locking version
+     * @fifo: the fifo to be used.
+     * @buffer: where the data must be copied.
+     * @len: the size of the destination buffer.
+     *
+     * This function copies at most @len bytes from the FIFO into the
+     * @buffer and returns the number of copied bytes.
+     *
+     * Note that with only one concurrent reader and one concurrent
+     * writer, you don't need extra locking to use these functions.
+     */
+    unsigned int __kfifo_get(struct kfifo *fifo,
+                             unsigned char *buffer, unsigned int len)
+    {
+        unsigned int l;
+     
+        len = min(len, fifo->in - fifo->out);
+     
+        /*
+         * Ensure that we sample the fifo->in index -before- we
+         * start removing bytes from the kfifo.
+         */
+     
+        smp_rmb();
+     
+        /* first get the data from fifo->out until the end of the buffer */
+        l = min(len, fifo->size - (fifo->out & (fifo->size - 1)));
+        memcpy(buffer, fifo->buffer + (fifo->out & (fifo->size - 1)), l);
+     
+        /* then get the rest (if any) from the beginning of the buffer */
+        memcpy(buffer + l, fifo->buffer, len - l);
+     
+        /*
+         * Ensure that we remove the bytes from the kfifo -before-
+         * we update the fifo->out index.
+         */
+     
+        smp_mb();
+     
+        fifo->out += len;
+     
+        return len;
+    }
+    EXPORT_SYMBOL(__kfifo_get);
+
+为了更好的理解上面的源码，这里顺带说一下此实现使用到的一些和本文主题无关的技巧：
+
+1. 使用与操作来求取环形缓冲区的下标，相比取余操作来求取下标的做法效率要高不少。使用与操作求取下标的前提是环形缓冲区的大小必须是 2 的 N 次方，换而言之就是说环形缓冲区的大小为一个仅有一个 1 的二进制数，那么 index & (size – 1) 则为求取的下标（这不难理解）
+1. 使用了 in 和 out 两个索引且 in 和 out 是一直递增的（此做法比较巧妙），这样能够避免一些复杂的条件判断（某些实现下，in == out 时还无法区分缓冲区是空还是满）
+
+这里，索引 in 和 out 被两个线程访问。in 和 out 指明了缓冲区中实际数据的边界，也就是 in 和 out 同缓冲区数据存在访问上的顺序关系，由于未使用同步机制，那么保证顺序关系就需要使用到 Memory barrier 了。索引 in 和 out 都分别只被一个线程修改，而被两个线程读取。__kfifo_put 先通过 in 和 out 来确定可以向缓冲区中写入数据量的多少，这时，out 索引应该先被读取后才能真正的将用户 buffer 中的数据写入缓冲区，因此这里使用到了 smp_mb()，对应的，__kfifo_get 也使用 smp_mb() 来确保修改 out 索引之前缓冲区中数据已经被成功读取并写入用户 buffer 中了。对于 in 索引，在 __kfifo_put 中，通过 smp_wmb() 保证先向缓冲区写入数据后才修改 in 索引，由于这里只需要保证写入操作有序，故选用写操作 barrier，在 __kfifo_get 中，通过 smp_rmb() 保证先读取了 in 索引（这时候 in 索引用于确定缓冲区中实际存在多少可读数据）才开始读取缓冲区中数据（并写入用户 buffer 中），由于这里只需要保证读取操作有序，故选用读操作 barrier。
+
+    struct __kfifo {
+    	unsigned int	in;
+    	unsigned int	out;
+    	unsigned int	mask;
+    	unsigned int	esize;
+    	void		*data;
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

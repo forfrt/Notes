@@ -1,0 +1,553 @@
+
+#R-B Tree
+
+R-B Tree，全称是Red-Black Tree，又称为“红黑树”，它一种特殊的二叉查找树。红黑树的每个节点上都有存储位表示节点的颜色，可以是红(Red)或黑(Black)。
+
+红黑树的特性:
+1. 每个节点或者是黑色，或者是红色。
+1. 根节点是黑色。
+1. 每个叶子节点（NIL）是黑色。 [注意：这里叶子节点，是指为空(NIL或NULL)的叶子节点！]
+1. 如果一个节点是红色的，则它的子节点必须是黑色的。
+1. 从一个节点到该节点的子孙节点的所有路径上包含相同数目的黑节点。
+
+注意：
+1. 特性(3)中的叶子节点，是只为空(NIL或null)的节点。
+1. 特性(5)，确保没有一条路径会比其他路径长出俩倍。因而，红黑树是相对是接近平衡的二叉树。
+
+----
+
+##红黑树的应用
+
+红黑树的应用比较广泛，主要是用它来存储有序的数据，它的时间复杂度是O(lgn)，效率非常之高。
+例如，Java集合中的TreeSet和TreeMap，C++ STL中的set、map，以及Linux虚拟内存的管理，都是通过红黑树去实现的。
+
+----
+
+##红黑树的时间复杂度和相关证明
+
+
+红黑树的时间复杂度为: O(lgn)
+下面通过“数学归纳法”对红黑树的时间复杂度进行证明。
+
+定理：一棵含有n个节点的红黑树的高度至多为2log(n+1).
+
+证明：
+    "一棵含有n个节点的红黑树的高度至多为2log(n+1)" 的逆否命题是 "高度为h的红黑树，它的包含的内节点个数至少为 2^h/2-1个"。
+    我们只需要证明逆否命题，即可证明原命题为真；即只需证明 "高度为h的红黑树，它的包含的内节点个数至少为 2^h/2-1个"。
+
+    从某个节点x出发（不包括该节点）到达一个叶节点的任意一条路径上，黑色节点的个数称为该节点的黑高度(x's black height)，记为bh(x)。关于bh(x)有两点需要说明： 
+    第1点：根据红黑树的"特性(5) ，即从一个节点到该节点的子孙节点的所有路径上包含相同数目的黑节点"可知，从节点x出发到达的所有的叶节点具有相同数目的黑节点。这也就意味着，bh(x)的值是唯一的！
+    第2点：根据红黑色的"特性(4)，即如果一个节点是红色的，则它的子节点必须是黑色的"可知，从节点x出发达到叶节点"所经历的黑节点数目">= "所经历的红节点的数目"。假设x是根节点，则可以得出结论"bh(x) >= h/2"。进而，我们只需证明 "高度为h的红黑树，它的包含的黑节点个数至少为 2^bh(x)-1个"即可。
+
+    到这里，我们将需要证明的定理已经由
+"一棵含有n个节点的红黑树的高度至多为2log(n+1)"
+    转变成只需要证明
+"高度为h的红黑树，它的包含的内节点个数至少为 2^bh(x)-1个"。
+
+----
+
+下面通过"数学归纳法"开始论证高度为h的红黑树，它的包含的内节点个数至少为 2^bh(x)-1个"。
+
+(01) 当树的高度h=0时，
+    内节点个数是0，bh(x) 为0，2bh(x)-1 也为 0。显然，原命题成立。
+
+(02) 当h>0，且树的高度为 h-1 时，它包含的节点个数至少为 2^bh(x)-1-1。这个是根据(01)推断出来的！
+
+    下面，由树的高度为 h-1 的已知条件推出“树的高度为 h 时，它所包含的节点树为 2^bh(x)-1”。
+
+    当树的高度为 h 时，
+    对于节点x(x为根节点)，其黑高度为bh(x)。
+    对于节点x的左右子树，它们黑高度为 bh(x) 或者 bh(x)-1。
+    根据(02)的已知条件，我们已知 "x的左右子树，即高度为 h-1 的节点，它包含的节点至少为 2bh(x)-1-1 个"；
+
+    所以，节点x所包含的节点至少为 ( 2bh(x)-1-1 ) + ( 2bh(x)-1-1 ) + 1 = 2^bh(x)-1。即节点x所包含的节点至少为 2bh(x)-1。
+    因此，原命题成立。
+
+    由(01)、(02)得出，"高度为h的红黑树，它的包含的内节点个数至少为 2^bh(x)-1个"。
+    因此，“一棵含有n个节点的红黑树的高度至多为2log(n+1)”。
+
+----
+
+##红黑树的基本操作(一) 左旋和右旋
+
+红黑树的基本操作是添加、删除。在对红黑树进行添加或删除之后，都会用到旋转方法。为什么呢？道理很简单，添加或删除红黑树中的节点之后，红黑树就发生了变化，可能不满足红黑树的5条性质，也就不再是一颗红黑树了，而是一颗普通的树。而通过旋转，可以使这颗树重新成为红黑树。简单点说，旋转的目的是让树保持红黑树的特性。
+
+旋转包括两种：左旋 和 右旋。下面分别对它们进行介绍。
+
+1. 左旋
+
+    对x进行左旋，意味着"将x变成一个左节点"。
+    左旋的伪代码《算法导论》：参考上面的示意图和下面的伪代码，理解“红黑树T的节点x进行左旋”是如何进行的。
+
+        LEFT-ROTATE(T, x)  
+         y ← right[x]            // 前提：这里假设x的右孩子为y。下面开始正式操作
+         right[x] ← left[y]      // 将 “y的左孩子” 设为 “x的右孩子”，即 将β设为x的右孩子
+         p[left[y]] ← x          // 将 “x” 设为 “y的左孩子的父亲”，即 将β的父亲设为x
+         p[y] ← p[x]             // 将 “x的父亲” 设为 “y的父亲”
+         if p[x] = nil[T]       
+         then root[T] ← y                 // 情况1：如果 “x的父亲” 是空节点，则将y设为根节点
+         else if x = left[p[x]]  
+                   then left[p[x]] ← y    // 情况2：如果 x是它父节点的左孩子，则将y设为“x的父节点的左孩子”
+                   else right[p[x]] ← y   // 情况3：(x是它父节点的右孩子) 将y设为“x的父节点的右孩子”
+         left[y] ← x             // 将 “x” 设为 “y的左孩子”
+         p[x] ← y                // 将 “x的父节点” 设为 “y”
+
+1. 右旋
+
+    对x进行左旋，意味着"将x变成一个左节点"。
+    右旋的伪代码《算法导论》：参考上面的示意图和下面的伪代码，理解“红黑树T的节点y进行右旋”是如何进行的。 
+
+        RIGHT-ROTATE(T, y)  
+         x ← left[y]             // 前提：这里假设y的左孩子为x。下面开始正式操作
+         left[y] ← right[x]      // 将 “x的右孩子” 设为 “y的左孩子”，即 将β设为y的左孩子
+         p[right[x]] ← y         // 将 “y” 设为 “x的右孩子的父亲”，即 将β的父亲设为y
+         p[x] ← p[y]             // 将 “y的父亲” 设为 “x的父亲”
+         if p[y] = nil[T]       
+         then root[T] ← x                 // 情况1：如果 “y的父亲” 是空节点，则将x设为根节点
+         else if y = right[p[y]]  
+                   then right[p[y]] ← x   // 情况2：如果 y是它父节点的右孩子，则将x设为“y的父节点的左孩子”
+                   else left[p[y]] ← x    // 情况3：(y是它父节点的左孩子) 将x设为“y的父节点的左孩子”
+         right[x] ← y            // 将 “y” 设为 “x的右孩子”
+         p[y] ← x                // 将 “y的父节点” 设为 “x”
+
+----
+
+##添加
+
+将一个节点插入到红黑树中，需要执行哪些步骤呢？首先，将红黑树当作一颗二叉查找树，将节点插入；然后，将节点着色为红色；最后，通过旋转和重新着色等方法来修正该树，使之重新成为一颗红黑树。详细描述如下：
+
+第一步: 将红黑树当作一颗二叉查找树，将节点插入。
+    红黑树本身就是一颗二叉查找树，将节点插入后，该树仍然是一颗二叉查找树。也就意味着，树的键值仍然是有序的。此外，无论是左旋还是右旋，若旋转之前这棵树是二叉查找树，旋转之后它一定还是二叉查找树。这也就意味着，任何的旋转和重新着色操作，都不会改变它仍然是一颗二叉查找树的事实。
+       好吧？那接下来，我们就来想方设法的旋转以及重新着色，使这颗树重新成为红黑树！
+
+第二步：将插入的节点着色为"红色"。
+
+    为什么着色成红色，而不是黑色呢？为什么呢？在回答之前，我们需要重新温习一下红黑树的特性：
+    1. 每个节点或者是黑色，或者是红色。
+    1. 根节点是黑色。
+    1. 每个叶子节点是黑色。 [注意：这里叶子节点，是指为空的叶子节点！]
+    1. 如果一个节点是红色的，则它的子节点必须是黑色的。
+    1. 从一个节点到该节点的子孙节点的所有路径上包含相同数目的黑节点。
+    将插入的节点着色为红色，不会违背"特性(5)"！少违背一条特性，就意味着我们需要处理的情况越少。接下来，就要努力的让这棵树满足其它性质即可；满足了的话，它就又是一颗红黑树了。o(∩∩)o...哈哈
+
+第三步: 通过一系列的旋转或着色等操作，使之重新成为一颗红黑树。
+
+    第二步中，将插入节点着色为"红色"之后，不会违背"特性(5)"。那它到底会违背哪些特性呢？
+    对于"特性(1)"，显然不会违背了。因为我们已经将它涂成红色了。
+    对于"特性(2)"，显然也不会违背。在第一步中，我们是将红黑树当作二叉查找树，然后执行的插入操作。而根据二叉查找数的特点，插入操作不会改变根节点。所以，根节点仍然是黑色。
+    对于"特性(3)"，显然不会违背了。这里的叶子节点是指的空叶子节点，插入非空节点并不会对它们造成影响。
+    对于"特性(4)"，是有可能违背的！
+    那接下来，想办法使之"满足特性(4)"，就可以将树重新构造成红黑树了。
+
+    RB-INSERT(T, z)  
+     y ← nil[T]                        // 新建节点“y”，将y设为空节点。
+     x ← root[T]                       // 设“红黑树T”的根节点为“x”
+     while x ≠ nil[T]                  // 找出要插入的节点“z”在二叉树T中的位置“y”
+         do y ← x                      
+            if key[z] < key[x]  
+               then x ← left[x]  
+               else x ← right[x]  
+     p[z] ← y                          // 设置 “z的父亲” 为 “y”
+     if y = nil[T]                     
+        then root[T] ← z               // 情况1：若y是空节点，则将z设为根
+        else if key[z] < key[y]        
+                then left[y] ← z       // 情况2：若“z所包含的值” < “y所包含的值”，则将z设为“y的左孩子”
+                else right[y] ← z      // 情况3：(“z所包含的值” >= “y所包含的值”)将z设为“y的右孩子” 
+     left[z] ← nil[T]                  // z的左孩子设为空
+     right[z] ← nil[T]                 // z的右孩子设为空。至此，已经完成将“节点z插入到二叉树”中了。
+     color[z] ← RED                    // 将z着色为“红色”
+     RB-INSERT-FIXUP(T, z)             // 通过RB-INSERT-FIXUP对红黑树的节点进行颜色修改以及旋转，让树T仍然是一颗红黑树
+
+----
+
+##删除
+
+将红黑树内的某一个节点删除。需要执行的操作依次是：首先，将红黑树当作一颗二叉查找树，将该节点从二叉查找树中删除；然后，通过"旋转和重新着色"等一系列来修正该树，使之重新成为一棵红黑树。详细描述如下：
+
+第一步：将红黑树当作一颗二叉查找树，将节点删除。
+    这和"删除常规二叉查找树中删除节点的方法是一样的"。分3种情况：
+    1. 被删除节点没有儿子，即为叶节点。那么，直接将该节点删除就OK了。
+    1. 被删除节点只有一个儿子。那么，直接删除该节点，并用该节点的唯一子节点顶替它的位置。
+    1. 被删除节点有两个儿子。那么，先找出它的后继节点；然后把“它的后继节点的内容”复制给“该节点的内容”；之后，删除“它的后继节点”。在这里，后继节点相当于替身，在将后继节点的内容复制给"被删除节点"之后，再将后继节点删除。这样就巧妙的将问题转换为"删除后继节点"的情况了，下面就考虑后继节点。 在"被删除节点"有两个非空子节点的情况下，它的后继节点不可能是双子非空。既然"的后继节点"不可能双子都非空，就意味着"该节点的后继节点"要么没有儿子，要么只有一个儿子。若没有儿子，则按"情况① "进行处理；若只有一个儿子，则按"情况② "进行处理。
+
+第二步：通过"旋转和重新着色"等一系列来修正该树，使之重新成为一棵红黑树。
+    因为"第一步"中删除节点之后，可能会违背红黑树的特性。所以需要通过"旋转和重新着色"来修正该树，使之重新成为一棵红黑树。
+
+    RB-DELETE(T, z)
+        if left[z] = nil[T] or right[z] = nil[T]         
+           then y ← z                                  // 若“z的左孩子” 或 “z的右孩子”为空，则将“z”赋值给 “y”；
+           else y ← TREE-SUCCESSOR(z)                  // 否则，将“z的后继节点”赋值给 “y”。
+        if left[y] ≠ nil[T]
+           then x ← left[y]                            // 若“y的左孩子” 不为空，则将“y的左孩子” 赋值给 “x”；
+           else x ← right[y]                           // 否则，“y的右孩子” 赋值给 “x”。
+        p[x] ← p[y]                                    // 将“y的父节点” 设置为 “x的父节点”
+        if p[y] = nil[T]                               
+           then root[T] ← x                            // 情况1：若“y的父节点” 为空，则设置“x” 为 “根节点”。
+           else if y = left[p[y]]                    
+                   then left[p[y]] ← x                 // 情况2：若“y是它父节点的左孩子”，则设置“x” 为 “y的父节点的左孩子”
+                   else right[p[y]] ← x                // 情况3：若“y是它父节点的右孩子”，则设置“x” 为 “y的父节点的右孩子”
+        if y ≠ z                                    
+           then key[z] ← key[y]                        // 若“y的值” 赋值给 “z”。注意：这里只拷贝z的值给y，而没有拷贝z的颜色！！！
+                copy y's satellite data into z         
+        if color[y] = BLACK                            
+           then RB-DELETE-FIXUP(T, x)                  // 若“y为黑节点”，则调用
+        return y
+
+结合伪代码以及为代码上面的说明，先理解RB-DELETE。理解了RB-DELETE之后，接着对 RB-DELETE-FIXUP的伪代码进行说明
+
+    RB-DELETE-FIXUP(T, x)
+        while x ≠ root[T] and color[x] = BLACK  
+            do if x = left[p[x]]      
+                  then w ← right[p[x]]                                             // 若 “x”是“它父节点的左孩子”，则设置 “w”为“x的叔叔”(即x为它父节点的右孩子)                                          
+                       if color[w] = RED                                           // Case 1: x是“黑+黑”节点，x的兄弟节点是红色。(此时x的父节点和x的兄弟节点的子节点都是黑节点)。
+                          then color[w] ← BLACK                        ▹  Case 1   //   (01) 将x的兄弟节点设为“黑色”。
+                               color[p[x]] ← RED                       ▹  Case 1   //   (02) 将x的父节点设为“红色”。
+                               LEFT-ROTATE(T, p[x])                    ▹  Case 1   //   (03) 对x的父节点进行左旋。
+                               w ← right[p[x]]                         ▹  Case 1   //   (04) 左旋后，重新设置x的兄弟节点。
+                       if color[left[w]] = BLACK and color[right[w]] = BLACK       // Case 2: x是“黑+黑”节点，x的兄弟节点是黑色，x的兄弟节点的两个孩子都是黑色。
+                          then color[w] ← RED                          ▹  Case 2   //   (01) 将x的兄弟节点设为“红色”。
+                               x ←  p[x]                               ▹  Case 2   //   (02) 设置“x的父节点”为“新的x节点”。
+                          else if color[right[w]] = BLACK                          // Case 3: x是“黑+黑”节点，x的兄弟节点是黑色；x的兄弟节点的左孩子是红色，右孩子是黑色的。
+                                  then color[left[w]] ← BLACK          ▹  Case 3   //   (01) 将x兄弟节点的左孩子设为“黑色”。
+                                       color[w] ← RED                  ▹  Case 3   //   (02) 将x兄弟节点设为“红色”。
+                                       RIGHT-ROTATE(T, w)              ▹  Case 3   //   (03) 对x的兄弟节点进行右旋。
+                                       w ← right[p[x]]                 ▹  Case 3   //   (04) 右旋后，重新设置x的兄弟节点。
+                                color[w] ← color[p[x]]                 ▹  Case 4   // Case 4: x是“黑+黑”节点，x的兄弟节点是黑色；x的兄弟节点的右孩子是红色的。(01) 将x父节点颜色 赋值给 x的兄弟节点。
+                                color[p[x]] ← BLACK                    ▹  Case 4   //   (02) 将x父节点设为“黑色”。
+                                color[right[w]] ← BLACK                ▹  Case 4   //   (03) 将x兄弟节点的右子节设为“黑色”。
+                                LEFT-ROTATE(T, p[x])                   ▹  Case 4   //   (04) 对x的父节点进行左旋。
+                                x ← root[T]                            ▹  Case 4   //   (05) 设置“x”为“根节点”。
+               else (same as then clause with "right" and "left" exchanged)        // 若 “x”是“它父节点的右孩子”，将上面的操作中“right”和“left”交换位置，然后依次执行。
+        color[x] ← BLACK
+
+----
+
+#Heaps and Heapsort
+
+##Sorting Revisited
+
+One of the typical tasks in a Data Structure course is to compare the running times of various sort algorithms. This can be done using analysis of algorithms techniques. For example, we already know that bubblesort is Theta(n^2), but quicksort is Theta(n * lg(n)), both in the average case. 
+
+Another way to compare sort routines is to actually run several of them on the same set of test data. Rather than have to write all of the code for this ourselves, an easy way to do this is to visit Jason Harrison's sorting animation Web site. Once at this site, click on the picture for each sort routine that you wish to run. This will download a Java routine that will perform the sort and display the sorting progress visually. You will, of course, need to use a browser that is Java-enabled. Which sort performs best? Do you see an obvious speed difference between some of the sorts? 
+
+##Definitions
+
+Recall that in a binary tree each node can have a left child node and/or a right child node. A leaf is a node with no children.
+
+An almost complete binary tree is a binary tree in which the following 3 conditions hold: 
+1. all the leaves are at the bottom level or the bottom 2 levels, 
+1. all the leaves are in the leftmost possible positions, 
+1. and (except possibly for the bottom level) all levels are completely filled with nodes.
+
+Here are some examples of almost complete binary trees. Note that there is no particular ordering of the letters. 
+
+                 R
+
+             /       \
+
+           G            A
+
+         /   \        /
+
+        T     W     G
+
+
+                 K
+
+             /       \
+
+           L           C
+
+        /    \       /    \
+
+      B       T     Q       Z
+
+    /   \
+
+   D     P
+
+ The following example is a complete binary tree. (Of course, it is also fits the definition of almost complete. Any complete binary tree is automatically almost complete.)
+
+                  G
+
+               /     \
+
+             R         T
+
+           /   \     /   \
+
+          V     E   S     N
+
+The following binary trees are not almost complete:
+
+                  W
+
+               /     \
+
+             T         P
+
+           /   \         \
+
+          H     K         V    (V should be pushed to the left)
+
+
+                  M
+
+               /     \
+
+             E         L
+
+           /   \     /
+
+          I     R   Y        (this level should be completely filled)
+
+        /   \
+
+       S     C
+
+
+                  H
+
+               /     \
+
+             N         D
+
+                     /   \
+
+                    R     V     (R and V should be pushed left, under N)
+
+
+                  A
+
+               /     \
+
+             G        J     (there are leaves at 3 levels)
+
+           /   \    
+
+          Y     O   
+
+        /   \
+
+       B     Z
+
+----
+
+##What is a Heap?
+
+Definition: A minimal heap (descending heap) is an almost complete binary tree in which the value at each parent node is less than or equal to the values in its child nodes.
+
+Obviously, the minimum value is in the root node. Note, too, that any path from a leaf to the root passes through the data in descending order.
+
+Here is an example of a minimal heap:
+
+                  C
+
+               /     \
+
+             H         K
+
+           /   \     /
+
+          L     I   M
+
+----
+
+##Storage of Heap Data
+
+The typical storage method for a heap, or any almost complete binary tree, works as follows. Begin by numbering the nodes level by level from the top down, left to right. For example, consider the following heap. The numbering has been added below the nodes.
+
+                  C
+                  0
+               /     \
+
+             H         K
+             1         2
+           /   \     /
+
+          L     I   M
+          3     4   5
+
+Then store the data in an array as shown below:
+
+![array drawing](./img/cpp/array_drawing.gif)
+
+The advantage of this method over using the usual pointers and nodes is that there is no wasting of space due to storing two pointer fields in each node. Instead, starting with the current index, CI, one calculates the index to use as follows: 
+
+    Parent(CI) = (CI - 1) / 2
+    RightChild(CI) = 2 * (CI + 1)
+    LeftChild(CI) = 2 * CI + 1
+
+For example, if we start at node H (with index 1), the right child is at index 2 * (1 + 1) = 4, that is, node I. 
+
+----
+
+##Inserting into a Heap
+
+This is done by temporarily pacing the new item at the end of the heap  and then calling a FilterUp routine to make any needed adjustments on the path from this leaf to the roof. For examplee, let's insert E into the following heap:
+
+                  C
+
+               /     \
+
+             H         K
+
+           /   \     /
+
+          L     I   M
+
+First, temporarily place E in the next available position:
+
+                  C
+
+               /     \
+
+             H         K
+
+           /   \     /   \
+
+          L     I   M     E
+
+Of course, the new tree might not be a heap. The `FilterUp` routine now checks the parent, K, and sees that things would be out of order as they are. So K is moved down to where E was. Then the parent above that, C, is checked. It is in order relative to the target item E, so the C is not moved down. The hole left behind is filled with E, then, as this is the correct position for it.
+
+                  C
+
+               /     \
+
+             H         E
+
+           /   \     /   \
+
+          L     I   M     K
+
+For practice, let's take the above heap and insert another item, D. First, place D temporarily in the next available position: 
+
+                  C
+
+               /     \
+
+             H         E
+
+           /   \     /   \
+
+          L     I   M     K
+
+        /
+
+       D
+
+Then the `FilterUp` routine checks the parent, L, and discovers that L must be moved down. Then the parent above that, H, is checked. it too mush be moved down. Finally C is checked, but it is OK where it is. The hole left where the H had been is where the target D is then inserted.
+
+Things have now been adjusted so that we again have a heap!
+
+----
+
+##Removing from a Heap
+
+We always remove the item from the root. That way we always get the smallest item. The problem is then how to adjust the binary tree so that we again have a heap (with on less item).
+
+The algorithm works like this: First, remove the root item and replace it temporarily with the item in the last position. Call this replacement the target. A `FilterDown` routine is then used to check the path from the root to a leaf for the correct position for this target. The path is chosen by always selecting the smaller child at each node. For example, let's remove the C from this heap: 
+
+                  C
+
+               /     \
+
+             D         E
+
+           /   \     /   \
+
+          H     I   M     K
+
+        /
+
+       L
+
+ First we remove the C and replace it with the last item (the target), L:
+
+                  L
+
+               /     \
+
+             D         E
+
+           /   \     /   \
+
+          H     I   M     K
+
+ The smaller child of L is D. Since D is out of order compared to the target L, we move D up. The smaller child under where D had been is H. When H is compared to L we see that the H too needs to be moved up. Since we are now at a leaf, this empty leaf is where the target L is put.
+
+                  D
+
+               /     \
+
+             H         E
+
+           /   \     /   \
+
+          L     I   M     K
+
+----
+
+ For another example, let's remove the E from the following heap:
+
+                  E
+
+               /     \
+
+             G         K
+
+           /   \     /   \
+
+         J      N   K     X
+
+        / \    /
+
+       X   Y  P
+
+First remove the E and replace it with the target P (the last item):
+
+                  P
+
+               /     \
+
+             G         K
+
+           /   \     /   \
+
+         J      N   K     X
+
+        / \ 
+
+       X   Y
+
+Now use the `FilterDown` routine to filter the P down to its correct position by checking the smaller child, G, which should be moved up, and then the smaller child below that, J, which should also be moved up. Finally, the smaller child, X, under where J had been is checked, but it does not get moved since it is OK relative to the target P. The P is then placed in the empty node above X. We then have the following heap: 
+
+                  G
+
+               /     \
+
+             J         K
+
+           /   \     /   \
+
+         P      N   K     X
+
+        / \ 
+
+       X   Y
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

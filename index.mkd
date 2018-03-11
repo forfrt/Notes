@@ -12,6 +12,7 @@
 1. [[Beautiful Codes]]
 1. [[Best Practice]]
 1. [[Bing API]]
+1. [Check](Check)
 1. [[Cpp]]
 1. [[Comment Style]]
 1. [[Django]]
@@ -19,8 +20,11 @@
 1. [Data Structure](Data Structure)
 1. [[Ecryptfs]]
 1. [[GCC]]
+1. [GNU C Library](GNU C Library)
 1. [[JUnit]]
+1. [ld](ld)
 1. [[LibGDX]]
+1. [[Lua]]
 1. [[truecrypt]]
 1. [[FiST]]
 1. [[Kconfig]]
@@ -33,6 +37,7 @@
 1. [MySQL](MySQL)
 1. [[Makefile]]
 1. [[Markdown]]
+1. [Maven](Maven)
 1. [[Mercurial]]
 1. [[Multi-precision multiplication]]
 1. [[MongoDB]]
@@ -45,16 +50,20 @@
 1. [[PostgreSQL]]
 1. [[Socket]]
 1. [[Software Configuration Tool]]
-2. [SQL](SQL)
+1. [SQL](SQL)
 3. [[STL]]
-4. [[Windows Batch Processing]]
-5. [[Web Shell]]
-6. [[Lua]]
+1. [WAM](WAM)
+1. [[Web Shell]]
+1. [[Windows Batch Processing]]
+1. [[Web Shell]]
+1. [[Lua]]
 
 ##Theory
 
-1. [[Algorithmic and Economic Aspects of the Internet]]
+1. [3gpp](3gpp)
 1. [[Advanced Computer Architecture]]
+1. [[Algorithmic and Economic Aspects of the Internet]]
+1. [[Artificial Intelligence]]
 1. [[BigTable]]
 1. [[Cloud Computing]]
 1. [[Coding]]
@@ -71,34 +80,43 @@
 1. [[Linux]]
 1. [[Linux Shell]]
 1. [[Japanese]]
-1. [[Microservice]]
-1. [[Modern Cryptography]]
-1. [[MindMapping]]
-1. [[System Security]]
-1. [[Watermaking]]
-1. [[小鹤双拼]]
-1. [[Artificial Intelligence]]
+2. [json ld](json-ld)
+3. [[Microservice]]
+4. [[Modern Cryptography]]
+5. [[MindMapping]]
 1. [[SLAM]]
+6. [[System Security]]
+7. [UMA](UMA)
+8. [[Watermaking]]
+9. [[小鹤双拼]]
 
 ##Books
 
+1. [Ivan Ristic-Bulletproof SSL and TLS_ Understanding and Deploying SSL_TLS and PKI to Secure Servers and Web Applications-Feisty Duck (2014)](Ivan Ristic-Bulletproof SSL and TLS_ Understanding and Deploying SSL_TLS and PKI to Secure Servers and Web Applications-Feisty Duck (2014))
 1. [[Linux Network Programming]]
 1. [[The Linux Programmer's Guide]]
-1. [[密歇根州公开课_平面设计]]
-1. [[みんなの日本語]]
-1. [[HTTP权威指南]]
+2. [Object-oriented Programming in ANSI-C](Object-oriented Programming in ANSI-C)
+3. [[密歇根州公开课_平面设计]]
+4. [[みんなの日本語]]
+5. [[HTTP权威指南]]
 
 ##Articles
 
+<<<<<<< HEAD
+1. [[A SANDBOX-BASED APPROACH TO THE DEOBFUSCATION AND DISSECTION OF PHP-BASED MALWARE]]
 1. [[CVE-2015-4852_breenmachine]]
-2. [[A SANDBOX-BASED APPROACH TO THE DEOBFUSCATION AND DISSECTION OF PHP-BASED MALWARE]]
-3. [Skip Lists: A Probabilistic Alternative to Balanced Tree](Skip Lists A Probabilistic Alternative to Balanced Tree)
-4. [[Webhsell威胁情报分析]]
-5. [[Webshell文件名]]
-6. [[Webshell路径]]
-7. [统一市场下撮合交易系统优化研究与性能模拟](统一市场下撮合交易系统优化研究与性能模拟)
-8. [Delegated Proof of Stake (DPOS) vs Proof of Work (POW)](Delegated Proof of Stake (DPOS) vs Proof of Work (POW))
-9. [基于区块链的去中心化交易关键技术研究及应用](基于区块链的去中心化交易关键技术研究及应用)
+1. [DID Spec-Implementers Draft 01](DID Spec-Implementers Draft 01)
+1. [How Sovrin works](How Sovrin works)
+1. [Linux内核的5个子系统](Linux内核的5个子系统)
+1. [Method For Generating Public and Private Key Pairs Without Using a Passpharase](Method For Generating Public and Private Key Pairs Without Using a Passpharase)
+1. [Practical Byzantine Fault Tolerance](Practical Byzantine Fault Tolerance)
+1. [Skip Lists: A Probabilistic Alternative to Balanced Tree](Skip Lists A Probabilistic Alternative to Balanced Tree)
+1. [[Webhsell威胁情报分析]]
+1. [[Webshell文件名]]
+1. [[Webshell路径]]
+1. [统一市场下撮合交易系统优化研究与性能模拟](统一市场下撮合交易系统优化研究与性能模拟)
+1. [Delegated Proof of Stake (DPOS) vs Proof of Work (POW)](Delegated Proof of Stake (DPOS) vs Proof of Work (POW))
+1. [基于区块链的去中心化交易关键技术研究及应用](基于区块链的去中心化交易关键技术研究及应用)
 
 ##Research Details
 1. [Bitshares](Bitshares)
@@ -107,12 +125,13 @@
 4. [IPFS](IPFS)
 
 ##Work
-
 1. [[日常]]
 1. [[问题]]
 1. [[补丁]]
 1. [[password]]
-2. [investment](investment)
+1. [investment](investment)
+1. [[Webshell文件名]]
+1. [[Webshell路径]]
 
 ##Course
 
@@ -124,7 +143,6 @@
 5. [徐小湛高数](徐小湛高数)
 
 ##Tools
-
 1. [[Linux Commands]]
 1. [[eclipse]]
 1. [[vim]]
@@ -148,11 +166,14 @@
 1. [[Ossim]]
 1. [[vArmour]]
 1. [[青藤云安全]]
+10. [uPort Whitepaper](uPort Whitepaper)
+8. [PikcioChain](PikcioChain)
 
 # Sources
 
 1. [Tinyhttpd](Tinyhttpd)
 1. [Redis](Redis)
+1. [dpdk](dpdk)
 
 # Exercise
 

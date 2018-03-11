@@ -10,14 +10,7 @@ Z的递增代表个别的修正版发布
 1. 发行版比较:[polishlinux](http://polishlinux.org/choose/comparison/)
 1. [Linux Distribution Chooser](www.zegeniestudios.net/ldc/index.php?firsttime=true)
 
-****
-
-#Linux命令
-
-##进程相关
-pgrep   通过程序名字查询进程
-
-****
+----
 
 #配置与编译内核
 

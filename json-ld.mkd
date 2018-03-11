@@ -1,0 +1,216 @@
+
+#JSON-LD
+
+Linked Data empowers people that publish and use information on the Web. It is a way to create a network of standards-based, machine-readable data across Web sites. It allows an application to *start at one piece of Linked Data, and follow embedded links to other pieces of Linked Data* that are hosted on different sites across the Web.
+
+JSON-LD is a lightweight Linked Data format. It is easy for humans to read and write. It is based on the already successful JSON format and provides a way to help JSON data interoperate at Web-scale. JSON-LD is an ideal data format for programming environments, REST Web services, and unstructured databases such as CouchDB and MongoDB. JSON-LD is primarily intended to be a way to use Linked Data in Web-based programming environments, to build interoperable Web services, and to store Linked Data in JSON-based storage engines. Since JSON-LD is 100% compatible with JSON, the large number of JSON parsers and libraries avaialbe today can be reused. In addition to all the features JSON prvodies, JSON-LD introduces:
+
+1.  *a universal identifier mechanism* for JSON objects via the use of **IRIs**(Internationalized Resource Identifier)
+2.  a way to disambiguate keys shared among different JSON documents by mapping them to **IRIs** via a **context**,
+3.  a mechanism in which a value in a JSON object may refer to a JSON object on a different site on the Web(That's the key content of LD)
+4.  the ability to annotate strings with their language,
+5.  a way to associate datatypes with values such as dates and times,
+6.  and *a facility to express one or more directed graphs*, such as a social network, in a single document.
+
+JSON-LD is designed to be usable directly as JSON, with no knowledge of RDF [RDF11-CONCEPTS]. It is also designed to be usable as RDF, if desired, for use with other Linked Data technologies like SPARQL. Developers who require any of the facilities listed above or need to serialize an RDF Graph or RDF Dataset in a JSON-based syntax will find JSON-LD of interest. People intending to use JSON-LD with RDF tools will find it can be used as another RDF syntax, like Turtle [TURTLE]. Complete details of how JSON-LD relates to RDF are in section 9. Relationship to RDF. 
+
+The syntax is designed to not disturb already deployed systems running on JSON, but provide a smooth upgrade path from JSON to JSON-LD. Since the shape of such data varies wildly, JSON-LD features mechanisms to reshape documents into a deterministic structure which simplifies their processing.
+
+****
+
+#Design Goals and Rationale
+
+
+- Simplicity
+  
+    No extra processors or software libraries are necessary to use JSON-LD in its most basic form. The language provides developers with a very easy learning curve. Developers only need to know JSON and two keywords (@context and @id) to use the basic functionality in JSON-LD.
+    
+- Compatibility
+  
+    A JSON-LD document is always a valid JSON document. This ensures that all of the standard JSON libraries work seamlessly with JSON-LD documents.
+    
+- Expressiveness
+  
+    The syntax *serializes directed graphs*. This ensures that almost every real world data model can be expressed.
+    
+- Terseness
+  
+    The JSON-LD syntax is very terse and human readable, requiring as little effort as possible from the developer.
+    
+- Zero Edits, most of the time
+  
+    JSON-LD ensures a smooth and simple transition from existing JSON-based systems. In many cases, zero edits to the JSON document and *the addition of one line to the HTTP response should suffice* (see section 6.8 Interpreting JSON as JSON-LD). This allows organizations that have already deployed large JSON-based infrastructure to use JSON-LD's features in a way that is not disruptive to their day-to-day operations and is transparent to their current customers. However, there are times where mapping JSON to a graph representation is a complex undertaking. In these instances, rather than extending JSON-LD to support esoteric use cases, we chose not to support the use case. While Zero Edits is a design goal, it is not always possible without adding great complexity to the language. JSON-LD focuses on simplicity when possible.
+    
+- Usable as RDF
+  
+    JSON-LD is usable by developers as idiomatic JSON, with no need to understand RDF [RDF11-CONCEPTS]. JSON-LD is also usable as RDF, so people intending to use JSON-LD with RDF tools will find it can be used like any other RDF syntax. Complete details of how JSON-LD relates to RDF are in section 9. Relationship to RDF. 
+    
+****
+
+#Terminology
+
+##Data Model Overview
+
+Generally speaking, the data model used for JSON-LD is a labeled, directed graph. *The graph contains nodes, which are connected by edges*. A node is typically data such as a string, number, typed values (like dates and times) or an IRI. There is also a special class of node called a blank node, which is typically used to express data that does not have a global identifier like an IRI. Blank nodes are identified using a blank node identifier. This simple data model is incredibly flexible and powerful, capable of modeling almost any kind of data. For a deeper explanation of the data model, see section 7. Data Model. 
+
+Developers who are familiar with Linked Data technologies will recognize the data model as the RDF Data Model. To dive deeper into how JSON-LD and RDF are related, see section 9. Relationship to RDF. 
+
+----
+
+##Syntax Token and Keywords
+
+- @context
+
+    Used to *define the short-hand names* that are used throughout a JSON-LD document. These short-hand names are called terms and help developers to express specific identifiers in a compact manner. The @context keyword is described in detail in section 5.1 The Context.
+    
+- @id 
+
+    Used to uniquely identify thins that are being described in the docuement with IRI or blank node identifiers. This keyword is described in section 5.3 Node Identifiers.
+- @value
+
+    Used to specify the data that is associated with a particular property in the graph. This keyword is described in section 6.9 String Interationalization and section 6.4 Typed Values.
+    
+- @language
+
+    Used to specify the language for a paricular string value or the default language of a JSON-LD document. This keyword is described in section 6.9 String Internationalization.
+    
+- @type
+
+    Used to set the data type of a node or typd value. This keyword is described in section 6.4 Typed Values.
+    
+- @container
+
+    Used to set the defualt container type for a term. This kdyword is described in section 6.11 Sets and Lists.
+    
+- @list
+
+    Used to express an ordered set of data. This keyword is described in section 6.11 Sets and Lists.
+    
+- @set
+
+    Used to express an unordered set of data and to ensure that values are always represented as arrays. This keyword is described in section 6.11 Sets and Lists.
+    
+- @reverse
+
+    Used to exprese properties. This keyword is described in section 6.12 Reverse Properties.
+    
+- @index 
+  
+    Used to specify that a container is used to index information and that processing should continue deeper into a JSON data structure. This keyword is described in section 6.16 Data Indexing.
+    
+****
+
+#Basic Concepts
+
+##The Contexts
+
+When two people communicate with one another, the conversation takes place in a shared environment, typically called "the context of the conversation". This shared context allows the individuals to use shortcut terms, like the first name of a mutual friend, to communicate more quickly but without losing accuracy. A context in JSON-LD works in the same way. It allows two applications to use shortcut terms to communicate with one another more efficiently, but without losing accuracy.
+
+Simply speaking, a context is used to map terms to IRIs. Terms are case sensitive and any valid string that is not a reserved JSON-LD keyword can be used as a term.
+
+For the sample document in the previous section, a context would look something like this:
+
+    {
+      "@context":
+      {
+        "name": "http://schema.org/name",  ¡û This means that 'name' is shorthand for 'http://schema.org/name' 
+        "image": {
+          "@id": "http://schema.org/image",  ¡û This means that 'image' is shorthand for 'http://schema.org/image' 
+          "@type": "@id"  ¡û This means that *a string value associated with 'image' should be interpreted as an identifier* that is an IRI 
+        },
+        "homepage": {
+          "@id": "http://schema.org/url",  ¡û This means that 'homepage' is shorthand for 'http://schema.org/url' 
+          "@type": "@id"  ¡û This means that *a string value associated with 'homepage' should be interpreted as an identifier* that is an IRI 
+        }
+      }
+    }
+    
+As the context above shows, the value of a term definition can either be a simple string, mapping the term to an IRI, or a JSON object.
+
+When a JSON object is associated with a term, it is called *an expanded term definition*. The example above specifies that the values of image and homepage, if they are strings, are to be interpreted as IRIs. Expanded term definitions also allow terms to be used for *index maps and to specify whether array values are to be interpreted as sets or lists*. Expanded term definitions may be defined using absolute or compact IRIs as keys, which is mainly used to associate type or language information with an absolute or compact IRI.
+
+Context can either be emmbedded into the document or be referenced. Assuming the context document in the previous example can be retrieved at http://json-ld.org/contexts/person.jsonld, it can be **referenced** by adding a single line and allows a JSON-LD document to be expressed much more concisely as shown in the example below:
+
+    {
+      "@context": "http://json-ld.org/contexts/person.jsonld",
+      "name": "Manu Sporny",
+      "homepage": "http://manu.sporny.org/",
+      "image": "http://manu.sporny.org/images/manu.png"
+    }
+
+The referenced context not only specifies how the terms map to IRIs in the Schema.org vocabulary but also specifies that string values associated with the `homepage` and `image` property can be interpreted as an IRI. This informations allows allows developers to re-use each other's data without having to agree to how their data will interoperate on a site-by-site basis. External JSON-LD context documents may contain extra information located outside of the `@context` key, such as documentation about the terms declared in the document. Information contained outside of the `@context` value is ignored when the document is used as an external JSON-LD context document.
+
+> The content in person.jsonld looks exactly like the previous context for the sample document.
+
+JSON docuemts can be interpreted s JSON-LD without having to be modified *by referencing a context via an HTTP Link HEADER* as described in section 6.8 interpreting JSON as JSON-LD. It is also possible to apply a custom context using the JSON-LD API.
+
+In JSON-LD documents, contexts may also be specified **inline**. This has the advantage that documents can be processed even in the absence of a connection to the Web. Ultimately, this is a modeling decision and different use cases may require different handling.
+
+    {
+      "@context":
+      {
+        "name": "http://schema.org/name",
+        "image": {
+          "@id": "http://schema.org/image",
+          "@type": "@id"
+        },
+        "homepage": {
+          "@id": "http://schema.org/url",
+          "@type": "@id"
+        }
+      },
+      "name": "Manu Sporny",
+      "homepage": "http://manu.sporny.org/",
+      "image": "http://manu.sporny.org/images/manu.png"
+    }
+
+This section only covers the most basic features of the JSON-LD Context. More advanced features related to the JSON-LD Context are covered in section 6. Advanced Concepts. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

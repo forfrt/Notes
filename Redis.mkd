@@ -1,4 +1,3 @@
-
 #Redisè®¾è®¡ä¸Žå®žçŽ°
 
 #ç®€å•åŠ¨æ€å­—ç¬¦ä¸²
@@ -488,6 +487,73 @@ zskiplistNodeç»“æž„åŒ…å«ä»¥ä¸‹å±žæ€§:
 ****
 
 #åŽ‹ç¼©åˆ—è¡¨
+
+
+#Ñ¹ËõÁÐ±í
+
+Ñ¹ËõÁÐ±íÊÇÁÐ±í¼üºÍ¹þÏ£¼üµÄµ×²ãÊµÏÖÖ®Ò». µ±Ò»¸öÁÐ±í¼üÖÊ±£º¯ÉÙÁ¿ÁÐ±íÏî, ²¢ÇÒÃ¿¸öÁÐ±íÏîÒªÃ´¾ÍÊÇÐ¡ÕûÊýÖµ, ÒªÃ´¾ÍÊÇ³¤¶È±È½Ï¶ÌµÄ×Ö·û´®, ÄÇÃ´Redis¾Í»áÊ¹ÓÃÑ¹ËõÁÐ±íÀ´×öÁÐ±í¼üµÄµ×²ãÊµÏÖ.
+
+    redis> RPUSH lst 1 3 5 100086 "hello" "world"
+    (integer)6
+    redis> OBJECT ENCODING lst
+    "ziplist"
+
+ÁíÍâ, µ±Ò»¸ö¹þÏ£¼üÖ»°üº¬ÉÙÁ¿¼üÖµ¶Ô, ²¢ÇÒÃ¿¸ö¼üÖµ¶ÔµÄ¼üºÍÖµÒªÃ´¾ÍÊÇÐ¡ÕûÊýÖµ, ÒªÃ´¾ÍÊÇ³¤¶È±È½Ï¶ÌµÄ×Ö·û´®, ÄÇÃ´Redis¾Í»áÊ¹ÓÃÑ¹ËõÁÐ±íÀ´×ö¹þÏ£¼üµÄµ×²ãÊµÏÖ.
+
+    redis> HMSET profile 1 3 5 100086 "hello" "world"
+    OK
+    redis> OBJECT ENCODING profile
+    "ziplist"
+
+----
+
+##Ñ¹Ëõ±í¹¹³É
+
+ÊÇÓÉÒ»ÏµÁÐÌØÊâ±àÂëµÄÁ¬ÐøÄÚ´æ¿é×é³ÉµÄË³ÐòÐÍÊý¾Ý½á¹¹. Ò»¸öÑ¹ËõÁÐ±í¿ÉÒÔ°üº¬ÈÎÒâ¶à¸ö½Úµã, Ã¿¸ö½Úµã¿ÉÒÔ±£´æÒ»¸ö×Ö½ÚÊý×é»òÕßÒ»¸öÕûÊýÖµ.
+
+1. zlbytes
+
+    uint32_t, Õû¸öÑ¹ËõÁÐ±íÕ¼ÓÃµÄÄÚ´æ×Ö½ÚÊý
+2. zltail
+
+    uint32_t, ¼ÇÂ¼Ñ¹ËõÁÐ±íÎ²½Úµã¾àÀëÆäÊµ×Ö½ÚÓÐ¶àÉÙ×Ö½Ú
+3. zllen
+
+    uint16_t, ¼ÇÂ¼Ñ¹ËõÁÐ±í°üº¬µÄ½ÚµãÊýÁ¿
+4. entryX
+
+    ÁÐ±í½Úµã, Ñ¹ËõÁÐ±í°üº¬µÄ¸÷¸ö½Úµã, ½Úµã³¤¶ÈÓÉ½Úµã±£´æÄÚÈÝ¾ö¶¨
+5. zlend
+
+    uint8_t, ÌØÊâÖµ0xFF, ÓÃÀ´±ê¼ÇÑ¹Ëõ½ÚµãÎ²¶Ë
+
+----
+
+##Ñ¹ËõÁÐ±í½ÚµãµÄ¹¹³É
+
+Ã¿¸öÑ¹ËõÁÐ±í½Úµã¿ÉÒÔ±£´æÒ»¸ö×Ö½ÚÊý×é»òÕßÒ»¸öÕûÊýÖµ, ÆäÖÐ, ×Ö½ÚÊý×é¿ÉÒÔÊÇÒ»ÏÂÈýÖÖ³¤¶ÈµÄÆäÖÐÒ»ÖÖ:
+1. ³¤¶ÈÐ¡ÓÚµÈÓÚ2^6-1×Ö½ÚµÄ×Ö½ÚÊý×é
+2. ³¤¶ÈÐ¡ÓÚµÈÓÚ2^14-1×Ö½ÚµÄ×Ö½ÚÊý×é
+3. ³¤¶ÈÐ¡ÓÚµÈÓÚ2^32-1×Ö½ÚµÄ×Ö½ÚÊý×é
+
+ÕûÊýÖµÔò¿ÉÒÔÊ¹Ò»ÏÂ6ÖÐ³¤¶ÈµÄÆäÖÐÒ»ÖÖ:
+1. 4Î»³¤, ½éÓÚ0-12µÄÎÞ·ûºÅÕûÊý
+2. 1×Ö½Ú³¤µÄÓÐ·ûºÅÕûÊý
+3. 3×Ö½Ú³¤µÄÓÐ·ûºÅÕûÊý
+4. int16_tÀàÐÍÕûÊý
+5. int32_tÀàÐÍÕûÊý
+6. int64_tÀàÐÍÕûÊý
+
+Ã¿¸öÑ¹ËõÁÐ±í½Úµã¶¼ÓÉprevious_entry_length, encoding, contentÈý²¿·Ö×é³É
+
+###`previous_entry_length`
+
+½ÚµãµÄprevious_entry_lengthÊôÐÔÒÔ×Ö½ÚÎªµ¥Î», ¼ÇÂ¼ÁËÑ¹ËõÁÐ±íÖÐÇ°Ò»¸ö½ÚµãµÄ³¤¶È.  previous_entry_lengthÊôÐÔµÄ³¤¶È¿ÉÒÔÊÇ1×Ö½Ú»òÕß5×Ö½Ú:
+
+
+
+
+
 
 
 

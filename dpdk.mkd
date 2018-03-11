@@ -1,0 +1,1062 @@
+#Getting Started Guide#
+
+#Introduction#
+
+##Documentation Roadmap##
+
+The following is a list of DPDK documents in the suggested reading order:
+
+- Release Notes: Provides release-specific information, including supported features, limitations, fixed issues, known issues and so on. Also, provides the answers to frequently asked questions in FAQ format.
+- Getting Started Guide (this document): Describes how to install and configure the DPDK; designed to get users up and running quickly with the software.
+- Programmer’s Guide: Describes:
+    - The software architecture and how to use it (through examples), specifically in a Linux application (linuxapp) environment
+    - The content of the DPDK, the build system (including the commands that can be used in the root DPDK Makefile to build the development kit and an application) and guidelines for porting an application
+    - Optimizations used in the software and those that should be considered for new development
+
+    A glossary of terms is also provided.
+
+- API Reference: Provides detailed information about DPDK functions, data structures and other programming constructs.
+- Sample Applications User Guide: Describes a set of sample applications. Each chapter describes a sample application that showcases specific functionality and provides instructions on how to compile, run and use the sample application.
+
+----
+
+#System Requirement#
+
+##BIOS Setting Prerequisite on x86##
+
+For the majority of platforms, no special BIOS settings are needed to use basic DPDK functionality. However, for additional HPET timer and power management functionality, and high performance of small packets on 40G NIC, BIOS setting changes may be needed. Consult the section on Enabling Additional Functionality for more information on the required changes.
+
+----
+
+##Compilation of the DPDK##
+
+- GNU make.
+- coreutils: cmp, sed, grep, arch, etc.
+- gcc: versions 4.9 or later is recommended for all platforms. On some distributions, some specific compiler flags and linker flags are enabled by default and affect performance (-fstack-protector, for example). Please refer to the documentation of your distribution and to gcc -dumpspecs.
+- libc headers, often packaged as gcc-multilib (glibc-devel.i686 / libc6-dev-i386; glibc-devel.x86_64 / libc6-dev for 64-bit compilation on Intel architecture; glibc-devel.ppc64 for 64 bit IBM Power architecture;)
+- Linux kernel headers or sources required to build kernel modules. (kernel - devel.x86_64; kernel - devel.ppc64)
+- Additional packages required for 32-bit compilation on 64-bit systems are:
+    - glibc.i686, libgcc.i686, libstdc++.i686 and glibc-devel.i686 for Intel i686/x86_64;
+    - glibc.ppc64, libgcc.ppc64, libstdc++.ppc64 and glibc-devel.ppc64 for IBM ppc_64;
+
+- Python, version 2.7+ or 3.2+, to use various helper scripts included in the DPDK package.
+
+Optional Tools:
+
+- Intel® C++ Compiler (icc). For installation, additional libraries may be required. See the icc Installation Guide found in the Documentation directory under the compiler installation.
+- IBM® Advance ToolChain for Powerlinux. This is a set of open source development tools and runtime libraries which allows users to take leading edge advantage of IBM’s latest POWER hardware features on Linux. To install it, see the IBM official installation document.
+- libpcap headers and libraries (libpcap-devel) to compile and use the libpcap-based poll-mode driver. This driver is disabled by default and can be enabled by setting CONFIG_RTE_LIBRTE_PMD_PCAP=y in the build time config file.
+- libarchive headers and library are needed for some unit tests using tar to get their resources.
+
+----
+
+##Running DPDK Applications
+
+To run an DPDK application, some customization may be required on the target machine.
+
+###Use of Hugepages in the Linux Environment
+
+Hugepage support is required for the large memory pool allocation used for packet buffers (the HUGETLBFS option must be enabled in the running kernel as indicated the previous section). By using hugepage allocations, *performance is increased since fewer pages are needed, and therefore less Translation Lookaside Buffers (TLBs, high speed translation caches)*, which reduce the time it takes to translate a virtual page address to a physical page address. Without hugepages, high TLB miss rates would occur with the standard 4k page size, slowing performance.
+
+----
+
+###Reserving Hugepages for DPDK Use
+
+The allocation of hugepages should be done at boot time or as soon as possible after system boot to prevent memory from being fragmented in physical memory. To reserve hugepages at boot time, a parameter is passed to the Linux kernel on the kernel command line.
+
+For 2 MB pages, just pass the hugepages option to the kernel. For example, to reserve 1024 pages of 2 MB, use:
+
+    hugepages=1024
+
+For other hugepage sizes, for example 1G pages, the size must be specified explicitly and can also be optionally set as the default hugepage size for the system. For example, to reserve 4G of hugepage memory in the form of four 1G pages, the following options should be passed to the kernel:
+
+    default_hugepagesz=1G hugepagesz=1G hugepages=4
+
+In the case of a dual-socket NUMA system, the number of hugepages reserved at boot time is generally divided equally between the two sockets (on the assumption that sufficient memory is present on both sockets).
+
+See the Documentation/kernel-parameters.txt file in your Linux source tree for further details of these and other kernel options.
+
+
+Alternative:
+
+For 2 MB pages, there is also the option of allocating hugepages after the system has booted. This is done by echoing the number of hugepages required to a nr_hugepages file in the /sys/devices/ directory. For a single-node system, the command to use is as follows (assuming that 1024 pages are required):
+
+    echo 1024 > /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
+
+On a NUMA machine, pages should be allocated explicitly on separate nodes:
+
+    echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+    echo 1024 > /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages
+
+----
+
+###Using Hugepages with the DPDK
+
+
+Once the hugepage memory is reserved, to make the memory available for DPDK use, perform the following steps:
+
+    mkdir /mnt/huge
+    mount -t hugetlbfs nodev /mnt/huge
+
+The mount point can be made permanent across reboots, by adding the following line to the /etc/fstab file:
+
+    nodev /mnt/huge hugetlbfs defaults 0 0
+
+For 1GB pages, the page size must be specified as a mount option:
+
+    nodev /mnt/huge_1GB hugetlbfs pagesize=1GB 0 0
+
+----
+
+###Xen Domain0 Support in the Linux Environment
+
+The existing memory management implementation is based on the Linux kernel hugepage mechanism. On the Xen hypervisor, hugepage support for DomainU (DomU) Guests means that DPDK applications work as normal for guests.
+
+However, Domain0 (Dom0) does not support hugepages. To work around this limitation, a new kernel module rte_dom0_mm is added to facilitate the allocation and mapping of memory via IOCTL (allocation) and MMAP (mapping).
+
+----
+
+####Enabling Xen Dom0 Mode in the DPDK
+
+By default, Xen Dom0 mode is disabled in the DPDK build configuration files. To support Xen Dom0, the CONFIG_RTE_LIBRTE_XEN_DOM0 setting should be changed to “y”, which enables the Xen Dom0 mode at compile time.
+
+Furthermore, the CONFIG_RTE_EAL_ALLOW_INV_SOCKET_ID setting should also be changed to “y” in the case of the wrong socket ID being received.
+
+----
+
+####Loading the DPDK rte_dom0_mm Module
+
+To run any DPDK application on Xen Dom0, the rte_dom0_mm module must be loaded into the running kernel with rsv_memsize option. The module is found in the kmod sub-directory of the DPDK target directory. This module should be loaded using the insmod command as shown below (assuming that the current directory is the DPDK target directory):
+
+    sudo insmod kmod/rte_dom0_mm.ko rsv_memsize=X
+
+The value X cannot be greater than 4096(MB).
+
+----
+
+####Configuring Memory for DPDK Use
+
+After the rte_dom0_mm.ko kernel module has been loaded, the user must configure the memory size for DPDK usage. This is done by echoing the memory size to a memsize file in the /sys/devices/ directory. Use the following command (assuming that 2048 MB is required):
+    echo 2048 > /sys/kernel/mm/dom0-mm/memsize-mB/memsize
+
+The user can also check how much memory has already been used:
+    cat /sys/kernel/mm/dom0-mm/memsize-mB/memsize_rsvd
+
+Xen Domain0 does not support NUMA configuration, as a result the `--socket-mem` command line option is invalid for Xen Domain0.
+
+----
+
+####Running the DPDK Application on Xen Domain0
+
+To run the DPDK application on Xen Domain0, an extra command line option `--xen-dom0` is required.
+
+----
+
+#Compiling the DPDK Target from Source#
+
+##Install the DPDK and Browse Sources##
+
+First, uncompress the archive and move to the uncompressed DPDK source directory:
+
+    tar xJf dpdk-<version>.tar.xz
+    cd dpdk-<version>
+
+The DPDK is composed of several directories:
+
+- lib: Source code of DPDK libraries
+- drivers: Source code of DPDK poll-mode drivers
+- app: Source code of DPDK applications (automatic tests)
+- examples: Source code of DPDK application examples
+- config, buildtools, mk: Framework-related makefiles, scripts and configuration
+
+----
+
+##Installation of DPDK Target Environments##
+
+The format of a DPDK target is:
+
+    ARCH-MACHINE-EXECENV-TOOLCHAIN
+
+where:
+
+- ARCH can be: i686, x86_64, ppc_64
+- MACHINE can be: native, power8
+- EXECENV can be: linuxapp, bsdapp
+- TOOLCHAIN can be: gcc, icc
+
+The targets to be installed depend on the 32-bit and/or 64-bit packages and compilers installed on the host. Available targets can be found in the DPDK/config directory. The defconfig_ prefix should not be used.
+
+When using the Intel® C++ Compiler (icc), one of the following commands should be invoked for 64-bit or 32-bit use respectively. Notice that the shell scripts update the $PATH variable and therefore should not be performed in the same session. Also, verify the compiler’s installation directory since the path may be different:
+
+    source /opt/intel/bin/iccvars.sh intel64
+    source /opt/intel/bin/iccvars.sh ia32
+
+To install and make targets, use the make install T=<target> command in the top-level DPDK directory.
+
+For example, to compile a 64-bit target using icc, run:
+
+    make install T=x86_64-native-linuxapp-icc
+
+To compile a 32-bit build using gcc, the make command should be:
+
+    make install T=i686-native-linuxapp-gcc
+
+To prepare a target without building it, for example, if the configuration changes need to be made before compilation, use the make config T=<target> command:
+
+    make config T=x86_64-native-linuxapp-gcc
+
+> Any kernel modules to be used, e.g. igb_uio, kni, must be compiled with the same kernel as the one running on the target. If the DPDK is not being built on the target machine, the *RTE_KERNELDIR* environment variable should be used to point the compilation at a copy of the kernel version to be used on the target machine.
+
+    export RTE_KERNELDIR=/usr/src/kernels/2.6.32-573.el6.x86_64/
+
+Once the target environment is created, the user may move to the target environment directory and continue to make code changes and re-compile. The user may also make modifications to the compile-time DPDK configuration by editing the .config file in the build directory. (This is a build-local copy of the defconfig file from the top- level config directory).
+
+    cd x86_64-native-linuxapp-gcc
+    vi .config
+    make
+
+In addition, the make clean command can be used to remove any existing compiled files for a subsequent full, clean rebuild of the code.
+
+----
+
+##Browsing the Installed DPDK Environment Target##
+
+Once a target is created it contains all libraries, including poll-mode drivers, and header files for the DPDK environment that are required to build customer applications. In addition, the test and testpmd applications are built under the build/app directory, which may be used for testing. A kmod directory is also present that contains kernel modules which may be loaded if needed.
+
+----
+
+##Loading Modules to Enable Userspace IO for DPDK##
+
+To run any DPDK application, a suitable uio module can be loaded into the running kernel. In many cases, the standard uio_pci_generic module included in the Linux kernel can provide the uio capability. This module can be loaded using the command
+
+    sudo modprobe uio_pci_generic
+
+    > uio_pci_generic module doesn’t support the creation of virtual functions.
+
+As an alternative to the uio_pci_generic, the DPDK also includes the igb_uio module which can be found in the kmod subdirectory referred to above. It can be loaded as shown below:
+
+    sudo modprobe uio
+    sudo insmod kmod/igb_uio.ko
+
+Since DPDK release 1.7 onward provides VFIO support, use of UIO is optional for platforms that support using VFIO.
+
+----
+
+##Loading VFIO Module##
+
+----
+
+##3.6. Binding and Unbinding Network Ports to/from the Kernel Modules##
+
+----
+
+#Compiling and Running Sample Applications#
+
+The chapter describes how to compile and run applications in an DPDK environment. It also provides a pointer to where sample applications are stored.
+
+----
+
+##Compiling a Sample Application##
+
+Once an DPDK target environment directory has been created (such as `x86_64-native-linuxapp-gcc`), it contains all libraries and header files required to build an application.
+
+When compiling an application in the Linux* environment on the DPDK, the following variables must be exported:
+
+- `RTE_SDK` - Points to the DPDK installation directory.
+- `RTE_TARGET` - Points to the DPDK target environment directory.
+
+The following is an example of creating the `helloworld` application, which runs in the DPDK Linux environment. This example may be found in the `${RTE_SDK}/examples` directory.
+
+The directory contains the `main.c` file. This file, when combined with the libraries in the DPDK target environment, calls the various functions to initialize the DPDK environment, then launches an entry point (dispatch application) for each core to be utilized. By default, the binary is generated in the build directory.
+
+    cd examples/helloworld/
+    export RTE_SDK=$HOME/DPDK
+    export RTE_TARGET=x86_64-native-linuxapp-gcc
+    
+    make
+        CC main.o
+        LD helloworld
+        INSTALL-APP helloworld
+        INSTALL-MAP helloworld.map
+    
+    ls build/app
+        helloworld helloworld.map
+
+
+> In the above example, `helloworld` was in the directory structure of the DPDK. However, it could have been located outside the directory structure to keep the DPDK structure intact. In the following case, the helloworld application is copied to a new directory as a new starting point.
+
+    export RTE_SDK=/home/user/DPDK
+    cp -r $(RTE_SDK)/examples/helloworld my_rte_app
+    cd my_rte_app/
+    export RTE_TARGET=x86_64-native-linuxapp-gcc
+
+    make
+      CC main.o
+      LD helloworld
+      INSTALL-APP helloworld
+      INSTALL-MAP helloworld.map
+
+----
+
+##Running a Sample Application##
+
+> The UIO drivers and hugepages must be setup prior to running an application.
+
+> Any ports to be used by the application must be already bound to an appropriate kernel module, as described in Binding and Unbinding Network Ports to/from the Kernel Modules, prior to running the application.
+
+The application is linked with the DPDK target environment’s Environmental Abstraction Layer (EAL) library, which provides some options that are generic to every DPDK application.
+
+The following is the list of options that can be given to the EAL:
+
+    ./rte-app [-c COREMASK | -l CORELIST] [-n NUM] [-b <domain:bus:devid.func>] \
+              [--socket-mem=MB,...] [-d LIB.so|DIR] [-m MB] [-r NUM] [-v] [--file-prefix] \
+              [--proc-type <primary|secondary|auto>] [-- xen-dom0]
+
+The EAL options are as follows:
+
+- `-c COREMASK` or `-l CORELIST`: An hexadecimal bit mask of the cores to run on. Note that core numbering can change between platforms and should be determined beforehand. The corelist is a set of core numbers instead of a bitmap core mask.
+- `-n NUM`: Number of memory channels per processor socket.
+- `-b <domain:bus:devid.func>`: Blacklisting of ports; prevent EAL from using specified PCI device (multiple -b options are allowed).
+- `--use-device`: use the specified Ethernet device(s) only. Use comma-separate `[domain:]bus:devid.func` values. Cannot be used with -b option.
+- `--socket-mem`: Memory to allocate from hugepages on specific sockets.
+- -`d`: Add a driver or driver directory to be loaded. The application should use this option to load the pmd drivers that are built as shared libraries.
+- `-m MB`: Memory to allocate from hugepages, regardless of processor socket. It is recommended that --socket-mem be used instead of this option.
+- `-r NUM`: Number of memory ranks.
+- `-v`: Display version information on startup.
+- `--huge-dir`: The directory where hugetlbfs is mounted.
+- `--file-prefix`: The prefix text used for hugepage filenames.
+- `--proc-type`: The type of process instance.
+- `--xen-dom0`: Support application running on Xen Domain0 without hugetlbfs.
+- `--vmware-tsc-map`: Use VMware TSC map instead of native RDTSC.
+- `--base-virtaddr`: Specify base virtual address.
+- `--vfio-intr`: Specify interrupt type to be used by VFIO (has no effect if VFIO is not used).
+
+The `-c` or `-l` and option is mandatory; the others are optional.
+
+Copy the DPDK application binary to your target, then run the application as follows (assuming the platform has four memory channels per processor socket, and that cores 0-3 are present and are to be used for running the application):
+
+    ./helloworld -l 0-3 -n 4
+
+> The `--proc-type` and `--file-prefix` EAL options are used for running multiple DPDK processes. See the “Multi-process Sample Application” chapter in the DPDK Sample Applications User Guide and the DPDK Programmers Guide for more details.
+
+----
+
+###Logical Core Use by Applications
+
+The coremask (-c 0x0f) or corelist (-l 0-3) parameter is always mandatory for DPDK applications. Each bit of the mask corresponds to the equivalent logical core number as reported by Linux. The preferred corelist option is a cleaner method to define cores to be used. Since these logical core numbers, and their mapping to specific cores on specific NUMA sockets, can vary from platform to platform, it is recommended that the core layout for each platform be considered when choosing the coremask/corelist to use in each case.
+
+On initialization of the EAL layer by an DPDK application, the logical cores to be used and their socket location are displayed. This information can also be determined for all cores on the system by examining the `/proc/cpuinfo` file, for example, by running cat `/proc/cpuinfo`. The physical id attribute listed for each processor indicates the CPU socket to which it belongs. This can be useful when using other processors to understand the mapping of the logical cores to the sockets.
+
+A more graphical view of the logical core layout may be obtained using the lstopo Linux utility. On Fedora Linux, this may be installed and run using the following command:
+
+    sudo yum install hwloc
+    ./lstopo
+
+----
+
+###Hugepage Memory Use by Applications
+
+When running an application, it is recommended to use the same amount of memory as that allocated for hugepages. This is done automatically by the DPDK application at startup, if no `-m` or `--socket-mem` parameter is passed to it when run.
+
+If more memory is requested by explicitly passing a `-m` or `--socket-mem` value, the application fails. However, the application itself can also fail if the user requests less memory than the reserved amount of hugepage-memory, particularly if using the -m option. The reason is as follows. Suppose the system has 1024 reserved 2 MB pages in socket 0 and 1024 in socket 1. If the user requests 128 MB of memory, the 64 pages may not match the constraints:
+
+- The hugepage memory by be given to the application by the kernel in socket 1 only. In this case, if the application attempts to create an object, such as a ring or memory pool in socket 0, it fails. To avoid this issue, it is recommended that the --socket-mem option be used instead of the -m option.
+- These pages can be located anywhere in physical memory, and, although the DPDK EAL will attempt to allocate memory in contiguous blocks, it is possible that the pages will not be contiguous. In this case, the application is not able to allocate big memory pools.
+
+The socket-mem option can be used to request specific amounts of memory for specific sockets. This is accomplished by supplying the `--socket-mem` flag followed by amounts of memory requested on each socket, for example, supply `--socket-mem=0,512` to try and reserve 512 MB for socket 1 only. Similarly, on a four socket system, to allocate 1 GB memory on each of sockets 0 and 2 only, the parameter `--socket-mem=1024,0,1024` can be used. *No memory will be reserved on any CPU socket that is not explicitly referenced*, for example, socket 3 in this case. If the DPDK cannot allocate enough memory on each socket, the EAL initialization fails.
+
+----
+
+##Additional Sample Applications##
+
+Additional sample applications are included in the ${RTE_SDK}/examples directory. These sample applications may be built and run in a manner similar to that described in earlier sections in this manual. In addition, see the DPDK Sample Applications User Guide for a description of the application, specific instructions on compilation and execution and some explanation of the code.
+
+----
+
+##Additional Test Applications##
+
+In addition, there are two other applications that are built when the libraries are created. The source files for these are in the DPDK/app directory and are called test and testpmd. Once the libraries are created, they can be found in the build/app directory.
+
+- The test application provides a variety of specific tests for the various functions in the DPDK.
+- The testpmd application provides a number of different packet throughput tests and examples of features such as how to use the Flow Director found in the Intel® 82599 10 Gigabit Ethernet Controller.
+
+
+
+
+****
+
+#dpdk-procinfo Application#
+
+The dpdk-procinfo application is a Data Plane Development Kit (DPDK) application that runs as a DPDK secondary process and is capable of retrieving port statistics, resetting port statistics and printing DPDK memory information. This application extends the original functionality that was supported by dump_cfg.
+
+##Running the Application##
+
+The application has a number of command line options:
+
+    ./$(RTE_TARGET)/app/dpdk-procinfo -- -m | [-p PORTMASK] [--stats | --xstats |
+    --stats-reset | --xstats-reset]
+
+###Parameters
+
+- `-p` PORTMASK: Hexadecimal bitmask of ports to configure.
+- `–stats` The stats parameter controls the printing of generic port statistics. If no port mask is specified stats are printed for all DPDK ports.
+- `–xstats` The xstats parameter controls the printing of extended port statistics. If no port mask is specified xstats are printed for all DPDK ports.
+- `–stats-reset` The stats-reset parameter controls the resetting of generic port statistics. If no port mask is specified, the generic stats are reset for all DPDK ports.
+- `–xstats-reset` The xstats-reset parameter controls the resetting of extended port statistics. If no port mask is specified xstats are reset for all DPDK ports.
+- `-m:` Print DPDK memory information.
+
+----
+
+##rte_dump_physmem_layout##
+
+Dump the physical memory layout to a file.
+
+    Segment 0: phys:0x12aa00000, len:2097152, virt:0x7f4f6be00000, socket_id:0, hugepage_sz:2097152, nchannel:0, nrank:0
+    Segment 1: phys:0x1d7000000, len:2097152, virt:0x7f4f6ba00000, socket_id:0, hugepage_sz:2097152, nchannel:0, nrank:0
+    Segment 2: phys:0x457800000, len:10733223936, virt:0x7f4cebc00000, socket_id:0, hugepage_sz:2097152, nchannel:0, nrank:0
+    Segment 3: phys:0x8b0c00000, len:2097152, virt:0x7f4ceb800000, socket_id:1, hugepage_sz:2097152, nchannel:0, nrank:0
+    Segment 4: phys:0x8fa200000, len:2097152, virt:0x7f4ceb400000, socket_id:1, hugepage_sz:2097152, nchannel:0, nrank:0
+    Segment 5: phys:0x95d600000, len:2097152, virt:0x7f4ceb000000, socket_id:1, hugepage_sz:2097152, nchannel:0, nrank:0
+    Segment 6: phys:0x9e3000000, len:2097152, virt:0x7f4ceac00000, socket_id:1, hugepage_sz:2097152, nchannel:0, nrank:0
+    Segment 7: phys:0x9e3400000, len:2097152, virt:0x7f4cea800000, socket_id:1, hugepage_sz:2097152, nchannel:0, nrank:0
+    Segment 8: phys:0xdab800000, len:2097152, virt:0x7f4cea400000, socket_id:1, hugepage_sz:2097152, nchannel:0, nrank:0
+    Segment 9: phys:0xdabc00000, len:10716446720, virt:0x7f4a6b600000, socket_id:1, hugepage_sz:2097152, nchannel:0, nrank:0
+    Segment 10: phys:0x102ea00000, len:2097152, virt:0x7f4a6b200000, socket_id:1, hugepage_sz:2097152, nchannel:0, nrank:0
+    Segment 11: phys:0x1031000000, len:2097152, virt:0x7f4a6ae00000, socket_id:1, hugepage_sz:2097152, nchannel:0, nrank:0
+    Segment 12: phys:0x1032000000, len:2097152, virt:0x7f4a6aa00000, socket_id:1, hugepage_sz:2097152, nchannel:0, nrank:0
+    Segment 13: phys:0x1032a00000, len:2097152, virt:0x7f4a6a600000, socket_id:1, hugepage_sz:2097152, nchannel:0, nrank:0
+
+----
+
+##rte_memzone_dump##
+
+Dump all reserved memzones to a file.
+
+    Zone 0: name:<rte_eth_dev_data>, phys:0x1d71cec40, len:0x30100, virt:0x7f4f6bbcec40, socket_id:0, flags:0
+    Zone 1: name:<MP_mbuf_pool_0>, phys:0x1d703b000, len:0x182100, virt:0x7f4f6ba3b000, socket_id:0, flags:0
+    Zone 2: name:<MP_mbuf_pool_0_0>, phys:0x6d29fffc0, len:0x4a00000, virt:0x7f4f66dfffc0, socket_id:0, flags:0
+    Zone 3: name:<RG_MP_mbuf_pool_0>, phys:0x12ab7ff40, len:0x80080, virt:0x7f4f6bf7ff40, socket_id:0, flags:0
+    Zone 4: name:<MP_indirect_mbuf_pool_0>, phys:0x6d287dec0, len:0x1820c0, virt:0x7f4f66c7dec0, socket_id:0, flags:0
+    Zone 5: name:<MP_indirect_mbuf_pool_0_0>, phys:0x6d227de80, len:0x600000, virt:0x7f4f6667de80, socket_id:0, flags:0
+    Zone 6: name:<RG_MP_indirect_mbuf_pool_0>, phys:0x12aaffe80, len:0x80080, virt:0x7f4f6beffe80, socket_id:0, flags:0
+    Zone 7: name:<rte_ixgbe_pmd_tx_ring_0_0>, phys:0x1d702ac00, len:0x10000, virt:0x7f4f6ba2ac00, socket_id:0, flags:0
+    Zone 8: name:<rte_ixgbe_pmd_tx_ring_0_1>, phys:0x1d7018a80, len:0x10000, virt:0x7f4f6ba18a80, socket_id:0, flags:0
+    Zone 9: name:<rte_ixgbe_pmd_tx_ring_0_2>, phys:0x1d7006900, len:0x10000, virt:0x7f4f6ba06900, socket_id:0, flags:0
+    Zone 10: name:<rte_ixgbe_pmd_tx_ring_0_3>, phys:0x12aaefe00, len:0x10000, virt:0x7f4f6beefe00, socket_id:0, flags:0
+    Zone 11: name:<rte_ixgbe_pmd_tx_ring_0_4>, phys:0x12aadfd80, len:0x10000, virt:0x7f4f6bedfd80, socket_id:0, flags:0
+    Zone 12: name:<rte_ixgbe_pmd_tx_ring_1_0>, phys:0x12aacfd00, len:0x10000, virt:0x7f4f6becfd00, socket_id:0, flags:0
+    Zone 13: name:<rte_ixgbe_pmd_tx_ring_1_1>, phys:0x12aabdc80, len:0x10000, virt:0x7f4f6bebdc80, socket_id:0, flags:0
+    Zone 14: name:<rte_ixgbe_pmd_tx_ring_1_2>, phys:0x12aaabc00, len:0x10000, virt:0x7f4f6beabc00, socket_id:0, flags:0
+    Zone 15: name:<rte_ixgbe_pmd_tx_ring_1_3>, phys:0x12aa99b80, len:0x10000, virt:0x7f4f6be99b80, socket_id:0, flags:0
+    Zone 16: name:<rte_ixgbe_pmd_tx_ring_1_4>, phys:0x12aa87b00, len:0x10000, virt:0x7f4f6be87b00, socket_id:0, flags:0
+    Zone 17: name:<rte_ixgbe_pmd_rx_ring_0_0>, phys:0x12aa75080, len:0x10040, virt:0x7f4f6be75080, socket_id:0, flags:0
+    Zone 18: name:<rte_ixgbe_pmd_rx_ring_1_0>, phys:0x12aa62a00, len:0x10040, virt:0x7f4f6be62a00, socket_id:0, flags:0
+    Zone 19: name:<rte_ixgbe_pmd_rx_ring_0_1>, phys:0x12aa50380, len:0x10040, virt:0x7f4f6be50380, socket_id:0, flags:0
+    Zone 20: name:<rte_ixgbe_pmd_rx_ring_1_1>, phys:0x12aa3dd00, len:0x10040, virt:0x7f4f6be3dd00, socket_id:0, flags:0
+    Zone 21: name:<rte_ixgbe_pmd_rx_ring_0_2>, phys:0x12aa2b680, len:0x10040, virt:0x7f4f6be2b680, socket_id:0, flags:0
+    Zone 22: name:<rte_ixgbe_pmd_rx_ring_1_2>, phys:0x12aa19000, len:0x10040, virt:0x7f4f6be19000, socket_id:0, flags:0
+    Zone 23: name:<rte_ixgbe_pmd_rx_ring_0_3>, phys:0x12aa06980, len:0x10040, virt:0x7f4f6be06980, socket_id:0, flags:0
+    Zone 24: name:<rte_ixgbe_pmd_rx_ring_1_3>, phys:0x6c626d800, len:0x10040, virt:0x7f4f5a66d800, socket_id:0, flags:0
+    Zone 25: name:<MP_ltt_log_history>, phys:0x12aa01fc0, len:0xc0, virt:0x7f4f6be01fc0, socket_id:0, flags:0
+    Zone 26: name:<MP_ltt_log_history_0>, phys:0x6c61657c0, len:0x108000, virt:0x7f4f5a5657c0, socket_id:0, flags:0
+    Zone 27: name:<RG_MP_ltt_log_history>, phys:0x6c6163700, len:0x2080, virt:0x7f4f5a563700, socket_id:0, flags:0
+    Zone 28: name:<RG_LTT.TAP.RING>, phys:0x6c615f640, len:0x4080, virt:0x7f4f5a55f640, socket_id:0, flags:0
+    Zone 29: name:<MP_LTT.TAP.MP>, phys:0x6c5fdd540, len:0x1820c0, virt:0x7f4f5a3dd540, socket_id:0, flags:0
+    Zone 30: name:<MP_LTT.TAP.MP_0>, phys:0x6b9fdd500, len:0xc000000, virt:0x7f4f4e3dd500, socket_id:0, flags:0
+    Zone 31: name:<RG_MP_LTT.TAP.MP>, phys:0x6b8fdd440, len:0x1000080, virt:0x7f4f4d3dd440, socket_id:0, flags:0
+    Zone 32: name:<MP_tap_mbuf_pool>, phys:0x6b8e5b300, len:0x182100, virt:0x7f4f4d25b300, socket_id:0, flags:0
+    Zone 33: name:<MP_tap_mbuf_pool_0>, phys:0x6b695b2c0, len:0x2500000, virt:0x7f4f4ad5b2c0, socket_id:0, flags:0
+    Zone 34: name:<RG_MP_tap_mbuf_pool>, phys:0x6b691b200, len:0x40080, virt:0x7f4f4ad1b200, socket_id:0, flags:0
+    Zone 35: name:<RG_HT_socket_table_IPv4>, phys:0x6ae11b100, len:0x8000080, virt:0x7f4f4251b100, socket_id:0, flags:0
+    Zone 36: name:<RG_HT_socket_table_IPv6>, phys:0x69011af80, len:0x8000080, virt:0x7f4f2451af80, socket_id:0, flags:0
+    Zone 37: name:<RG_HT_session_table>, phys:0x66c11ae00, len:0x2000080, virt:0x7f4f0051ae00, socket_id:0, flags:0
+    Zone 38: name:<PayloadSessionPool>, phys:0x61711ad00, len:0x50000000, virt:0x7f4eab51ad00, socket_id:0, flags:0
+    Zone 39: name:<MP_msgbuf_pool_0>, phys:0x616798bc0, len:0x1820c0, virt:0x7f4eaab98bc0, socket_id:0, flags:0
+    Zone 40: name:<MP_msgbuf_pool_0_0>, phys:0x611198b80, len:0x5600000, virt:0x7f4ea5598b80, socket_id:0, flags:0
+    Zone 41: name:<RG_MP_msgbuf_pool_0>, phys:0x611118ac0, len:0x80080, virt:0x7f4ea5518ac0, socket_id:0, flags:0
+    Zone 42: name:<MP_msgbuf_pool_1>, phys:0x1032a7df00, len:0x1820c0, virt:0x7f4a6a67df00, socket_id:1, flags:0
+    Zone 43: name:<MP_msgbuf_pool_1_0>, phys:0x10251fffc0, len:0x5600000, virt:0x7f4ce4bfffc0, socket_id:1, flags:0
+    Zone 44: name:<RG_MP_msgbuf_pool_1>, phys:0x103217ff40, len:0x80080, virt:0x7f4a6ab7ff40, socket_id:1, flags:0
+    Zone 45: name:<MP_itc_mbuf_pool>, phys:0x610f96980, len:0x182100, virt:0x7f4ea5396980, socket_id:0, flags:0
+    Zone 46: name:<MP_itc_mbuf_pool_0>, phys:0x60ea96940, len:0x2500000, virt:0x7f4ea2e96940, socket_id:0, flags:0
+    Zone 47: name:<RG_MP_itc_mbuf_pool>, phys:0x60ea56880, len:0x40080, virt:0x7f4ea2e56880, socket_id:0, flags:0
+
+----
+
+##rte_dump_tailq##
+
+Dump tail queues to the console.
+
+    Tailq 0: qname:<RTE_DISTRIBUTOR>, tqh_first:(nil), tqh_last:0x7f4f6ea9401c
+    Tailq 1: qname:<RTE_HASH>, tqh_first:0x7f4f6be01a40, tqh_last:0x7f4d1e600a80
+    Tailq 2: qname:<RTE_FBK_HASH>, tqh_first:(nil), tqh_last:0x7f4f6ea9407c
+    Tailq 3: qname:<RTE_LPM>, tqh_first:(nil), tqh_last:0x7f4f6ea940ac
+    Tailq 4: qname:<RTE_LPM6>, tqh_first:(nil), tqh_last:0x7f4f6ea940dc
+    Tailq 5: qname:<RTE_ACL>, tqh_first:(nil), tqh_last:0x7f4f6ea9410c
+    Tailq 6: qname:<RTE_MEMPOOL>, tqh_first:0x7f4f6bbbd140, tqh_last:0x7f4f6be011c0
+    Tailq 7: qname:<RTE_RING>, tqh_first:0x7f4f6ba3af80, tqh_last:0x7f4d26600bc0
+    Tailq 8: qname:<UIO_RESOURCE_LIST>, tqh_first:0x7f4f6bbfee80, tqh_last:0x7f4f6bbc5740
+    Tailq 9: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 10: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 11: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 12: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 13: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 14: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 15: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 16: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 17: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 18: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 19: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 20: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 21: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 22: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 23: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 24: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 25: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 26: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 27: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 28: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 29: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 30: qname:<>, tqh_first:(nil), tqh_last:(nil)
+    Tailq 31: qname:<>, tqh_first:(nil), tqh_last:(nil)
+
+----
+
+##rte_eth_stats_get##
+
+----
+
+****
+
+#Programmer's Guide
+
+##Packet Classification and Access Control
+
+
+
+****
+
+#Huge pagee part 1#
+
+https://lwn.net/Articles/374424/
+
+https://www.kernel.org/doc/Documentation/vm/hugetlbpage.txt
+
+> Editor's note: this article is the first in a five-part series on the use of huge pages with Linux. We are most fortunate to have core VM hacker Mel Gorman as the author of these articles! The remaining installments will appear in future LWN Weekly Editions.
+
+
+****
+
+#UIO: user-space drivers#
+
+https://lwn.net/Articles/232575/
+
+****
+
+http://blog.csdn.net/xy010902100449/article/details/47282995
+
+#DPDK 内存管理（一）（内存初始化） 
+
+#1 前言
+
+DPDK通过使用hugetlbfs，减少CPU TLB表的Miss次数，提高性能。
+
+#2 初始化
+
+DPDK的内存初始化工作，主要是将hugetlbfs的配置的大内存页，根据其映射的物理地址是否连续、属于哪个Socket等，有效的组织起来，为后续管理提供便利。
+
+##2.1 eal_hugepage_info_init()
+
+eal_hugepage_info_init()主要是获取配置好的Hugetlbfs的相关信息，并将其保存在struct internal_config数据结构中。
+
+主要工作如下：
+
+1. 读取/sys/kernel/mm/hugepages目录下的各个子目录，通过判断目录名称中包含"hugepages-"字符串，获取hugetlbfs的相关子目录，并获取hugetlbfs配置的内存页大小。例如：　　
+
+    [root@YMOS_DEFAULT ~]# ls -ltr /sys/kernel/mm/hugepages/
+    total 0
+    drwxr-xr-x 2 root root 0 2014-11-04 15:54 hugepages-2048kB
+
+1. 通过读取/proc/mounts信息，找到hugetlbfs的挂载点。例如：　　　　
+
+    root@Ubuntu:~# cat /proc/mounts 
+    rootfs / rootfs rw 0 0
+    sysfs /sys sysfs rw,nosuid,nodev,noexec,relatime 0 0
+    proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+    udev /dev devtmpfs rw,relatime,size=1016836k,nr_inodes=254209,mode=755 0 0
+    devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=000 0 0
+    tmpfs /run tmpfs rw,nosuid,noexec,relatime,size=205128k,mode=755 0 0
+    /dev/disk/by-uuid/fd1dbca3-ac30-4bac-b93a-0d89b0fd152c / ext4 rw,relatime,errors=remount-ro,user_xattr,barrier=1,data=ordered 0 0
+    none /sys/fs/fuse/connections fusectl rw,relatime 0 0
+    none /sys/kernel/debug debugfs rw,relatime 0 0
+    none /sys/kernel/security securityfs rw,relatime 0 0
+    none /run/lock tmpfs rw,nosuid,nodev,noexec,relatime,size=5120k 0 0
+    none /run/shm tmpfs rw,nosuid,nodev,relatime 0 0
+    none /media/sf_F_DRIVE vboxsf rw,nodev,relatime 0 0
+    gvfs-fuse-daemon /home/chuanxinji/.gvfs fuse.gvfs-fuse-daemon rw,nosuid,nodev,relatime,user_id=1000,group_id=1000 0 0
+    /dev/sr0 /media/VBOXADDITIONS_4.3.10_93012 iso9660 ro,nosuid,nodev,relatime,uid=1000,gid=1000,iocharset=utf8,mode=0400,dmode=0500 0 0
+    none /mnt/huge hugetlbfs rw,relatime 0 0
+    root@Ubuntu:~#
+
+1. 通过读取/sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages，获取配置的hugepages个数。
+
+    root@Ubuntu:~# cat /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
+    64
+    root@Ubuntu:~#
+
+1. 以打开文件的方式，打开挂载点目录，为其FD设置互斥锁，Why??
+
+    上述所有获取的信息，都保存在internal_config.hugepage_info[MAX_HUGEPAGES_SIZE]中，hugepage_info数据结构如下:
+
+    struct hugepage_info {
+    　　size_t hugepage_sz; /**< size of a huge page */
+    　　const char *hugedir; /**< dir where hugetlbfs is mounted */
+    　　uint32_t num_pages[RTE_MAX_NUMA_NODES];
+    　　/**< number of hugepages of that size on each socket */
+    　　int lock_descriptor; /**< file descriptor for hugepage dir */
+    };
+
+    具体赋值如下，
+    hpi->hugepage_sz = 2M;
+    hpi->hugedir = /mnt/huge;
+    hpi->num_pages[0] = 64; // 由于此时还不知道哪些内存页分处在哪个socket上，故，都先放在socket-0上。
+    hpi->lock_descriptor = open(hpi->hugedir, O_RONLY); // 在读取hugetlbfs配置的时候，需要锁住整个目录。当所有hugepage都mmap完成后，会解锁。
+
+1. 将internal_config.hugepage_info[MAX_HUGEPAGES_SIZE]按内存页的大小排序。
+
+##rte_eal_config_create()
+
+rte_eal_config_create()主要是初始化rte_config.mem_config。如果是以root用户运行dpdk程序的话，rte_config.mem_config指向/var/run/.rte_config文件mmap的一段sizeof(struct rte_mem_config)大小的内存。
+
+rte_config.mem_config = /var/run/.rte_config文件mmap的首地址；
+
+    struct rte_config {
+        uint32_t master_lcore;       /**< Id of the master lcore */
+    
+            ... ...
+        
+        struct rte_mem_config *mem_config;
+    } __attribute__((__packed__));
+
+struct rte_mem_config数据结构如下：
+
+    struct rte_mem_config {
+        volatile uint32_t magic;   /**< Magic number - Sanity check. */
+    
+        /* memory topology */
+        uint32_t nchannel;    /**< Number of channels (0 if unknown). */
+        uint32_t nrank;       /**< Number of ranks (0 if unknown). */
+    
+        /**
+         * current lock nest order
+         *  - qlock->mlock (ring/hash/lpm)
+         *  - mplock->qlock->mlock (mempool)
+         * Notice:
+         *  *ALWAYS* obtain qlock first if having to obtain both qlock and mlock
+         */
+        rte_rwlock_t mlock;   /**< only used by memzone LIB for thread-safe. */
+        rte_rwlock_t qlock;   /**< used for tailq operation for thread safe. */
+        rte_rwlock_t mplock;  /**< only used by mempool LIB for thread-safe. */
+    
+        uint32_t memzone_idx; /**< Index of memzone */
+    
+        /* memory segments and zones */
+        struct rte_memseg memseg[RTE_MAX_MEMSEG];    /**< Physmem descriptors. */
+        struct rte_memzone memzone[RTE_MAX_MEMZONE]; /**< Memzone descriptors. */
+    
+        /* Runtime Physmem descriptors. */
+        struct rte_memseg free_memseg[RTE_MAX_MEMSEG];
+    
+        struct rte_tailq_head tailq_head[RTE_MAX_TAILQ]; /**< Tailqs for objects */
+    
+        /* Heaps of Malloc per socket */
+        struct malloc_heap malloc_heaps[RTE_MAX_NUMA_NODES];
+    } __attribute__((__packed__));
+
+##rte_eal_hugepage_init()
+
+rte_eal_hugepage_init()主要是在/mnt/huge目录下创建hugetlbfs配置的内存页数（在本文中就是64）的rtemap_xx文件，并为每个rtemap_xx文件做mmap映射，保证mmap后的虚拟地址与实际的物理地址是一样的。
+
+具体如下：
+
+1. 创建nr_hugepages个struct hugepage_file数组，即有多少个内存页，创建多少个struct hugepage_file数据结构。struct hugepage_file数据结构如下：
+
+    struct hugepage_file {
+        void *orig_va;      /**< virtual addr of first mmap() */
+        void *final_va;     /**< virtual addr of 2nd mmap() */
+        uint64_t physaddr;  /**< physical addr */
+        size_t size;        /**< the page size */
+        int socket_id;      /**< NUMA socket ID */
+        int file_id;        /**< the '%d' in HUGEFILE_FMT */
+        int memseg_id;      /**< the memory segment to which page belongs */
+    #ifdef RTE_EAL_SINGLE_FILE_SEGMENTS
+        int repeated;       /**< number of times the page size is repeated */
+    #endif
+        char filepath[MAX_HUGEPAGE_PATH]; /**< path to backing file on filesystem */
+    };
+
+1. 有多少个内存页，在挂载点目录下创建多少个rtemap_xx文件，如下所示，并为每一个文件mmap一个hugepage_sz大小的内存区域。其中，
+
+    hugepage_file->orig_va = 记录每个rtemap_xx文件mmap的首地址；
+    hugepage_file->file_id = 创建的rtemap_xx的顺序，就是xx的值；
+    hugepage_file->filepath = /mnt/huge/rtemap_xx；
+    hugepage_file->size = hugepage_sz，也就是2M；
+
+    root@Ubuntu:~# ls -tlr /mnt/huge/
+	total 131072
+	-rwxr-xr-x 1 root root 2097152 Nov  5 14:53 rtemap_2
+	-rwxr-xr-x 1 root root 2097152 Nov  5 14:53 rtemap_1
+	-rwxr-xr-x 1 root root 2097152 Nov  5 14:53 rtemap_0
+	-rwxr-xr-x 1 root root 2097152 Nov  5 14:53 rtemap_8
+	-rwxr-xr-x 1 root root 2097152 Nov  5 14:53 rtemap_7
+	-rwxr-xr-x 1 root root 2097152 Nov  5 14:53 rtemap_6
+
+　　　　　　　　　　　　　　... ...
+
+	-rwxr-xr-x 1 root root 2097152 Nov  5 14:53 rtemap_60
+	-rwxr-xr-x 1 root root 2097152 Nov  5 14:53 rtemap_59
+	-rwxr-xr-x 1 root root 2097152 Nov  5 14:53 rtemap_58
+	-rwxr-xr-x 1 root root 2097152 Nov  5 14:53 rtemap_63
+	-rwxr-xr-x 1 root root 2097152 Nov  5 14:53 rtemap_62
+	-rwxr-xr-x 1 root root 2097152 Nov  5 14:53 rtemap_61
+	root@Ubuntu:~# 
+
+1. 通过读取/proc/self/pagemap页表文件，得到本进程中虚拟地址与物理地址的映射关系。使用上一步中，每个rtemap_xx文件mmap得到的虚拟地址，除以操作系统内存页的大小4k，得到一个偏移量。根据这个偏移量，在/prox/self/pagemap中，得到物理地址的页框，假设为page，那么，物理页框page乘以操作系统内存页的大小4K，再加上虚拟地址的页偏移，就是物理地址。每个rtemap_xx映射的物理地址保存在对应的hugepage_file->physaddr中。
+
+    physaddr = ((page & 0x7fffffffffffffULL) * page_size) + ((unsigned long)virtaddr % page_size);
+
+1. 读取/proc/self/numa_maps，得到每个rtemap_xx文件mmap得到的虚拟地址在哪个Socket上，即，哪个CPU上。其socketid保存在对应的hugepage_file->socket_id中。
+
+    root@Ubuntu:~# cat /proc/self/numa_maps 
+    00400000 default file=/bin/cat mapped=7 mapmax=2 N0=7
+    0060a000 default file=/bin/cat anon=1 dirty=1 N0=1
+    0060b000 default file=/bin/cat anon=1 dirty=1 N0=1
+    025c1000 default heap anon=3 dirty=3 active=0 N0=3
+    7fdf0222c000 default file=/usr/lib/locale/locale-archive mapped=10 mapmax=61 N0=10
+    7fdf0290f000 default file=/lib/x86_64-linux-gnu/libc-2.15.so mapped=82 mapmax=128 N0=82
+    7fdf02ac4000 default file=/lib/x86_64-linux-gnu/libc-2.15.so
+    7fdf02cc3000 default file=/lib/x86_64-linux-gnu/libc-2.15.so anon=4 dirty=4 N0=4
+    7fdf02cc7000 default file=/lib/x86_64-linux-gnu/libc-2.15.so anon=2 dirty=2 N0=2
+    7fdf02cc9000 default anon=3 dirty=3 active=1 N0=3
+    7fdf02cce000 default file=/lib/x86_64-linux-gnu/ld-2.15.so mapped=27 mapmax=122 N0=27
+    7fdf02ed7000 default anon=3 dirty=3 N0=3
+    7fdf02eee000 default anon=2 dirty=2 N0=2
+    7fdf02ef0000 default file=/lib/x86_64-linux-gnu/ld-2.15.so anon=1 dirty=1 N0=1
+    7fdf02ef1000 default file=/lib/x86_64-linux-gnu/ld-2.15.so anon=2 dirty=2 N0=2
+    7fff09be1000 default stack anon=3 dirty=3 N0=3
+    7fff09cc2000 default
+    root@Ubuntu:~#
+
+1. 在hugepage_file数组中，根据物理地址，按从小到大的顺序，将hugepage_file排序。
+1. 根据按物理地址排序后的结果，判断物理地址是否连续，重新mmap /mnt/huge/retmap_xx文件，使得物理地址等于第二次mmap后的虚拟地址。第二次mmap得到的虚拟地址保存在对应的hugepage_file->final_va中。
+1. munmap释放第一步中各个rtemap_xx文件首次mmap得到的内存地址。
+1. 计算每个socket上包含多少个hugepage，信息保存在internal_config.hugepage_info[0].num_pages[socket]中。
+1. calc_num_pages_per_socket()，目的是什么？？？
+1. 为/var/run/.rte_hugepage_info文件mmap一段nr_hugepages * sizeof(struct hugepage_file)大小的内存块，并将第一步中创建的hugepage_file数组中的所有内容，都copy到这一块内存中。
+1. rte_config.mem_config->memseg[]数组记录hugepage_file映射后物理地址连续的块数，hugepage_file->memseg_id为该huepage_file的物理地址在哪个rte_config.mem_config->memseg[]数组中。struct rte_memseg数据结构如下：
+
+    struct rte_memseg {
+        phys_addr_t phys_addr;      /**< Start physical address. */
+        union {
+            void *addr;         /**< Start virtual address. */
+            uint64_t addr_64;   /**< Makes sure addr is always 64 bits */
+        };
+    #ifdef RTE_LIBRTE_IVSHMEM
+        phys_addr_t ioremap_addr; /**< Real physical address inside the VM */
+    #endif
+        size_t len;               /**< Length of the segment. */
+        size_t hugepage_sz;       /**< The pagesize of underlying memory */
+        int32_t socket_id;          /**< NUMA socket ID. */
+        uint32_t nchannel;          /**< Number of channels. */
+        uint32_t nrank;             /**< Number of ranks. */
+    #ifdef RTE_LIBRTE_XEN_DOM0
+         /**< store segment MFNs */
+        uint64_t mfn[DOM0_NUM_MEMBLOCK];
+    #endif
+    } __attribute__((__packed__));
+
+rte_config.mem_config->memseg[j].phys_addr = 各物理地址是连续的内存块的首地址。
+rte_config.mem_config->memseg[j].addr = 各个物理地址是连续的内存块对应的虚拟地址的首地址。由于物理地址和虚拟地址是相同的，这个值应该等于phys_addr。
+rte_config.mem_config->memseg[j].len = 各个物理地址是连续的内存块的大小。
+rte_config.mem_config->memseg[j].socket_id = 内存块在哪个socket上。。
+rte_config.mem_config->memseg[j].hugepage_sz = hugepage内存页的大小。本文中是2M。
+
+----
+
+##rte_eal_memdevice_init()
+
+rte_eal_memdevice_init()初始化rte_config.mem_config->nchannel和rte_config.mem_config->nrank。
+rte_config.mem_config->nchannel = 启动参数中“-n”指定的值，不能为0，不能大于4。
+rte_config.mem_config->nrank = 启动参数中“-r”指定的值。不能为0，不能大于16。
+
+----
+
+##rte_eal_memzone_init()
+
+rte_eal_memzone_init()主要负责初始化rte_config.mem_config->free_memseg[]及rte_config.mem_config->memzone[]。其中,rte_config.mem_config->free_memseg[]记录空闲的rte_config.mem_config->memseg[]。
+
+----
+
+#总结 
+
+![mem1.jpg](./img/Dpdk/mem1.jpg)
+
+****
+
+#DPDK 内存管理（二）（rte_mempool 内存管理） 
+
+DPDK以两种方式对外提供内存管理方法，一个是rte_mempool，主要用于网卡数据包的收发；一个是rte_malloc，主要为应用程序提供内存使用接口。本文讨论rte_mempool。rte_mempool由函数rte_mempool_create()负责创建，从rte_config.mem_config->free_memseg[]中取出合适大小的内存，放到rte_config.mem_config->memzone[]中。
+
+本文中，以l2fwd为例，说明rte_mempool的创建及使用。
+
+##rte_mempool的创建
+
+    l2fwd_pktmbuf_pool =
+        rte_mempool_create("mbuf_pool", NB_MBUF,
+                   MBUF_SIZE, 32,
+                   sizeof(struct rte_pktmbuf_pool_private),
+                   rte_pktmbuf_pool_init, NULL,
+                   rte_pktmbuf_init, NULL,
+                   rte_socket_id(), 0);
+
+- "mbuf_pool"：创建的rte_mempool的名称。
+- NB_MBUF：rte_mempool包含的rte_mbuf元素的个数。
+- MBUF_SIZE：每个rte_mbuf元素的大小。
+
+    #define RTE_PKTMBUF_HEADROOM    128
+    #define MBUF_SIZE (2048 + sizeof(struct rte_mbuf) + RTE_PKTMBUF_HEADROOM)
+    #define NB_MBUF   8192
+    
+    struct rte_pktmbuf_pool_private {
+        uint16_t mbuf_data_room_size; /**< Size of data space in each mbuf.*/
+    };
+
+rte_mempool由函数rte_mempool_create()负责创建。首先创建rte_ring，再创建rte_mempool，并建立两者之间的关联。
+
+![rte_mempool.jpg](./img/Dpdk/rte_mempool.jpg)
+
+1. rte_ring_create()创建rte_ring无锁队列
+
+    r = rte_ring_create(rg_name, rte_align32pow2(n+1), socket_id, rg_flags);
+
+具体步骤如下：
+    1. 需要保证创建的队列数可以被2整除，即，count = rte_align32pow2(n + 1);
+    2. 计算需要为count个队列分配的内存空间，即，ring_size = count * sizeof(void *) + sizeof(struct rte_ring);
+    
+    struct rte_ring的数据结构如下，
+    
+        struct rte_ring {
+            TAILQ_ENTRY(rte_ring) next;      /**< Next in list. */
+        
+            char name[RTE_RING_NAMESIZE];    /**< Name of the ring. */
+            int flags;                       /**< Flags supplied at creation. */
+        
+            /** Ring producer status. */
+            struct prod {
+                uint32_t watermark;      /**< Maximum items before EDQUOT. */
+                uint32_t sp_enqueue;     /**< True, if single producer. */
+                uint32_t size;           /**< Size of ring. */
+                uint32_t mask;           /**< Mask (size-1) of ring. */
+                volatile uint32_t head;  /**< Producer head. */
+                volatile uint32_t tail;  /**< Producer tail. */
+            } prod __rte_cache_aligned;
+        
+            /** Ring consumer status. */
+            struct cons {
+                uint32_t sc_dequeue;     /**< True, if single consumer. */
+                uint32_t size;           /**< Size of the ring. */
+                uint32_t mask;           /**< Mask (size-1) of ring. */
+                volatile uint32_t head;  /**< Consumer head. */
+                volatile uint32_t tail;  /**< Consumer tail. */
+        #ifdef RTE_RING_SPLIT_PROD_CONS
+            } cons __rte_cache_aligned;
+        #else
+            } cons;
+        #endif
+        
+        #ifdef RTE_LIBRTE_RING_DEBUG
+            struct rte_ring_debug_stats stats[RTE_MAX_LCORE];
+        #endif
+        
+            void * ring[0] __rte_cache_aligned; /**< Memory space of ring starts here.
+                                                 * not volatile so need to be careful
+                                                 * about compiler re-ordering */
+        };
+    
+    1. 调用rte_memzone_reserve()，在rte_config.mem_config->free_memseg[]中查找一个合适的free_memseg（查找规则是free_memseg中剩余内存大于等于需要分配的内存，但是多余的部分是最小的），从该free_memseg中分配指定大小的内存，然后将分配的内存记录在rte_config.mem_config->memzone[]中。
+    1. 初始化新分配的rte_ring
+    
+        r->flags = flags;
+        r->prod.watermark = count;
+        r->prod.sp_enqueue = !!(flags & RING_F_SP_ENQ);
+        r->cons.sc_dequeue = !!(flags & RING_F_SC_DEQ);
+        r->prod.size = r->cons.size = count;
+        r->prod.mask = r->cons.mask = count-1;
+        r->prod.head = r->cons.head = 0;
+        r->prod.tail = r->cons.tail = 0;
+        
+        TAILQ_INSERT_TAIL(ring_list, r, next); // 挂到rte_config.mem_config->tailq_head[RTE_TAILQ_RING]队列中
+
+1. 创建并初始化rte_mempool
+
+    1. 计算需要为rte_mempool申请的内存空间。包含：sizeof(struct rte_mempool)、private_data_size，以及n * objsz.total_size。
+
+        mempool_size = MEMPOOL_HEADER_SIZE(mp, pg_num) + private_data_size;
+        if (vaddr == NULL)
+            mempool_size += (size_t)objsz.total_size * n;
+
+　　objsz.total_size = objsz.header_size + objsz.elt_size + objsz.trailer_size; 其中，
+　　objsz.header_size = sizeof(struct rte_mempool *);
+　　objsz.elt_size = MBUF_SIZE；
+　　objsz.trailer_size = ????
+
+    1. 调用rte_memzone_reserve()，在rte_config.mem_config->free_memseg[]中查找一个合适的free_memseg，在该free_memseg中分配mempool_size大小的内存，然后将新分配的内存记录到rte_config.mem_config->memzone[]中 
+    1. 初始化新创建的rte_mempool，并调用rte_pktmbuf_pool_init()初始化rte_mempool的私有数据结构
+
+        /* init the mempool structure */
+        mp = mz->addr;
+        memset(mp, 0, sizeof(*mp));
+        snprintf(mp->name, sizeof(mp->name), "%s", name);
+        mp->phys_addr = mz->phys_addr;
+        mp->ring = r;
+        mp->size = n;
+        mp->flags = flags;
+        mp->elt_size = objsz.elt_size;
+        mp->header_size = objsz.header_size;
+        mp->trailer_size = objsz.trailer_size;
+        mp->cache_size = cache_size;
+        mp->cache_flushthresh = (uint32_t)
+            (cache_size * CACHE_FLUSHTHRESH_MULTIPLIER);
+        mp->private_data_size = private_data_size;
+        
+        /* calculate address of the first element for continuous mempool. */
+        obj = (char *)mp + MEMPOOL_HEADER_SIZE(mp, pg_num) +
+            private_data_size;
+        
+        /* populate address translation fields. */
+        mp->pg_num = pg_num;
+        mp->pg_shift = pg_shift;
+        mp->pg_mask = RTE_LEN2MASK(mp->pg_shift, typeof(mp->pg_mask));
+        
+        /* mempool elements allocated together with mempool */
+        mp->elt_va_start = (uintptr_t)obj;
+        mp->elt_pa[0] = mp->phys_addr +
+            (mp->elt_va_start - (uintptr_t)mp);
+        
+        mp->elt_va_end = mp->elt_va_start;
+        
+        RTE_EAL_TAILQ_INSERT_TAIL(RTE_TAILQ_MEMPOOL, rte_mempool_list, mp); //挂到rte_config.mem_config->tailq_head[RTE_TAILQ_MEMPOOL]队列中
+
+    1. 调用mempool_populate(), 以及rte_pktbuf_init()初始化rte_mempool的每个rte_mbuf元素
+
+#总结
+
+相关数据结构的关联关系如下图：
+
+![mempool.jpg](./img/Dpdk/mempool.jpg)
+
+****
+
+#DPDK 内存管理（三）（rte_malloc 内存管理） 
+
+rte_malloc()为程序运行过程中分配内存，模拟从堆中动态分配内存空间。
+
+    void *
+    rte_malloc(const char *type, size_t size, unsigned align)
+    {
+        return rte_malloc_socket(type, size, align, SOCKET_ID_ANY);
+    }
+
+rte_malloc()函数调用关系如下图：
+
+![rte_malloc.jpg](./img/Dpdk/rte_malloc.jpg)
+
+- rte_malloc_socket()：指定从哪个socket上分配内存空间，默认是指定SOCKET_ID_ANY，即，程序在哪个socket上运行，就从哪个socket上分配内存。如果指定的socket上没有合适的内存空间，就再从其它socket上分配。
+- malloc_heap_alloc()：从rte_config.mem_config->malloc_heaps[]数组中找到指定socket对应的堆（使用struct malloc_heap描述堆），即，从这个堆中分配空间。如果该堆是第一次使用，还没有被初始化过，则调用malloc_heap_init()初始化；
+
+    首先，调用find_suitable_element()在堆中查找是否有合适内存可以分配，如果没有，则调用malloc_heap_add_memzone()在rte_config.mem_config->memzone[]中给堆分配一块内存。最后，调用malloc_elem_alloc()在堆中，将需要分配的内存划分出去。
+
+    void *
+    malloc_heap_alloc(struct malloc_heap *heap,
+            const char *type __attribute__((unused)), size_t size, unsigned align)
+    {
+        if (!heap->initialised)
+            malloc_heap_init(heap);
+    
+        size = CACHE_LINE_ROUNDUP(size);
+        align = CACHE_LINE_ROUNDUP(align);
+        rte_spinlock_lock(&heap->lock);
+        struct malloc_elem *prev, *elem = find_suitable_element(heap,
+                size, align, &prev);
+        if (elem == NULL){
+            if ((malloc_heap_add_memzone(heap, size, align)) == 0)
+                elem = find_suitable_element(heap, size, align, &prev);
+        }
+    
+        if (elem != NULL){
+            elem = malloc_elem_alloc(elem, size, align, prev);
+            /* increase heap's count of allocated elements */
+            heap->alloc_count++;
+        }
+        rte_spinlock_unlock(&heap->lock);
+        return elem == NULL ? NULL : (void *)(&elem[1]);
+    
+    }
+
+- malloc_heap_init()：主要是为struct malloc_heap数据结构的各个成员变量赋初始值，并将该堆的状态设置为INITIALISED。
+- malloc_heap_add_memzone()：调用rte_memzone_reserve()，在rte_config.mem_config->memzone[]中分配合适大小的内存。分配的内存的大小是mz_size = MAX(min_size, 11M)，其中，min_size = size + align + MALLOC_ELEM_OVERHEAD * 2; size是rte_malloc()指定的需要分配内存的大小。如果memzone[]中没有合适的内存块，将mz_size减半，再次查找。 (MALLOC_ELEM_OVERHEAD=128)
+
+    do {
+        mz = rte_memzone_reserve(mz_name, mz_size, numa_socket,
+                     mz_flags);
+        if (mz == NULL)
+            mz_size /= 2;
+    } while (mz == NULL && mz_size > min_size);
+
+find_suitable_element()：在堆中找到一块合适大小的内存，分配的内存是从堆的底部开始查找的。如果堆剩余内存不够分配的，会再次调用malloc_heap_add_memzone()扩展堆的大小。
+
+malloc_elem_alloc()：查找到合适大小的内存块后，将这一块内存从堆中划分出去。
+
+![rte_malloc_2](./img/Dpdk/rte_malloc_2.jpg)
+
+****
+
+#DPDK内存管理-----(四) rte_mbuf
+
+本文主要介绍rte_mbuf与rte_mempool数据结构之间的组织关系、以及网卡接收到的数据是如何存储在rte_mbuf中的。
+
+#rte_mbuf、rte_mempool及网卡收到的数据包在内存中的组织结构
+
+![rte_mbuf1.jpg]()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

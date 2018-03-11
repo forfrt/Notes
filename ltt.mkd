@@ -1,3 +1,11 @@
+#Concepts
+
+##Numa
+
+NUMA (non-uniform memory access) is a method of configuring a cluster of microprocessor in a multiprocessing system so that they can share memory locally, improving performance and the ability of the system to be expanded. NUMA is used in a symmetric multiprocessing system. An SMP system is a "tightly-coupled", "share everything" system in which multiple processors working under a single operating system access each other's memory over a common bus or "interconnect" path.
+
+Ordinarily, a limitation of SMP is that as microprocessors are added, the shared bus or data path get overloaded and becomes a performance bottlenect. Numa adds an intermediate level of memory shared amony a few microprocessors so sthat all data accesses don't have to travel on the main bus.
+
 
 #Code review
 
@@ -153,28 +161,173 @@
 
 ----
 
+##RPS
+
+###`bsharp_tree`
+
+    * --------------------------------------------------------------------------
+    * About the BSharpTree in RPS
+    * --------------------------------------------------------------------------
+    *
+    * In the RPS, we defined many structures/classes to implement the concepts,
+    * in B-tree, here are the struct/class notations:
+    *
+    * 1) class  BSharpTree: a bsharp tree
+    * 2) struct BNode     : a node in BSharpTree, contains many keys
+    * 3) struct BNodeKey  : a key in BSharpTree, contained in a specific BNode
+    *
+    * What's more, in RPS, a BSharpTree is divided into many BNodes by time -
+    * thus, each BNode represents a time slot, the duration of the slot is
+    * defined by the Aplication. e.g, duration is 50ms means the first BNode
+    * covers (0ms, 50ms), the second BNode (50ms, 100ms), the third (100ms,
+    * 150ms)...
+    *
+    * Each BNodeKey is a collection of application data with a specified
+    * timestamp, an insertion operation orders the BSharpTree to insert it into
+    * the the proper BNode. The comparison criteria is time: by comparing the
+    * key's timestamp with the nodes' timestamp (their start time), the key is
+    * inserted into the BNode who's timeslot range covers the timestamp.
+
+- `enum TimeStat BSharpTree:insert(struct BNodeKey*key)`
+
+    1. Get the possible index of BNodeKey pointer being inserted 
+    1. If the index is not out of range, get the exact index in `m_nodes` array by moduling the length of this BSharpTree
+    1. Insert this key into the node of former index.
+
+- `void BSharpTree::rotate()`
+
+    1. Add the total BSharpTree duration to the basetime of current node
+    1. Clear the current node
+    1. Move the current node pointer to next node object
+
+###`timetable`
+
+    * we use two B# trees:
+    *
+    * front tree stores all the RPS entities that will be scheduled in the
+    * near future (e.g. 1 minute, note that this is also the time length
+    * of the tree),
+    * it has a finer time-granularity (e.g. 50ms of each node).
+    *
+    * The back tree is used as a backlog, RPS entities that have
+    * timestamps outside the range of the first tree is stored in the
+    * back tree, it has a more coarser time-granularity (e.g. 500ms of
+    * each node). And in a proper time, the entities will be moved
+    * from back tree to front tree by a fetch_data() operation.
+
+- `bool TimeTable:insert(BNodeKey* bkey)`
+
+    1. Try to insert the key into `m_front_tree`
+    1. If the timestamp of key is out of `m_front_tree`'s range, try to insert into `m_back_tree`
+
+- `void TimeTable::fetch_data(uint64_t basetime)`
+
+- `void TimeTable::update_curr_time()`
+
+    1. Get the next step timestamp after current time
+    1. If the `m_front_tree` is ready to rotate, rotate it.
+    1. Fetch data from back tree and insert to the front tree.
+
+- ``
+
+----
+
+##Replay_payload
+
+    /** resend threshold: if packet is not received after the threshold, the             
+     * packet will be resend */                                                          
+    #define RESEND_THRESHOLD (2 * 1000 * 1000)  /** us */                                
+                                                                                         
+    /** resend abort threshold: if packet is not received after the abort threshold, the 
+     * packet will be aborted and notify upagent with LTT_STATUS_ERROR */                
+    #define RESEND_ABORT_THRESHOLD (RESEND_THRESHOLD * 5)  /** us */                     
+
+----
+
+#Structure
+
+----
+
+##Dallas Run
+
+Dallas有三种case:
+1. function case
+
+    只跑一个caselist, 测试功能, 包括payload caselist
+1. load case
+
+    只跑一个caselist, 但可以定制case调度的频繁度, 测单种caselist的极限性能
+
+1. tm case
+    用一个算法, 模拟现网cp/up traffic情况
+    用户需要写比较复杂的配置文件, 定义好模拟的现网中有什么node, 每个node是什么接口, 地址怎么分布, 以及一共有多少用户, 有哪些用户属性
+    用户属性包括它支持怎样的特性 (这个用户是什么policy, 是什么地区码, 有多少个session, 多少个bearer, 以及bearer支持什么样的payload profile (描述payload的速度, 类型dummy/replay等等) ) 和payload
+    tm一旦开始，就是dallas ap program根据配置来模拟每个用户的信令走向了
+
+
+----
+
 #Commands
+
+##Password reset
+
+1001: https://etepwreset.seln.ete.ericsson.se/
 
 ##Dallas Build
 
-```
     setup_15Aspace
+    setup_Dallas1_space
     export LTT_REPO=/repo/eruitfe/ltt_ng
     cd $MK
     make clean; make
     make dist
 
     cd /proj/pcn/lts/user/dallas_r15b/releases/
-    
     tar xvf 19089_CXP9011454_eruitfe.tar.Z
-    ll *eruitfe*
-    
     cp -rp 19089_CXP9011454_eruitfe /lab/testtools/rhel664/dallas/testRelease/Dallas_15B_eruitfe_sdk
     /lab/gw_test_framework/epglib2/bin/lab_storage_sync sync --src SERO --dest SELN /lab/testtools/rhel664/dallas/testRelease/Dallas_15B_eruitfe_sdk
     or
     scp statem_mme.beam root@epgtool1004-10:/lab/testtools/rhel664/dallas/testRelease/Dallas_15B_eruitfe_sdk/app/ebin/
 
-```
+
+##Dallas LTT Replacement
+
+    make clean & make
+    cp ltt [testRelease]/3pp/ltt/bin/ltt
+
+----
+
+##Dallas DPN Replacement
+
+    setup_15Aspace
+    cd arch/dpn/c/
+    make clean
+    make
+    cp arch/dpn/c/bin/rhel664/dpn [testRelease]/sbin/dpn
+
+----
+
+##Dallas Node Reload
+
+    ssh erv@epg10-3
+    ssh vepg31-3
+
+    show chassis
+    reload card all
+
+    start oam-cli
+    ManagedElement=1,Epg=1,Sgw=1
+
+    ManagedElement=1,Epg=1,Pgw=1,Apn=dls-apn3-0106
+    statistics
+
+----
+
+#Dallas Training for ST
+
+\\vhub.mo.sw.ericsson.se\proj\pcn\DALLAS\Dallas Training for ST\GGSN_EPG\LN
+https://play.ericsson.net/media/t/0_4f33fp3d
+http://epgst-competence.mo.sw.ericsson.se/?q=node/7
 
 ----
 
@@ -183,13 +336,42 @@
 ```
     /lab/testtools/rhel664/dallas/testRelease/Dallas_15B_RC1_0_0052_ebm_load_balance_emoqrst/scripts/lts_system_setup -a uninstall
     /lab/testtools/rhel664/dallas/testRelease/Dallas_15B_RC1_0_0052_ebm_load_balance_emoqrst/scripts/lts_system_setup -a install
-    /etc/rc.d/rc.vlan restart
+    lts_deploy ltt /etc/rc.d/rc.vlan restart
     lts_control start -c /autott/dallas
     lts_info
+    lts_msgshow
+    lts_pm p
     vim /autott/dallas_15a/vepg31-4.dallas.backbone
     vim /var/log/dallas_msg.log
     vim /var/log/ltt.log
     vim /var/dallas/policy.conf
+
+
+    lts_system_setup -a uninstall
+    /lab/testtools/rhel664/dallas/testRelease/Dallas_15B_3R1_LLV003_dummy_timeout_emoqrst/scripts/lts_system_setup -a install
+    lts_deploy ltt /etc/rc.d/rc.vlan restart
+    lts_set_loopback -dallas_config_dir  /autott/dallas
+    lts_control start -c /autott/dallas
+
+    watch lts_info
+    lts_get_ms_groups_range type
+
+    lts_run_tm all
+    lts_log -t
+    lts_info
+    lts_info
+    lts_stop
+    lts_system_setup -a uninstall -v
+
+    lts_run_mobiles '948578, 1, [104]'
+    lts_get_subscriber 948578
+    lts_run_mobiles '948578, 1, [{160, 1, 83}]'
+    lts_run_mobiles '1,1,[{159,1,109}]'
+    lts_run_load '1, 2000000, [104,{158,cont}], 10000'
+    lts_run_tm '{perc, 10} , all'
+    lts_run_tm '104833,100'
+
+    lts_control stop
 
 ```
 
@@ -201,19 +383,84 @@
 1. View Dallas Backbone configuration
 1. View Dallas log messages
 1. View Ltt log messages
-1. View Dallas vlan configurations used in step 3
+1. View Dallas vlan configurations used in step 
+
+----
+
+##Dallas Run Cases
+
+    lts_run_tm all
+    lts_run_load [1] 146, 500
+    lts_run_load '1,1000,[104,{158,cont}],100' 
+    show chassis
+    reload card all
+
+----
+
+#Dallas Configurations
+
+1. 查看/修改ltt reserve了多少内存
+
+    htop
+    cat /proc/meminfo
+    vim /var/dallas/system_profile
+    echo 10240 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+    //! This file is unlikely be changed with this command. In this case, you should 
+    change the value of system_profile file and restart dallas project (lts_system_setup -deinstall & lts_system_setup -install)
+
+1. 通过tunnel id计算ms id
+
+    teid=32bytes---》 十六进制 取后27位-1---》再转十进制 
+
+1. 查看网卡对应的物理属性( numa_node... )
+    /sys/class/net/eth0/device
+
+----
+
+##Dallas Environment Troubleshooting
+/lab/j20/testtools/binaries/rhel6.x86_64/onewireshark/ws.sh &
+    start oam-cli
+    ManagedElement=1, Epg=1, Node=1
+    status
+
+    configure
+    ManagedElement=1,Epg=1,Node=1,FaultManagement=1
+    activeNotifications
+    
+    lts_get_subscriber
+
+----
+
+##Dallas check status
+
+    lts_pmshow -f /var/log/dallas_pm.log.1 -l |grep SGW
+    lts_pmshow -f /var/log/dallas_pm.log.1 -c 2498  
+
+----
+
+##Dallas capture traffic
+
+    ssh epgtool9-20
+    /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV025/3pp/ltt/util/exe /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV025/3pp/ltt/util/itc.py -i 0, 1 -e  ''
+    /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV025/3pp/ltt/util/exe /lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV025/3pp/ltt/util/itc.py stop
+    /lab/j20/testtools/binaries/rhel6.x86_64/onewireshark/ws.sh & 
 
 ----
 
 ##Dallas Delivery
 
 ```
-    git resete -soft HEAD^
+    git reset -soft HEAD^
+
     git commit
     
         The format of commit message is like: "<jira_num>[commit description]"
+
+    git branch --set-upstream-to=origin/dallas_15b sdk_parser
     git pull --rebase
-    git push origin HEAD:refs/for/dallas_15b/sdk
+
+    git push origin HEAD:refs/for/master
+    git push origin HEAD:refs/for/master
 ```
 
 ----
@@ -228,11 +475,7 @@ https://pdupc-jira.mo.sw.ericsson.se/secure/RapidBoard.jspa
 
 ----
 
-#Configurations
-
-----
-
-##Calculate Profile
+##Calculate Dummy Profile
     {udp_payload_profile,
     1, %% 'Payload-profile-index'
     300, %% 'Payload session life time' %% (Integer 0 .. 3600). Note that '0' means that packets per session will be used instead.
@@ -262,6 +505,170 @@ https://pdupc-jira.mo.sw.ericsson.se/secure/RapidBoard.jspa
     ACK 300/2.571428571428571 = 116.6666666666667 real total MTU total packet: 117 
     
     extra 1 packet need 2.571428571428571 s 
+
+
+    83, 11, 10, 10, 245, 138, 0.41, 0.62, 1, 0.47, 0, []
+    0.41*125=51.25
+    0.62*125=77.5
+    245/77.5=3.1612903225806451612903225806452
+    138/51.25=2.6926829268292682926829268292683
+    11/2.6926829268292682926829268292683=4.0851449275362318840579710144927
+    11/3.1612903225806451612903225806452=3.4795918367346938775510204081632
+
+    97, 11, 10, 10, 294, 277, 0.81, 0.75, 1 ,0.47, 0, []
+    0.81*125=101.25
+    0.75*125=93.75
+    294/93.75=3.136
+    277/101.25=2.7358024691358024691358024691358
+    11/2.7358024691358024691358024691358=4.0207581227436823104693140794224
+    11/3.136=3.5076530612244897959183673469388
+
+    51.25   138  2.6926829268292682926829268292683  4.0851449275362318840579710144927   4
+    77.5    245  3.1612903225806451612903225806452  3.4795918367346938775510204081632   3
+    
+    51      138 2.7058823529411764705882352941176   4.0652173913043478260869565217392   4
+    78      245 3.1410256410256410256410256410256   3.5020408163265306122448979591837   4
+    
+    loop_time=2.7058823529411764705882352941176
+    pkt_burst_ack=1
+    pkt_burst_main=2.7058823529411764705882352941176*78/245=0.86146458583433373349339735894356
+    
+                                        MTU     ACK
+    2.70588*1       2.70588             0       1
+    2.70588*2       5.41176             0       1
+    2.70588*3       8.11764             1       2
+    2.70588*4       10.82352            2       3
+    
+    ----
+    
+    2.70588*5       13.5294             3       4
+    2.70588*6       16.23528            4       done   
+
+                                        0       1
+                                        0       1
+                                        1       1
+                                        2       2
+                                        3       3
+                                        4       4
+                                        4       4
+
+ERROR     05-17 08:09:14.619 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495001354, loop_elpased: 0, loop_time: 2705882,                    timestamp: 0 , pk
+t_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 0                    pkt_sent_ack: 1
+ERROR     05-17 08:09:17.315 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495001357, loop_elpased: 1, loop_time: 2705882,                    timestamp: 270588
+2 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 0                    pkt_sent_ack: 1
+ERROR     05-17 08:09:20.027 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495001360, loop_elpased: 2, loop_time: 2705882,                    timestamp: 541176
+4 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 1                    pkt_sent_ack: 1
+ERROR     05-17 08:09:22.725 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495001362, loop_elpased: 3, loop_time: 2705882,                    timestamp: 811764
+6 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 2                    pkt_sent_ack: 2
+ERROR     05-17 08:09:25.435 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495001365, loop_elpased: 4, loop_time: 2705882,                    timestamp: 108235
+28 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 3                    pkt_sent_ack: 3
+EVENT     05-17 08:09:26.460 dsyslog        TOO MANY PRINTOUTS PER SECOND! (critical:0 error:0 warning:0 event:0 info:0 debug:714 resend:3729208032 printouts dropped the last 31 secs)
+ERROR     05-17 08:09:28.135 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495001368, loop_elpased: 5, loop_time: 2705882,                    timestamp: 135294
+10 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 4                    pkt_sent_ack: 4
+ERROR     05-17 08:09:30.845 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495001370, loop_elpased: 6, loop_time: 2705882,                    timestamp: 162352
+92 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 4                    pkt_sent_ack: 4
+ERROR     05-17 08:09:31.345 LTT_1          dummy session 1156995616094552064 send to mq at 1495001371
+
+----
+
+INFO      05-17 08:59:58.536 pdn_sim        Register dummy payload profiles
+ERROR     05-17 09:01:44.656 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495004504, loop_elpased: 0, loop_time: 4803921,                    timestamp: 0 , pk
+t_total_main: 2                    pkt_total_ack: 2, pkt_sent_main: 1                    pkt_sent_ack: 0
+ERROR     05-17 09:01:49.458 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495004509, loop_elpased: 1, loop_time: 4803921,                    timestamp: 480392
+1 , pkt_total_main: 2                    pkt_total_ack: 2, pkt_sent_main: 1                    pkt_sent_ack: 0
+ERROR     05-17 09:01:54.263 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495004514, loop_elpased: 2, loop_time: 4803921,                    timestamp: 960784
+2 , pkt_total_main: 2                    pkt_total_ack: 2, pkt_sent_main: 1                    pkt_sent_ack: 1
+ERROR     05-17 09:01:59.059 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495004519, loop_elpased: 3, loop_time: 4803921,                    timestamp: 144117
+63 , pkt_total_main: 2                    pkt_total_ack: 2, pkt_sent_main: 2                    pkt_sent_ack: 2
+ERROR     05-17 09:02:03.869 LTT_1          dummy payload in session 1156995616094552064 send to mq at                    1495004523, loop_elpased: 4, loop_time: 4803921,                    timestamp: 192156
+84 , pkt_total_main: 2                    pkt_total_ack: 2, pkt_sent_main: 2                    pkt_sent_ack: 2
+
+----
+
+ERROR     05-17 11:08:07.351 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 0,             pkt_total_main: 4, pkt_sent_main: 0
+ERROR     05-17 11:08:07.351 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 0             pkts_to_sent: 1
+ERROR     05-17 11:08:07.353 LTT_1          DUMMY TIMEOUTtry_to_send_packet : MAIN Packet Sending:             loop_elapsed: 0,             pkt_total_ack: 4, pkt_sent_ack: 0
+ERROR     05-17 11:08:07.353 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 0             pkts_to_sent: 0
+ERROR     05-17 11:08:07.353 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1156995616094552064                    send to mq at                    1495012087, loop_elpased: 0, 
+loop_time: 2705882,                    timestamp: 0 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 1                    pkt_sent_ack: 0
+ERROR     05-17 11:08:10.053 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 1,             pkt_total_main: 4, pkt_sent_main: 1
+ERROR     05-17 11:08:10.053 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 1             pkts_to_sent: 0
+ERROR     05-17 11:08:10.053 LTT_1          DUMMY TIMEOUTtry_to_send_packet : MAIN Packet Sending:             loop_elapsed: 1,             pkt_total_ack: 4, pkt_sent_ack: 0
+ERROR     05-17 11:08:10.053 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 1             pkts_to_sent: 0
+ERROR     05-17 11:08:10.053 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1156995616094552064                    send to mq at                    1495012090, loop_elpased: 1, 
+loop_time: 2705882,                    timestamp: 2705882 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 1                    pkt_sent_ack: 0
+ERROR     05-17 11:08:12.753 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 2,             pkt_total_main: 4, pkt_sent_main: 1
+ERROR     05-17 11:08:12.753 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 2             pkts_to_sent: 0
+ERROR     05-17 11:08:12.753 LTT_1          DUMMY TIMEOUTtry_to_send_packet : MAIN Packet Sending:             loop_elapsed: 2,             pkt_total_ack: 4, pkt_sent_ack: 0
+ERROR     05-17 11:08:12.753 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 2             pkts_to_sent: 1
+ERROR     05-17 11:08:12.757 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1156995616094552064                    send to mq at                    1495012092, loop_elpased: 2, 
+loop_time: 2705882,                    timestamp: 5411764 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 1                    pkt_sent_ack: 1
+ERROR     05-17 11:08:15.463 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 3,             pkt_total_main: 4, pkt_sent_main: 1
+ERROR     05-17 11:08:15.463 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 3             pkts_to_sent: 1
+ERROR     05-17 11:08:15.463 LTT_1          DUMMY TIMEOUTtry_to_send_packet : MAIN Packet Sending:             loop_elapsed: 3,             pkt_total_ack: 4, pkt_sent_ack: 1
+ERROR     05-17 11:08:15.463 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 3             pkts_to_sent: 1
+ERROR     05-17 11:08:15.463 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1156995616094552064                    send to mq at                    1495012095, loop_elpased: 3, 
+loop_time: 2705882,                    timestamp: 8117646 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 2                    pkt_sent_ack: 2
+ERROR     05-17 11:08:18.173 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 4,             pkt_total_main: 4, pkt_sent_main: 2
+ERROR     05-17 11:08:18.173 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 4             pkts_to_sent: 1
+ERROR     05-17 11:08:18.173 LTT_1          DUMMY TIMEOUTtry_to_send_packet : MAIN Packet Sending:             loop_elapsed: 4,             pkt_total_ack: 4, pkt_sent_ack: 2
+ERROR     05-17 11:08:18.173 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 4             pkts_to_sent: 1
+ERROR     05-17 11:08:18.173 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1156995616094552064                    send to mq at                    1495012098, loop_elpased: 4, 
+loop_time: 2705882,                    timestamp: 10823528 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 3                    pkt_sent_ack: 3
+ERROR     05-17 11:08:20.873 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 5,             pkt_total_main: 4, pkt_sent_main: 3
+ERROR     05-17 11:08:20.873 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 5             pkts_to_sent: 1
+ERROR     05-17 11:08:20.873 LTT_1          DUMMY TIMEOUTtry_to_send_packet : MAIN Packet Sending:             loop_elapsed: 5,             pkt_total_ack: 4, pkt_sent_ack: 3
+ERROR     05-17 11:08:20.873 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 5             pkts_to_sent: 1
+ERROR     05-17 11:08:20.873 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1156995616094552064                    send to mq at                    1495012100, loop_elpased: 5, 
+loop_time: 2705882,                    timestamp: 13529410 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 4                    pkt_sent_ack: 4
+ERROR     05-17 11:08:23.583 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 6,             pkt_total_main: 4, pkt_sent_main: 4
+ERROR     05-17 11:08:23.583 LTT_1          DUMMY TIMEOUTtry_to_send_packet : MAIN Packet Sending:             loop_elapsed: 6,             pkt_total_ack: 4, pkt_sent_ack: 4
+ERROR     05-17 11:08:23.583 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1156995616094552064                    send to mq at                    1495012103, loop_elpased: 6, 
+loop_time: 2705882,                    timestamp: 16235292 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 4                    pkt_sent_ack: 4
+
+----
+
+ERROR     05-17 11:57:23.763 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 0,             pkt_total_main: 4, pkt_sent_main: 0
+ERROR     05-17 11:57:23.763 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 0             pkt_sent: 0             pkts_to_sent: 1
+ERROR     05-17 11:57:23.766 LTT_1          DUMMY TIMEOUTtry_to_send_packet : ACK Packet Sending:             loop_elapsed: 0,             pkt_total_ack: 4, pkt_sent_ack: 0
+ERROR     05-17 11:57:23.766 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 0             pkt_sent: 0             pkts_to_sent: 0
+ERROR     05-17 11:57:23.766 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1152921508901814272                    send to mq at                    1495015043, loop_elpased: 0, 
+loop_time: 2705882,                    timestamp: 0 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 1                    pkt_sent_ack: 0
+ERROR     05-17 11:57:26.468 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 1,             pkt_total_main: 4, pkt_sent_main: 1
+ERROR     05-17 11:57:26.468 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 1             pkt_sent: 1             pkts_to_sent: 0
+ERROR     05-17 11:57:26.468 LTT_1          DUMMY TIMEOUTtry_to_send_packet : ACK Packet Sending:             loop_elapsed: 1,             pkt_total_ack: 4, pkt_sent_ack: 0
+ERROR     05-17 11:57:26.468 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 1             pkt_sent: 0             pkts_to_sent: 0
+ERROR     05-17 11:57:26.468 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1152921508901814272                    send to mq at                    1495015046, loop_elpased: 1, 
+loop_time: 2705882,                    timestamp: 2705882 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 1                    pkt_sent_ack: 0
+ERROR     05-17 11:57:29.168 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 2,             pkt_total_main: 4, pkt_sent_main: 1
+ERROR     05-17 11:57:29.168 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 2             pkt_sent: 1             pkts_to_sent: 0
+ERROR     05-17 11:57:29.168 LTT_1          DUMMY TIMEOUTtry_to_send_packet : ACK Packet Sending:             loop_elapsed: 2,             pkt_total_ack: 4, pkt_sent_ack: 0
+ERROR     05-17 11:57:29.168 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 2             pkt_sent: 0             pkts_to_sent: 1
+ERROR     05-17 11:57:29.168 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1152921508901814272                    send to mq at                    1495015049, loop_elpased: 2, 
+loop_time: 2705882,                    timestamp: 5411764 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 1                    pkt_sent_ack: 1
+ERROR     05-17 11:57:31.878 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 3,             pkt_total_main: 4, pkt_sent_main: 1
+ERROR     05-17 11:57:31.878 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 3             pkt_sent: 1             pkts_to_sent: 1
+ERROR     05-17 11:57:31.878 LTT_1          DUMMY TIMEOUTtry_to_send_packet : ACK Packet Sending:             loop_elapsed: 3,             pkt_total_ack: 4, pkt_sent_ack: 1
+ERROR     05-17 11:57:31.878 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 3             pkt_sent: 1             pkts_to_sent: 1
+ERROR     05-17 11:57:31.878 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1152921508901814272                    send to mq at                    1495015051, loop_elpased: 3, 
+loop_time: 2705882,                    timestamp: 8117646 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 2                    pkt_sent_ack: 2
+ERROR     05-17 11:57:34.578 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 4,             pkt_total_main: 4, pkt_sent_main: 2
+ERROR     05-17 11:57:34.578 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 4             pkt_sent: 2             pkts_to_sent: 1
+ERROR     05-17 11:57:34.578 LTT_1          DUMMY TIMEOUTtry_to_send_packet : ACK Packet Sending:             loop_elapsed: 4,             pkt_total_ack: 4, pkt_sent_ack: 2
+ERROR     05-17 11:57:34.578 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 4             pkt_sent: 2             pkts_to_sent: 1
+ERROR     05-17 11:57:34.578 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1152921508901814272                    send to mq at                    1495015054, loop_elpased: 4, 
+loop_time: 2705882,                    timestamp: 10823528 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 3                    pkt_sent_ack: 3
+ERROR     05-17 11:57:37.288 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 5,             pkt_total_main: 4, pkt_sent_main: 3
+ERROR     05-17 11:57:37.288 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 0.861464,             loop_elapsed: 5             pkt_sent: 3             pkts_to_sent: 1
+ERROR     05-17 11:57:37.288 LTT_1          DUMMY TIMEOUTtry_to_send_packet : ACK Packet Sending:             loop_elapsed: 5,             pkt_total_ack: 4, pkt_sent_ack: 3
+ERROR     05-17 11:57:37.288 LTT_1          DUMMY TIMEOUT@try_to_send_flow_packet : pkt_burst: 1.000000,             loop_elapsed: 5             pkt_sent: 3             pkts_to_sent: 1
+ERROR     05-17 11:57:37.288 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1152921508901814272                    send to mq at                    1495015057, loop_elpased: 5, 
+loop_time: 2705882,                    timestamp: 13529410 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 4                    pkt_sent_ack: 4
+ERROR     05-17 11:57:39.998 LTT_1          DUMMY TIMEOUT@try_to_send_packet : MAIN Packet Sending:             loop_elapsed: 6,             pkt_total_main: 4, pkt_sent_main: 4
+ERROR     05-17 11:57:39.998 LTT_1          DUMMY TIMEOUTtry_to_send_packet : ACK Packet Sending:             loop_elapsed: 6,             pkt_total_ack: 4, pkt_sent_ack: 4
+ERROR     05-17 11:57:39.998 LTT_1          DUMMY TIMEOUT@dummy_payload_execute :Dummy payload in session 1152921508901814272                    send to mq at                    1495015059, loop_elpased: 6, 
+loop_time: 2705882,                    timestamp: 16235292 , pkt_total_main: 4                    pkt_total_ack: 4, pkt_sent_main: 4                    pkt_sent_ack: 4
+
 
 #Run Dummy Payload
 ```
@@ -329,7 +736,1652 @@ P0092144
     app_stats.pdn_rx_error += app_stat[i].pdn_rx_error;
     app_stats.pdn_tx_error += app_stat[i].pdn_tx_error;
 
+
+
+
+
 /lab/testtools/dallas1/PRA/RC1_0_0050_51/PCDALNGEN-703_2017-04-25_10.44_TC13769.2.1_SF_ENEF-MME-RT_SGW_robustness_ssr8010s2/raw_logs/epgtool/dls_autott_ends.log
 /lab/testtools/dallas1/PRA/reference/2017-04-05_08.04_TC16621.1.1_SF_ENEF-SGW-RT_PGW_robustness_ssr8010s2/raw_logs/epgtool/vim dls_autott_ends.log
+
+
+- 05052017
+
+replay_session_execute: resending timeout:profile_id[8110] session_id [4617346948532273152]resend_pktid[43736] flow_idx[0]
+@run :execute return error
+normal raw payload flow miss:
+ src 36.8.40.135 dst 196.2.176.65
+ipv4 pkt proto id 17
+
+{replay_payload_profile, 8110,  396,  1.00, 0, 0, false, true, 110, []}.   %%8048_ppfilm_20120525074558_1.cap
+DALLAS_REPLAY_FILE_DIR=/lab/epg_st_utils/captures/latest
+
+
+selnpcgwnx1001:/lab/testtools/dallas1/PRA/RC1_0_0049/2017-04-06_02.24_TC3362.1.2_BS_3.5_Standalone_PGW_SACC_MBB_stability_ssr8010s2_PCDALNGEN-684>
+
+----
+
+- 05082017
+
+LTT Replay Rx unexpected pkt, recv_pktid:[126], sent_pktid:[126], capture file:[/lab/epg_st_utils/captures/latest/sequences/rtsp/streaming_sofa_movie.cap], replay id:[6064]
+LTT Replay Rx unexpected pkt, recv_pktid:[335], sent_pktid:[335], capture file:[/lab/epg_st_utils/captures/latest/sequences/rtsp/streaming_sofa_movie.cap], replay id:[6064]
+ERROR     05-06 05:28:51.414 LTT_3          LTT Replay Rx unexpected pkt, recv_pktid:[126], sent_pktid:[126], capture [file:[/lab/epg_st_utils/captures/latest/sequences/ftp/stor_sound1_edited.cap|file:///[/lab/epg_st_utils/captures/latest/sequences/ftp/stor_sound1_edited.cap]], replay id:[6010]
+ERROR     05-06 05:28:51.414 LTT_1          LTT Replay Rx unexpected pkt, recv_pktid:[571], sent_pktid:[571], capture [file:[/lab/epg_st_utils/captures/latest/sequences/ftp/stor_sound1_edited.cap|file:///[/lab/epg_st_utils/captures/latest/sequences/ftp/stor_sound1_edited.cap]], replay id:[8010]
+
+selnpcgwnx1001:/home/eruitfe/ltt_ng/src> grep -r -i -n "recv_pktid" .
+./rps/cc_deps.hh:116:    uint64_t recv_pktid;            /** last received packet ID */
+./app/replay_session.c:315:    if (stat->recv_pktid != stat->sent_pktid) {/** pkts are not received */
+./app/replay_session.c:525:    LTT_LOG(DEBUG, APP,"\trecv pktid[%lu], sent_pktid[%lu]\n", stat->recv_pktid, stat->sent_pktid);
+./app/replay_session.c:535:    if (likely(stat->recv_pktid != stat->sent_pktid)) {
+./app/replay_session.c:809:        if (stat->recv_pktid < stat->sent_pktid) {
+./app/replay_session.c:810:            stat->recv_pktid++;
+./app/replay_session.c:817:            LTT_LOG(ERROR, APP, "LTT Replay Rx unexpected pkt, recv_pktid:[%lu], sent_pktid:[%lu], capture file:[%s], replay id:[%u] \n",
+./app/replay_session.c:818:                    stat->recv_pktid, stat->sent_pktid, replay->prof->pcapfile, replay->prof->replay_id);
+./app/replay_session.c:827:        LTT_LOG(ERROR, APP, "LTT Replay Rx unexpected direction, recv_pktid:[%lu], sent_pktid:[%lu], capture file:[%s], replay id:[%u] @[%lu]\n",
+./app/replay_session.c:828:                stat->recv_pktid, stat->sent_pktid, replay->prof->pcapfile, replay->prof->replay_id, rte_get_tsc_cycles());
+./app/replay_status.c:42:    stat->recv_pktid = 0;
+./app/replay_status.c:74:        LTT_LOG(L, APP,"\t\t\t\t\tPKT[%lu] RECEIVED\n", stat->recv_pktid);
+./app/replay_status.c:76:                stat->resend_pktid, stat->sent_pktid, stat->recv_pktid);
+./app/replay_status.c:80:        LTT_LOG(L, APP,"\tPKT[%lu] RECEIVED\n", stat->recv_pktid);
+./app/replay_status.c:82:                stat->resend_pktid, stat->sent_pktid, stat->recv_pktid);
+./app/replay_status.c:100:    stat->recv_pktid = stat->sent_pktid;
+Binary file ./app/replay_session.o matches
+./app/replay_status.h:50:    uint64_t recv_pktid;            /** last received packet ID */
+
+Auto-merging src/om/ltt_om.h
+Auto-merging src/om/jobtracker_agent.c
+CONFLICT (content): Merge conflict in src/om/jobtracker_agent.c
+Auto-merging src/instance/agent.c
+CONFLICT (content): Merge conflict in src/instance/agent.c
+
+        modified:   src/app/app_stats.c
+        modified:   src/app/app_stats.h
+        modified:   src/instance/agent.c
+        modified:   src/instance/agent.h
+        modified:   src/om/jobtracker_agent.c
+        modified:   src/om/ltt_om.h
+
+/lab/testtools/rhel664/dallas/testRelease/Dallas_15B_3R1_LLV003_dummy_timeout_emoqrst 
+dummy timeout的包
+
+epgtool10-30
+
+----
+
+- 05222017
+
+/lab/testtools/rhel664/dallas/testRelease/emenhui/3R1_LLV011_session_lif_time/app/ebin 
+
+----
+- 05242017
+
+hugepage=12863
+
+1. 16384
+
+    EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
+1. 8192
+
+    EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+       Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
+
+1. 3850
+    EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
+
+1. 3594
+
+    initialized
+
+1. 3722
+    EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
+
+1. 3658
+
+    initialized
+
+1. 3690
+
+    initialized
+
+1. 3706
+
+    EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
+
+1. 3698
+
+    initialized
+
+1. 3702
+
+    initialized
+
+1. 3704
+
+    EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
+
+1. 3703
+
+    initialized
+
+1. 3704
+
+    EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
+    
+----
+
+- 06022017
+hugepage=10240
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV014/
+
+1. 3703
+
+    Enabling CRC32 instruction for dz_0_dp_7501_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_7502_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_7502_ft_IPv6_0 hashing
+
+1. 3704
+
+    Enabling CRC32 instruction for dz_0_dp_7503_ft_IPv6_1 hashing
+    EAL: memzone_reserve_aligned_thread_unsafe(): No more room in config
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_0_dp_7503_ft_IPv6_1
+
+----
+
+- 06022017
+
+hugepage=5120
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV014/
+
+1. 3703
+
+    0.0.16.5/13  VLAN 253 IF vlan0253:1001, IfIndex  1 SRC MAC 90:e2:ba:86:6e:c5,DST MAC 02:02:00:30:a0:00
+    
+    
+    
+    : Priority 32764, Source IPv6 ::
+    Destination:
+    
+    
+    : Priority 32765, Source 0.0.0.0/0
+    Destination:
+    
+    
+    =============================================================
+    Enabling CRC32 instruction for dz_0_dp_0_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_0_ft_IPv6_0 hashing
+    Enabling CRC32 instruction for dz_1_dp_0_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_1_dp_0_ft_IPv6_0 hashing
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_1_dp_0_ft_IPv6_0
+
+1. 100
+
+mem1.log
+
+    0.0.16.5/13  VLAN 253 IF vlan0253:1001, IfIndex  1 SRC MAC 90:e2:ba:86:6e:c5,DST MAC 02:02:00:30:a0:00
+    
+    
+    
+    : Priority 32764, Source IPv6 ::
+    Destination:
+    
+    
+    : Priority 32765, Source 0.0.0.0/0
+    Destination:
+    
+    
+    =============================================================
+    Enabling CRC32 instruction for dz_0_dp_0_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_0_ft_IPv6_0 hashing
+    Enabling CRC32 instruction for dz_1_dp_0_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_1_dp_0_ft_IPv6_0 hashing
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_1_dp_0_ft_IPv6_0
+    "/var/log/ltt.log" 586L, 28220C                                                                       
+
+----
+
+- 06022017
+
+hugepage=7680
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV014/
+1. 3703
+    mem2.log
+
+    Enabling CRC32 instruction for dz_0_dp_5306_ft_IPv4_0 hashing
+    RING: Cannot reserve memory
+    HASH: memory allocation failed
+    EAL: Error - exiting with code: 1
+      Cause: Failed to create hash table dz_0_dp_5306_ft_IPv4_0
+
+- 06052017
+hugepage=7680
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV014/
+1. 2618
+    mem3.log
+
+    Enabling CRC32 instruction for dz_0_dp_5306_ft_IPv4_0 hashing
+    RING: Cannot reserve memory                                  
+    HASH: memory allocation failed                               
+    EAL: Error - exiting with code: 1                            
+      Cause: Failed to create hash table dz_0_dp_5306_ft_IPv4_0  
+
+1. 1309
+
+    mem4.log
+
+    Enabling CRC32 instruction for dz_0_dp_2713_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_2713_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_2714_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_2714_ft_IPv6_0 hashing
+
+1. 2600
+
+    Enabling CRC32 instruction for dz_0_dp_5295_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_5295_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_5296_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_5296_ft_IPv6_0 hashing
+
+1. 2604
+
+    mem6.log
+    Enabling CRC32 instruction for dz_0_dp_5303_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_5303_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_5304_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_5304_ft_IPv6_0 hashing
+
+1. 2605
+
+    mem5.log
+    Enabling CRC32 instruction for dz_0_dp_5304_ft_IPv6_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_5305_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_5305_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_5306_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_5306_ft_IPv6_0 hashing
+    Enabling CRC32 instruction for dz_1_dp_640_ft_IPv4_0 hashing
+
+    RING: Cannot reserve memory                                 
+    HASH: memory allocation failed                              
+    EAL: Error - exiting with code: 1                           
+      Cause: Failed to create hash table dz_1_dp_640_ft_IPv4_0  
+
+5304/7502=0.70701146360970407891229005598507
+768/1024=0.75
+2604/3703=0.70321361058601134215500945179584
+
+- 06052017
+hugepage=8920
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV014/
+
+1. 3104
+
+    mem7.log
+    Enabling CRC32 instruction for dz_0_dp_6303_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_6303_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_6304_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_6304_ft_IPv6_0 hashing
+
+1. 3204
+
+    Enabling CRC32 instruction for dz_0_dp_6503_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_6503_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_6504_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_6504_ft_IPv6_0 hashing
+
+1. 3504
+
+    Enabling CRC32 instruction for dz_0_dp_7102_ft_IPv6_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_7103_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_7103_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_7104_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_7104_ft_IPv6_0 hashing
+
+1. 3703
+
+    Enabling CRC32 instruction for dz_0_dp_7501_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_7501_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_7502_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_7502_ft_IPv6_0 hashing
+
+----
+
+- 06062017
+hugepage=8236
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV014/
+
+1. 3703
+
+    Enabling CRC32 instruction for dz_0_dp_6995_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_6995_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_6996_ft_IPv4_0 hashing
+    HASH: memory allocation failed                               
+    EAL: Error - exiting with code: 1                            
+      Cause: Failed to create hash table dz_0_dp_6996_ft_IPv4_0  
+
+----
+
+hugepage=8330
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV014/
+
+1. 3703
+
+    Enabling CRC32 instruction for dz_0_dp_7281_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_7282_ft_IPv4_0 hashing
+    HASH: memory allocation failed                               
+    EAL: Error - exiting with code: 1                            
+      Cause: Failed to create hash table dz_0_dp_7282_ft_IPv4_0  
+
+8330-8236=94
+7282-6996=284
+94*4=376
+376/284=1.3239436619718309859154929577465
+
+lib/librte_hash/rte_cuckoo_hash.c:185:          RTE_LOG(ERR, HASH, "memory allocation failed\n");
+lib/librte_hash/rte_cuckoo_hash.c:217:          RTE_LOG(ERR, HASH, "memory allocation failed\n");
+lib/librte_hash/rte_cuckoo_hash.c:229:          RTE_LOG(ERR, HASH, "memory allocation failed\n");
+lib/librte_hash/rte_cuckoo_hash.c:245:          RTE_LOG(ERR, HASH, "memory allocation failed\n");
+
+lib/librte_ring/rte_ring.c:191:         RTE_LOG(ERR, RING, "Cannot reserve memory for tailq\n");
+lib/librte_ring/rte_ring.c:214:         RTE_LOG(ERR, RING, "Cannot reserve memory\n");
+examples/multi_process/client_server_mp/mp_server/init.c:276:           rte_exit(EXIT_FAILURE, "Cannot reserve memory zone for port information\n")
+
+----
+
+hugepage=8405
+/lab/testtools/rhel664/dallas_dev/preRelease/3R1_LLV014/
+
+1. 3703
+
+    Enabling CRC32 instruction for dz_0_dp_7501_ft_IPv4_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_7501_ft_IPv6_1 hashing
+    Enabling CRC32 instruction for dz_0_dp_7502_ft_IPv4_0 hashing
+    Enabling CRC32 instruction for dz_0_dp_7502_ft_IPv6_0 hashing
+
+----
+
+- 06082017
+
+python add.py \\w+ memzone_12863_3603 memzone_12863_3703
+('memzone_12863_3603', 6834056512)
+('memzone_12863_3703', 6886536512)
+
+52480000=2*100*262400=2*100*(256k+64*100)
+
+----
+
+- 06122017
+
+7680, 5360
+8236, 6996
+8330, 7282
+12863, 15694
+
+----
+
+- 06142017
+
+5360, 30720
+6996, 32944
+7282, 33320
+9939, 37200
+9026, 36000
+12068, 40000
+3234, 28380
+
+----
+
+- 06152017
+
+NUMA part researching
+
+session_pool从全局变量转移到每个instance下自带一个
+s_session_hash -->> instance->pool
+session_hash_init() -->> payload_pool_init
+将payload_pool_init从app_init移到了instance_schedule
+
+无numa版s_payload_session_pool->session[session_id]与s_payload_session_pool->session[session_id]->session_id没有直接关系
+
+session_find_by_id从app.c放到了payload_pool.c
+
+----
+
+- 06162017
+
+偶数dp放在numa 0上, 奇数dp放在numa 1上
+
+5360, 30720
+6996, 32944
+7282, 33320
+9939, 37200
+9026, 36000
+12068, 40000
+3234, 28380
+13588, 40200
+15108, 44000
+
+----
+
+2632,  30720
+3450,  32944
+3593,  33320
+4966.5, 37200
+4465,  36000
+5986,  40000
+1569,  28380
+7506,  44000
+6746,  40200
+
+30720,  2605
+32944,  3450
+33320,  3593
+37200, 4966.5
+36000,  4465
+40000,  5986
+28380,  1569
+44000,  7506
+40200,  6746
+
+----
+
+- 06192017
+
+TODOs:
+
+1. Finish the numa code review
+1. Get more acknowledge about cache and routing parts in vnet layer
+
+----
+
+- 06202017
+
+TODOs:
+1. Update the num code repo
+1. Try to fix the dpn error depending on DPN support
+
+cache也可以使用zmalloc_socket分到各自对应的socket上
+
+----
+
+- 06252017
+
+changes between old numa and new numa
+
+- app.h: add struct FragConf and related function back
+- payload.h: remove the socket_id attribute from struct PayloadSession
+- payload_pool.c: add socket_id to hash_table_create called in payload_pool_init
+- agent.c: 
+    1. change urcu header file from urcu.h to urcu-qsbr.h
+
+- up_agent.c
+    1. change urcu header file from urcu.h to urcu-qsbr.h
+
+- rps_wrapper.hh
+    1. changed the value of `RPS_ENTITY_LOOP_TIMES` from 1 to 10
+
+- sal.c
+    1. `s_id_generator` variable is divided to `[MAX_NUMA]` parts
+
+- rps.cc
+    1. add `times` to parameter list of `Rps::run` 
+
+- sal.c
+    1. Divided `salHashTablex` into `MAX_NUMA` parts
+    1. `lock` in `socket_hashx_insert` is divided into `MAX_NUMA` parts
+
+- datapath.c 
+    1. divided flowtable in default datapath into `[MAX_NUMA]` parts
+    1. other datapaths are stored in specified NUMA socket
+    > except default datapath, all other datapaths are consistent with their flowtable 
+    ( which means one of elements in g_dz[dz_id]->dp[dp_id]->flow_table[] array 
+    is Null )
+
+- flow.c
+    1. no change
+
+- vport.c
+    1. no change
+
+- vport_sal.c
+    1. change urcu header file from urcu.h to urcu-qsbr.h
+
+- 
+
+ERROR     06-26 10:16:32.080 epgtool1031-30:DPN_(1.1.0) TcpApplication HandleRead : TcpConnection Recei
+ve error:End of file
+
+./application_framework/dp/tcp/tcp_connection.cc:        gLog->Err("TcpApplication %s : TcpConnection Receive error:%s",
+
+./application_framework/third_party/ltt_driver/ltt_driver_application.cc:552:  //  zmq_obj_ptr upPush(new CZmqPusher("tcp://*:5305",
+./application_framework/third_party/ltt_driver/ltt_driver_application.cc:1216:  //  pos += Temp_Uint16ToLittleEndianBuffer(5305, &body[pos]);
+./application_framework/third_party/ltt_driver/ltt_driver_application.cc:1743:           boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string("127.0.0.1"),5305);
+
+TranslateFlowActionReq
+sa_msg.hh
+
+
+----
+
+#0  0x000000000045ca55 in create_vnet_bond_vdev ()                    
+#1  0x000000000045ce75 in vnet_init_vdev ()                           
+#2  0x000000000045da2e in vnetctrl_add_bond_dev ()                    
+#3  0x0000000000445b30 in console_service_task ()                     
+#4  0x00000034bc607aa1 in start_thread () from /lib64/libpthread.so.0 
+#5  0x00000034bc2e893d in clone () from /lib64/libc.so.6              
+
+ltt_driver_application.cc:2613
+
+----
+
+#0  0x00000000004e7b2a in rte_lcore_to_socket_id (lcore_id=4294967295)                          
+    at /repo/eruitfe/ltt_numa/dpdk/dpdk-16.07/x86_64-snb-linuxapp-gcc/include/rte_lcore.h:160   
+#1  0x00000000004f45b9 in create_vnet_bond_vdev (info=0x7fdcbcff8690) at vnet.c:383             
+#2  0x00000000004f4e57 in vnet_init_vdev (info=0x7fdcbcff8690) at vnet.c:551                    
+#3  0x00000000004f5f98 in vnetctrl_add_bond_dev (info=0x7fdcbcff8740) at vnet_controller.c:105  
+#4  0x0000000000495ba7 in handle_add_vnet_dev_req (reply=0x7fdcbcff8810, request=0x7fdcbcff9210)
+    at console_agent.c:677                                                                      
+#5  0x0000000000497005 in _handle_request (reply=0x7fdcbcff8810, request=0x7fdcbcff9210)        
+    at console_agent.c:1163                                                                     
+#6  0x0000000000494ace in console_service_task (zmq_ctx=0x11c61050) at console_agent.c:98       
+#7  0x00000034bc607aa1 in start_thread () from /lib64/libpthread.so.0                           
+#8  0x00000034bc2e893d in clone () from /lib64/libc.so.6                                        
+
+    static unsigned rte_lcore_id 	( 	void  		) 	
+    
+    Return the ID of the execution unit we are running on.
+    
+    Returns
+        Logical core ID (in EAL thread) or LCORE_ID_ANY (in non-EAL thread) 
+
+> lcore runs console-agent is not contained in coremask. in other words, is in non-EAL thread
+
+----
+
+./src/om/up_agent.c:        LTT_LOG(ERROR, UPAGENT, "instance[%d] is not running", instanceid);
+./src/om/up_agent.c:        LTT_LOG(ERROR, UPAGENT, "instance[%d] is not running!\n", instanceid);
+./src/om/cp_agent.c:        LTT_LOG(ERROR, CPAGENT, "instance[%d] is not running\n", instanceid);
+./src/om/cp_agent.c:        LTT_LOG(ERROR, CPAGENT, "instance[%d] is not running", instanceid);
+Binary file ./src/om/cp_agent.o matches
+Binary file ./src/app/session_ctl.o matches
+./src/app/replay_session.c:        LTT_LOG(ERROR, APP, "instance[%d] is not running,"
+Binary file ./src/app/replay_session.o matches
+Binary file ./src/app/dummy_session.o matches
+./src/app/session_ctl.c:        LTT_LOG(ERROR, SCTRL, "instance[%d] is not running,"
+./src/app/session_ctl.c:        LTT_LOG(ERROR, SCTRL, "instance[%d] is not running,"
+./src/app/session_ctl.c:        LTT_LOG(ERROR, SCTRL, "instance[%d] is not running,"
+./src/app/session_ctl.c:        LTT_LOG(ERROR, SCTRL, "instance[%d] is not running,"
+./src/app/session_ctl.c:        LTT_LOG(ERROR, SCTRL, "instance[%d] is not running,"
+./src/app/dummy_session.c:        LTT_LOG(ERROR, APP, "instance[%d] is not running,"
+
+root      4162  553  0.4 1083092 297804 ?      Rl   10:20  68:47 /lab/testtools/rhel664/dallas/testRele
+ase/3R1_eruitfe_numa/3pp/ltt/bin/ltt -c 0x5404 -n 4 -- -p 3 -i 1 --pid-file /var/run/ltt.pid --config=(
+0,0,2),(0,1,10),(0,2,12),(0,3,14),(1,0,2),(1,1,10),(1,2,12),(1,3,14) --log-server=10.130.46.6 --oam-lco
+res={0, 1}, {5}, {7}                                                                                   
+
+ps -ef | grep lts_system_setup | grep -v grep
+
+----
+
+ERROR     06-29 04:29:36.833 epgtool1031-30:DPN_(1.1.0) HandleReceive : ltt connection transfered:0 err
+or:Connection reset by peer
+ERROR     06-29 04:29:36.833 epgtool1031-30:DPN_(1.1.0) HandleReceive : ltt connection transfered:0 err
+or:End of file
+
+#0  0x000000000049495d in sid_to_instanceid (session_id=1200325758732468224, socket_id=1)             
+    at session_ctl.c:206                                                                              
+206     session_ctl.c: No such file or directory.                                                     
+(gdb) bt                                                                                              
+#0  0x000000000049495d in sid_to_instanceid (session_id=1200325758732468224, socket_id=1)             
+    at session_ctl.c:206                                                                              
+#1  0x000000000049418b in sessctl_start_session (sinfo=0x7fd9de1f6680) at session_ctl.c:58            
+#2  0x000000000049d1c1 in handle_add_session_req (reply=0x7fd9de1f67b0, request=0x7fd9de1f7210)       
+    at up_agent.c:548                                                                                 
+#3  0x000000000049ea33 in handle_up_req (request=0x7fd9de1f7210, conn_idx=0) at up_agent.c:947        
+#4  0x000000000049ca84 in recv_handler (buffer=0x7fd9de1f7210 "", conn_idx=0, n=115) at up_agent.c:421
+#5  0x000000000049c899 in up_connection_handler (arg=0x7fe673200380) at up_agent.c:373                
+#6  0x00000034bc607aa1 in start_thread () from /lib64/libpthread.so.0                                 
+#7  0x00000034bc2e893d in clone () from /lib64/libc.so.6                                              
+
+----
+
+/lab/testtools/rhel664/dallas/testRelease/3R1_eruitfe_numa/3pp/ltt/bin/ltt -c 7E06 -n 4 -- -p 3 -i 1 --pid-file /var/run/ltt.pid --config="(0,0,2),(0,1,10),(0,2,12),(0,3,14),(1,0,1),(1,1,9),(1,2,11),(1,3,13)" --log-server=10.130.46.6 --oam-lcores="{0, 3}, {5}, {7}" > /var/log/ltt.log 2>&1 3>&1 &'
+
+/lab/testtools/rhel664/dallas/testRelease/3R1_eruitfe_numa/3pp/ltt/bin/ltt -c 7E06 -n 4 -- -p 3 -i 1 --pid-file /var/run/ltt.pid --config="(0,0,2),(0,1,10),(0,2,12),(0,3,14),(1,0,1),(1,1,9),(1,2,11),(1,3,13)" --log-server=10.130.46.6 --oam-lcores="{0, 3}, {5}, {7}" > /var/log/ltt.log 2>&1 3>&1
+
+ltt_port_core_mask=7E06
+config='"(0,0,2),(0,1,10),(0,2,12),(0,3,14),(1,0,1),(1,1,9),(1,2,11),(1,3,13)"'
+
+----
+
+- 070320117
+
+Initializing LTT log system                            
+init ltt log mgr
+ltt log mananger connected to [10.130.46.6]            
+@parse_log_config_file: open LOG configure file failed
+
+ 0x00000000004e708e in tx_misc_send_packet (pkt=0x7ff98e4ffb80, port=0 '\000') at transmitter.c:117
+ 0x00000000004f3afb in vnet_send_packet (pkt=0x7ff98e4ffb80, pkt_type=1, portid=0) at vnet.c:160   
+ 0x00000000005cf1a2 in tap_egress (portid=0) at tuntap.c:249                                       
+ 0x00000000005cf1fc in tap_loop (arg=0x0) at tuntap.c:264                                          
+ 0x00000034bc607aa1 in start_thread () from /lib64/libpthread.so.0                                 
+ 0x00000034bc2e893d in clone () from /lib64/libc.so.6                                              
+
+0x7ff9a40911c0
+0x7ff9a4090880
+0x7ff9a408ff40
+
+Num     Type           Disp Enb Address            What                                               
+2       breakpoint     keep y   0x00000000005cdf06 in tap_init at tuntap.c:101                        
+        breakpoint already hit 1 time                                                                 
+3       breakpoint     keep y   0x00000000005cf220 in tap_loop at tuntap.c:268                        
+        breakpoint already hit 23 times                                                               
+4       breakpoint     keep y   0x00000000005d52f1 in tap_parse_config at tuntap.c:353                
+        breakpoint already hit 1 time                                                                 
+5       breakpoint     keep y   0x00000000004e6f1b in tx_misc_send_packet at transmitter.c:88         
+        breakpoint already hit 6 times                                                                
+6       breakpoint     keep y   0x00000000005c1086 in init_misc_txq at dpdkenv.c:714                  
+7       breakpoint     keep y   0x00000000004327cb in dpdk_setup_misc_tx_queue_conf at ltt_config.c:63
+8       breakpoint     keep y   0x00000000005cf0a3 in tap_egress at tuntap.c:231                      
+        breakpoint already hit 39 times                                                               
+
+----
+
+- 07042017
+
+ERROR     07-04 09:35:55.926 gtp_path_mgmt  The peer 6.12.0.1 <-> 5.0.0.2 set to invalid as retries rea
+ched max 4.
+
+ERROR     07-04 09:46:01.643 LTT_1          normal raw payload flow miss:
+ERROR     07-04 09:46:01.643 LTT_1           flow miss key  src: 24.0.0.2 dst: 192.0.106.62
+ERROR     07-04 09:46:01.643 LTT_1          ipv4 pkt proto id 6
+
+> flow = flow4_lookup_flow(table->flow4, &mkey);
+(gdb) bt                                                                                           
+#0  0x0000000000551c3e in _vnet_gtpu_vport_recv (vport=0x7f639c09dd40, pkt=0x7f65f93b3ec0,         
+    arg=0x7f6c3a391608) at vport_vnet.c:175                                                        
+#1  0x000000000053939e in vport_recv (vport=0x7f639c09dd40, pkt=0x7f65f93b3ec0, arg=0x7f6c3a391608)
+    at vport.c:68                                                                                  
+#2  0x00000000004f3e42 in vnet_raw_vdev_xmit (vdev=0x7f5f99200740, pkt=0x7f65f93b3ec0,             
+    metadata=0x7f6c3a391608) at vnet.c:269                                                         
+#3  0x00000000004f4103 in vnet_bond_vdev_xmit (vdev=0x7f6657c022c0, pkt=0x7f65f93b3ec0,            
+    metadata=0x7f6c3a391608) at vnet.c:311                                                         
+#4  0x00000000004f4c22 in vnet_dev_xmit (vdev=0x7f6657c022c0, pkt=0x7f65f93b3ec0,                  
+    metadata=0x7f6c3a391608) at vnet.c:556                                                         
+#5  0x00000000004bd8bc in gtpu_recv (pkt=0x7f65f93b3ec0, cxt=0x7f6c3a391790) at gtp_proto.c:137    
+#6  0x00000000004e7aec in hook_gtpu (pkt=0x7f65f93b3ec0, cxt=0x7f6c3a391790) at udp_proto.c:89     
+#7  0x00000000004e799a in udp_recv (pkt=0x7f65f93b3ec0, cxt=0x7f6c3a391790) at udp_proto.c:64      
+#8  0x00000000004ca253 in ipv4_recv (pkt=0x7f65f93b3ec0, cxt=0x7f6c3a391790) at ipv4_proto.c:97    
+#9  0x00000000004acf52 in eth_recv (pkt=0x7f65f93b3ec0, cxt=0x7f6c3a391790) at eth_proto.c:69      
+#10 0x00000000004f5656 in receive_packet_pmd (pkt=0x7f65f93b3ec0, rxq_id=0, portid=0) at vnet.c:748
+#11 0x00000000004f3d41 in vnet_receive_packet (qconf=0xa0cc40 <s_lcore_conf+142848>,               
+    pkts_burst=0x18005c0 <g_instance_array+5440>, max_pkts=32) at vnet.c:203                       
+#12 0x00000000004d8a2f in do_receive (receiver=0x18005b0 <g_instance_array+5424>, max_pkts=32)     
+    at receiver.c:41                                                                               
+#13 0x0000000000571bdc in instance_schedule () at instance.c:212                                   
+#14 0x000000000066c9d5 in eal_thread_loop ()                                                       
+#15 0x00000034bc607aa1 in start_thread () from /lib64/libpthread.so.0                              
+#16 0x00000034bc2e893d in clone () from /lib64/libc.so.6                                           
+
+----
+
+- 07052017
+
+    dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[0] dp_version[0] ext_val32[275411678]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[0] dp_version[0] ext_val32[275411678]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[912] dp_version[0] ext_val32[0]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[912] dp_version[0] ext_val32[0]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[275411678]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[275411678]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[0] dp_version[0] ext_val32[278483809]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[0] dp_version[0] ext_val32[278483809]
+    dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[927] dp_version[0] ext_val32[0]
+    
+    Program terminated with signal SIGSEGV, Segmentation fault.                                       
+    #0  0x0000000000503446 in dp_add_flow (update=0 '\000', socket_id=0, dz_id=0, dp_id=475,          
+        dp_version=0, key=0x7fc70a1f9ea0, acts=0x7fc70a1fa111, meta=0x7fc70a1fa175) at datapath.c:405 
+    405     datapath.c: No such file or directory.                                                    
+    (gdb) bt                                                                                          
+    #0  0x0000000000503446 in dp_add_flow (update=0 '\000', socket_id=0, dz_id=0, dp_id=475,          
+        dp_version=0, key=0x7fc70a1f9ea0, acts=0x7fc70a1fa111, meta=0x7fc70a1fa175) at datapath.c:405 
+    #1  0x000000000055fe06 in vsctrl_add_flow (meta=0x7fc70a1f9f30) at vswitch_controller.c:197       
+    #2  0x000000000049dd0a in handle_flow_operation_req (reply=0x7fc70a1fa7b0, request=0x7fc70a1fb210)
+        at up_agent.c:753                                                                             
+    #3  0x000000000049ecfe in handle_up_req (request=0x7fc70a1fb210, conn_idx=0) at up_agent.c:972    
+    #4  0x000000000049cb1a in recv_handler (buffer=0x7fc70a1fb210 "", conn_idx=0, n=1632)             
+        at up_agent.c:421                                                                             
+    #5  0x000000000049c92f in up_connection_handler (arg=0x7fcddde00040) at up_agent.c:373            
+    #6  0x00000034bc607aa1 in start_thread () from /lib64/libpthread.so.0                             
+    #7  0x00000034bc2e893d in clone () from /lib64/libc.so.6                                          
+
+    Breakpoint 1, dp_add_flow (update=0 '\000', socket_id=0, dz_id=0, dp_id=0, dp_version=0,          
+        key=0x7f2862bfaea0, acts=0x7f2862bfaf7b, meta=0x7f2862bfafdf) at datapath.c:372               
+    372     datapath.c: No such file or directory.                                                    
+    (gdb) c                                                                                           
+    Continuing.                                                                                       
+                                                                                                      
+    Breakpoint 1, dp_add_flow (update=0 '\000', socket_id=0, dz_id=0, dp_id=0, dp_version=0,          
+        key=0x7f2862bfaea0, acts=0x7f2862bfb046, meta=0x7f2862bfb0aa) at datapath.c:372               
+    372     in datapath.c                                                                             
+    (gdb)                                                                                             
+    Continuing.                                                                                       
+                                                                                                      
+    Breakpoint 1, dp_add_flow (update=0 '\000', socket_id=0, dz_id=0, dp_id=831, dp_version=0,        
+        key=0x7f2862bfaea0, acts=0x7f2862bfb111, meta=0x7f2862bfb175) at datapath.c:372               
+    372     in datapath.c                                                                             
+    (gdb)                                                                                             
+    Continuing.                                                                                       
+                                                                                                      
+    Program received signal SIGSEGV, Segmentation fault.                                              
+    0x0000000000503446 in dp_add_flow (update=0 '\000', socket_id=0, dz_id=0, dp_id=831, dp_version=0,
+        key=0x7f2862bfaea0, acts=0x7f2862bfb111, meta=0x7f2862bfb175) at datapath.c:405               
+    405     in datapath.c                                                                             
+    (gdb)                                                                                             
+    Continuing.                                                                                       
+                                                                                                      
+    Program received signal SIGSEGV, Segmentation fault.                                              
+    0x0000000000503446 in dp_add_flow (update=0 '\000', socket_id=0, dz_id=0, dp_id=831, dp_version=0,
+        key=0x7f2862bfaea0, acts=0x7f2862bfb111, meta=0x7f2862bfb175) at datapath.c:405               
+    405     in datapath.c                                                                             
+
+    ERROR     07-05 11:57:59.038 MS-group 1     SubSystem_1-ApInstance_1: Cannot perform 'run_resolved_payl
+    oad_ipv6_pfx_chk_internal'. Wrong MS-state: registered,PdpId: 1. MS-Id: 1, IMSI: 100260000000001, MS-st
+    ate: registered, Active contexts: [], Ongoing: nothing, Last event: none @ 07-05 11:57:58, Last TCs: [{
+    159,1,109} @ 11:57:59]
+    
+    ERROR     07-05 11:55:42.986 LTT_1          @gtpc_recv: no device found to handle pkt
+    ERROR     07-05 11:56:03.036 LTT_1          @gtpc_recv: no device found to handle pkt
+    ERROR     07-05 11:56:23.086 LTT_1          @gtpc_recv: no device found to handle pkt
+    ERROR     07-05 11:56:43.136 LTT_1          @gtpc_recv: no device found to handle pkt
+    
+    up_custom_filter_message (np=0x7f7185752cc0) at up_custom.c:147                                   
+    0x0000000000565dfa in agent_handle_non_payload (np=0x7f7185752cc0) at agent.c:157                 
+    0x000000000056028e in vsctrl_non_payload_handler (type=NP_RAW_FLOW_MISS, pkt=0x7f651c65f400,      
+    arg=0x0) at vswitch_controller.c:252                                                              
+    0x0000000000552d9f in _vnet_rawip_vport_recv (vport=0x7f6ba3a002c0, pkt=0x7f651c65f400, arg=0x0)  
+    at vport_vnet.c:445                                                                               
+    0x0000000000539436 in vport_recv (vport=0x7f6ba3a002c0, pkt=0x7f651c65f400, arg=0x0) at vport.c:68
+    0x00000000004f3e99 in vnet_raw_vdev_xmit (vdev=0x7f6ba3a000c0, pkt=0x7f651c65f400, metadata=0x0)  
+    at vnet.c:269                                                                                     
+    0x00000000004f4c79 in vnet_dev_xmit (vdev=0x7f6ba3a000c0, pkt=0x7f651c65f400, metadata=0x0)       
+    at vnet.c:556                                                                                     
+    0x00000000004ca401 in hook_ipv4 (pkt=0x7f651c65f400, cxt=0x7f7185753790) at ipv4_proto.c:136      
+    0x00000000004ca22e in ipv4_recv (pkt=0x7f651c65f400, cxt=0x7f7185753790) at ipv4_proto.c:87       
+    0x00000000004acfa9 in eth_recv (pkt=0x7f651c65f400, cxt=0x7f7185753790) at eth_proto.c:69         
+    0x00000000004f56ad in receive_packet_pmd (pkt=0x7f651c65f400, rxq_id=0, portid=1) at vnet.c:748   
+    0x00000000004f3d98 in vnet_receive_packet (qconf=0xa0fb40 <s_lcore_conf+154752>,                  
+    pkts_burst=0x1800800 <g_instance_array+5888>, max_pkts=32) at vnet.c:203                          
+    0x00000000004d8a86 in do_receive (receiver=0x18007f0 <g_instance_array+5872>, max_pkts=32)        
+    at receiver.c:41                                                                                  
+    0x0000000000571cb3 in instance_schedule () at instance.c:212                                      
+    0x000000000066c9f5 in eal_thread_loop ()                                                          
+    0x00000034bc607aa1 in start_thread () from /lib64/libpthread.so.0                                 
+    0x00000034bc2e893d in clone () from /lib64/libc.so.6                                              
+
+----
+
+- 07062017
+
+1. 查看flowmiss是否也是同样的问题
+
+    yes, log is restored in /repo/eruitfe/log/[ltt/dallas_msg]_default_flow_miss.log
+1. 改回tap0, tap1全偶数core试试, 并且将add_flow传下来的所有socket_id都置为0
+
+    ltt_port_core_mask=1554
+    config='"(0,0,2),(0,1,10),(0,2,12),(1,0,4),(1,1,6),(1,2,8)"'
+1. 问问凌云
+
+----
+
+- 07072017
+
+    ---------------------------------------------------------------------------            
+    Dallas version: 3R1_LLV016_eadghhk                                                     
+    Beam dir:       not available                                                          
+    Config dir:     not available                                                          
+    ---------------------------------------------------------------------------            
+    LTT version:    0.50                                                                   
+    DPDK version:   16.07                                                                  
+    ---------------------------------------------------------------------------            
+    DPDK server:    tool-03-201 tool-03-202 tool-03-203 tool-03-204 tool-03-205 tool-03-206
+    ---------------------------------------------------------------------------            
+    System state:   initializing                                                           
+    ---------------------------------------------------------------------------            
+    Running tests:                                                                         
+    none                                                                                   
+    ---------------------------------------------------------------------------            
+
+
+DEBUG     07-07 12:07:41.442 LTT_3          @_sal_vport_recv zone:1 dp:0 version:0 vport:0 lcore_id: 19
+ socket_id: 1
+ERROR     07-07 12:07:41.442 LTT_3          sal recv flow miss src: 2a01:3:2a01:dd6d:bb86:a91e:b82:a6c6
+ dst: 2a00:198:1c00::241:5bbb
+ERROR     07-07 12:07:41.442 LTT_3          @_sal_vport_recv, flow not found, @ DZ[1] DP[0] version[0]
+VPORT[0] fp[279432251]
+
+dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[0] dp_version[0] ext_val32[279432251]key->src_ip: 421034
+212211091871341693011130166198key->dst_ip: 4201152280000000260104239                                   
+dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[0] dp_version[0] ext_val32[279432251]key->src_ip: 421034
+212211091871341693011130166198key->dst_ip: 420115228000000026591187                                    
+dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[279432251]key->src_ip: 420115
+2280000000260104239key->dst_ip: 421034212211091871341693011130166198                                   
+dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[279432251]key->src_ip: 420115
+228000000026591187key->dst_ip: 421034212211091871341693011130166198                                    
+
+----
+
+- 07112017
+
+dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[0] dp_version[0] ext_val32[270615084]key->src_ip: 421034
+20223614820913264920819890key->dst_ip: 4201152000000001412614
+dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[0] dp_version[0] ext_val32[270615084]key->src_ip: 421034
+20223614820913264920819890key->dst_ip: 42011520000000012012614
+dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[304] dp_version[0] ext_val32[0]key->src_ip: 420115200000
+0001412614key->dst_ip: 42103420223614820913264920819890
+dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[304] dp_version[0] ext_val32[0]key->src_ip: 420115200000
+00012012614key->dst_ip: 42103420223614820913264920819890
+dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]key->src_ip: 42103420223614
+820913264920819890key->dst_ip: 4201152000000001412614
+dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]key->src_ip: 42103420223614
+820913264920819890key->dst_ip: 42011520000000012012614
+dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[270615084]key->src_ip: 420115
+2000000001412614key->dst_ip: 42103420223614820913264920819890
+dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[270615084]key->src_ip: 420115
+20000000012012614key->dst_ip: 42103420223614820913264920819890
+
+7471 dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[0] dp_version[0] ext_val32[270615084]key->src_ip: 42103420223614820913264920819890key->dst_ip: 42011520000000012012614
+
+7475 dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]key->src_ip: 42103420223614820913264920819890key->dst_ip: 42011520000000012012614
+
+8661 sal recv flow miss: 42103420223614820913264920819890 42011520000000012012614
+8662 @_sal_vport_recv, flow not found, @ DZ[1] DP[0] version[0] VPORT[0] fp[270615084]
+
+9380 42103420223614820913264920819890 42011520000000012012614
+9381 @_sal_vport_recv, flow not found, @ DZ[1] DP[0] version[0] VPORT[0] fp[270615084]
+
+9924 42103420223614820913264920819890 42011520000000012012614
+9925 @_sal_vport_recv, flow not found, @ DZ[1] DP[0] version[0] VPORT[0] fp[270615084]
+
+ERROR     07-11 07:52:31.351 LTT_1          Replay Rx unexpected direction, recv_pktid:[4], sent
+_pktid:[4], capture file:[/lab/epg_st_utils/captures/latest/sequences/http/24512_HTTP_2017021703
+0425_0.cap], replay id:[466] sent_ts[439995] resend_ts[439995] @[35046439581509136] sessionid[11
+63149101638877184]
+
+
+
+
+3223 _sal_vport_recv@NUMA: sal recv flow miss: version: 6, 2a1032a01b654144fdc7ed33156 2a0198000000000
+     96fed3
+3224 @_sal_vport_recv, flow not found, @ DZ[1] DP[0] version[0] VPORT[0] fp[270614856]
+
+#0  _sal_vport_recv (vport=0x7f6961405f80, pkt=0x7f696d40f780, arg=0x7f6b84ccf36c) at vport_sal.c:136
+#1  0x00000000005396f3 in vport_recv (vport=0x7f6961405f80, pkt=0x7f696d40f780, arg=0x7f6b84ccf36c)
+    at vport.c:68
+#2  0x0000000000589d5e in sal_vdev_xmit (vdev=0x7f62d81cfcc0, pkt=0x7f696d40f780,
+    metadata=0x7f6b84ccf36c) at sal.c:642
+#3  0x0000000000589e64 in sal_dev_xmit (vdev=0x7f62d81cfcc0, pkt=0x7f696d40f780,
+    metadata=0x7f6b84ccf36c) at sal.c:704
+#4  0x000000000057e0d8 in socket_send (socket=0x7f6b84ccf340, pkt=0x7f696d40f780) at sal.c:95
+#5  0x000000000058932b in sal_socket_send (socket=0x7f6b84ccf340, pkt=0x7f696d40f780) at sal.c:455
+#6  0x00000000004930cb in send_packet (session=0x7f6f191ffc80) at replay_session.c:583
+#7  0x0000000000493280 in try_to_send_packet (session=0x7f6f191ffc80) at replay_session.c:603
+#8  0x000000000049361e in replay_session_execute (session=0x7f6f191ffc80) at replay_session.c:704
+#9  0x000000000059995e in RPS::run (this=0x1622500 <g_rps_array+96>, times=1) at rps.cc:111
+#10 0x00000000005720e7 in instance_schedule () at instance.c:221
+#11 0x000000000066ce95 in eal_thread_loop ()
+#12 0x00000034bc607aa1 in start_thread () from /lib64/libpthread.so.0
+#13 0x00000034bc2e893d in clone () from /lib64/libc.so.6
+
+----
+
+- 07122017
+
+2598 send_packet@NUMA: flow_idx: 1, flow.id: 270615627, flow.dir: 0 2a1032a05e050ae1a4ef6561c0 2a0198
+     0000000021e7729
+2599 _sal_vport_recv@NUMA: sal recv flow miss: version: 6, 2a1032a05e050ae1a4ef6561c0 2a0198000000002
+     1e7729
+2600 @_sal_vport_recv, flow not found, @ DZ[1] DP[0] version[0] VPORT[0] fp[270615627]
+
+2578 dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[0] dp_version[0] ext_val32[270615627]key->src_ip:
+      2a1032a05e050ae1a4ef6561c0key->dst_ip: 2a01980000000021e7729
+
+2582 dp_add_flow@NUMA: socket_id:[0] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]key->src_ip: 2a1032a
+      05e050ae1a4ef6561c0key->dst_ip: 2a01980000000021e7729
+
+----
+
+- 07132017
+
+ERROR     07-13 08:03:24.923 epgtool1031-30:DPN_(1.1.0)  InputByteStream can't find the IE : 8
+ERROR     07-13 08:03:24.923 epgtool1031-30:DPN_(1.1.0)  InputByteStream can't find the IE : 2
+ERROR     07-13 08:03:24.923 epgtool1031-30:DPN_(1.1.0)  InputByteStream can't find the IE : 5
+ERROR     07-13 08:03:24.923 epgtool1031-30:DPN_(1.1.0) HandleRouteQueryResp Fail 10
+
+ 5341 ERROR     07-13 12:12:45.869 LTT_1          vnet_bond_vdev_xmit  src: 5.24.0.1 dst: 6.192.16.247
+ 5342 ERROR     07-13 12:12:45.869 LTT_1          vnet_bond_vdev_xmit  src: 5.24.0.1 dst: 6.192.16.167
+ 5343 ERROR     07-13 12:12:45.869 LTT_1          @vnet_bond_vdev_xmit find iDEV failed
+ 5344 ERROR     07-13 12:12:45.869 LTT_1          @vnet_bond_vdev_xmit find iDEV failed
+
+5336 ERROR     07-13 12:12:45.863 LTT_1          @gtpu_recv: no route(device) found to handle pkt
+
+@vnet_bond_vdev_xmit find iDEV failed
+
+LTT_LOG(DEBUG, VNET, "@vnet_bond_vdev_xmit pos:%d\n", pos);
+
+----
+
+#07172017
+
+3668 ERROR     07-14 09:34:05.233 LTT_3          @gtpu_recv: no route(device) found to handle pkt
+3669 ERROR     07-14 09:34:05.238 LTT_3          @gtpu_recv: no route(device) found to handle pkt
+3670 ERROR     07-14 09:34:05.239 LTT_3          @gtpu_recv: no route(device) found to handle pkt
+
+386496 ERROR     07-14 09:35:13.234 LTT_3          vnet_bond_vdev_xmit@NUMA pos:20
+
+session_id from create session type check
+
+ERROR     07-16 13:30:32.548 epgtool9-21:DPN_(2.1.0) AddDataPath@NUMA: zoneId: 1, numaId: 24
+
+----
+
+#07182017
+
+ERROR     07-18 09:07:54.472 LTT_1          replay_session_execute: resending timeout: profile_i
+d[7002],                            session_id[1158137407380389888] resend_pktid[408] flow_idx[1
+]
+
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/app/dummy_session.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/app/payload.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/app/payload_pool.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/app/session_ctl.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/common/ltt_config.h':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/instance/instance.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/network/vnet.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/om/cp_agent.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/om/up_agent.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/rps/rps.cc':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+Normal merge conflict for 'src/sal/sal.c':
+  {local}: modified file
+  {remote}: modified file
+4 files to edit
+
+----
+
+lts_get_ms_groups_range                  
+lts_run_mobiles ' 2380171, 1, [104, 158]'
+lts_get_subscriber                       
+lts_get_subscriber 2380171               
+lts_run_tm '[82]'                        
+lts_msgshow                              
+lts_msgshow > msgshow                    
+vim msgshow                              
+vim /autott/dallas/dallas.mobile         
+lts_system_setup -deinstall              
+history                                 
+
+----
+
+#07202017
+
+divided s_sal.lock into MAX_NUMA parts
+
+ERROR     07-21 04:21:15.104 LTT_3          replay_session_execute: resending timeout: profile_id[3123]
+, session_id[1155474033735630848] resend_pktid[11] flow_idx[0]
+ERROR     07-21 04:21:15.112 MS-group 29    SubSystem_3-ApInstance_6: MsId: 594307, PayloadSessionId 10
+091183 done failed, Payload Profile Index: 3123, result: [0,1]
+INFO      07-21 04:21:15.206 dsyslog        Client connection accepted in STATUSLOG from 10.132.161.200
+ERROR     07-21 04:21:15.190 LTT_2          replay_session_execute: resending timeout: profile_id[3123]
+, session_id[1153464087825350656] resend_pktid[11] flow_idx[0]
+
+----
+
+#07272017
+
+ 9d7881f 2017-07-24 | <PCDALNGEN-859> [fix replay tgnat] [Xiaoming Song] (HEAD, tag: 3R1_LLV025, origin/master, origin/HEAD)
+ 0d325cb 2017-07-20 | <PCDALNGEN-861>:[TC18129.1 fix txq full retry issue by delay n us in while loop] [Canxing Bu]
+ 2fa96ca 2017-07-21 | <PCDALNGEN-864> [fix flow table destroy memory leak] [Xiaoming Song]
+ 82d3e2b 2017-07-17 | <PCDALNGEN-858>:[fix sal del socket failed for APR] [Canxing Bu] (tag: 3R1_LLV024)
+ 4a1a1d2 2017-07-13 | <PCDALNGEN-856>:[TC18129.1 fix crash due to txq full and remove qsbr] [Canxing Bu] (tag: 3R1_LLV023)
+ 1109baf 2017-07-12 | <PCDALNGEN-851>:Increase SAL mempool size [Jack MIN]
+ 55b740a 2017-06-21 | <PCDALNGEN-801>:[Replay Sending Pattern Fix] [Jack MIN] (tag: 3R1_LLV022)
+ 0bb1d56 2017-05-16 | fast path: hyper cache implementation [Canxing Bu]
+ 047058a 2017-06-27 | <PCDALNGEN-831> [ipv6 fragment error] [Xiaoming Song] (tag: 3R1_LLV021, tag: 3R1_LLV020, tag: 3R1_LLV019)
+ af789f5 2017-06-16 | <PCDALNGEN-683> [increase up_agent MQ] [Xiaoming Song] (tag: 3R1_LLV018)
+ 4c7c1ef 2017-06-16 | <PCDALNGEN-751>:[opt session struct, RPS and custom payload] [Canxing Bu]
+ 84e5ba6 2017-04-21 | <PCDALNGEN-720>:[fix reasseble fragmented pkt for DL raw udp] [Canxing Bu] (tag: 3R1_LLV017, tag: 3R1_LLV016, tag: 3R1_LLV015)
+ 8a6aec4 2017-06-01 | <PCDALNGEN-717> [fix si_compare failed] [Xiaoming Song]
+ b30789f 2017-05-06 | <PCDALNGEN-753>:[change same direction rule and add_debug_log] [Canxing Bu] (tag: 3R1_LLV014)
+ de6bb75 2017-05-18 | <PCDALNGEN-426>:[Fixed misplaced conditional statement as well as precision loss problem] [Ruitao Feng] (tag: 3R1_LLV013, tag: 3R1_LLV012)
+ 40e17c8 2017-05-18 | <PCDALNGEN-773>:[LTT crashed due to recv error gtpc pkt] [Canxing Bu] (tag: 3R1_LLV011)
+ 8504a22 2017-05-16 | fix modify ip address log format [Xiaoming Song] (tag: 3R1_LLV010, tag: 3R1_LLV009, tag: 3R1_LLV008)
+ f33cfcc 2017-04-26 | modify ip address log format [Xiaoming Song]
+ 0b349d1 2017-05-11 | FIX: Initialize g_lcores_usages for interval value [Jack MIN]
+ 0d06b82 2017-05-12 | <PCDALNGEN-747>: [LTT command didn't worked with command 'exe'] [Heng Yin] (tag: 3R1_LLV007)
+ 30266fc 2017-05-05 | <PCDALNGEN-703>:[Added Error Indiction Counter in GET_APP_STATS_REP Message] [Ruitao Feng] (tag: 3R1_LLV006, tag: 3R1_LLV005)
+ a974e89 2017-05-09 | <PCDALNGEN-723>:[up agent rcu lock issue fix] [Canxing Bu] (tag: 3R1_LLV004)
+ d63e4d4 2017-04-28 | Fix ITC with multiple segments [Canxing Bu]
+ 3e8f5de 2017-05-04 | <PCDALNGEN-667>:[Lcore Usage] [Jack MIN] (tag: 3R1_LLV003)
+ ec7bf78 2017-05-02 | <PCDALNGEN-743>:[change RTE_MAX_MEMZONE to 16384 for create hash failed case] [Canxing Bu] (tag: RC1_0_0055, tag: 3R1_LLV002, tag: 3R1_LLV001, tag: 3R1_LLV000)
+ 71200e9 2017-04-27 | <PCDALNGEN-739>:[increase default dp capacity and sal capacity for Max PDP case] [Canxing Bu] (tag: RC1_0_0054)
+ 770a0c8 2017-04-26 | <PCDALNGEN-732>:[Add MTU Setting Support] [Canxing Bu]
+ a0a8f54 2017-04-12 | txq full retry more times and add debug log [Canxing Bu] (tag: RC1_0_0053, tag: RC1_0_0052, tag: RC1_0_0051, tag: RC1_0_0050)
+ 8f9414e 2017-04-13 | <PCDALNGEN-575>:[modify dummy packet size] [Xiaoming Song]
+
+----
+
+#08092017
+
+eselnts1396(rebase)> git pull origin master --rebase                          
+From ssh://selngerrit.mo.sw.ericsson.se:29418/pc/dallas/ltt_ng
+ * branch            master     -> FETCH_HEAD
+First, rewinding head to replay your work on top of it...
+Applying: numa for review
+Using index info to reconstruct a base tree...
+M       src/app/Makefile
+M       src/app/app.c
+M       src/app/app.h
+M       src/app/app_stats.c
+M       src/app/app_stats.h
+M       src/app/dummy_session.c
+M       src/app/dummy_session.h
+M       src/app/payload.c
+M       src/app/payload.h
+M       src/app/payload_pool.c
+M       src/app/replay_session.c
+M       src/app/replay_status.h
+M       src/app/session_ctl.c
+M       src/app/session_ctl.h
+M       src/common/Makefile
+M       src/common/ltt_config.c
+M       src/common/ltt_config.h
+M       src/common/ltt_rcu_hash.c
+M       src/common/ltt_rcu_hash.h
+M       src/common/ltt_util.c
+M       src/common/ltt_util.h
+M       src/dataplane/dpdkenv.c
+M       src/instance/agent.c
+M       src/instance/agent.h
+M       src/instance/instance.c
+M       src/instance/instance.h
+M       src/itc/itc.c
+M       src/main.c
+M       src/network/ipv4/ipv4.c
+M       src/network/ipv4/ipv4_fragment.c
+M       src/network/ipv6/ipv6.c
+M       src/network/ipv6/ipv6_fragment.c
+M       src/network/proto/gre_proto.c
+M       src/network/proto/gre_proto.h
+M       src/network/proto/gtp_proto.c
+M       src/network/proto/gtp_proto.h
+M       src/network/proto/ipv6_proto.c
+M       src/network/proto/ipv6_proto.h
+M       src/network/proto/udp_proto.c
+M       src/network/proto/udp_proto.h
+M       src/network/route.h
+M       src/network/transmitter.c
+M       src/network/vnet.c
+M       src/network/vnet.h
+M       src/om/cp_agent.c
+M       src/om/jobtracker_agent.c
+M       src/om/up_agent.c
+M       src/om/up_agent.h
+M       src/rps/bsharp_tree.cc
+M       src/rps/bsharp_tree.hh
+M       src/rps/cc_deps.hh
+M       src/rps/rps.cc
+M       src/rps/rps.hh
+M       src/rps/timetable.cc
+M       src/rps/timetable.hh
+M       src/sal/sal.c
+M       src/tuntap/tuntap.c
+M       src/upservice/custom_service.c
+M       src/upservice/up_custom.h
+M       src/vswitch/flow.c
+M       src/vswitch/flow_ipv4.c
+M       src/vswitch/vport_vnet.c
+M       src/vswitch/vswitch_controller.c
+M       src/vswitch/vswitch_controller.h
+M       tools/console/statistic/jobtracker.py
+M       tools/console/upservice/flow.py
+M       tools/util/jobtracker.py
+.git/rebase-apply/patch:61: trailing whitespace.
+LTT            ^             |^       |           ^
+.git/rebase-apply/patch:62: trailing whitespace.
+Replay         |             ||       |           |
+.git/rebase-apply/patch:76: trailing whitespace.
+CPPFLAGS= -g $(LINUXFLG) $(LOCAL_CPPFLAGS)
+.git/rebase-apply/patch:177: trailing whitespace.
+
+.git/rebase-apply/patch:540: trailing whitespace.
+    printf("%s@NUMA: instance[%d] lcore[%u] session[%lu]\n",
+warning: squelched 53 whitespace errors
+warning: 58 lines add whitespace errors.
+Falling back to patching base and 3-way merge...
+Auto-merging src/vswitch/vswitch_controller.h
+CONFLICT (content): Merge conflict in src/vswitch/vswitch_controller.h
+Auto-merging src/vswitch/vswitch_controller.c
+CONFLICT (content): Merge conflict in src/vswitch/vswitch_controller.c
+Auto-merging src/vswitch/vport_vnet.c
+Auto-merging src/vswitch/flow_ipv4.c
+Auto-merging src/vswitch/flow.c
+Auto-merging src/sal/sal.c
+CONFLICT (content): Merge conflict in src/sal/sal.c
+Auto-merging src/rps/rps.hh
+Auto-merging src/rps/rps.cc
+Auto-merging src/om/up_agent.h
+Auto-merging src/om/up_agent.c
+CONFLICT (content): Merge conflict in src/om/up_agent.c
+Auto-merging src/om/cp_agent.c
+Auto-merging src/network/vnet.c
+CONFLICT (content): Merge conflict in src/network/vnet.c
+Auto-merging src/network/transmitter.c
+Auto-merging src/network/proto/gtp_proto.c
+Auto-merging src/network/ipv4/ipv4.c
+Auto-merging src/instance/instance.h
+Auto-merging src/instance/instance.c
+CONFLICT (content): Merge conflict in src/instance/instance.c
+Auto-merging src/instance/agent.h
+Auto-merging src/instance/agent.c
+CONFLICT (content): Merge conflict in src/instance/agent.c
+Auto-merging src/dataplane/dpdkenv.c
+Auto-merging src/common/ltt_rcu_hash.h
+Auto-merging src/common/ltt_rcu_hash.c
+Auto-merging src/common/ltt_config.h
+CONFLICT (content): Merge conflict in src/common/ltt_config.h
+Auto-merging src/common/ltt_config.c
+Auto-merging src/common/hyper_cache.c
+CONFLICT (add/add): Merge conflict in src/common/hyper_cache.c
+Auto-merging src/app/session_ctl.h
+CONFLICT (content): Merge conflict in src/app/session_ctl.h
+Auto-merging src/app/session_ctl.c
+CONFLICT (content): Merge conflict in src/app/session_ctl.c
+Auto-merging src/app/replay_session.c
+CONFLICT (content): Merge conflict in src/app/replay_session.c
+Auto-merging src/app/payload_pool.c
+CONFLICT (content): Merge conflict in src/app/payload_pool.c
+Auto-merging src/app/payload.h
+Auto-merging src/app/payload.c
+Auto-merging src/app/dummy_session.c
+CONFLICT (content): Merge conflict in src/app/dummy_session.c
+Auto-merging src/app/app.h
+Auto-merging src/app/app.c
+CONFLICT (content): Merge conflict in src/app/app.c
+error: Failed to merge in the changes.
+Patch failed at 0001 numa for review
+The copy of the patch that failed is found in: .git/rebase-apply/patch
+
+When you have resolved this problem, run "git rebase --continue".
+If you prefer to skip this patch, run "git rebase --skip" instead.
+To check out the original branch and stop rebasing, run "git rebase --abort".
+
+instance_get_id() vs instance_get_instanceid_by_lcore
+
+check instance_allocate, instance_init as well as instance_schedule to verify if the relationship
+between instance_id and instance_lcore_id is always updated in qconf object
+
+----
+
+- 08112017
+
+dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[1114] dp_version[0] ext_val32[0]                 key->sr
+c_ip: f24d0ade, key->dst_ip: 9770c02c
+dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[1114] dp_version[0] ext_val32[0]key->src_ip: 2a022280000
+00023ab0a6key->dst_ip: 2a104100104ba6f7baceb39a592
+
+flow miss key (ipv4): f24d0ade f24d0ade                                                                
+_vnet_gtpu_vport_recv@NUMA: flow miss dz[0], dp[1114], vport[0], dp_ver[0], key payload_id[0] flow miss
+, received teid[806807284]                                                                             
+
+gtpu flow miss key src: 222.10.77.242 dst: 44.192.112.151
+
+up_custom_add_context@NUMA: sessctl_sid_to_instanceid@NUMA: s_socket_conf[0]->core_num: 10             
+s_socket_conf[0]->cores:|8||10||12||14||16||18||20||22||24||26|                                        
+sessctl_sid_to_instanceid@NUMA: GET_PAYLOAD_ID(580505030948290560): 135159360                          
+sessctl_sid_to_instanceid@NUMA: s_socket_conf[0]->core_num: 10             s_socket_conf[0]->cores:|8||
+10||12||14||16||18||20||22||24||26|                                                                    
+sessctl_sid_to_instanceid@NUMA: GET_PAYLOAD_ID(580505030948290560): 135159360                          
+TABLE: rte_table_hash_create_key8_lru: Hash table memory footprint is 33554560 bytes                   
+sessctl_sid_to_instanceid@NUMA: s_socket_conf[0]->core_num: 10             s_socket_conf[0]->cores:|8||
+10||12||14||16||18||20||22||24||26|                                                                    
+sessctl_sid_to_instanceid@NUMA: GET_PAYLOAD_ID(580505030948290560): 135159360                          
+sessctl_sid_to_instanceid@NUMA: s_socket_conf[0]->core_num: 10             s_socket_conf[0]->cores:|8||
+10||12||14||16||18||20||22||24||26|                                                                    
+sessctl_sid_to_instanceid@NUMA: GET_PAYLOAD_ID(580505030948290560): 135159360                          
+ipv4_lookup_output@NUMA: out_port: [0], lcore_id: [12],             result.flags: [A]                  
+ipv4_lookup_output@NUMA: out_port: [0], lcore_id: [12],             result.flags: [B]                  
+ipv4_lookup_output@NUMA: out_port: [0], lcore_id: [12],             result.flags: [B]                  
+ipv4_lookup_output@NUMA: out_port: [0], lcore_id: [12],             result.flags: [B]                  
+_vnet_gtpu_vport_recv@NUMA: table: [0x7f65bbfb7000], socket_id: [1], vport_id: [0], dp_id: [370]       
+flow miss key (ipv4): 6f8d08de 864aa02c                                                                
+
+----
+
+ _vnet_gre_vport_recv@NUMA: table: [(nil)], socket_id: [0], vport_id: [0], dp_id: [2313]
+ _vnet_gre_vport_recv@NUMA: table_b: [(nil)], socket_id: [1], vport_id: [0], dp_id: [2313]
+ _vnet_gre_vport_recv@NUMA: flow_table miss dz[0], dp[2313], vport[0], dp_ver[0], key payload_id[0] flow miss, received teid[270292791]
+ flow_table miss key: 2a0222c000000038e55e 2a104010017eea2674c7a30c784
+
+ dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[2313] dp_version[0] ext_val32[0]key->src_ip: 2a0222c000000038e55ekey->dst_ip: 2a104010017eea2674c7a30c784
+ dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]key->src_ip: 2a104010017eea2674c7a30c784key->dst_ip: 2a0222c000000038e55e
+ dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[270292790]key->src_ip: 2a0222c000000038e55ekey->dst_ip: 2a104010017eea2674c7a30c784
+
+----
+
+vlan0108:1002 Link encap:Ethernet  HWaddr 3C:FD:FE:A1:7D:D8
+          inet addr:11.0.8.2  Bcast:0.0.0.0  Mask:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+
+p1p1      Link encap:Ethernet  HWaddr 3C:FD:FE:A1:7D:D8
+          inet6 addr: fe80::3efd:feff:fea1:7dd8/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:5576508765 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:5259882227 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:4225539829510 (3.8 TiB)  TX bytes:3937195646141 (3.5 TiB)
+
+p3p1      Link encap:Ethernet  HWaddr 3C:FD:FE:A1:7D:50
+          inet6 addr: fe80::3efd:feff:fea1:7d50/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:5564444538 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:5841657112 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:4210699820250 (3.8 TiB)  TX bytes:4676666260576 (4.2 TiB)
+
+dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[0] dp_version[0] ext_val32[806376690]                 key->src_ip: 200a02c, key->dst_ip: 6e820fde 
+dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[2119] dp_version[0] ext_val32[0]                 key->src_ip: 6e820fde, key->dst_ip: 200a02c      
+dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]                 key->src_ip: 200a02c, key->dst_ip: 6e820fde         
+dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[806376690]                 key->src_ip: 6e820fde, key->dst_ip: 200a02c 
+
+----
+
+2017-08-23 04:38 PM
+
+comm_log_eth_addr(ERROR, VNET, " src ", result.ifaddr);
+comm_log_eth_addr(ERROR, VNET, " dst ", result.next_hop);
+
+printf("%s@NUMA vlan id[%d], ifindex[%u], ifname[%s]\n",
+        __func__, result.vlan_id, result.ifindex, result.ifname);
+printf("%s@NUMA: tx src&dst: %x %x \n", __func__, ipv4->src_addr, ipv4->dst_addr);
+
+----
+
+2017-08-24 03:14 PM
+
+struct TunnelInfo {                    struct TunnelInfo {                               
+    uint32_t teid;                         uint32_t teid;                                
+    union {                                union {                                       
+        uint16_t flags;                        uint16_t flags;                           
+        struct {                               struct {                                  
+            uint8_t flags;                         uint8_t flags;                        
+            uint8_t type;     /----                uint8_t type;                         
+        } gtp;                \----            } gtp;                                    
+    } u;                                   } u;                                          
+    struct IpAddr src_ip;                  struct IpAddr src_ip;                         
+    struct IpAddr dst_ip;                  struct IpAddr dst_ip;                         
+    uint16_t src_port;                     uint16_t src_port;                            
+    uint16_t dst_port;                     uint16_t dst_port;                            
+                                                                                         
+    //! Only for test                                                                    
+    uint64_t timestamp;                                                                  
+    uint8_t rxq_id;                                                                      
+    uint8_t in_port;                                                                     
+};                                     };                                                
+
+----
+
+2017-08-29 01:58 PM
+
+Initializing port[0]: nb_rxq[10] nb_txq[21] mtu[1522] Address:3C:FD:FE:A1:7D:50
+Setup TxQueue[0] on Core[8] Socket[0] TxQueue[0] on Port[0] Core[8] Socket[0] successful
+
+Initializing port[1]: nb_rxq[10] nb_txq[21] mtu[1522] Address:3C:FD:FE:A1:7D:D8
+Setup TxQueue[0] on Core[8] Socket[1] TxQueue[0] on Port[1] Core[8] Socket[1] successful
+
+----
+
+Initializing port[0]: nb_rxq[10] nb_txq[21] mtu[1522] Address:3C:FD:FE:A1:7D:50
+Setup TxQueue[0] on Core[8] Socket[0] TxQueue[0] on Port[0] Core[8] Socket[0] successful
+
+Initializing port[1]: nb_rxq[10] nb_txq[21] mtu[1522] Address:3C:FD:FE:A1:7D:D8
+Setup TxQueue[0] on Core[8] Socket[1] TxQueue[0] on Port[1] Core[8] Socket[1] successful
+
+
+ltt: transmitter.c:95: tx_misc_send_packet: Assertion `0' failed.
+
+----
+
+_vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[1], rxq_id[0],         
+table[0x7f7090b85940], table_b[(nil)], socket_id[0],             dz[0],
+dp[1256], vport[0], dp_ver[0],                                         
+_vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[1],               
+rxq_id[0],                 table[0x7f7090b85940], table_b[(nil)],      
+socket_id[0],                 dz[0], dp[1256], vport[0],               
+dp_ver[0],                 key payload_id[0], received teid[806199784] 
+flow_table miss key: d2af09de 700802c                                  
+gtpu flow miss key src: 222.9.175.210 dst: 44.128.0.7                  
+
+ ipv4_lookup_output@NUMA vlan id[108], out_port[0], ifname[vlan0108: 
+ 1002],             lcore_id:[18], result.flags:[B]                  
+ ipv4_lookup_output@NUMA: tx src&dst: d2af09de 700802c               
+
+----
+
+21695 _vnet_gre_vport_recv@NUMA: FLOW_TABLE MISS: in_port[150], rxq_id[176],                 table[0x7fe50667bdc0], table_b[(nil)], socket_id[1],                 dz[0], dp[2591], vport[0], dp_ver[0],
+                 key payload_id[0], received teid[270287636]
+21696 flow_table miss key: f2760fde 600002c
+21697 gre flow miss  src: 222.15.118.242 dst: 44.0.0.6 _sal_vport_send: socket missed! session id: 270287635
+
+21693 ipv4_lookup_output@NUMA vlan id[133], out_port[1], ifname[vlan0133:1002],             lcore_id:[27], result.flags:[A]
+21694 ipv4_lookup_output@NUMA: tx src&dst: f2760fde 600002c
+
+----
+
+21713 ipv4_lookup_output@NUMA vlan id[133], out_port[1], ifname[vlan0133:1002],             lcore_id:[8], result.flags:[B]
+21714 ipv4_lookup_output@NUMA: tx src&dst: 39380dde f00802c
+
+21722 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7fe522175f80], table_b[(nil)], socket_id[1], lcore_id[14],                 dz[0], dp[1925], vport[0], dp_ve
+      r[0],                 key payload_id[0], received teid[806067499]
+21723 flow_table miss key: 39380dde f00802c
+21724 gtpu flow miss key src: 222.13.56.57 dst: 44.128.0.15
+
+----
+
+1502242 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[0], rxq_id[0],             table[(nil)], table_b[(nil)], socket_id[0], lcoreid[24],             dz[0], dp[1105], vport[0], dp_ver[0],
+1502243 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7ef6fe4de280], table_b[(nil)], socket_id[1], lcore_id[24],                 dz[0], dp[1105], vport[0], dp
+        ver[0],                 key payload_id[0], received teid[805533762]
+1502244 flow_table miss key: 2a0222c00000001b1a4c4 2a10410001c320c6dee9b899c4
+1502245 gtpu flow miss key src: 2a00:222:c00::1b1:a4c4 dst: 2a01:4:1000:1:c320:c6de:e9b8:99c4
+
+1501854 ipv6_lookup_output@NUMA vlan id[133], out_port[1], ifname[vlan0133],             lcore_id:[14], result.flags:[B]
+1501855 ipv6_lookup_output@NUMA: tx src&dst: 2a0222c00000001b1a4c4 2a10410001c320c6dee9b899c4
+
+----
+
+2017-08-30 10:25 AM
+
+ltt_0829_2.log
+
+1494049 _vnet_gtpu_vport_recv: dz[0], dp[1073], vport[0], dp_ver[0], key payload_id[0] flow miss, received teid[806378413]                                                                 
+1494050 gtpu flow miss key src: 2a00:222:c00::73:4306 dst: 2a01:4:1200:1:910d:fea8:8b43:4d52                                                                                               
+1494051 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[0], rxq_id[0],             table[0x7f06eae24c00], table_b[(nil)], socket_id[1], lcoreid[19],             dz[0], dp[1073], vport[0],
+        dp_ver[0],                                                                                                                                                                         
+1494052 _vnet_gtpu_vport_recv: dz[0], dp[1073], vport[0], dp_ver[0], key payload_id[0] flow miss, received teid[806378413]                                                                 
+1494053 gtpu flow miss key src: 2a00:222:c00::73:4306 dst: 2a01:4:1200:1:910d:fea8:8b43:4d52                                                                                               
+1494054 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[0], rxq_id[0],             table[0x7f06eae24c00], table_b[(nil)], socket_id[1], lcoreid[19],             dz[0], dp[1073], vport[0],
+        dp_ver[0],                                                                                                                                                                         
+1494055 gtpu flow miss key src: 2a00:222:c00::73:4306 dst: 2a01:4:1200:1:910d:fea8:8b43:4d52                                                                                               
+
+dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[1073] dp_version[0] ext_val32[0]key->src_ip: 2a0222c0000000073436key->dst_ip: 2a1041200191dfea88b434d52     
+dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[0]key->src_ip: 2a1041200191dfea88b434d52key->dst_ip: 2a0222c0000000073436        
+dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[806378412]key->src_ip: 2a0222c0000000073436key->dst_ip: 2a1041200191dfea88b434d52
+
+
+1519379 NUMA@_sal_vport_recv zone:0 dp:0 version:0 vport:0 lcore_id: 16 socket_id: 0
+
+1519384 ipv6_lookup_output@NUMA vlan id[104], out_port[0], ifname[vlan0104],             lcore_id:[16], result.flags:[B]
+1519385 ipv6_lookup_output@NUMA: tx src&dst: 2a2060c0200000000140 2a2050180000000001
+1519386 ipv6_lookup_output@NUMA vlan id[126], out_port[1], ifname[vlan0126],             lcore_id:[16], result.flags:[B]
+1519387 ipv6_lookup_output@NUMA: tx src&dst: 2a2060830000000005 2a205020000000001
+
+----
+
+1508321 NUMA@_sal_vport_recv zone:1 dp:0 version:0 vport:0 lcore_id: 25 socket_id: 1
+
+ipv4_lookup_output@NUMA vlan id[133], out_port[1], ifname[vlan0133:1002],             lcore_id:[25], result.flags:[A]
+ipv4_lookup_output@NUMA: tx src&dst: 54c80dde 300c02c
+
+ipv6_lookup_output@NUMA vlan id[101], out_port[0], ifname[vlan0101],             lcore_id:[25], result.flags:[B]
+ipv6_lookup_output@NUMA: tx src&dst: 2a|2|0|6|0|8|20|0|0|0|0|0|0|0|0|51| 2a|2|0|5|0|2|0|0|0|0|0|0|0|0|0|1|
+
+----
+
+2017-08-31 03:36 PM
+
+1510850 _vnet_gtpu_vport_recv: dz[0], dp[1301], vport[0], socket_id[1], dp_ver[0], key payload_id[0] f
+        low miss, received teid[806434453]
+1510851 gtpu flow miss key src: 2a00:222:c00::19b:d3c5 dst: 2a01:4:1200:c:43c1:6254:3dfe:9712
+1510852 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[1], rxq_id[0],             table[0x7efc6388210
+        0], table_b[(nil)], socket_id[1], lcoreid[21],             dz[0], dp[1301], vport[0], dp_ver[0
+        ],
+1510853 gtpu flow miss key src: 2a00:222:c00::19b:d3c5 dst: 2a01:4:1200:c:43c1:6254:3dfe:9712
+
+ltt_0830_1_1
+
+1507126 _vnet_gre_vport_recv@NUMA: FLOW_TABLE: in_port[102], rxq_id[176],             table[(nil)], table_b[(nil)], socket_id[0], lcoreid[24],             dz[0], dp[2625], vport[0], dp_ver[0],
+1507127 _vnet_gre_vport_recv@NUMA: FLOW_TABLE MISS: in_port[102], rxq_id[176],                 table[0x7f31265e0080], table_b[(nil)], socket_id[1], lcore_id[24],                 dz[0], dp[2625], vport[0],
+        dp_ver[0],                 key payload_id[0], received teid[270287637]
+1507128 flow_table miss key: IPv6 222.15.117.52IPv6 44.0.0.2
+1507129 gre flow miss  src: 222.15.117.52 dst: 44.0.0.2 _sal_vport_send: socket missed! session id: 270287636
+
+1510072 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[0], rxq_id[0],             table[(nil)], table_b[(nil)], socket_id[0], lcoreid[10],             dz[0], dp[1089], vport[0], dp_ver[0],
+1510073 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7f3166384080], table_b[(nil)], socket_id[1], lcore_id[10],                 dz[0], dp[1089], vport[0], dp
+        ver[0],                 key payload_id[0], received teid[270254775]
+1510074 flow_table miss key: IPv6 222.13.86.24IPv6 97.121.128.1
+1510075 gtpu flow miss key src: 222.13.86.24 dst: 97.121.128.1
+
+----
+
+2017-09-01 10:31 AM
+
+ltt_0901_1.log
+
+13380114 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[1], rxq_id[0],             table[(nil)], table_b[(nil)], socket_id[1], lcoreid[11],             dz[1], dp[816], vport[0], dp_ver[0],              
+13380115 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[1], rxq_id[0],                 table[0x7fbc18cb1800], table_b[(nil)], socket_id[0], lcore_id[23],                 dz[0], dp[1116], vport[0], 
+         dp_ver[0],                 key payload_id[0], received teid[536935644]                                                                                                                            
+13380116 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[0], rxq_id[0],             table[(nil)], table_b[(nil)], socket_id[0], lcoreid[20],             dz[1], dp[453], vport[0], dp_ver[0],              
+13380117 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7fafaf8ffdc0], table_b[(nil)], socket_id[1], lcore_id[20],                 dz[1], dp[453], vport[0],  
+         dp_ver[0],                 key payload_id[0], received teid[58]                                                                                                                                   
+13380118 flow_table miss key: IPv6 2a01:101:1892:400e::IPv6 2a00:222:c00::273:84e1                                                                                                                         
+13380119 IPv4 14.142.192.58                                                                                                                                                                                
+
+13377530 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7fafaf104940], table_b[(nil)], socket_id[1], lcore_id[10],                 dz[1], dp[465], vport[0],
+         dp_ver[0],                 key payload_id[0], received teid[325]                                                                                                                                
+13380120 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7fafaf104940], table_b[(nil)], socket_id[1], lcore_id[10],                 dz[1], dp[465], vport[0],  
+         dp_ver[0],                 key payload_id[0], received teid[325]                                                                                                                                  
+
+
+
+13379743 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[1], rxq_id[0],             table[(nil)], table_b[(nil)], socket_id[1], lcoreid[23],             dz[0], dp[2174], vport[0], dp_ver[0],
+
+13379411 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[1], rxq_id[0],                 table[0x7fbbecc7cf40], table_b[(nil)], socket_id[0], lcore_id[23],                 dz[0], dp[2174], vport[0], dp_ver[0],                 key payload_id[0], received teid[806150224]
+
+13230475_vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[1], rxq_id[0],                 table[0x7fbbecc7cf40], table_b[(nil)], socket_id[0], lcore_id[23], dz[0], dp[2174], vport[0], dp_ver[0],                 key payload_id[0], received teid[270389206]
+
+13379759 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[1], rxq_id[0],                 table[0x7fbbecc7cf40], table_b[(nil)], socket_id[0], lcore_id[23],                 dz[0],          dp[2174], vport[0], dp_ver[0],                 key payload_id[0], received teid[270389206]
+
+13380121 gtpu flow miss key src: 2a00:222:800::291:29f0 dst: 2a01:4:1100:41c9:466:71fc:c8f9:fd8a
+
+13233076 ipv6_lookup_output@NUMA vlan id[108], out_port[0], ifname[vlan0108],             lcore_id:[18], result.flags:[A]
+13233077 ipv6_lookup_output@NUMA: tx src&dst: 2a00:222:800::291:29f0 2a01:4:1100:41c9:466:71fc:c8f9:fd8a                 
+
+13233054 NUMA@_sal_vport_recv zone:1 dp:0 version:0 vport:0 lcore_id: 18 socket_id: 0
+13233059 _sal_vport_recv@NUMA src&dst: IPv6 2a00:222:800::291:29f0IPv6 2a01:4:1100:41c9:466:71fc:c8f9:fd8a
+
+13082740 dp_add_flow@NUMA: socket_id:[0] dz_id[0] dp_id[2174] dp_version[0] ext_val32[0] src&dst: IPv6 2a00:222:800::291:29f0IPv6 2a01:4:1100:41c9:466:71fc:c8f9:fd8a
+
+----
+
+1486232 gtpu flow miss key src: 2a00:222:c00::1f0:4b1d dst: 2a01:4:1100:3:1695:72ac:ea44:41c8
+
+1511851 ipv6_lookup_output@NUMA vlan id[133], out_port[1], ifname[vlan0133],             lcore_id:[11], result.flags:[A]
+1511852 ipv6_lookup_output@NUMA: tx src&dst: 2a00:222:c00::1f0:4b1d 2a01:4:1100:3:1695:72ac:ea44:41c8                   
+
+1511850 _sal_vport_recv@NUMA src&dst: IPv6 2a00:222:c00::1f0:4b1dIPv6 2a01:4:1100:3:1695:72ac:ea44:41c8
+
+----
+
+4258277 gtpu flow miss key src: 2a01:101:8a2:9:: dst: 2a00:222:c00::32b:ad30
+
+4212359 dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[0] dp_version[0] ext_val32[537403579] src&dst: IPv6 2a01:101:8a2:9::IPv6 2a00:222:c00::32b:ad30
+4212363 dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[441] dp_version[0] ext_val32[0] src&dst: IPv6 2a01:101:8a2:9::IPv6 2a00:222:c00::32b:ad30
+4212469 _sal_vport_recv@NUMA src&dst: IPv6 2a01:101:8a2:9::IPv6 2a00:222:c00::32b:ad30
+
+----
+
+2017-09-04 09:31 AM
+
+4217974 NUMA@_sal_vport_recv zone:1 dp:0 version:0 vport:0 lcore_id: 15 socket_id: 1
+4217975 _sal_vport_recv@NUMA src&dst: IPv6 2a00:222:c00::13a:dd68IPv6 2a01:4:1000:1cde:3eca:7190:9457:5b00              
+
+4217976 ipv6_lookup_output@NUMA vlan id[133], out_port[1], ifname[vlan0133],             lcore_id:[15], result.flags:[A]
+4217977 ipv6_lookup_output@NUMA: tx src&dst: 2a00:222:c00::13a:dd68 2a01:4:1000:1cde:3eca:7190:9457:5b00                
+
+4217978 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[0], rxq_id[0],             table[(nil)], table_b[(nil)], socket_id[0], lcoreid[10],             dz[0], dp[723], vport[0], dp_ver[0],
+4217979 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7fb0894f4200], table_b[(nil)], socket_id[1], lcore_id[10],                 dz[0], dp[723], vport[0],
+        dp_ver[0],                 key payload_id[0], received teid[805623602]
+4217980 flow_table miss key: IPv6 2a00:222:c00::13a:dd68IPv6 2a01:4:1000:1cde:3eca:7190:9457:5b00
+
+----
+
+2017-09-12 04:26 PM
+
+21099 dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[0] dp_version[0] ext_val32[268435457] src&dst: IPv4 44.96.0.2 IPv4 222.12.1.242
+21100 dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[1281] dp_version[0] ext_val32[0] src&dst: IPv4 222.12.1.242 IPv4 44.96.0.2
+21101 dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[0] src&dst: IPv4 44.96.0.2 IPv4 222.12.1.242
+21102 dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[268435457] src&dst: IPv4 222.12.1.242 IPv4 44.96.0.2
+
+----
+
+2017-09-13 09:36 AM
+
+1490442 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7f831bd2f0c0], table_b[(nil)], socket_id[1], lcore_id[8],                 dz[0], dp[1309], vport[0],
+        dp_ver[0],                 key payload_id[0], received teid[806709362]                                                                                                                          
+1490443 GTPU flow_table miss key: IPv4 222.13.220.31 IPv4 44.192.0.19                                                                                                                                   
+
+1489901 ipv4_lookup_output@NUMA vlan id[233], out_port[1], ifname[vlan0233:1002],             lcore_id:[14], result.flags:[B]
+1489902 ipv4_lookup_output@NUMA: tx src&dst: IPv4 222.13.220.31 IPv4 44.192.0.19                                             
+
+
+1511980 dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[0] dp_version[0] ext_val32[806709361] src&dst: IPv4 44.192.0.19 IPv4 222.13.220.31
+1511981 dp_add_flow@NUMA: socket_id:[1] dz_id[0] dp_id[1309] dp_version[0] ext_val32[0] src&dst: IPv4 222.13.220.31 IPv4 44.192.0.19     
+1511982 dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[0] src&dst: IPv4 44.192.0.19 IPv4 222.13.220.31        
+1511983 dp_add_flow@NUMA: socket_id:[1] dz_id[1] dp_id[0] dp_version[0] ext_val32[806709361] src&dst: IPv4 222.13.220.31 IPv4 44.192.0.19
+
+NUMA@_sal_vport_recv zone:1 dp:0 version:0 vport:0 lcore_id: 15 socket_id: 1
+1512049 _sal_vport_recv@NUMA src&dst: IPv4 222.13.220.31 IPv4 44.192.0.19
+
+1512075 ipv4_lookup_output@NUMA vlan id[233], out_port[1], ifname[vlan0233:1002],             lcore_id:[15], result.flags:[A]                                                                           
+1512076 ipv4_lookup_output@NUMA: tx src&dst: IPv4 222.13.220.31 IPv4 44.192.0.19                                                                                                                        
+
+1512077 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE: in_port[0], rxq_id[0],             table[(nil)], table_b[(nil)], socket_id[0], lcoreid[8],             dz[0], dp[1309], vport[0], dp_ver[0],
+1512078 _vnet_gtpu_vport_recv@NUMA: FLOW_TABLE MISS: in_port[0], rxq_id[0],                 table[0x7f831bd2f0c0], table_b[(nil)], socket_id[1], lcore_id[8],                 dz[0], dp[1309], vport[0],
+        dp_ver[0],                 key payload_id[0], received teid[806709362]
+1512079 GTPU flow_table miss key: IPv4 222.13.220.31 IPv4 44.192.0.19
+
+----
+
+1534788 NUMA@_sal_vport_recv zone:0 dp:0 version:0 vport:0 lcore_id: 15 socket_id: 1
+1534789 _sal_vport_recv@NUMA src&dst: IPv4 44.192.0.19 IPv4 222.13.220.31           
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

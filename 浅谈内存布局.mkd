@@ -1,0 +1,142 @@
+
+http://blog.handy.wang/blog/2014/03/18/qian-tan-nei-cun-bu-ju-memory-layout/
+
+#内存布局
+
+##进程的地址空间：TEXT，DATA，BSS，HEAP，STACK 
+
+现代操作系统对每个进程都分配了完整的虚拟内存地址空间。进程会把整个地址空间分成多个区间来使用。 程序员最为熟悉的两个区间莫过于堆和栈。然而还有其他的内存区间来存储代码、静态、全局变量等等。 本文来总结一下这些内存区间到底存的是哪些东西。先看图：
+
+![Memory_Layout.png](./img/Cpp/Memory_Layout.png)
+
+虚拟内存技术使得每个进程都可以独占整个内存空间，地址从零开始，直到内存上限。 每个进程都将这部分空间（从低地址到高地址）分为六个部分：
+
+1. TEXT段：整个程序的代码，以及所有的常量。这部分内存是是固定大小的，只读的。
+1. DATA段，又称GVAR：初始化为非零值的全局变量。
+1. BSS段：初始化为0或未初始化的全局变量和静态变量。
+1. HEAP（堆空间）：动态内存区域，使用malloc或new申请的内存。
+1. 未使用的内存。
+1. STACK（栈空间）：局部变量、参数、返回值都存在这里，函数调用开始会参数入栈、局部变量入栈；调用结束依次出栈
+
+其中堆空间和栈空间的大小是可变的，堆空间从下往上生长，栈空间从上往下生长。
+由于常量存储在TEXT段中，所有对常量的赋值都将产生segment fault异常。
+可以认为BSS段中的所有字节都是0。因为未初始化的全局变量、静态变量都在BSS段中， 所以它们都会被初始化为0，同时类的成员变量也会被初始化为0，但编译器不保证局部变量的初始化。
+上面说栈( STACK )是从上到下( 高地址到低地址 )分配的，而且我们知道， 函数的局部变量的空间是在进入函数体后才分配的，在栈空间里。来个例子来看看吧！
+
+    int main(){
+        char a=0, b=0;
+        int *p = (int*)&b;
+        *p = 258;
+        printf("%d %d", a, b);
+        return 0;
+    }
+
+输出是
+
+    1 2
+
+`a`, `b`属于局部变量，存储在栈空间中，先分配`a`的地址，再分配`b`的地址。因为栈是从上往下生长的，所以`b`的地址比`a`低一个字节。 然后对`b`的地址进行赋值258（int是4字节，十六进制表示是0x00 00 01 02）。最后1字节0x02赋值给了`b`，接下来1字节0x01赋值给了`a`。
+
+> 上述结果和CPU端模式也有关系！我的CPU是小端字节序的~ 低位存的是低字节。
+
+
+
+
+
+
+
+
+****
+
+##C语言的内存布局
+
+![Memory_Layout.gif](./img/Cpp/Memory_Layout.gif)
+
+内存从低地址到高地址划分，分为：Text Segment、Initialized Data Segment、Uninitialized Data Segment、Heap、Stack。
+
+1. Text Segment
+
+    即代码段(Code Segment)，里面存放可执行的指令，可以理解为程序的实际逻辑代码(不考虑形参、局部变量)，不过在代码段里的指令应该已是汇编指令了。
+    代码段在内存布局中处在堆栈下面(即低地址段)的位置，防止代码段被堆栈溢出覆盖。通常，代码段里的内容是被共享且只读的，防止程序意外的修改其在代码段里的指令。
+
+2. Initialized Data Segment
+
+    即数据段(Data Segment)，这应该是一种狭义的叫法，也就是大家通常意义上认为的数据段。
+    其实Initialized Data Segment和Uninitialized Data Segment合起来可以称为广义的数据段，因为它们都存数据。
+    Initialized Data Segment存储被程序员显式初始化过的全局变量、静态变量、常量,由此可以看数据段(狭义)可以进一步的分为 只读区段 和 读写区段，
+    数据段不是只读的，在程序运行的时候存储在此区段的变量值可以修改。
+
+3. Uninitialized Data Segment
+
+    又名BSS，即Block Started by Symbol，最早是联合航空公司的联合航空符号汇编程序里的一个伪操作，后来BSS这个术语被合并到FORTRAN汇编程序里。
+    这伪操作定义了一个标签而且预留了一定量的未初始化的区域，所以BSS就成了“单独保留许多独立的小数据的位置“的简称。
+    由此看出，BSS这部分空间是预留出来的，存放的是程序员没有初始化或初始化为0(我的理解是初始化为nil)的全局变量、静态变量，未初始化的在被编译器在内存中初始化为0(0x0)，
+    这就是为什么它也叫Uninitialized Data Segment。
+    
+    [Historically, BSS (from Block Started by Symbol) was a pseudo-operation in UA-SAP (United Aircraft Symbolic Assembly Program), 
+    the assembler developed in the mid-1950s for the IBM 704 by Roy Nutt, Walter Ramshaw, and others at United Aircraft Corporation.
+    The BSS keyword was later incorporated into FAP (FORTRAN Assembly Program), IBM's standard assembler for its 709 and 7090/94 computers. 
+    It defined a label (i.e. symbol) and reserved a block of uninitialized space for a given number of words (Timar 1996). 
+    In this situation BSS served as a shorthand in place of individually reserving a number of separate smaller data locations. 
+    Some assemblers support a complementary or alternative directive BES, for Block Ended by Symbol, 
+    where the specified symbol corresponds to the end of the reserved block.]
+
+4. Heap
+
+    堆区紧接着BSS段，它的内存分配增长方向是从低地址向高地址。所有动态的内存分配操作都是由 程序员 通过相关函数从堆区进行分配和释放，如malloc, realloc, and free这些操作。
+    在一个进程里，堆区被所有的共享函数库和动态加载的模块所共享。
+
+5. Stack
+
+    栈区紧挨着堆区，一般都处在内存的高地址区域，但是它的内存分配增长方向是从高地址向低地址，也就是说堆和栈的内存分配增长方向上是相对的，即从两头向中间方向。
+    此区段的内存分配是由编译器做的，当栈顶指针已经遇到堆指针的时候表明栈溢出了。
+    栈区是LIFO的结构，SP(Stack Pointer)寄存器始终记录着栈顶位置，当push或pop数据的时候，SP都会有相应的变化。
+    在栈区里主要是存放函数调用相关的内容，如：实参、函数调用的返回地址、局部变量等相关信息，我们称之为栈帧(Stack Frame)，
+    也就是说在栈区里有很多个栈帧，每进行一次函数调用，一个新的栈帧就会入栈，且向低地址区方向增长。
+    一个栈帧至少由一个函数调用的返回地址组成，所以普通的函数调用递归函数调用都是借助这个返回地址才得到让程序流程进行下去的。
+    
+    The stack frame at the top of the stack is for the currently executing routine. The stack frame usually includes at least the following items (in push order):
+        1. the arguments (parameter values) passed to the routine (if any);
+        1. the return address back to the routine's caller (e.g. in the DrawLine stack frame, an address into DrawSquare's code); 
+        1. and space for the local variables of the routine (if any).
+
+****
+
+##Cpp内存布局
+
+C++的内存布局大致分为：代码段、全局/静态存储区、常量区、自由存储区、堆、栈。
+
+1. 全局/静态存储区
+
+    全局变量和静态变量被分配到同一块内存中，在以前的C语言中，全局变量又分为初始化的和未初始化的，
+    在C++里面没有这个区分了，他们共同占用同一块内存区（未初始化的变量都被初始化成0或空串，C中也一样）。
+
+2. 常量存储区
+
+    这是一块比较特殊的存储区，他们里面存放的是常量，不允许修改。
+    注意常量的存放区域，通常情况下，常量存放在程序区(程序区是只读的，因此任何修改常量的行为都是非法的)，而不是数据区。
+    有的系统，也将部分常量分配到静态数据区，比如字符串常量(有的系统也将其分配在程序区)。但是要记住一点，常量所在的内存空间都是受系统保护的，不能修改。
+    对常量空间的修改将造成访问内存出错，一般系统都会提示。常量的生命周期一直到程序执行结束为止。
+
+3. 自由存储区
+
+    就是那些由malloc等分配的内存块，他和堆是十分相似的，不过它是用free来结束自己的生命的
+    
+4. 重要示例：
+    char s[]="123";    s在栈区，“123”在栈区，其值可以被修改
+    char *s="123";     s在栈区，“123”在常量区，其值不能被修改
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
