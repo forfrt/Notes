@@ -66,6 +66,54 @@
 ##
 
 #[Machine Learning by Stanford](https://www.coursera.org/learn/machine-learning/home/welcome)
+
+#Introduction
+
+##Welcome
+
+Machine Learning 
+- Grew out of work in AI
+- New capability for computers
+
+Examples:
+- Database mining
+
+    Large datasets from growth of automation/web
+    E.g., Web click data, medical records, biology, engineering
+
+- Applications cannot program by hand
+
+    E.g., Autonomous helicopter, handwriting recognition, most of Natural Language Processing(NLP), Computer Vision
+
+- Self-customizing programs
+
+    E.g., Amazon, Netflix product recommendations
+
+- Understanding human learning (brain, real AI)
+
+----
+
+##What is Machine Learning
+
+> Arthur Samuel described it as: "the field of study that gives computers the ability to learn without being explicitly programmed." This is an older, informal definition.
+
+> Tom Mitchell provides a more modern definition: "A computer program is said to learn from experience E with respect to some class of tasks T and performance measure P, if its performance at tasks in T, as measured by P, improves with experience E."
+
+Example: playing checkers.
+
+E = the experience of playing many games of checkers
+T = the task of playing checkers.
+P = the probability that the program will win the next game.
+
+
+Machine learning algorithms:
+- Supervised learning
+- Unsupervised learning
+
+Others: Reinforcement learning, recommender systems.
+
+Also talk about: Practical advice for applying learning algorithms.
+
 ##Supervised Learning
 
 in supervised learning, in every example in our data set, we are told what is the "correct answer" that we would have quite liked the algorithms have predicted on that example.
@@ -80,6 +128,347 @@ in supervised learning, in every example in our data set, we are told what is th
 ----
 
 ##Unsupervised Learning
+
+Unsupervised learning allows us to approach problems with little or no idea what our results should look like. We can derive structure from data where we don't necessarily know the effect of the variables.
+
+We can derive this structure by clustering the data based on relationships among the variables in the data.
+
+With unsupervised learning there is no feedback based on the prediction results.
+
+Example:
+
+Clustering: Take a collection of 1,000,000 different genes, and find a way to automatically group these genes into groups that are somehow similar or related by different variables, such as lifespan, location, roles, and so on.
+
+Non-clustering: The "Cocktail Party Algorithm", allows you to find structure in a chaotic environment. (i.e. identifying individual voices and music from a mesh of sounds at a cocktail party).
+
+----
+
+#Model and Cost Function
+
+##Model Representation
+
+To establish notation for future use, we’ll use $$x^{(i)}$$ to denote the “input” variables (living area in this example), also called input features, and $$y^{(i)}$$ to denote the “output” or target variable that we are trying to predict (price). A pair $$(x^{(i)} , y^{(i)} )$$ is called a training example, and the dataset that we’ll be using to learn—a list of m training examples $${(x^{(i)} , y^{(i)} ); i = 1, . . . , m}$$—is called a training set. Note that the superscript “(i)” in the notation is simply an index into the training set, and has nothing to do with exponentiation. We will also use X to denote the space of input values, and Y to denote the space of output values. In this example, X = Y = ℝ. 
+
+To describe the supervised learning problem slightly more formally, our goal is, given a training set, to learn a function h : X → Y so that h(x) is a “good” predictor for the corresponding value of y. For historical reasons, this function h is called a hypothesis. Seen pictorially, the process is therefore like this:
+
+![Model Representation.png](./img/Machine Learning/Model Representation.png)
+
+1. When the target variable that we’re trying to predict is continuous, such as in our housing example, we call the learning problem a regression problem. 
+2. When y can take on only a small number of discrete values (such as if, given the living area, we wanted to predict if a dwelling is a house or an apartment, say), we call it a classification problem.
+
+----
+
+##Cost Function
+
+We can measure the accuracy of our hypothesis function by using a cost function. This takes an average difference (actually a fancier version of an average) of all the results of the hypothesis with inputs from x's and the actual output y's.
+
+![Cost Function.png](./img/Machine Learning/Cost Function.png)
+
+To break it apart, it is 12 $\overline(x) where $\overline(x) is the mean of the squares of h_θ(x_i)−y_i , or the difference between the predicted value and the actual value.
+
+This function is otherwise called the "Squared error function", or "Mean squared error". The mean is halved 12 as a convenience for the computation of the gradient descent, as the derivative term of the square function will cancel out the 12 term. The following image summarizes what the cost function does: 
+
+----
+
+##Cost Function - Intuition I
+
+If we try to think of it in visual terms, our training data set is scattered on the x-y plane. We are trying to make a straight line (defined by h_θ(x)) which passes through these scattered data points.
+
+Our objective is to get the best possible line. The best possible line will be such so that the average squared vertical distances of the scattered points from the line will be the least. Ideally, the line should pass through all the points of our training data set. In such a case, the value of J(θ_0,θ_1) will be 0. The following example shows the ideal situation where we have a cost function of 0. 
+
+![Cost Function - Intuition I_1.png](./img/Machine Learning/Cost Function - Intuition I_1.png)
+
+When θ_1=1, we get a slope of 1 which goes through every single data point in our model. Conversely, when θ_1=0.5, we see the vertical distance from our fit to the data points increase. 
+
+![Cost Function - Intuition I_2.png](./img/Machine Learning/Cost Function - Intuition I_2.png)
+
+This increases our cost function to 0.58. Plotting several other points yields to the following graph: 
+
+![Cost Function - Intuition I_2.png](./img/Machine Learning/Cost Function - Intuition I_3.png)
+
+Thus as a goal, we should try to minimize the cost function. In this case, θ_1=1 is our global minimum. 
+
+----
+
+##Cost Function -Intuition II
+
+A contour plot is a graph that contains many contour lines. A contour line of a two variable function has a constant value at all points of the same line. An example of such a graph is the one to the right below.
+
+![Cost Function - Intuition II_2.png](./img/Machine Learning/Cost Function - Intuition II_3.png)
+
+Taking any color and going along the 'circle', one would expect to get the same value of the cost function. For example, the three green points found on the green line above have the same value for J(θ_0,θ_1) and as a result, they are found along the same line. The circled x displays the value of the cost function for the graph on the left when θ_0 = 800 and θ_1= -0.15. Taking another h(x) and plotting its contour plot, one gets the following graphs:
+
+![Cost Function - Intuition II_2.png](./img/Machine Learning/Cost Function - Intuition II_3.png)
+
+When θ_0 = 360 and θ_1 = 0, the value of J(θ_0,θ_1) in the contour plot gets closer to the center thus reducing the cost function error. Now giving our hypothesis function a slightly positive slope results in a better fit of the data.
+
+![Cost Function - Intuition II_2.png](./img/Machine Learning/Cost Function - Intuition II_3.png)
+
+The graph above minimizes the cost function as much as possible and consequently, the result of θ_1 and θ_0 tend to be around 0.12 and 250 respectively. Plotting those values on our graph to the right seems to put our point in the center of the inner most 'circle'. 
+
+****
+
+#Parameter Learning
+
+##Gradient Descent
+
+So we have our hypothesis function and we have a way of measuring how well it fits into the data. Now we need to estimate the parameters in the hypothesis function. That's where gradient descent comes in.
+
+Imagine that we graph our hypothesis function based on its fields θ_0 and θ_1 (actually we are graphing the cost function as a function of the parameter estimates). We are not graphing x and y itself, but the parameter range of our hypothesis function and the cost resulting from selecting a particular set of parameters.
+
+We put θ_0 on the x axis and θ_1 on the y axis, with the cost function on the vertical z axis. The points on our graph will be the result of the cost function using our hypothesis with those specific theta parameters. The graph below depicts such a setup.
+
+![Gradient Descent_1.png](./img/Machine Learning/Gradient Descent_1.png)
+
+We will know that we have succeeded when our cost function is at the very bottom of the pits in our graph, i.e. when its value is the minimum. The red arrows show the minimum points in the graph.
+
+The way we do this is by taking the derivative (the tangential line to a function) of our cost function. The slope of the tangent is the derivative at that point and it will give us a direction to move towards. We make steps down the cost function in the direction with the steepest descent. The size of each step is determined by the parameter α, which is called the learning rate. 
+
+For example, the distance between each 'star' in the graph above represents a step determined by our parameter α. A smaller α would result in a smaller step and a larger α results in a larger step. The direction in which the step is taken is determined by the partial derivative of J(θ_0,θ_1). Depending on where one starts on the graph, one could end up at different points. The image above shows us two different starting points that end up in two different places. 
+
+The gradient descent algorithm is:
+
+repeat until convergence:
+
+θ_j:=θ_j−α*(∂/∂*θ_j)*J(θ_0,θ_1)
+
+where
+
+j=0,1 represents the feature index number.
+
+At each iteration j, one should simultaneously update the parameters θ_1,θ_2,...,θ_n. Updating a specific parameter prior to calculating another one on the j(th) iteration would yield to a wrong implementation. 
+
+----
+
+##Gradient Descent Intuition
+
+In this video we explored the scenario where we used one parameter θ_1 and plotted its cost function to implement a gradient descent. Our formula for a single parameter was :
+
+Repeat until convergence:
+
+    θ_1:=θ_1−α*(d/dθ_1)*J(θ_1)
+
+Regardless of the slope's sign for d/dθ_1*J(θ1), θ_1 eventually converges to its minimum value. The following graph shows that when the slope is negative, the value of θ_1 increases and when it is positive, the value of θ_1 decreases.
+
+![Gradient Descent Intuition_1.png](./img/Machine Learning/Gradient Descent Intuition_1.png)
+
+On a side note, we should adjust our parameter α to ensure that the gradient descent algorithm converges in a reasonable time. Failure to converge or too much time to obtain the minimum value imply that our step size is wrong.
+
+![Gradient Descent Intuition_2.png](./img/Machine Learning/Gradient Descent Intuition_2.png)
+
+How does gradient descent converge with a fixed step size α?
+
+The intuition behind the convergence is that d/dθ_1*J(θ1) approaches 0 as we approach the bottom of our convex function. At the minimum, the derivative will always be 0 and thus we get: 
+
+    θ_1:=θ_1−α*0
+
+![Gradient Descent Intuition_3.png](./img/Machine Learning/Gradient Descent Intuition_3.png)
+
+----
+
+##Gradient Descent For Linear Regression
+
+When specifically applied to the case of linear regression, a new form of the gradient descent equation can be derived. We can substitute our actual cost function and our actual hypothesis function and modify the equation to :
+
+    repeat until convergence: {
+        $θ_0=θ_0-α*1/m*\sum\limits_{i=1}^{m}(h_θ(x_i)-y_i)$
+        $θ_1=θ_1-α*1/m*\sum\limits_{i=1}^{m}((h_θ(x_i)-y_i)*x_i)$
+    }
+
+where m is the size of the training set, θ_0 a constant that will be changing simultaneously with θ_1 and xi,y_i are values of the given training set (data).
+
+Note that we have separated out the two cases for θ_j into separate equations for θ_0 and θ_1; and that for θ_1 we are multiplying x_i at the end due to the derivative. The following is a derivation of ∂/∂θ_j*J(θ) for a single example : 
+
+![Gradient Descent For Linear Regression_1.png](./img/Machine Learning/Gradient Descent For Linear Regression_1.png)
+
+The point of all this is that if we start with a guess for our hypothesis and then repeatedly apply these gradient descent equations, our hypothesis will become more and more accurate.
+
+So, this is simply gradient descent on the original cost function J. This method looks at every example in the entire training set on every step, and is called batch gradient descent. Note that, while gradient descent can be susceptible to local minima in general, the optimization problem we have posed here for linear regression has only one global, and no other local, optima; thus gradient descent always converges (assuming the learning rate α is not too large) to the global minimum. Indeed, J is a convex quadratic function. Here is an example of gradient descent as it is run to minimize a quadratic function.
+
+![Gradient Descent For Linear Regression_2.png](./img/Machine Learning/Gradient Descent For Linear Regression_2.png)
+
+The ellipses shown above are the contours of a quadratic function. Also shown is the trajectory taken by gradient descent, which was initialized at (48,30). The x’s in the figure (joined by straight lines) mark the successive values of θ that gradient descent went through as it converged to its minimum.
+
+----
+
+#Linear Algebra Review
+
+##Matrices and Vectors
+
+Matrices are 2-dimensional arrays:
+
+    \begin{bmatrix} a & b & c \newline d & e & f \newline g & h & i \newline j & k & l\end{bmatrix}
+
+The above matrix has four rows and three columns, so it is a 4 x 3 matrix.
+
+A vector is a matrix with one column and many rows: 
+
+    \begin{bmatrix} w \newline x \newline y \newline z \end{bmatrix}
+
+Notation and terms:
+
+- A_ij refers to the element in the ith row and jth column of matrix A.
+- A vector with 'n' rows is referred to as an 'n'-dimensional vector.
+- v_i refers to the element in the ith row of the vector.
+- In general, all our vectors and matrices will be 1-indexed. Note that for some programming languages, the arrays are 0-indexed.
+- Matrices are usually denoted by uppercase names while vectors are lowercase.
+- "Scalar" means that an object is a single value, not a vector or matrix.
+- R refers to the set of scalar real numbers.
+- R^n refers to the set of n-dimensional vectors of real numbers.
+
+Run the cell below to get familiar with the commands in Octave/Matlab. Feel free to create matrices and vectors and try out different things.
+
+----
+
+##Addition and Scalar Multiplication
+
+Addition and subtraction are element-wise, so you simply add or subtract each corresponding element:
+
+    \begin{bmatrix} a & b \newline c & d \newline \end{bmatrix} +\begin{bmatrix} w & x \newline y & z \newline \end{bmatrix} =\begin{bmatrix} a+w & b+x \newline c+y & d+z \newline \end{bmatrix}
+
+Subtracting Matrices: 
+
+    \begin{bmatrix} a & b \newline c & d \newline \end{bmatrix} - \begin{bmatrix} w & x \newline y & z \newline \end{bmatrix} =\begin{bmatrix} a-w & b-x \newline c-y & d-z \newline \end{bmatrix}
+
+To add or subtract two matrices, their dimensions must be the same.
+
+In scalar multiplication, we simply multiply every element by the scalar value:
+
+    \begin{bmatrix} a & b \newline c & d \newline \end{bmatrix} * x =\begin{bmatrix} a*x & b*x \newline c*x & d*x \newline \end{bmatrix}
+
+----
+
+##Matrix-Matrix Multiplication
+
+We multiply two matrices by breaking it into several vector multiplications and concatenating the result.
+
+    \begin{bmatrix} a & b \newline c & d \newline e & f \end{bmatrix} *\begin{bmatrix} w & x \newline y & z \newline \end{bmatrix} =\begin{bmatrix} a*w + b*y & a*x + b*z \newline c*w + d*y & c*x + d*z \newline e*w + f*y & e*x + f*z\end{bmatrix}
+
+An m x n matrix multiplied by an n x o matrix results in an m x o matrix. In the above example, a 3 x 2 matrix times a 2 x 2 matrix resulted in a 3 x 2 matrix.
+
+To multiply two matrices, the number of columns of the first matrix must equal the number of rows of the second matrix.
+
+----
+
+##Matrix Multiplication Properties
+
+- Matrices are not commutative: A*B≠B*A
+- Matrices are associative: (A*B)*C=A*(B*C)
+
+The identity matrix, when multiplied by any matrix of the same dimensions, results in the original matrix. It's just like multiplying numbers by 1. The identity matrix simply has 1's on the diagonal (upper left to lower right diagonal) and 0's elsewhere.
+
+    \begin{bmatrix} 1 & 0 & 0 \newline 0 & 1 & 0 \newline 0 & 0 & 1 \newline \end{bmatrix}
+
+When multiplying the identity matrix after some matrix (A*I), the square identity matrix's dimension should match the other matrix's columns. When multiplying the identity matrix before some other matrix (I*A), the square identity matrix's dimension should match the other matrix's rows.
+
+
+----
+
+##Inverse and Transpose
+
+The inverse of a matrix A is denoted A^−1. Multiplying by the inverse results in the identity matrix.
+
+A non square matrix does not have an inverse matrix. We can compute inverses of matrices in octave with the pinv(A) function and in Matlab with the inv(A) function. Matrices that don't have an inverse are singular or degenerate.
+
+The transposition of a matrix is like rotating the matrix 90° in clockwise direction and then reversing it. We can compute transposition of matrices in matlab with the transpose(A) function or A':
+
+    A = \begin{bmatrix} a & b \newline c & d \newline e & f \end{bmatrix}
+    
+    A^T = \begin{bmatrix} a & c & e \newline b & d & f \newline \end{bmatrix}
+
+In other words:
+
+A_ij=A^T_ji
+
+****
+
+#Environment Setup Instructions
+
+The Machine Learning course includes several programming assignments which you’ll need to finish to complete the course. The assignments require the Octave or MATLAB scientific computing languages.
+
+- Octave is a free, open-source application available for many platforms. It has a text interface and an experimental graphical one.
+- MATLAB is proprietary software, but a free trial license to MATLAB Online is being offered for the completion of this course.
+
+##FAQ
+
+Does it cost money?
+
+> While you’re taking the course, both software packages are available free of charge. Octave is distributed under the GNU Public License, which means that it is always free to download and distribute. MATLAB Online licenses are available for completing the programming assignments in the course only. For any other purposes (like your own work after you complete the course), MATLAB can be licensed to individuals or companies from Mathworks directly.
+
+Is there a difference in quality?
+
+> There are several subtle differences between the two software packages. MATLAB may offer a smoother experience (especially for Mac users), contains a larger number of functions, and can be more robust to failure. However, the functions used in this course are available in both packages, and many students have successfully completed the course using either.
+
+How do I install one of them?
+
+> See installation instructions for Windows, Mac OS X (10.10 Yosemite and 10.9 Mavericks), other Mac OS X, or GNU/Linux.
+
+----
+
+##Multiple Features
+
+Linear regression with multiple variables is also known as "multivariate linear regression".
+
+We now introduce notation for equations where we can have any number of input variables.
+
+    \begin{align*}
+    x_j^{(i)} &= \text{value of feature } j \text{ in the }i^{th}\text{ training example} \newline 
+    x^{(i)}& = \text{the input (features) of the }i^{th}\text{ training example} \newline 
+    m &= \text{the number of training examples} \newline 
+    n &= \text{the number of features} 
+    \end{align*}
+
+The multivariable form of the hypothesis function accommodating these multiple features is as follows:
+
+    h_θ(x)=θ_0+θ_1x_1+θ_2x_2+θ_3x_3+...+θ_nx_n
+
+In order to develop intuition about this function, we can think about θ_0 as the basic price of a house, θ_1 as the price per square meter, θ_2 as the price per floor, etc. x_1 will be the number of square meters in the house, x_2 the number of floors, etc.
+
+Using the definition of matrix multiplication, our multivariable hypothesis function can be concisely represented as:
+
+    \begin{align*}h_\theta(x) =\begin{bmatrix}\theta_0 \hspace{2em} \theta_1 \hspace{2em} ... \hspace{2em} \theta_n\end{bmatrix}\begin{bmatrix}x_0 \newline x_1 \newline \vdots \newline x_n\end{bmatrix}= \theta^T x\end{align*}
+
+This is a vectorization of our hypothesis function for one training example; see the lessons on vectorization to learn more.
+
+Remark: Note that for convenience reasons in this course we assume x0(i)=1 for (i∈1,…,m). This allows us to do matrix operations with theta and x. Hence making the two vectors 'θ' and x(i) match each other element-wise (that is, have the same number of elements: n+1).]
+
+----
+
+##Gradient Descent for Multiple Variables
+
+The gradient descent equation itself is generally the same form; we just have to repeat it for our 'n' features:
+
+    \begin{align*} & \text{repeat until convergence:} \; \lbrace \newline \; 
+    & \theta_0 := \theta_0 - \alpha \frac{1}{m} \sum\limits_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) \cdot x_0^{(i)}\newline \; 
+    & \theta_1 := \theta_1 - \alpha \frac{1}{m} \sum\limits_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) \cdot x_1^{(i)} \newline \; 
+    & \theta_2 := \theta_2 - \alpha \frac{1}{m} \sum\limits_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) \cdot x_2^{(i)} \newline 
+    & \cdots \newline 
+    \rbrace \end{align*}
+
+In other words:
+
+    \begin{align*}& \text{repeat until convergence:} \; \lbrace \newline \; 
+    & \theta_j := \theta_j - \alpha \frac{1}{m} \sum\limits_{i=1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) \cdot x_j^{(i)} \; & \text{for j := 0...n}\newline 
+    \rbrace\end{align*}
+
+The following image compares gradient descent with one variable to gradient descent with multiple variables: 
+
+![Gradient Descent For Multiple Variables.png](./img/Machine Learning/Gradient Descent For Multiple Variables.png)
+
+
+2018-02-19 04:15 PM
+
+----
+
+\wt
+
+
+
+
+
+
+
+
 
 
 

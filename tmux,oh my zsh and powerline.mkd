@@ -1,0 +1,5 @@
+
+
+1. [How to Use Powerline With Ubuntu and Putty](http://www.programwitherik.com/how-to-use-powerline-with-ubuntu-and-putty/)
+1. [How can I install and use powerline plugin?](https://askubuntu.com/questions/283908/how-can-i-install-and-use-powerline-plugin)
+1. [gpakosz/.tmux](https://github.com/gpakosz/.tmux)

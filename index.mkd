@@ -91,31 +91,46 @@
 ##Articles
 
 1. [[CVE-2015-4852_breenmachine]]
-1. [[A SANDBOX-BASED APPROACH TO THE DEOBFUSCATION AND DISSECTION OF PHP-BASED MALWARE]]
-1. [Skip Lists: A Probabilistic Alternative to Balanced Tree](Skip Lists A Probabilistic Alternative to Balanced Tree)
-1. [[Webhsell威胁情报分析]]
-1. [[Webshell文件名]]
-1. [[Webshell路径]]
+2. [[A SANDBOX-BASED APPROACH TO THE DEOBFUSCATION AND DISSECTION OF PHP-BASED MALWARE]]
+3. [Skip Lists: A Probabilistic Alternative to Balanced Tree](Skip Lists A Probabilistic Alternative to Balanced Tree)
+4. [[Webhsell威胁情报分析]]
+5. [[Webshell文件名]]
+6. [[Webshell路径]]
+7. [统一市场下撮合交易系统优化研究与性能模拟](统一市场下撮合交易系统优化研究与性能模拟)
+8. [Delegated Proof of Stake (DPOS) vs Proof of Work (POW)](Delegated Proof of Stake (DPOS) vs Proof of Work (POW))
+9. [基于区块链的去中心化交易关键技术研究及应用](基于区块链的去中心化交易关键技术研究及应用)
+
+##Research Details
+1. [Bitshares](Bitshares)
+2. [EOS](EOS)
+3. [侧链, 锚定](侧链, 锚定)
+4. [IPFS](IPFS)
 
 ##Work
 
 1. [[日常]]
 1. [[问题]]
 1. [[补丁]]
-1. [[Password]]
+1. [[password]]
+2. [investment](investment)
 
 ##Course
 
 1. [[Programming Mobile Applications for Android Handheld Systems Part 1]]
 1. [[Machine Learning by Stanford University]]
+2. [Tsinghua's 数据结构与算法](Tsinghua's 数据结构与算法)
+3. [天善智能 数据分析师之路](天善智能-数据分析师之路)
+4. [机器学习中的数据基础](机器学习中的数据基础)
+5. [徐小湛高数](徐小湛高数)
 
-##Tools Hotkeys
+##Tools
 
 1. [[Linux Commands]]
 1. [[eclipse]]
 1. [[vim]]
 1. [[sourceInsight]]
 1. [[apvlv]]
+2. [tmux,oh my zsh and powerline](tmux,oh my zsh and powerline)
 
 ##Presentation
 

@@ -1,0 +1,14 @@
+
+So how does Delegated Proof of Stake work? It works by using reputation systems and frictionless, real-time voting to create a panel of limited trusted parties. These parties then have the right to create blocks to add to the Blockchain and prohibit un- trusted parties from participating. *The panel of trusted parties take turns creating blocks in a randomly assigned order that changes with each iteration*.
+
+It is important to note that not much trust is required. Block creators (called delegates) can create blocks or not create blocks, include transactions or not include trasactions. That is it. They cannot change transaction details like sender, recipients, or balances, so they have little power to do anything harmful. If delegates fail to create a block or include a trasaction, the next delegates's block will be twice the size or will include the missing trasaction, and the confirmation time will be 20 seconds instead of 10 secounds. No serious harm done. *The malicious or tardy delegates behavior is publically available and the community can vote them out quickly and easily*. This would result in the delegate losing their income as delegates with no potential upside.
+
+Built into the client is a voting system. Every owner of Bitshares votes to create a panel of 101 deleagtes who take turns creating blocks.
+
+The number 101 is arbitrary. The community could allow more delegates for more decentralization, but their costs would go up. They could also reduce costs at the expense of decentralization by having less than 101 delegates. 101 is the first attempt at that sweet spot and can be changed by the community at a later time.
+
+So the 30,000-foot view is that because *the number of delegate positions is limited, delegates actually compete against one another for the job*. By voluntarily lowering their salaries, delegates can attract votes, and thus, the cost of securing the network is kept in check by competition among delegates.
+
+
+
+
