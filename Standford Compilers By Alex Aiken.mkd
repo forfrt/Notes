@@ -1,0 +1,239 @@
+
+# Introduce #
+
+1. Compilers
+
+    off-line
+                                 Data
+                                  |
+                                  ¡ý
+    Program ----> Compiler ----> exec
+                                  |
+                                  ¡ý
+                                Output
+2. Interpreters
+
+    Program --->
+    Data    ---> Interpreter --> Output
+
+----
+
+- 1954, IBM develops the 704, first IBM commercial successful machine
+
+    Software cost exceeded hardwawre cost
+
+- Speedcoding
+
+    1953, John Backus
+    - Much faster to develop a program, more productive
+    - 10-20x slower than handwrite program
+    - takes 300 bytes memory, 30% memory of 704
+
+- FORTRAN I
+
+    Formulas Translated
+    1953-1957, By John Backus
+    1958, 50% Programs in FORTRAN
+    - The first successful programming language, the first compiler
+    - Led to an enorrmous body of theoretical work
+    - Modern compilers preserve the outline of FORTRAN I
+
+- Struct of FORTRAN I
+
+    1. Lexical Analysis     -->
+    2. Parsing              --> Syntactic
+    3. Semantic Analysis    --> Types, Scope
+    4. Optimization
+    5. Code Generation      --> Translation
+
+****
+
+# Structure of a Compiler #
+
+1. First step, recognize words
+
+    lexical analysis divides program text into words or tokens
+
+2. Once words are understood, the next step is to understand sentence structure
+
+    Parsing=Diagramming Sentences
+
+3. Understand meaning
+
+    This is too hard
+    Compillers perform limited semantic analysis to catch inconsistencies
+    Programming languages define strict rules to avoid such ambiguities
+    Compilers perform many semantic checks besides variable bindings
+
+4. Optimization, a little bit like editing
+
+    Automatically modify programs so that they
+    - Run faster
+    - Use less memory
+    - Power
+    - Network messages
+    - Database access
+
+5. Code Generation, Produces assembly code (usually)
+
+The overall structure of almost every compiler adheres to our outline
+The proportions have changed since FORTRAN
+
+****
+
+# The Economy of Programming Language #
+
+Why are there so many programming language?
+
+    Application domians have distinctive/conflicting needs
+    - scientific computing needs    : good Float Points, good arrays, parallelis m      FORTRAN
+    - business applications needs   : persistence, report generation, data analysis     SQL
+    - Systems programming needs     : low level control, real time constraints          C/C++
+    It is hard to design one system for all.
+
+Why are there new programming languages?
+
+    Claim: *Programmer training* is the dominant cost for a programming language.
+    1. widely-used language are slow to change.
+    2. Easy to start a new language.
+
+        If productivity > training cost, company tend to choose a new language
+
+    3. Languages adopted to fill a void.
+    4. New languages tend to look like old languages. (Java vs Cpp)
+
+What is a good programming language?
+
+    No universally accepted metric for language design
+
+****
+
+# Cool Overview #
+
+Classroom Object Oriented Language, Designed to be implementable in a short time
+
+A complete compiler
+- Cool -> MIPS assembly language
+
+5 Programming assignments (PAs)
+- Write a Cool program
+- Lexical analysis
+- Parsing
+- Semantic analysis
+- Code generation
+- Optimizations(Optional)
+
+    class Main{
+        i : IO <- new IO;
+        main():Int { { i.out_string("Hello World!\n"); 1; } };
+    };
+    
+    class Main{
+        main():Object {  (new IO).out_string("Hello World!\n")  };
+    };
+
+    class Main inherits IO{
+        main():Object {  self.out_string("Hello World!\n")  };
+    };
+
+    class Main inherits IO{
+        main():Object {  out_string("Hello World!\n")  };
+    };
+
+****
+
+# Cool Example II
+
+    class Main{
+        main(): Object{
+            (new IO).out_string((new IO).in_string().concat("\n"))
+        };
+    };
+    
+    class Main inherits A2I{
+        main(): Object{
+            (new IO).out_string(i2a(a2i((new IO).in_string())+1).concat("\n\"))
+        };
+    };
+    
+> coolc fact.cl atoi.cl
+    
+    class Main inherits A2I{
+        main(): Object{
+            (new IO).out_string(i2a(fact(a2i((new IO).in_string()))).concat("\n\"))
+        };
+    
+        fact(i: Int): Int{
+            if (i=0) then 1 else i*fact(i-1) fi
+        }
+    };
+
+fact with loop
+
+    fact(i: Int): Int{
+        let fact: Int <-1 in {
+            while (not (i=0)) loop {
+                fact <-fact *i;
+                i <- i-1;
+            } pool;
+            fact;                       //! return value is the variable fact
+        }
+    }
+
+****
+
+# Cool Example III #
+
+    class Main inherits IO {
+        main(): Object {
+            let hello: String <- "Hello ",
+                world: String <- "World!",
+                newline: String <- "\n"
+            in out_string(hello.concat(world.concat(newline)))
+        };
+    };
+
+----
+
+    class List inhertis A2I{
+        item: String;
+        next: List;
+
+        init(i: String, n: List): List{
+            {
+                item<-i;
+                next<-n;
+                self;
+            }
+        }
+
+        flatten(): String{
+            let string: String <-
+                case item of
+                    i: Int => i2a(i);
+                    s: String => s;
+                    o: Object => {abort(); "";}:                            //! Use a code block to return a String-type value
+                esac
+            if (isvoid next) then
+                string
+            else
+                string.concat(next.flatten())
+            fi
+        }
+    }
+
+    class Main inherits IO {
+        main(): Object {
+            let hello: String <- "Hello ",
+                world: String <- "World!",
+                i: Int <- 42,
+                newline: String <- "\n"
+                nil: List,                                                  //! Not inializated, used as a NULL
+                list: List <-   (new List).init(hello, 
+                                (new List).init(world, 
+                                    (new List).init(i, 
+                                    (new List).init(newline, nil)))
+            in out_string(list.flatten())
+        };
+    };
+

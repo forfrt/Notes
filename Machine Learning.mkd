@@ -1,0 +1,1520 @@
+
+# Probability
+
+## Supervised and Unsupervised Learning
+
+1. Supervised Learning:
+    1. Variable y is discrete: classification
+    2. Variable y is continuous: regression
+
+2. Unsupervised Learning: From the set of instance $(\mathbf{x}_1, y_1), \ldots, (\mathbf{x}_N, y_N)$ we only have access to $\mathbf{x}_1,\ldots, \mathbf{x}_N$.
+
+    - Find similar groups: *clustering*.
+    - Find a probability function for $\mathbf{x}$: *density estimation*.
+    - Find a lower dimensionality representation for $\mathbf{x}$: *dimensionality reduction and feature      
+      selection*.
+      
+Other types of learning: semi-supervised learning, active learning, multi-task learning.
+
+## Probability Review
+
+-   We are interested in trials which result in two random variables,
+    $X$ and $Y$, each of which has an ‘outcome’denoted by $x$ or $y$.
+
+-   We summarise the notation and terminology for these distributions in
+    the following table.
+       
+Terminology | Mathematical notation | Description
+------|:-------------:|:-------------:|
+joint | $P(X=x, Y=y)$ | probability that X=x *and* Y=y
+marginal | $P(X=x)$ | probability  that X=x *regardless of* Y
+conditional | $P(X=x$ &vert; $Y=y)$ | probability that X=x *given that* Y=y
+
+### Different Distributions
+
+- Definition of probability distributions.
+
+| Terminology             | Definition                                                   | Probability Notation                           |
+| :-----------------:     | :----------------------------------------------------------: | :------------------------------:               |
+| Joint Probability       | $\lim_{N\rightarrow\infty}\frac{n_{X=3,Y=4}}{N}$             | $P\left(X=3,Y=4\right)$                        |
+| Marginal Probability    | $\lim_{N\rightarrow\infty}\frac{n_{X=5}}{N}$                 | $P\left(X=5\right)$                            |
+| Conditional Probability | $\lim_{N\rightarrow\infty}\frac{n_{X=3,Y=4}}{n_{Y=4}}$       | $P\left(X=3\right.$ &vert; $\left. Y=4\right)$ |
+ 
+----
+ 
+### Normalization ###
+
+*All* distributions are normalized. This is clear from the fact that
+$\sum_{x}n_{x}=N$, which gives
+
+$$\sum_{x}P\left(x\right)={\lim_{N\rightarrow\infty}}\frac{\sum_{x}n_{x}}{N}={\lim_{N\rightarrow\infty}}\frac{N}{N}=1.$$
+
+A similar result can be derived for the marginal and conditional
+distributions.
+
+----
+
+### The Sum Rule
+
+Ignoring the limit in our definitions:
+
+-   The marginal probability $P\left(y\right)$ is
+    ${\lim_{N\rightarrow\infty}}\frac{n_{y}}{N}$ .
+
+
+-   The joint distribution $P\left(x,y\right)$ is
+    ${\lim_{N\rightarrow\infty}}\frac{n_{x,y}}{N}$.
+
+
+-   $n_{y}=\sum_{x}n_{x,y}$ so
+
+    $${\lim_{N\rightarrow\infty}}\frac{n_{y}}{N}={\lim_{N\rightarrow\infty}}\sum_{x}\frac{n_{x,y}}{N},$$
+
+   in other words
+   
+   $$P\left(y\right)=\sum_{x}P\left(x,y\right).$$
+   
+   This is known as the sum rule of probability.
+   
+----
+
+### The Product Rule
+
+-   $P\left(x|y\right)$ is
+    $${\lim_{N\rightarrow\infty}}\frac{n_{x,y}}{n_{y}}.$$
+
+-   $P\left(x,y\right)$ is
+    $${\lim_{N\rightarrow\infty}}\frac{n_{x,y}}{N}={\lim_{N\rightarrow\infty}}\frac{n_{x,y}}{n_{y}}\frac{n_{y}}{N}$$
+    
+    or in other words
+  
+    $$P\left(x,y\right)=P\left(x|y\right)P\left(y\right).$$
+    
+    This is known as the product rule of probability.
+    
+----
+
+### Bayes’ Rule
+
+From the product rule,
+    $$P\left(y,x\right)=P\left(x,y\right)=P\left(x|y\right)P\left(y\right),$$
+    
+so
+    $$P\left(y|x\right)P\left(x\right)=P\left(x|y\right)P\left(y\right)$$
+    
+which leads to Bayes’ rule,
+    $$
+P\left(y|x\right)=\frac{P\left(x|y\right)P\left(y\right)}{P\left(x\right)}.
+    $$
+
+****
+
+# s2_objective
+
+## Classification
+
+- In classification we take in a *feature matrix* and make predictions of *class labels* given the features. 
+- Our features are $\mathbf{x}_i$ for the $i$th data point
+- Our labels are $y_i$ which is either -1 (negative) or +1 (positive).
+
+----
+
+- predict the class label, $y_i$, given the features associated with that data point, $\mathbf{x}_i$, using the *prediction function*: 
+
+    $$f(\mathbf{x}_i) = \text{sign}\left(\mathbf{w}^\top \mathbf{x}_i + b\right)$$
+
+- Decision boundary for the classification is given by a *hyperplane*. 
+- Vector $\mathbf{w}$ is the [normal vector](http://en.wikipedia.org/wiki/Normal_(geometry)) to the hyperplane.
+- Hyperplane is described by the formula $\mathbf{w}^\top \mathbf{x} = -b$ 
+  
+----
+
+## Mathematical Drawing of Decision Boundary
+
+**Refresher**: draw a hyper plane at decision boundary.
+ - *Decision boundary*: plane where a point moves from being classified as -1 to +1. 
+ 
+ - We have
+
+   $$\text{sign}(\mathbf{w}^\top \mathbf{x}) = \text{sign}(w_0 + w_1x_{i,1} + w_2 x_{i, 2})$$
+
+   $x_{i, 1}$ is first feature $x_{i, 2}$ is second feature assume $x_{0,i}=1$. 
+   
+ 
+ - Set $w_0 = b$ we have
+ 
+   $$\text{sign}\left(w_1 x_{i, 1} + w_2 x_{i, 2} + b\right)$$
+   
+----
+
+## Equation of Plane
+
+$$\text{sign}\left(w_1 x_{i, 1} + w_2 x_{i, 2} + b\right)$$
+
+- Equation of plane is 
+  
+  $$w_1 x_{i, 1} + w_2 x_{i, 2} + b = 0$$ 
+  
+  or
+  
+    $$w_1 x_{i, 1} + w_2 x_{i, 2} = -b$$ 
+    
+- Next we will initialise the model and draw a decision boundary.
+
+----
+
+## Perceptron Algorithm
+
+- If we choose a random data point $\mathbf{x}_i$ from the dataset, we can evaluate if the current $\mathbf{w}$ and     $b$ provide a correct prediction.
+
+
+- We apply our function 
+
+  $$f(\mathbf{x}_i) = \text{sign}(\mathbf{w}^\top\mathbf{x}_i + b)$$
+
+
+- And check if the predicted value corresponds to the actual label comparing $y_i$ and $f(\mathbf{x}_i)$
+
+----
+
+### How the algorithm works?
+
+- We want to find parameters $\mathbf{w}$ and $b$ that allow a correct prediction for a datapoint $\mathbf{x}_i$.
+
+
+- We can then run an algorithm with the following rules: 
+
+    - If the vector $\mathbf{x}_i$ is correctly classified using $\mathbf{w}$ and $b$, we don't change those
+      parameters.
+        
+    - If the vector $\mathbf{x}_i$ is incorrectly classified using $\mathbf{w}$ and $b$, we change those
+      parameters by adding a correction terms.
+
+----
+
+### What is the correction term  that we add?
+
+- If the vector $\mathbf{x}_i$ is incorrectly classified as negative being positive, we add $\eta\mathbf{x}_i$ to $\mathbf{w}$ and $\eta $ to $b$.
+
+
+- If the vector $\mathbf{x}_i$ is incorrectly classified as positive being negative, we substract $\eta\mathbf{x}_i$ 
+to $\mathbf{w}$ and $\eta$ to $b$.
+
+
+- $\eta$ is known as the learning rate.
+
+----
+
+### Perceptron Reflection
+
+ - The perceptron is an algorithm. 
+ - What is it doing? When will it fail?
+ - We can explain the update equations and prove it converges (when it does!)
+ - But, where did these update equations come from? 
+ - They come from first defining an *objective function*, *perceptron criterion*, and then optimising it.
+ - An objective function is also known as loss function, error function, cost function
+
+----
+
+### Objective Functions and Regression
+
+- Classification: map feature to class label.
+- Regression: map feature to real value our *prediction function* is
+
+    $$f(x_i) = mx_i + c$$
+
+- Need an *algorithm* to fit it. 
+
+- Least squares: minimize an error.
+
+$$E(m, c) = \sum_{i=1}^n (y_i - f(x_i))^2$$
+
+----
+
+### Steepest Descent
+
+- Minimize the sum of squares error function. 
+- One way of doing that is gradient descent. 
+- Initialize with a guess for $m$ and $c$ 
+- update that guess by subtracting a portion of the gradient from the guess. 
+- Like walking down a hill in the steepest direction of the hill to get to the bottom.
+
+----
+
+### Offset Gradient
+
+- Now we need to compute the gradient of the error function, firstly with respect to $c$,
+
+  $$\frac{\text{d}E(m, c)}{\text{d} c} = -2\sum_{i=1}^n (y_i - mx_i - c)$$
+
+- This is computed in python as follows
+
+----
+
+### Slope Gradient
+
+The gradient with respect tom $m$ is similar, but now the gradient of the quadratic's argument is $-x_i$ so the gradient with respect to $m$ is
+
+$$\frac{\text{d}E(m, c)}{\text{d} m} = -2\sum_{i=1}^n x_i(y_i - mx_i - c)$$
+
+which can be implemented in python (numpy) as
+
+----
+
+### Update Equations
+
+- Now we have gradients with respect to $m$ and $c$.
+- Can update our inital guesses for $m$ and $c$ using the gradient. 
+- We don't want to just subtract the gradient from $m$ and $c$, 
+- We need to take a *small* step in the gradient direction. 
+- Otherwise we might overshoot the minimum. 
+- We want to follow the gradient to get to the minimum, the gradient changes all the time. 
+
+----
+
+### Update Equations 
+
+- The step size has already been introduced, it's again known as the learning rate and is denoted by $\eta$. 
+
+  $$c_\text{new} \leftarrow c_{\text{old}} - \eta \frac{\text{d}E(m, c)}{\text{d}c}$$ 
+
+- gives us an update for our estimate of $c$ (which in the code we've been calling `c_star` to represent a common way of writing a parameter estimate, $c^*$) and 
+
+  $$m_\text{new} \leftarrow m_{\text{old}} - \eta \frac{\text{d}E(m, c)}{\text{d}m}$$
+  
+- Giving us an update for $m$.
+
+----
+
+### Stochastic Gradient Descent
+
+- If $n$ is small, gradient descent is fine.
+- But sometimes (e.g. on the internet $n$ could be a billion).
+- Stochastic gradient descent is more similar to perceptron.
+- Look at gradient of one data point at a time rather than summing across *all* data points) 
+- This gives a stochastic estimate of gradient.
+
+----
+
+### Stochastic Gradient Descent
+
+The real gradient with respect to $m$ is given by 
+
+  $$\frac{\text{d}E(m, c)}{\text{d} m} = -2\sum_{i=1}^n x_i(y_i - mx_i - c)$$
+
+  but it has $n$ terms in the sum. Substituting in the gradient we can see that the full update is of the form
+  
+  $$m_\text{new} \leftarrow m_\text{old} + 2\eta \left[x_1 (y_1 - m_\text{old}x_1 - c_\text{old}) 
+     + (x_2 (y_2 -   m_\text{old}x_2 - c_\text{old}) + \dots + (x_n (y_n - m_\text{old}x_n - c_\text{old})\right]$$
+
+  This could be split up into lots of individual updates
+
+$$m_1 \leftarrow m_\text{old} + 2\eta \left[x_1 (y_1 - m_\text{old}x_1 - c_\text{old})\right]$$
+$$m_2 \leftarrow m_1 + 2\eta \left[x_2 (y_2 - m_\text{old}x_2 - c_\text{old})\right]$$
+$$m_3 \leftarrow m_2 + 2\eta \left[\dots\right]$$
+$$m_n \leftarrow m_{n-1} + 2\eta \left[x_n (y_n - m_\text{old}x_n - c_\text{old})\right]$$
+
+which would lead to the same final update.
+
+----
+
+### Updating $c$ and $m$
+
+- We  can present each data point in a random order, like we did for the perceptron.
+
+
+- This makes the algorithm suitable for large scale web use (recently this domain is know as 'Big Data') and algorithms like this are widely used by Google, Microsoft, Amazon, Twitter and Facebook.
+
+----
+
+### Stochastic Gradient Descent
+
+Since the data is normally presented in a random order we just can write
+
+  $$m_\text{new} = m_\text{old} + 2\eta\left[x_i (y_i - m_\text{old}x_i - c_\text{old})\right]$$
+  
+****
+
+# s3_regression
+
+## What is Machine Learning?
+
+$$ \text{data} + \text{model} = \text{prediction}$$
+
+-   $\text{data}$ : observations, could be actively or passively
+    acquired (meta-data).
+
+-   $\text{model}$ : assumptions, based on previous experience (other data!
+    transfer learning etc), or beliefs about the regularities of
+    the universe. Inductive bias.
+
+-   $\text{prediction}$ : an action to be taken or a categorization or a
+    quality score.
+
+----
+
+## Overdetermined System
+
+*Overdetermined system (more equations than unknowns): three equations and two unknowns* 
+
+----
+
+## The Gaussian Density
+
+Perhaps the most common probability density.
+
+\begin{align*}
+p(y| \mu, \sigma^2) & = \frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{(y - \mu)^2}{2\sigma^2}\right)\\
+                    & \buildrel\triangle\over = \mathcal{N}(y|\mu, \sigma^2)
+\end{align*}
+
+$\sigma^2$ is the variance of the density and $\mu$ is the mean.
+
+----
+
+### Two Important Gaussian Properties
+
+**Sum of Gaussian**
+
+-   Sum of Gaussian variables is also Gaussian.
+    
+    $$y_i \sim \mathcal{N}(\mu, \sigma^2)$$ 
+    
+    And the sum is distributed as
+    
+    $$\sum_{i=1}^{n} y_i \sim \mathcal{N}\left(\sum_{i=1}^n \mu_i,\sum_{i=1}^n \sigma_i^2\right)$$
+    
+    (*Aside*: As sum increases, sum of non-Gaussian, finite variance variables is
+    also Gaussian [central limit theorem](https://en.wikipedia.org/wiki/Central_limit_theorem).)
+    
+----
+
+### Two Important Gaussian Properties
+
+**Scaling a Gaussian**
+
+-   Scaling a Gaussian leads to a Gaussian.
+    
+    $$y \sim \mathcal{N}(\mu, \sigma^2)$$
+    
+    And the scaled density is distributed as
+    
+    $$w y \sim \mathcal{N}(w\mu,w^2 \sigma^2)$$
+    
+----
+
+## Laplace's Idea
+
+### A Probabilistic Process
+
+-   Set the mean of Gaussian to be a function.
+    
+    $$p\left(y_i|x_i\right)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp \left(-\frac{\left(y_i-f\left(x_i\right)\right)^{2}}
+    {2\sigma^2}\right).$$
+
+
+-   This gives us a ‘noisy function’.
+
+----
+
+### Height as a Function of Weight
+
+-   In the standard Gaussian, parametized by mean and variance.
+
+-   Make the mean a linear function of an *input*.
+
+-   This leads to a regression model. 
+
+    \begin{align*}
+               y_i=    &  f\left(x_i\right)+\epsilon_i,\\
+       \epsilon_i \sim &  \mathcal{N}(0, \sigma^2).
+     \end{align*}
+        
+-   Assume $y_i$ is height and $x_i$ is weight.
+
+----
+
+### Data Point Likelihood
+
+-   Likelihood of an individual data point
+    $$p\left(y_i|x_i,m,c\right)=\frac{1}{\sqrt{2\pi \sigma^2}}\exp \left(-\frac{\left(y_i-mx_i-c\right)^{2}}{2\sigma^2}\right).$$
+    
+
+-   Parameters are gradient, $m$, offset, $c$ of the function and noise
+    variance $\sigma^2$.
+    
+----
+
+### Data Set Likelihood
+
+-   If the noise, $\epsilon_i$ is sampled independently for each
+    data point.
+
+-   Each data point is independent (given $m$ and $c$).
+
+-   For independent variables:
+    $$p(\mathbf{y}) = \prod_{i=1}^n p(y_i)$$
+    $$p(\mathbf{y}|\mathbf{x}, m, c) = \prod_{i=1}^n p(y_i|x_i, m, c)$$
+----
+
+### For Gaussian 
+
+- i.i.d. assumption
+    
+    $$p(\mathbf{y}|\mathbf{x}, m, c) = \prod_{i=1}^n \frac{1}{\sqrt{2\pi \sigma^2}}\exp \left(-\frac{\left(y_i-mx_i-  
+            c\right)^{2}}{2\sigma^2}\right).$$
+            
+    $$p(\mathbf{y}|\mathbf{x}, m, c) = \frac{1}{\left(2\pi \sigma^2\right)^{\frac{n}{2}}}\exp \left(-  
+            \frac{\sum_{i=1}^n\left(y_i-mx_i-c\right)^{2}}{2\sigma^2}\right).$$
+            
+----
+
+### Log Likelihood Function
+
+-   Normally work with the log likelihood:
+    
+    $$L(m,c,\sigma^{2})=-\frac{n}{2}\log 2\pi -\frac{n}{2}\log \sigma^2 -\sum _{i=1}^{n}\frac{\left(y_i-mx_i-    
+        c\right)^{2}}{2\sigma^2}.$$
+
+----
+
+### Consistency of Maximum Likelihood
+
+
+-   If data was really generated according to probability we specified.
+
+
+-   Correct parameters will be recovered in limit as
+    $n \rightarrow \infty$.
+
+
+-   This can be proven through sample based approximations (law of large numbers) of “KL divergences”.
+
+
+-   Mainstay of classical statistics.
+
+----
+
+### Probabilistic Interpretation of the Error Function
+
+-   Probabilistic Interpretation for Error Function is Negative Log Likelihood.
+
+
+-   *Minimizing* error function is equivalent to *maximizing* log likelihood.
+
+
+-   Maximizing *log likelihood* is equivalent to maximizing the *likelihood* because $\log$ is monotonic.
+
+
+-   Probabilistic interpretation: Minimizing error function is equivalent to maximum likelihood with respect to   parameters.
+
+----
+
+### Error Function
+
+-   Negative log likelihood is the error function leading to an error function
+
+    $$E(m,c,\sigma^{2})=\frac{n}{2}\log \sigma^2 +\frac{1}{2\sigma^2}\sum _{i=1}^{n}\left(y_i-mx_i-c\right)^{2}.$$
+
+-   Learning proceeds by minimizing this error function for the data
+    set provided.
+    
+----
+
+### Connection: Sum of Squares Error
+
+-   Ignoring terms which don’t depend on $m$ and $c$ gives
+    
+    $$E(m, c) \propto \sum_{i=1}^n (y_i - f(x_i))^2$$
+    
+    where $f(x_i) = mx_i + c$.
+
+
+-   This is known as the *sum of squares* error function.
+
+
+-   Commonly used and is closely associated with the Gaussian likelihood.
+
+----
+
+## Reminder
+
+- Two functions involved:
+
+  - Prediction function: $f(x_i)$
+
+  - Error, or Objective function: $E(m, c)$
+
+
+- Error function depends on parameters through prediction function.
+
+----
+
+### Mathematical Interpretation
+
+-   What is the mathematical interpretation?
+
+    -   There is a cost function.
+
+    -   It expresses mismatch between your prediction and reality.
+        $$E(m, c)=\sum_{i=1}^n \left(y_i - mx_i -c\right)^2$$
+
+    -   This is known as the sum of squares error.
+
+----
+
+### Learning is Optimization
+
+-   Learning is minimization of the cost function.
+
+-   At the minima the gradient is zero.
+
+-   Coordinate ascent, find gradient in each coordinate and set to zero.
+    \begin{align}
+     \frac{\text{d}E(m)}{\text{d}m} &= -2\sum_{i=1}^n x_i\left(y_i- m x_i - c \right)\\
+                                   0&= -2\sum_{i=1}^n x_i\left(y_i- m x_i - c \right)
+    \end{align}                               
+
+----
+
+### Learning is Optimization
+
+- Fixed point equations
+    $$0 =
+          -2\sum_{i=1}^n x_iy_i
+          +2\sum_{i=1}^n
+            m x_i^2 +2\sum_{i=1}^n cx_i$$
+    $$m  =    \frac{\sum_{i=1}^n \left(y_i
+          -c\right)x_i}{\sum_{i=1}^nx_i^2}$$
+          
+----
+
+### Learning is Optimization
+
+-   Learning is minimization of the cost function.
+
+-   At the minima the gradient is zero.
+
+-   Coordinate ascent, find gradient in each coordinate and set to zero.
+
+     $$\frac{\text{d}E(c)}{\text{d}c} = -2\sum_{i=1}^n \left(y_i- m x_i - c \right)$$
+    
+     $$0 = -2\sum_{i=1}^n\left(y_i-m x_i - c \right)$$
+    
+----
+
+## Learning is Optimization
+
+- Fixed point equations
+    \begin{align}
+        0 &= -2\sum_{i=1}^n y_i +2\sum_{i=1}^n m x_i +2n c\\
+        c &= \frac{\sum_{i=1}^n \left(y_i-mx_i\right)}{n}
+    \end{align}    
+    
+----
+
+### Fixed Point Updates
+
+Worked example. 
+   
+   \begin{align}
+       c^{*}=&\frac{\sum _{i=1}^{n}\left(y_i-m^{*}x_i\right)}{n},\\
+       m^{*}=&\frac{\sum _{i=1}^{n}x_i\left(y_i-c^{*}\right)}{\sum _{i=1}^{n}x_i^{2}},\\
+      \left.\sigma^2\right.^{*}=&\frac{\sum _{i=1}^{n}\left(y_i-m^{*}x_i-c^{*}\right)^{2}}{n}
+  \end{align}
+  
+----
+
+### Multi-dimensional Inputs
+
+-   Multivariate functions involve more than one input.
+
+-   Height might be a function of weight and gender.
+
+-   There could be other contributory factors.
+
+-   Place these factors in a feature vector $\mathbf{x}_i$.
+
+-   Linear function is now defined as
+    $$f(\mathbf{x}_i) = \sum_{j=1}^p w_j x_{i, j} + c$$
+    
+----
+
+### Log Likelihood for Multivariate Regression
+
+-   The likelihood of a single data point is
+    $$p\left(y_i|x_i\right)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp
+        \left(-\frac{\left(y_i-\mathbf{w}^{\top}\mathbf{x}_i\right)^{2}}{2\sigma^2}\right).$$
+
+-   Leading to a log likelihood for the data set of
+    $$L(\mathbf{w},\sigma^2)= -\frac{n}{2}\log \sigma^2
+          -\frac{n}{2}\log 2\pi -\frac{\sum
+            _{i=1}^{n}\left(y_i-\mathbf{w}^{\top}\mathbf{x}_i\right)^{2}}{2\sigma^2}.$$
+
+-   And a corresponding error function of
+    $$E(\mathbf{w},\sigma^2)= \frac{n}{2}\log
+          \sigma^2 + \frac{\sum
+            _{i=1}^{n}\left(y_i-\mathbf{w}^{\top}\mathbf{x}_i\right)^{2}}{2\sigma^2}.$$
+            
+----
+
+### Expand the Brackets
+
+\begin{align*}
+  E(\mathbf{w},\sigma^2)  = & \frac{n}{2}\log \sigma^2 + \frac{1}{2\sigma^2}\sum _{i=1}^{n}y_i^{2}-\frac{1}{\sigma^2}\sum _{i=1}^{n}y_i\mathbf{w}^{\top}\mathbf{x}_i\\&+\frac{1}{2\sigma^2}\sum _{i=1}^{n}\mathbf{w}^{\top}\mathbf{x}_i\mathbf{x}_i^{\top}\mathbf{w} +\text{const}.\\
+    = & \frac{n}{2}\log \sigma^2 + \frac{1}{2\sigma^2}\sum _{i=1}^{n}y_i^{2}-\frac{1}{\sigma^2}
+  \mathbf{w}^\top\sum_{i=1}^{n}\mathbf{x}_iy_i\\&+\frac{1}{2\sigma^2} \mathbf{w}^{\top}\left[\sum
+    _{i=1}^{n}\mathbf{x}_i\mathbf{x}_i^{\top}\right]\mathbf{w} +\text{const}.
+    \end{align*}
+    
+----
+
+### Multivariate Derivatives
+
+-   We will need some multivariate calculus.
+
+-   For now some simple multivariate differentiation:
+    $$\frac{\text{d}{\mathbf{a}^{\top}}{\mathbf{w}}}{\text{d}\mathbf{w}}=\mathbf{a}$$
+    and
+    $$\frac{\mathbf{w}^{\top}\mathbf{A}\mathbf{w}}{\text{d}\mathbf{w}}=\left(\mathbf{A}+\mathbf{A}^{\top}\right)\mathbf{w}$$
+    or if $\mathbf{A}$ is symmetric (*i.e.*
+    $\mathbf{A}=\mathbf{A}^{\top}$)
+    $$\frac{\text{d}\mathbf{w}^{\top}\mathbf{A}\mathbf{w}}{\text{d}\mathbf{w}}=2\mathbf{A}\mathbf{w}.$$
+    
+----
+
+### Differentiate
+
+Differentiating with respect to the vector $\mathbf{w}$ we obtain
+$$\frac{\partial L\left(\mathbf{w},\sigma^2 \right)}{\partial \mathbf{w}}=\frac{1}{\sigma^2} \sum _{i=1}^{n}\mathbf{x}_iy_i-\frac{1}{\sigma^2} \left[\sum _{i=1}^{n}\mathbf{x}_i\mathbf{x}_i^{\top}\right]\mathbf{w}$$
+Leading to
+$$\mathbf{w}^{*}=\left[\sum _{i=1}^{n}\mathbf{x}_i\mathbf{x}_i^{\top}\right]^{-1}\sum _{i=1}^{n}\mathbf{x}_iy_i,$$
+Rewrite in matrix notation:
+$$\sum _{i=1}^{n}\mathbf{x}_i\mathbf{x}_i^\top = \mathbf{X}^\top \mathbf{X}$$
+$$\sum _{i=1}^{n}\mathbf{x}_iy_i = \mathbf{X}^\top \mathbf{y}$$
+
+----
+
+### Update Equations
+
+-   Update for $\mathbf{w}^{*}$.
+    $$\mathbf{w}^{*} = \left(\mathbf{X}^\top \mathbf{X}\right)^{-1} \mathbf{X}^\top \mathbf{y}$$
+
+-   The equation for $\left.\sigma^2\right.^{*}$ may also be found
+    $$\left.\sigma^2\right.^{{*}}=\frac{\sum _{i=1}^{n}\left(y_i-\left.\mathbf{w}^{*}\right.^{\top}\mathbf{x}_i\right)^{2}}{n}.$$
+    
+----
+
+# s4_Basis Function
+
+### Nonlinear Regression
+
+-   Problem with Linear Regression—$\mathbf{x}$ may not be linearly
+    related to $\mathbf{y}$.
+
+-   Potential solution: create a feature space: define
+    $\phi(\mathbf{x})$ where $\phi(\cdot)$ is a
+    nonlinear function of $\mathbf{x}$.
+
+-   Model for target is a linear combination of these nonlinear
+    functions
+    $$f(\mathbf{x}) = \sum_{j=1}^k w_j \phi_j(\mathbf{x})$$
+    
+----
+
+### Quadratic Basis
+
+-   Basis functions can be global. E.g. quadratic basis:
+    $$\boldsymbol{\phi} = [1, x, x^2]$$
+    
+----
+
+### Functions Derived from Quadratic Basis
+
+\begin{align}
+    f(x) &= {\color{\redColor}w_0}\phi_0(x) + {\color{\magentaColor}w_1 \phi_1(x)} + {\color{\blueColor}w_2          
+                                                                                 \phi_2(x)}\\
+         &= {\color{\redColor}w_0} \quad\;\;\;\,+ {\color{\magentaColor}w_1x} \quad\;\,+ {\color{\blueColor}w_2 x^2}
+\end{align}
+
+----
+
+### Radial Basis Functions
+
+-   Or they can be local. E.g. radial (or Gaussian) basis
+    $$\phi_j(x) = \exp\left(-\frac{(x-\mu_j)^2}{\ell^2}\right)$$
+    
+----
+
+### Functions Derived from Radial Basis
+
+$$f(x) = {\color{\redColor}w_1 e^{-2(x+1)^2}}  + {\color{\magentaColor}w_2e^{-2x^2}} + {\color{\blueColor}w_3 e^{-2(x-1)^2}}$$
+
+----
+
+### Basis Function Models
+
+-   The *prediction function* is now defined as
+    $$f(\mathbf{x}_i) = \sum_{j=1}^m w_j \phi_{i, j}$$
+    
+----
+
+## Vector Notation
+
+-   Write in vector notation,
+    $$f(\mathbf{x}_i) = \mathbf{w}^\top \boldsymbol{\phi}_i$$
+    
+----
+
+### Log Likelihood for Basis Function Model
+
+-   The likelihood of a single data point is
+    $$p\left(y_i|x_i\right)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp
+        \left(-\frac{\left(y_i-\mathbf{w}^{\top}\boldsymbol{\phi}_i\right)^{2}}{2\sigma^2}\right).$$
+
+----
+
+### Log Likelihood for Basis Function Model
+
+-   Leading to a log likelihood for the data set of
+    $$L(\mathbf{w},\sigma^2)= -\frac{n}{2}\log \sigma^2
+          -\frac{n}{2}\log 2\pi -\frac{\sum
+            _{i=1}^{n}\left(y_i-\mathbf{w}^{\top}\boldsymbol{\phi}_i\right)^{2}}{2\sigma^2}.$$
+
+----
+
+### Objective Function
+
+- And a corresponding *objective function* of the form
+    $$E(\mathbf{w},\sigma^2)= \frac{n}{2}\log
+          \sigma^2 + \frac{\sum
+            _{i=1}^{n}\left(y_i-\mathbf{w}^{\top}\boldsymbol{\phi}_i\right)^{2}}{2\sigma^2}.$$
+            
+----
+
+### Expand the Brackets
+
+$$\begin{align}
+  E(\mathbf{w},\sigma^2) =  &\frac{n}{2}\log \sigma^2 + \frac{1}{2\sigma^2}\sum _{i=1}^{n}y_i^{2}-\frac{1}{\sigma^2}\sum _{i=1}^{n}y_i\mathbf{w}^{\top}\boldsymbol{\phi}_i\\ &+\frac{1}{2\sigma^2}\sum _{i=1}^{n}\mathbf{w}^{\top}\boldsymbol{\phi}_i\boldsymbol{\phi}_i^{\top}\mathbf{w} +\text{const}.\end{align}$$
+ 
+----
+
+### Expand the Brackets
+
+ $$ \begin{align} E(\mathbf{w}, \sigma^2) = & \frac{n}{2}\log \sigma^2 + \frac{1}{2\sigma^2}\sum _{i=1}^{n}y_i^{2}-\frac{1}{\sigma^2}
+  \mathbf{w}^\top\sum_{i=1}^{n}\boldsymbol{\phi}_i y_i\\ & +\frac{1}{2\sigma^2} \mathbf{w}^{\top}\left[\sum
+    _{i=1}^{n}\boldsymbol{\phi}_i\boldsymbol{\phi}_i^{\top}\right]\mathbf{w} +\text{const}.\end{align}$$
+    
+---
+
+### Multivariate Derivatives Reminder
+
+-   We will need some multivariate calculus.
+    $$\frac{\text{d}\mathbf{a}^{\top}\mathbf{w}}{\text{d}\mathbf{w}}=\mathbf{a}$$
+    and
+    $$\frac{\text{d}\mathbf{w}^{\top}\mathbf{A}\mathbf{w}}{\text{d}\mathbf{w}}=\left(\mathbf{A}+\mathbf{A}^{\top}\right)\mathbf{w}$$
+    or if $\mathbf{A}$ is symmetric (*i.e.*
+    $\mathbf{A}=\mathbf{A}^{\top}$)
+    $$\frac{\text{d}\mathbf{w}^{\top}\mathbf{A}\mathbf{w}}{\text{d}\mathbf{w}}=2\mathbf{A}\mathbf{w}.$$
+    
+----
+
+### Differentiate
+
+Differentiating with respect to the vector $\mathbf{w}$ we obtain
+$$\frac{\text{d} E\left(\mathbf{w},\sigma^2 \right)}{\text{d} \mathbf{w}}=-\frac{1}{\sigma^2} \sum _{i=1}^{n}\boldsymbol{\phi}_iy_i+\frac{1}{\sigma^2} \left[\sum _{i=1}^{n}\boldsymbol{\phi}_i\boldsymbol{\phi}_i^{\top}\right]\mathbf{w}$$
+Leading to
+$$\mathbf{w}^{*}=\left[\sum _{i=1}^{n}\boldsymbol{\phi}_i\boldsymbol{\phi}_i^{\top}\right]^{-1}\sum _{i=1}^{n}\boldsymbol{\phi}_iy_i,$$
+
+----
+
+### Matrix Notation
+
+Rewrite in matrix notation:
+$$\sum _{i=1}^{n}\boldsymbol{\phi}_i\boldsymbol{\phi}_i^\top = \boldsymbol{\Phi}^\top \boldsymbol{\Phi}$$
+$$\sum _{i=1}^{n}\boldsymbol{\phi}_iy_i = \boldsymbol{\Phi}^\top \mathbf{y}$$
+
+----
+
+### Update Equations
+
+-   Update for $\mathbf{w}^{*}$.
+    $$\mathbf{w}^{*} = \left(\boldsymbol{\Phi}^\top \boldsymbol{\Phi}\right)^{-1} \boldsymbol{\Phi}^\top \mathbf{y}$$
+
+-   The equation for $\left.\sigma^2\right.^{*}$ may also be found
+    $$\left.\sigma^2\right.^{{*}}=\frac{\sum _{i=1}^{n}\left(y_i-\left.\mathbf{w}^{*}\right.^{\top}\boldsymbol{\phi}_i\right)^{2}}{n}.$$
+    
+----
+
+### Avoid Direct Inverse
+
+- E.g. Solve for $\mathbf{w}$
+  $$\left(\boldsymbol{\Phi}^\top \boldsymbol{\Phi}\right)\mathbf{w} = \boldsymbol{\Phi}^\top \mathbf{y}$$
+  
+- See `np.linalg.solve`
+
+- In practice use $\mathbf{Q}\mathbf{R}$ decomposition (see lab class notes).
+
+****
+
+# s5_Geeralisation
+
+### Overfitting
+- Increase number of basis functions we obtain a better 'fit' to the data.
+- How will the model perform on previously unseen data?
+- Let's consider predicting the future.
+
+----
+
+### Extrapolation
+
+- Here we are training beyond where the model has learnt.
+- This is known as *extrapolation*.
+- Extrapolation is predicting into the future here, but could be:
+    - Predicting back to the unseen past (pre 1892)
+    - Spatial prediction (e.g. Cholera rates outside Manchester given rates inside Manchester).
+
+----
+
+### Interpolation
+- Predicting the wining time for 1946 Olympics is *interpolation*.
+- This is because we have times from 1936 and 1948.
+- If we want a model for *interpolation* how can we test it?
+- One trick is to sample the validation set from throughout the data set.
+
+----
+
+### Choice of Validation Set
+
+- The choice of validation set should reflect how you will use the model in practice.
+- For extrapolation into the future we tried validating with data from the future.
+- For interpolation we chose validation set from data.
+- For different validation sets we could get different results.
+
+----
+
+### Leave One Out Error
+- Take training set and remove one point.
+- Train on the remaining data.
+- Compute the error on the point you removed (which wasn't in the training data).
+- Do this for each point in the training set in turn.
+- Average the resulting error. 
+- This is the leave one out error.
+
+----
+
+### Bias Variance Decomposition
+
+Expected test error for different variations of the *training data* sampled from, $\Pr(\mathbf{x}, y)$
+
+$$\mathbb{E}\left[ (y - f^*(\mathbf{x}))^2 \right]$$
+
+Decompose as
+
+$$\mathbb{E}\left[ (y - f(\mathbf{x}))^2 \right] = \text{bias}\left[f^*(\mathbf{x})\right]^2 + \text{variance}\left[f^*(\mathbf{x})\right] +\sigma^2$$
+
+----
+
+### Bias
+
+- Given by
+    $$\text{bias}\left[f^*(\mathbf{x})\right] = \mathbb{E}\left[f^*(\mathbf{x})\right] - f(\mathbf{x})$$
+    
+- Error due to bias comes from a model that's too simple.
+
+----
+
+### Variance
+
+- Given by
+    $$\text{variance}\left[f^*(\mathbf{x})\right] = \mathbb{E}\left[\left(f^*(\mathbf{x}) -  \mathbb{E}\left[f^*(\mathbf{x})\right]\right)^2\right]$$
+    
+- Slight variations in the training set cause changes in the prediction. Error due to variance is error in the model due to an overly complex model. 
+  
+----
+
+### $k$ Fold Cross Validation
+
+- Leave one out error can be very time consuming.
+- Need to train your algorithm $n$ times.
+- An alternative: $k$ fold cross validation.
+
+****
+
+# s6_Bayesian Regression
+
+### Two Simultaneous Equations
+
+A system of two simultaneous equations with two
+unknowns.
+
+$$\begin{aligned}
+        y_1 = & mx_1 + c\\
+        y_2 = & mx_2 + c
+      \end{aligned}$$ 
+      
+$$\begin{aligned}
+        y_1-y_2 = & m(x_1 - x_2)
+      \end{aligned}$$  
+      
+$$\begin{aligned}
+        \frac{y_1-y_2}{x_1 - x_2} = & m
+      \end{aligned}$$ 
+      
+$$\begin{aligned}
+        m & =\frac{y_2-y_1}{x_2 - x_1}\\
+        c & = y_1 - m x_1
+      \end{aligned}$$    
+      
+### Underdetermined System
+- What about two unknowns and *one* observation?
+    $$y_1 =  mx_1 + c$$     
+    
+----
+
+### Overdetermined System
+
+-   With two unknowns and two observations: 
+    $$\begin{aligned}
+          y_1 = & mx_1 + c\\
+          y_2 = & mx_2 + c
+        \end{aligned}$$
+
+-   Additional observation leads to *overdetermined* system.
+    $$y_3 =  mx_3 + c$$
+
+-   This problem is solved through a noise model
+    $\epsilon \sim \mathcal{N}(0,\sigma^2)$ $$\begin{aligned}
+          y_1 = mx_1 + c + \epsilon_1\\
+          y_2 = mx_2 + c + \epsilon_2\\
+          y_3 = mx_3 + c + \epsilon_3
+        \end{aligned}$$
+        
+----
+
+### Noise Models
+
+-   Motivation: Simple linear models are not modeling entire system.
+
+-   Noise model gives *mismatch* between model and data.
+
+-   Gaussian model is justified by appeal to central limit theorem.
+
+-   Other models also possible (Student-$t$ for heavy tails).
+
+-   Maximum likelihood with Gaussian noise leads to *least squares*.
+
+----
+
+### Different Types of Uncertainty (<span style="color:red">*optional*</span>)
+
+-   The first type of uncertainty we are assuming is
+    *aleatoric* uncertainty.
+
+-   The second type of uncertainty we are assuming is
+    *epistemic* uncertainty.
+    
+----
+
+### Aleatoric Uncertainty  (<span style="color:red">*optional*</span>)
+-   This is uncertainty we couldn’t know even if we wanted to. e.g. the
+    result of a football match before it’s played.
+
+-   Where a sheet of paper might land on the floor.
+
+----
+
+### Epistemic Uncertainty  (<span style="color:red">*optional*</span>)
+
+-   This is uncertainty we could in principal know the answer too. We
+    just haven’t observed enough yet, e.g. the result of a football
+    match *after* it’s played.
+
+-   What colour socks your lecturer is wearing.
+
+----
+
+## Bayesian Inference in the Univariate Case
+
+### Prior Distribution
+
+-   Bayesian inference requires a prior on the parameters.
+
+-   The prior represents your belief *before* you see the data of the
+    likely value of the parameters.
+
+-   For linear regression, consider a Gaussian prior on the intercept:
+    $$c \sim \mathcal{N}(0, \alpha_1)$$
+    
+----
+
+### Posterior Distribution
+
+-   Posterior distribution is found by combining the prior with
+    the likelihood.
+
+-   Posterior distribution is your belief *after* you see the data of
+    the likely value of the parameters.
+
+-   The posterior is found through **Bayes’ Rule**
+    $$p(c|y) = \frac{p(y|c)p(c)}{p(y)}$$
+    ${p(c)}$: prior
+    
+    ${p(y|c)}$: likelihood
+    
+    ${p(y)}$: marginal likelihood
+    
+    ${p(c|y)}$: posterior
+    
+----
+
+### Stages to Derivation of the Posterior
+
+-   Multiply likelihood by prior
+
+    -   They are "exponentiated quadratics", the answer is always also
+        an exponentiated quadratic because
+        $$\exp(a^2)\exp(b^2) = \exp(a^2 + b^2)$$
+
+-   Complete the square to get the resulting density in the form of
+    a Gaussian.
+
+-   Recognise the mean and (co)variance of the Gaussian. This is the
+    estimate of the posterior.
+    
+----
+
+# s7 Unsupervised Learning
+
+### Unsupervised Learning
+
+* Supervised learning is learning where each data point has a label (e.g. regression output)
+* In unsupervised learning we have no labels for the data.
+* Often thought of as structure discovery.
+    * Finding features in the data
+    * Exploratory data analysis
+* In *Nature* 2015, <img src="https://static.oschina.net/uploads/space/2018/0324/203405_LC6Y_876354.png" alt="BigThreeDL" style="width:300px;"/> 
+> We expect unsupervised learning to become far more important in the longer term. Human and animal learning is largely unsupervised: we discover the structure of the world by observing it, not by being told the name of every object!
+
+----
+
+## Clustering - $k$-means
+
+* Associate each data point, $\mathbf{y}_{i, :}$ with one of $k$ different discrete groups.
+* For example:
+    * Clustering animals into discrete groups. Are animals discrete or continuous?
+    * Clustering into different different *political* affiliations.
+* **Question**: how to determine $k$?   
+  
+----
+
+### $k$-means Clustering
+
+* Simple algorithm for allocating points to groups. 
+* *Require*: Set $k$ and a stopping criterion
+    1. Initialize cluster centres as randomly selected data points.
+    2. Assign each data point to *nearest* cluster centre (centroid).
+    3. Update each cluster centre by setting it to the mean of assigned data points.
+    4. Repeat 2 and 3 until the stopping criterion reached (e.g., cluster allocations do not change).
+
+----
+
+## Dimensionality Reduction - PCA
+### Motivation of Dimensionality Reduction: High Dimensional Data
+
+* USPS Data Set Handwritten Digit
+* 3648 dimensions (64 rows, 57 columns)
+* Space contains much more than just this digit.
+* **Question**: How many possible images of this size and bit depth?
+
+----
+
+### Low Dimensional Subspace/Manifolds
+
+* For high dimensional data with *structure*:
+    * We expect fewer variations than dimensions;
+    * Therefore we expect the data to live on a lower dimensional manifold.
+    * Conclusion: Deal with high dimensional data by looking for a lower dimensional embedding/projection/transformation.
+
+----
+
+### Principal Component Analysis
+
+* PCA (@Hotelling:analysis33) is a linear embedding.
+* Today its presented as:
+    * Rotate to find 'directions' in data with maximal variance.
+    * How do we find these directions?
+* Algorithmically we do this by diagonalizing the **sample** covariance matrix (a.k.a. scatter matrix, related to correlated Gaussian section in Session 6, rotation matrix)
+    $$
+    \mathbf{S}=\frac{1}{n}\sum_{i=1}^n \left(\mathbf{y}_{i, :}-\boldsymbol{\mu}\right)\left(\mathbf{y}_{i, :} - \boldsymbol{\mu}\right)^\top
+    $$
+* **Interesting observation**: Compare this definition with the $k$-means objective function
+
+----
+
+### Principal Component Analysis
+
+* Given data $\{\mathbf{y}\}$, PCA finds *orthogonal* directions defined by a projection $\mathbf{U}$ capturing the **maximum varience** in the data. The projected data (PCA representation) $\mathbf{x} = \mathbf{U}^\top\mathbf{y}$. Maximising the variance is equivalent to minimise the reconstruction error.
+* **Question**: given the PCA representation $\mathbf{x}$, how to obtain (an approximation/reconstruction) of $\mathbf{y}$?
+
+----
+
+# s8_Naive Bayes
+
+## Background
+
+### Classification
+
+* We are given a  data set containing 'inputs', $\mathbf{X}$ and 'targets', $\mathbf{y}$.
+* Each data point consists of an input vector $\mathbf{x}_i$ and a class label, $y_i$.
+* For binary classification assume $y_i$ should be either $1$ (yes) or $-1$ (no).
+* Input vector can be thought of as features.
+
+----
+
+### Classification Examples
+
+* Classifiying hand written digits from binary images (automatic zip code reading)
+* Detecting faces in images (e.g. digital cameras).
+* Who a detected face belongs to (e.g. Picasa, Facebook, DeepFace, GaussianFace)
+* Classifying type of cancer given gene expression data.
+* Categorization of document types (different types of news article on the internet)
+
+----
+
+### Reminder on the Term "Bayesian"
+
+* We use Bayes' rule to invert probabilities in the Bayesian approach.
+     * Bayesian is not named after Bayes' rule (v. common confusion). 
+     * The term Bayesian refers to the treatment of the parameters as stochastic variables.
+     * Proposed by @Laplace:memoire74 and @Bayes:doctrine63 independently.
+     * For early statisticians this was very controversial (Fisher et al).
+* **Question**: Is Naive Bayes presented below a Bayesian approach? (Recall the definition)
+
+----
+
+### Reminder on the Term "Bayesian"
+* The use of Bayes' rule does *not* imply you are being Bayesian.
+    * It is just an application of the product rule of probability.
+
+----
+
+## Bernoulli Naïve Bayes
+
+### Regression vs Classification
+
+* Recall: Algorithms have a *prediction* function (how to get o/p from i/p) and *objective* function (how to get the best model).
+* For regression the *codomain* of the functions, $f(\mathbf{X})$ was the real numbers or sometimes real vectors. 
+* In classification we are given an input vector, $\mathbf{x}$, and an associated label, $y$ which is a discrete value or a category  or the value $0$ or $1$. 
+* Binary classification: $y$ takes the value $0$ or $1$, a basic fundamental problem (like binary numbers for computing)
+* **Question**: If we have a binary classifier that can classifer an input into $0$ or $1$. Can we use it to some multiclass classification problems with more than two class labels? If yes, how?
+
+----
+
+### Bernoulli Distribution
+
+* Binary classification: need a probability distribution for discrete variables (*bye Gaussian for a while*). 
+* Discrete probability is in some ways easier:  $P(y=1) = \pi$ & specify distribution as a table.
+
+| The class label $y$      | Probability of 0         | Probability of 1     |
+| --- | --- | --- |
+| $P(y)$ | $(1-\pi)$ | $\pi$ |
+
+* Mathematically we use a trick to write it down as a single equation: use $y$ as a mathematical switch:
+    $$
+    P(y) = \pi^y (1-\pi)^{(1-y)}
+    $$
+This is the [Bernoulli distribution](http://en.wikipedia.org/wiki/Bernoulli_distribution). 
+
+----
+
+### Mathematical Switch
+
+* The Bernoulli distribution
+    $$
+    P(y) = \pi^y (1-\pi)^{(1-y)}
+    $$
+* Is a clever trick for switching probabilities, as code it would be
+```python
+def bernoulli(y_i, pi):
+    if y_i == 1:
+        return pi
+    else:
+        return 1-pi
+```
+
+----
+
+### Jacob Bernoulli's Bernoulli
+* Bernoulli described the Bernoulli distribution in terms of an 'urn' filled with balls.
+* There are red and black balls. There is a fixed number of balls in the urn.
+* The portion of red balls is given by $\pi$.
+
+----
+
+### Maximum Likelihood in the Bernoulli
+
+* Assume $n$ data points, $\mathbf{y}$ is a binary vector of length $n$. 
+* Assume each value was sampled independently from the Bernoulli distribution, given probability $\pi$
+$$
+p(\mathbf{y}|\pi) = \prod_{i=1}^n \pi^{y_i} (1-\pi)^{1-y_i}.
+$$
+
+----
+
+### Negative Log Likelihood
+* Minimize the negative log likelihood
+    \begin{align*}E(\pi)& = -\log p(\mathbf{y}|\pi)\\ &= -\sum_{i=1}^{n} y_i \log \pi - \sum_{i=1}^n (1-y_i) \log(1-\pi),\end{align*}
+* Take gradient with respect to the parameter $\pi$. 
+    $$\frac{\text{d}E(\pi)}{\text{d}\pi} = -\frac{\sum_{i=1}^{n} y_i}{\pi}  + \frac{\sum_{i=1}^n (1-y_i)}{1-\pi},$$
+    
+----
+
+### Fixed Point
+
+* Stationary point: set derivative to zero
+    $$0 = -\frac{\sum_{i=1}^{n} y_i}{\pi}  + \frac{\sum_{i=1}^n (1-y_i)}{1-\pi},$$
+
+* Rearrange to form
+    $$(1-\pi)\sum_{i=1}^{n} y_i =   \pi\sum_{i=1}^n (1-y_i),$$
+
+* Giving
+    $$\sum_{i=1}^{n} y_i =   \pi\left(\sum_{i=1}^n (1-y_i) + \sum_{i=1}^{n} y_i\right),$$
+    
+----
+
+### Solution
+
+* Recognise that $\sum_{i=1}^n (1-y_i) + \sum_{i=1}^{n} y_i = n$ so we have
+    $$\pi = \frac{\sum_{i=1}^{n} y_i}{n}$$
+* Estimate the probability associated with the Bernoulli by setting it to the number of observed positives, divided by the total length of $y$. 
+* Makes intiutive sense. 
+* What's your best guess of probability for coin toss is heads when you get 47 heads from 100 tosses?
+
+----
+
+### Bayes' Rule Reminder
+
+$$\text{posterior} = \frac{\text{likelihood}\times\text{prior}}{\text{marginal likelihood}}$$
+
+* Four components:
+    1. Prior distribution
+    2. Likelihood
+    3. Posterior distribution
+    4. Marginal likelihood
+
+----
+
+### Naive Bayes Classifiers
+
+* First lecture: placing probability distributions (or densities) over all the **variables** of interest.
+* **Question** Where to place probability distributions in a Bayesian treatment/approach?
+* In Naive Bayes this is exactly what we do.
+* Form a classification algorithm by modelling the *joint* density of our observations. 
+* Need to make assumption about joint density.
+
+----
+
+### Assumptions about Density
+
+* Make assumptions to reduce the number of parameters we need to optimise. 
+* Given label data $\mathbf{y}$ and the inputs $\mathbf{X}$ could specify joint density of all potential values of $\mathbf{y}$ and $\mathbf{X}$, $p(\mathbf{y}, \mathbf{X})$. 
+* If $\mathbf{X}$ and $\mathbf{y}$ are training data.
+* If $\mathbf{x}^*$ is a test input and $y^*$ a test label we want
+$$
+p(y^*|\mathbf{X}, \mathbf{y}, \mathbf{x}^*),
+$$ 
+
+----
+
+### Answer from Rules of Probability
+
+* Compute this distribution using the product and sum rules. 
+
+* Need the probability associated with all possible combinations of $\mathbf{y}$ and $\mathbf{X}$. 
+
+* There are $2^n$ possible combinations for the vector $\mathbf{y}$ (**make sure you know why**)
+
+* **The challenge**: What we need to solve the problem
+    * Probability for each of these $2^n$ combinations must be jointly specified along with the joint density of the matrix $\mathbf{X}$
+        * **Try**: If n=10, 100, 1000, 10000, how many combinations are there?
+    * Also need to *extend* the density for any chosen test location $\mathbf{x}^*$. 
+      
+----
+
+### Naive Bayes Assumptions
+
+* In naive Bayes we make certain simplifying assumptions that allow us to perform all of the above in practice. 
+
+1. Data Conditional Independence
+2. Feature conditional independence
+3. Marginal density for $y$.
+
+----
+
+### Data Conditional Independence
+
+* Given model parameters $\boldsymbol{\theta}$ we assume that all data points in the model are **independent**. 
+$$
+p(y^*, \mathbf{x}^*, \mathbf{y}, \mathbf{X}|\boldsymbol{\theta}) = p(y^*, \mathbf{x}^*|\boldsymbol{\theta})\prod_{i=1}^n p(y_i, \mathbf{x}_i | \boldsymbol{\theta}).
+$$
+* This is a conditional independence assumption.
+* We made similar assumptions for regression (where $\boldsymbol{\theta} = \left\{\mathbf{w},\sigma^2\right\}$.
+* Here we assume *joint* density of $\mathbf{y}$ and $\mathbf{X}$ is independent across the data given the model parameters.
+
+----
+
+### Bayes Classifier
+
+Computing posterior distribution in this case becomes easier, this is known as the 'Bayes classifier'.
+
+----
+
+### Feature Conditional Independence
+
+* Particular to naive Bayes: assume *features* are also conditionally independent, given param *and* the label. 
+    $$p(\mathbf{x}_i | y_i, \boldsymbol{\theta}) = \prod_{j=1}^p p(x_{i,j}|y_i, \boldsymbol{\theta})$$
+  where $p$ is the dimensionality of our inputs.
+* This is known as the *naive Bayes* assumption.
+* Bayes classifier + feature conditional independence.
+
+----
+
+### Marginal Density for $y_i$
+
+* To specify the joint distribution we also need the marginal for $p(y_i)$
+    $$p(x_{i,j},y_i| \boldsymbol{\theta}) = p(x_{i,j}|y_i, \boldsymbol{\theta})p(y_i).$$
+* Because $y_i$ is binary the *Bernoulli* density makes a suitable choice for our prior over $y_i$,
+    $$p(y_i|\pi) = \pi^{y_i} (1-\pi)^{1-y_i}$$
+  where $\pi$ now has the interpretation as being the *prior* probability that the classification should be positive. 
+  
+----
+
+### Joint Density for Naive Bayes
+
+This allows us to write down the full joint density of the training data,
+$$
+p(\mathbf{y}, \mathbf{X}|\boldsymbol{\theta}, \pi) = \prod_{i=1}^n \prod_{j=1}^p p(x_{i,j}|y_i, \boldsymbol{\theta})p(y_i|\pi)
+$$
+which can now be fit by maximum likelihood. 
+
+----
+
+### Maximum Likelihood
+
+As normal we form our objective as the negative log likelihood,
+$$
+E(\boldsymbol{\theta}, \pi) = -\log p(\mathbf{y}, \mathbf{X}|\boldsymbol{\theta}, \pi) = -\sum_{i=1}^n \sum_{j=1}^p \log p(x_{i, j}|y_i, \boldsymbol{\theta}) - \sum_{i=1}^n \log p(y_i|\pi),
+$$
+which we note *decomposes* into two objective functions, one which is dependent on $\pi$ alone and one which is dependent on $\boldsymbol{\theta}$ alone so we have,
+$$
+E(\pi, \boldsymbol{\theta}) = E(\boldsymbol{\theta}) + E(\pi).
+$$
+
+* We can minimise them separately.
+
+----
+
+### Fit Prior
+
+* We can minimize prior. For Bernoulli likelihood over the labels we have, 
+    $$
+    E(\pi) = - \sum_{i=1}^n\log p(y_i|\pi) = -\sum_{i=1}^n y_i \log \pi - \sum_{i=1}^n (1-y_i) \log (1-\pi)
+    $$
+* Solution from above (see earlier derivation) is
+    $$
+    \pi = \frac{\sum_{i=1}^n y_i}{n}.
+    $$
+    
+----
+
+### Fit Conditional 
+
+* Minimize conditional distribution:
+    $$
+    E(\boldsymbol{\theta}) = -\sum_{i=1}^n \sum_{j=1}^p \log p(x_{i, j} |y_i, \boldsymbol{\theta}),
+    $$
+
+* Implies making an assumption about its form.
+* The right assumption will depend on the data. 
+* E.g. for real valued data, use a Gaussian
+    $$
+    p(x_{i, j} | y_i,\boldsymbol{\theta}) = \frac{1}{\sqrt{2\pi \sigma_{y_i,j}^2}} \exp \left(-\frac{(x_{i,j} - \mu_{y_i, j})^2}{\sigma_{y_i,j}^2}\right),
+    $$
+    
+----
+
+## Making Predictions
+
+Naive Bayes has given us the class conditional densities: $p(\mathbf{x}_i | y_i, \boldsymbol{\theta})$. To make predictions with these densities we need to form the distribution given by
+$$
+P(y^*| \mathbf{y}, \mathbf{X}, \mathbf{x}^*, \boldsymbol{\theta})
+$$
+
+----
+
+### Compute Posterior for Test Point Label
+
+* We know that
+    $$
+    P(y^*| \mathbf{y}, \mathbf{X}, \mathbf{x}^*, \boldsymbol{\theta})p(\mathbf{y}, \mathbf{X}, \mathbf{x}^*|\boldsymbol{\theta}) = p(y*, \mathbf{y}, \mathbf{X}, \mathbf{x}^*| \boldsymbol{\theta})
+    $$
+* This implies
+    $$
+        P(y^*| \mathbf{y}, \mathbf{X}, \mathbf{x}^*, \boldsymbol{\theta}) = \frac{p(y*, \mathbf{y}, \mathbf{X}, \mathbf{x}^*| \boldsymbol{\theta})}{p(\mathbf{y}, \mathbf{X}, \mathbf{x}^*|\boldsymbol{\theta})}
+    $$
+    
+****
+
+# s9_Logistic Regression
+
+## Overview
+### Session 8 - Naive Bayes
+
+* Naive Bayes classifier
+* Numerical issues due to multiplication of probabilities: use **log**, use [Laplace smoothing](https://en.wikipedia.org/wiki/Additive_smoothing) (also in Session 8 notebook, search keywords).
+
+### This session
+* Logistic regression: direct estimation of the probability for each class. Note: a **classification** rather than regression algorithm.
+* Why stay *linear*: scalability (speed), interpretation, model complexity
+* Two **default** linear classifier in Matlab: logistic regression (LR) and linear SVM
+* For your possible interest only: [Watch: Conditional Logistic Regression Applied to Predicting Horse Race Winners in Hong Kong](https://www.youtube.com/watch?v=5gW0PO7g6pY)
+* For your possible interest only: [Kaggle Competition: Hong Kong Horse Racing Results 2014-17 Seasons](https://www.kaggle.com/lantanacamara/hong-kong-horse-racing) with notebook, code, data, discussions. Happy exploring!
+* Many examples (with notebooks) at [sklearn.linear_model.LogisticRegression](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html)
+
+----
+
+## Logistic Regression  
+
+### Log Odds
+
+* Model the *log-odds* with the basis functions.
+* [odds](http://en.wikipedia.org/wiki/Odds) are defined as the ratio of the probability of a positive outcome, to the probability of a negative outcome. 
+* Probability is between zero and one, odds are:
+    $$ \frac{\pi}{1-\pi} $$
+* Odds are between $0$ and $\infty$. 
+* Logarithm of odds maps them to $-\infty$ to $\infty$.<img src="diagrams/log1.png" align="middle" alt="Source: http://portal.tpu.ru:7777/SHARED/k/KONVAL/Sites/English_sites/Site3_M/img/log1.png" style="width:150px;"/>
+
+----
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

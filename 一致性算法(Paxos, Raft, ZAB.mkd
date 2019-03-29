@@ -1,0 +1,156 @@
+
+# 什么是一致性
+
+CAP Theorem
+
+对于一个分布式系统, 不能同时满足一下三点:
+1. 一致性(Consistency)
+2. 可用性(Availability)
+3. 分区容错性(Partition Tolerance)
+
+# 一致性模型
+1. 弱一致性
+    - 最终一致性
+        1. DNS(Domain Name System)
+        2. Gossip(Cassandra的通信协议)
+1. 强一致性
+    1. 同步
+    2. Paxos
+    3. Raft(multi-paxos)
+    4. ZAB(multi-paxos)
+
+# 首先 -- 明确问题
+
+数据不能存在单点上.
+
+分布式系统对fault tolorence的一般解决方案是state machine replication
+
+其实我们今天讨论的准确的说, 应该是state machine replication的共识(consensus)算法
+
+paxos其实是一个共识算法. 系统的最终一致性, 不仅需要达到共识, 还会取决于client的行为.
+
+# 强一致性算法 -- 主从同步
+
+主从同步复制
+1. master接受写请求
+2. master复制日志至slave
+3. master等待, 直到所有从库返回
+
+问题:
+一个节点失败, master阻塞, 导致整个集群不可用, 保证了一致性, 可用性却大大降低
+
+# 强一致性算法 -- 多数派
+
+多数派, 每次写都保证写入大于N/2个节点, 每次读保证从大于N/2个节点中读
+
+但是, 在并发环境下, 无法保证系统正确性, 顺序非常重要
+
+    Inc 5 --> 0       0       0 <-- Set 0
+        Inc 5 | Inc 5 | Set 0 |
+        Set 0 | Set 0 | Inc 5 |
+              0       0       5
+
+# 强一致性算法 -- Paxos
+
+Lesile Lamport, Latex的发明者
+
+1. Basic Paxos
+2. Multi Paxos
+3. Fast Paxos
+
+## 角色介绍
+1. client 系统外部角色, 请求发起者.
+2. proposer 介绍client请求, 向集群发起提议. 并在冲突发生时, 起到冲突调解的作用.
+3. Acceptor 替票头片和接受者, 只有当行程法定人数(Quorum, 一般是majority)时, 提议才会最终被介绍.
+4. Learner 提议接受者, backup, 备份, 对集群一致性没什么影响
+
+## 步骤
+
+1. Phase 1a: Prepare
+
+    proposer提出一个提案, 编号为N, 此N大于这个proposer之前提出的提案编号, 请求acceptors的quorum接受
+2. Phase 1b: Promise
+
+    如果N大于此acceptor之前接受的任何提案编号则接受, 否则拒绝
+3. Phase 2a: Accept
+
+    如果达到了多数派, proposer会发出accept请求, 此请求包括提案编号N, 以及提案内容
+4. Phase 2b: Accepted
+
+    如果此acceptor在此期间没有收到任何编号大于N的提案, 则接受此提案内容, 否则忽略
+
+Title: Basic Paxos基本流程
+Client->Proposer: Request
+Proposer->Acceptor: Prepare(1)
+Acceptor->Proposer: Promise(1, {Va, Vb, Vc})
+Proposer->Acceptor: Accept!(1, Vn)
+Acceptor->Proposer: Accepted(1, Vn)
+Acceptor->Learner: Accepted(1, Vn)
+Learner->Client: Response
+
+> 潜在问题, 活锁liveness或dueling, 可以在实现之中通过添加timeout来实现
+
+Basic Paxos的问题:
+难实现, 效率低(2轮RPC), 活锁
+
+Multi Paxos:
+新概念, Leader: 唯一的proposer, 所有请求都需经过此Leader
+
+Title: Multi Paxos基本流程
+
+---First Requests---
+Client->Proposer: Request
+Proposer->Accetpor: Prepare(N)
+Acceptor->Proposer: Promise(N, I, {Va, Vb, Vc}), Leader竞选结束
+Proposer->Accetpor: Accept!(N, I, Vm))
+Acceptor->Proposer: Accepted(N, I, Vm)
+Acceptor->Learner: Accepted(N, I, Vm)
+Learner->Client: Response
+
+---Following Requests---
+Client->Proposer: Request
+Proposer->Acceptor: Accept!(N, I+1, W)
+Accetpor->Proposer: Accepted(N, I+1, W)
+Accetpor->Proposer: Accepted(N, I+1, W)
+Learner->Client: Response
+
+在Leader竞选之后, 之后的提案都只需要一轮RPC
+
+减少角色, 进一步简化
+
+Client->Serversa: Request
+Client->Serversb: Request
+Client->Serversc: Request
+Serversa->Serversb: Prepare(N)
+Serversa->Serversc: Prepare(N)
+Serversb->Serversa: Promise(N, I, {Va, Vb})
+Serversc->Serversa: Promise(N, I, {Va, Vb})
+Serversa->Serversb: Accept!(N, I, Vn)
+Serversa->Serversc: Accept!(N, I, Vn)
+Serversb->Serversa: Accepted(N, I)
+Serversc->Serversa: Accepted(N, I)
+Serversa->Client: Response
+
+----
+
+# 强一致性算法 -- Raft
+
+Raft
+- 划分为三个子问题:
+    - Leader Election
+    - Log Replication
+    - Safety
+- 重定义角色
+    - Leader
+    - Follower
+    - Candidate
+
+- 场景测试: https://raft.github.io
+
+
+
+
+
+
+
+

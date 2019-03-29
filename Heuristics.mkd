@@ -1,0 +1,12 @@
+# How can one define low level heuristics in the sense of hyper heuristics? #
+
+Hyperheuristics could be regarded as high-level heuristics to select or generate low-level heuristics. The high-level heuristics may be metaheuristics such as tabu search and evolutionary algorithms, and the low-level heuristics may be some simple rules for selecting solution components or neighborhood functions for modifying solutions.
+Taking job scheduling as an example, we have some prior knowledge and experience on selecting jobs and describe these knowledge as so-called dispatching rules such as first-come-first-serve (FCFS), shortest-processing-time-first (SPT), earliest-due-date-first (EDD),and so on. The problem is that we do not know when to use which rule. In this case, we may use an evolutionary algorithm to find out a near-optimal combination of the use of rules. Here, the evolutionary algorithm is the high-level heuristic to select the dispatching rules (i.e. low-level heuristics).
+Another scenario, we are solving the job scheduling problem by a local search algorithm. Since job scheduling is a permutation optimizatio problem, we may use neighborhood functions such as insertion, swap, inversion, and so on. Different neighborhood functions have their pros and cons. Thus, we need a mechanism to select among these operators. Again, we develop a high-level selection heuristic to select the low-level neighborhood functions and then have a hyperheuristic algorithm.
+You may want to check Prof. Kendall's publications for more information about how hyperheuristics are applied for various problems including scheduling, timetabling, packing, and so on. They could provide more senses of defining low-level heuristics.
+http://www.graham-kendall.com/publications/index.php?type=hyper-heuristic
+Hope my information is useful to you.
+
+----
+
+

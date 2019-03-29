@@ -1,0 +1,66 @@
+#
+
+
+# Mole #
+
+- sharing course material
+- a discussion board
+
+The slides for the Lectures and the Lab Notebooks are in:
+http://inverseprobability.com/mlai2015
+
+# Introduction to Machine learning and Probability #
+
+ Course Text: 
+- A first course in machine learning
+- Pattern recognition and Machine learning
+- Machine Learin: A probobilistic Perspective
+- Hands-on Machine Learning with Scikit-Learn & TensorFlow
+
+- A model that help us to solve a prediction problem.
+- The model is built using a dataset.
+- The ultimate goals is to extract knowledge from data.
+
+Examples:
+- Digital Number recognition
+- Face Detection and Face Recognition
+- Predicting The Age of A Person
+- Stock Market
+- Clustering
+- Autoclass
+- Recommendation Systems
+
+# Supervised Learning and Unsupervised Learning #
+
+# Probability Review
+
+|Terminology|Mathematical notation|Description|
+|joint|P(X=x, Y=y)|probability that X=x and Y=y|
+|marginal|P(X=x)|probability that X=x regardless of Y|
+|conditional|P(X=x\|Y=y)|probability that X=x given that Y=y|
+
+## The Sum Rule ##
+
+`P(y)=\Sum`
+
+## The Product Rule ##
+
+`P(x, y)=P(x|y)*P(y)`
+
+## Bayes' Rule ##
+
+`P(y|x)=P(x|y)*P(y)/P(x)`
+
+
+
+
+
+
+
+
+
+
+
+
+
+

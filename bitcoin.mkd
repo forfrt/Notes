@@ -1,0 +1,649 @@
+
+#Table of Content
+
+<!-- vim-markdown-toc GFM -->
+
+* [比特币源码学习笔记（一）](#比特币源码学习笔记一)
+    * [前言](#前言)
+    * [第一章](#第一章)
+    * [Ctrasaction类](#ctrasaction类)
+    * [uint256和uint160类](#uint256和uint160类)
+    * [SendMoney()](#sendmoney)
+* [CreateTransaction()](#createtransaction)
+    * [SignSignature()](#signsignature)
+    * [ScriptHash()](#scripthash)
+    * [Hash()](#hash)
+    * [Solver()](#solver)
+    * [带有2个参数的solver()](#带有2个参数的solver)
+
+<!-- vim-markdown-toc -->
+
+****
+
+#比特币源码学习笔记（一）
+
+##前言
+
+本文所引用的源码均来自原始版比特币客户端，即由中本聪发布的第一版源码。该客户端包括大约16000行代码。尽管经过数年的发展，比特币客户端经过了几次较大更新，其数据结构和原理从诞生之日起一直延续至今。本文会尽可能保证文字的严谨准确，表达当中难免会产生疏漏，欢迎指正.
+
+##第一章
+
+本章节讲述比特币客户端是怎样生成比特币地址，并创建新的交易。
+
+GenerateNewKey()方法，该方法位于main.cpp。
+
+    bool AddKey(const CKey& key)
+    {
+        CRITICAL_BLOCK(cs_mapKeys)
+        {
+            mapKeys[key.GetPubKey()] = key.GetPrivKey();
+            mapPubKeys[Hash160(key.GetPubKey())] = key.GetPubKey();
+        }
+        return CWalletDB().WriteKey(key.GetPubKey(), key.GetPrivKey());
+    }
+    
+    vector<unsigned char> GenerateNewKey()
+    {
+        CKey key;
+        key.MakeNewKey();
+        if (!AddKey(key))
+            throw runtime_error("GenerateNewKey() : AddKey failed\n");
+        return key.GetPubKey();
+    }
+
+1. 首先建立一个新的CKey类型对象。
+1. 调用addKey()方法将新建的key添加至
+    1. 全局映射mapKeys （第5行）
+    2. 全局map mapPubKeys（第6行）
+    3. 钱包数据库wallet.dat（第8行）。
+
+    > mapKeys建立公钥与私钥的一一对应关系。
+    > mapPubKeys建立公钥的hash和公钥本身的对应关系。
+
+1. 返回公钥（第16行）。
+
+    该公钥为未压缩的格式，属于OpenSSL标准格式之一。在得到公钥之后，比特币客户端会将该公钥传递至PubKeyToAddress()并调用Hash160ToAddress()方法生成地址。最后返回的Base58编码字符串值便是一个新生成的比特币地址。Base58由1-9和除i，l，0，o之外的英文字符组成。
+
+##Ctrasaction类
+
+CTransaction的定义位于main.h。在比特币当中，*所谓币的概念其实是一系列交易Tx的组合*。这种方式虽然实现起来更为复杂，却提高了比特币的安全性。用户可以为每一笔交易创建一个新的地址，地址在使用一次之后可以立即作废。因此，CTransaction是比特币客户端最重要的类之一。
+
+    class CTransaction
+    {
+    public:
+        int nVersion;
+        vector<CTxIn> vin;
+        vector<CTxOut> vout;
+        int nLockTime;
+        //......
+    }
+
+CTransaction包含两个容器类型：输入交易vin和输出交易vout。每个vin由若干CTxIn对象组成，每个vout则由CTxOut组成。
+
+一笔交易Tx可以拥有任意笔输入交易。每笔交易Tx的输入交易（CTxIn类）包含一个COutPoint对象prevout，*该对象引用另外一笔交易Tx的输出交易作为来源交易*。来源交易使当前交易Tx从另一笔交易当中得到可花费的比特币。
+
+任何交易均由一个256位uint256哈希作为其唯一识别。若要引用某一笔来源交易TxSource当中某个特定的输出交易，*我们需要两种信息：TxSource的哈希，和该输出交易在输出交易当中的位置n*。这两种信息构成COutPoint类。
+
+一个COutPoint对象指向来源交易的某一笔输出交易TxSource.vout[n]。如果该笔输出交易被另外一笔交易Tx的位置i的输入交易所引用，例如Tx.vin[i].prevout，我们将其称为Tx的第i笔输入交易花费了TxSource中的第n笔输出交易。
+
+----
+
+##uint256和uint160类
+
+这两种类型的定义位于uint.h。一个uint256类包含有一个256位的哈希。它由一个长度为256/32=8的unsigned int数组构成。一个相似的数据结构是uint160，该结构的定义可在同一个文件当中找到。既然SHA-256的长度为256bit，读者不难推断出uint160的作用是存放RIPEMD-160哈希。uint256和uint160均由base_uint类继承而来。
+
+    class base_uint {
+    protected:
+        enum { WIDTH = BITS / 32 };
+        unsigned int pn[WIDTH];
+    
+    public:
+        bool operator!() const
+        {
+            for (int i = 0; i < WIDTH; i++)
+                if (pn[i] != 0)
+                    return false;
+            return true;
+        }
+        //......
+        unsigned int GetSerializeSize(int nType = 0, int nVersion = VERSION) const
+        {
+            return sizeof(pn);
+        }
+    
+        template <typename Stream>
+        void Serialize(Stream& s, int nType = 0, int nVersion = VERSION) const
+        {
+            s.write((char*)pn, sizeof(pn));
+        }
+    
+        template <typename Stream>
+        void Unserialize(Stream& s, int nType = 0, int nVersion = VERSION)
+        {
+            s.read((char*)pn, sizeof(pn));
+        }
+    }
+
+该类重载了若干运算符。此外该类拥有3个序列化成员函数，GetSerializeSize()、Serialize()和Unserialize()。我们会在后面讲到这三种方法是如何工作的。
+
+----
+
+##SendMoney()
+
+该方法位于main.cpp。以下是该方法的源码：
+
+    bool SendMoney(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew)
+    {
+        CRITICAL_BLOCK(cs_main)
+        {
+            int64 nFeeRequired;
+            if (!CreateTransaction(scriptPubKey, nValue, wtxNew, nFeeRequired))
+            {
+                string strError;
+                if (nValue + nFeeRequired > GetBalance())
+                    strError = strprintf("Error: This is an oversized transaction that requires a transaction fee of %s ", FormatMoney(nFeeRequired).c_str());
+                else
+                    strError = "Error: Transaction creation failed ";
+                wxMessageBox(strError, "Sending...");
+                return error("SendMoney() : %s\n", strError.c_str());
+            }
+            if (!CommitTransactionSpent(wtxNew))
+            {
+                wxMessageBox("Error finalizing transaction", "Sending...");
+                return error("SendMoney() : Error finalizing transaction");
+            }
+    
+            printf("SendMoney: %s\n", wtxNew.GetHash().ToString().substr(0,6).c_str());
+    
+            // Broadcast
+            if (!wtxNew.AcceptTransaction())
+            {
+                // This must not fail. The transaction has already been signed and recorded.
+                throw runtime_error("SendMoney() : wtxNew.AcceptTransaction() failed\n");
+                wxMessageBox("Error: Transaction not valid", "Sending...");
+                return error("SendMoney() : Error: Transaction not valid");
+            }
+            wtxNew.RelayWalletTransaction();
+        }
+        MainFrameRepaint();
+        return true;
+    }
+
+----
+
+当用户发送比特币到某一个地址时，比特币客户端会调用SendMoney()方法。该方法包含三个参数：
+
+1. scriptPubKey包含脚本代码OP_DUP OP_HASH160 <收款人地址160位哈希> OP_EQUALVERIFY OP_CHECKSIG。
+2. nValue表示将要转账的金额。该金额并未包含交易费nTrasactionFee。
+3. wtxNew是一个CWalletTx类的本地变量。该变量目前的值为空，之后会包含若干CMerkleTX类对象。该类由CTransaction衍生而来，并且添加了若干方法。我们暂时先不管具体细节，仅将其看作CTransaction类。
+
+该方法的流程显而易见：
+
+1. 首先建立一笔新的交易（CreateTransaction(scriptPubKey, nValue, wtxNet, nFeeRequired)，第6行）。
+1. 尝试将这笔交易提交至数据库（CommitTransactionSpent(wtxNet)，第16行）。
+1. 如果该笔交易提交成功（wtxNew.AcceptTransaction()，第23行），将其广播至其他peer节点（wtxNew.RelayWalletTransaction()，第30行）。
+
+这四个方法都与wtxNew相关。我们在本章介绍了第一个，其余三个将会在后续文章中介绍。
+
+----
+
+#CreateTransaction()
+
+该方法位于main.cpp。以下是该方法的源码：
+
+    bool CreateTransaction(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew, int64& nFeeRequiredRet)
+    {
+        nFeeRequiredRet = 0;
+        CRITICAL_BLOCK(cs_main)
+        {
+            // txdb must be opened before the mapWallet lock
+            CTxDB txdb("r");
+            CRITICAL_BLOCK(cs_mapWallet)
+            {
+                int64 nFee = nTransactionFee;
+                loop
+                {
+                    wtxNew.vin.clear();
+                    wtxNew.vout.clear();
+                    if (nValue < 0)
+                        return false;
+                    int64 nValueOut = nValue;
+                    nValue += nFee;
+    
+                    // Choose coins to use
+                    set<CWalletTx*> setCoins;
+                    if (!SelectCoins(nValue, setCoins))
+                        return false;
+                    int64 nValueIn = 0;
+                    foreach(CWalletTx* pcoin, setCoins)
+                        nValueIn += pcoin->GetCredit();
+    
+                    // Fill vout[0] to the payee
+                    wtxNew.vout.push_back(CTxOut(nValueOut, scriptPubKey));
+    
+                    // Fill vout[1] back to self with any change
+                    if (nValueIn > nValue)
+                    {
+                        // Use the same key as one of the coins
+                        vector<unsigned char> vchPubKey;
+                        CTransaction& txFirst = *(*setCoins.begin());
+                        foreach(const CTxOut& txout, txFirst.vout)
+                            if (txout.IsMine())
+                                if (ExtractPubKey(txout.scriptPubKey, true, vchPubKey))
+                                    break;
+                        if (vchPubKey.empty())
+                            return false;
+    
+                        // Fill vout[1] to ourself
+                        CScript scriptPubKey;
+                        scriptPubKey << vchPubKey << OP_CHECKSIG;       //! 这里填充的公钥 OP_CHECKSIG就是SignSignature中用到的scriptCode
+                        wtxNew.vout.push_back(CTxOut(nValueIn - nValue, scriptPubKey));
+                    }
+    
+                    // Fill vin
+                    foreach(CWalletTx* pcoin, setCoins)
+                        for (int nOut = 0; nOut < pcoin->vout.size(); nOut++)
+                            if (pcoin->vout[nOut].IsMine())
+                                wtxNew.vin.push_back(CTxIn(pcoin->GetHash(), nOut));
+    
+                    // Sign
+                    int nIn = 0;
+                    foreach(CWalletTx* pcoin, setCoins)
+                        for (int nOut = 0; nOut < pcoin->vout.size(); nOut++)
+                            if (pcoin->vout[nOut].IsMine())
+                                SignSignature(*pcoin, wtxNew, nIn++);       //! nIn的分配方式与上面的fill vin一直
+    
+                    // Check that enough fee is included
+                    if (nFee < wtxNew.GetMinFee(true))
+                    {
+                        nFee = nFeeRequiredRet = wtxNew.GetMinFee(true);
+                        continue;
+                    }
+    
+                    // Fill vtxPrev by copying from previous transactions vtxPrev
+                    wtxNew.AddSupportingTransactions(txdb);
+                    wtxNew.fTimeReceivedIsTxTime = true;
+    
+                    break;
+                }
+            }
+        }
+        return true;
+    }
+
+调用该方法时，它所需要的四个参数如下：
+
+1. scriptPubKey包含脚本代码OP_DUP OP_HASH160 <收款人地址160位哈希> OP_EQUALVERIFY OP_CHECKSIG。
+1. nValue是将要转账的数额，交易费nTransactionFee并未包括在内。
+1. wtxNew是一个新的Tx实例。
+1. nFeeRequiredRet是一笔用来支付交易费的输出交易，在该方法执行完成之后获得。
+
+该方法的流程如下：
+
+    定义一个本地变量nValueOut = nValue来保存将转账的金额（第17行）。将nValue与交易费nFee相加得到新的包含转账费的nValue。
+    执行位于第21行的SelectCoins(nValue, setCoins)得到一系列币，并放入setCoins。setCoins包含支付给你本人地址的交易，即你所拥有的币。这些交易将成为wtxNew的来源交易。
+    执行位于第27行的wtxNew.vout.push_back(CTxOut (nValueOut,sciptPubKey))并添加一笔输出交易至wtxNew。该笔输出将支付给<收款人地址160位哈希>（包含在scriptPubKey里面）数量为的币。
+    如果需要找零（nValueIn > nValue），添加另一笔输出交易至wtxNew并将零钱发回本人。该过程包含以下步骤：
+        从setCoin当中获取第一笔交易txFirst，依次检查txFirst.vout中的交易是否属于本人。如果是则从该笔输出交易当中提取出公钥，并放入本地变量vchPubKey
+        将vchPubKey放入脚本vchPubKey OP_CHECKSIG，并使用这段脚本代码为wtxNew添加一个支付给本人的输出交易（第45行）。
+        因为setCoins包含支付给本人的交易，所以每笔交易一定包括至少一笔支付给本人的交易。从第一笔交易txFirst中即可找到。
+    至此，wtxNew的输出交易容器vout已准备就绪。现在，该设置输入交易容器vin。记住每一个输入交易列表vin均引用一笔来源交易，而且wtxNew的每笔来源交易均可在setCoins中被找到。对于每一笔setCoins中的交易pcoin，逐个遍历其输出交易pcoin->vout[nOut]。如果第nOut笔输出支付给本人（意味着wtxNew从该笔输出交易中获得币），则向wtxNew添加一笔新的输入交易（wtxNew.vin(wtxNew.vin.push_back(CTxIn(pcoin->GetHash(), nOut))，第51行)。该输入交易指向pcoin中的第nOut笔输出交易，由此将wtxNew.vin与pcoin的第nOut笔输出相连接。
+    对于setCoins当中的每笔交易pcoin，逐个遍历其所有输出交易pcoin->vout[nOut]。如果该笔交易属于本人，调用SignSignature(*pcoin,wtxNew, nIn++)为第nIn笔输入交易添加签名。注意nIn为wtxNew的输入交易位置。
+    如果交易费nFee小于wtxNet.GetMinFee(true)，将nFee设为后者，清空wtxNew中的所有数据并重新开始整个过程。在位于第11行的第一次迭代当中，nFee是全局变量nTransactionFee = 0的本地复制。
+    如果你不明白为什么要如此费力地重新添满wtxNew，源码中的GetMinFee()提供了答案：交易的最低费用与交易的数据大小有关。wtxNew的大小只有在完整构建之后才可得知。如果wtxNew.GetMinFee(true)计算得到的最小交易费用大于之前创造wtxNew时假设的交易费nFee，则除了重新构建wtxNew之外别无他法。
+    这里遇到了一个先有鸡还是先有蛋的局面：若想创建一笔新的交易，则必须知道交易费用是多少。而交易费只有在整个交易被创建以后才可得知。为了打破这个循环，本地变量nFee被用来放置预计的交易费用，并且新的交易构建在此基础上。在构建完成之后，得到真实的交易费并与预估的交易费作比较。如果预估的交易费小于真实的交易费，则替换成真实交易费并重新构造整个交易。
+
+这里是GetMinFee()的源码
+
+int64 GetMinFee(bool fDiscount=false) const{
+        unsigned int nBytes = ::GetSerializeSize(*this, SER_NETWORK);
+        if (fDiscount && nBytes < 10000)
+            return 0;
+        return (1 + (int64)nBytes / 1000) * CENT;
+}
+
+
+如果计算得到的交易费比之前预计的交易费更高，则跳出第11行开始的循环并返回整个函数（第67行）。在此之前，需要进行以下两个步骤：
+1. 执行wtxNew.AddSupportingTransactions(txdb)。这一部分以后会进行更详细介绍。
+1. 设置wtxNet.fTimeReceivedIsTxTime=true（第66行）。
+
+----
+
+现在来看一下如何通过SignSignature()签署新生成的交易wtxNew。
+
+##SignSignature()
+
+该方法位于script.cpp. 一下是该方法的源码:
+
+    //! txFrom=pcoin in setCoins, txTo=wtxNew
+    //! nHashType=SIGHASH_ALL
+    bool SignSignature(const CTransaction& txFrom, CTransaction& txTo, unsigned int nIn, int nHashType, CScript scriptPrereq)
+    {
+        assert(nIn < txTo.vin.size());
+        CTxIn& txin = txTo.vin[nIn];
+        assert(txin.prevout.n < txFrom.vout.size());
+        const CTxOut& txout = txFrom.vout[txin.prevout.n];      //! 个人账户中的转出地址, prevout.n是什么时候设置的?
+    
+        // Leave out the signature from the hash, since a signature can't sign itself.
+        // The checksig op will also drop the signatures from its hash.
+        uint256 hash = SignatureHash(scriptPrereq + txout.scriptPubKey, txTo, nIn, nHashType);
+    
+        if (!Solver(txout.scriptPubKey, hash, nHashType, txin.scriptSig))
+            return false;
+    
+        txin.scriptSig = scriptPrereq + txin.scriptSig;
+    
+        // Test solution
+        if (scriptPrereq.empty())
+            if (!EvalScript(txin.scriptSig + CScript(OP_CODESEPARATOR) + txout.scriptPubKey, txTo, nIn))
+                return false;
+    
+        return true;
+    }
+
+首先需要注意的是，该函数有5个参数，而CreateTransaction()只有3个。这是因为在script.h文件里，后两个参数已默认给出。
+
+以下是传递给CreateTransaction()中的3个参数：
+
+1. txFrom是一个*pcoin对象。它是CreateTransaction()里setCoins中的所有币中的某一个。它同时也是一笔来源交易。它的若干输出交易当中包含了新交易将要花费的币。
+1. txTo是CreateTransaction()里的wtxNew对象。它是将要花费来源交易txFrom的新交易。新交易需要被签署方可生效。
+1. nIn是指向txTo中输入交易列表的索引位置。该输入交易列表包含一个对txFrom的输出交易列表的引用。更准确地讲，txin=txTo.vin[nIn]（第4行）是txTo中的输入交易；txout=txFrom.vout[txin.prev.out.n]（第6行）是txin所指向的txFrom中的输出交易。
+
+以下是SignSignature()所做的工作：
+
+1. 调用SignatureHash()方法生成txTo的哈希值。
+1. 调用Solver()函数签署刚才生成的哈希。
+1. 调用EvalScript()来运行一小段脚本并检查签名是否合法。
+
+我们一起看一下这三个函数。
+
+----
+
+##ScriptHash()
+
+    //! scriptCode=scriptPrereq+txout.scriptPubKey, txout=txFrom.vout[txin.prevout.n]
+    //! nHashType=SIGHASH_ALL
+    uint256 SignatureHash(CScript scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType)
+    {
+        if (nIn >= txTo.vin.size())
+        {
+            printf("ERROR: SignatureHash() : nIn=%d out of range\n", nIn);
+            return 1;
+        }
+        CTransaction txTmp(txTo);
+
+        // In case concatenating two scripts ends up with two codeseparators,
+        // or an extra one at the end, this prevents all those possible incompatibilities.
+        scriptCode.FindAndDelete(CScript(OP_CODESEPARATOR));
+
+        // Blank out other inputs' signatures
+        for (int i = 0; i < txTmp.vin.size(); i++)
+            txTmp.vin[i].scriptSig = CScript();
+        txTmp.vin[nIn].scriptSig = scriptCode;
+
+        // Blank out some of the outputs
+        if ((nHashType & 0x1f) == SIGHASH_NONE)
+        {
+            // Wildcard payee
+            txTmp.vout.clear();
+
+            // Let the others update at will
+            for (int i = 0; i < txTmp.vin.size(); i++)
+                if (i != nIn)
+                    txTmp.vin[i].nSequence = 0;
+        }
+        else if ((nHashType & 0x1f) == SIGHASH_SINGLE)
+        {
+            // Only lockin the txout payee at same index as txin
+            unsigned int nOut = nIn;
+            if (nOut >= txTmp.vout.size())
+            {
+                printf("ERROR: SignatureHash() : nOut=%d out of range\n", nOut);
+                return 1;
+            }
+            txTmp.vout.resize(nOut+1);
+            for (int i = 0; i < nOut; i++)
+                txTmp.vout[i].SetNull();
+    
+            // Let the others update at will
+            for (int i = 0; i < txTmp.vin.size(); i++)
+                if (i != nIn)
+                    txTmp.vin[i].nSequence = 0;
+        }
+    
+        // Blank out other inputs completely, not recommended for open transactions
+        if (nHashType & SIGHASH_ANYONECANPAY)
+        {
+            txTmp.vin[0] = txTmp.vin[nIn];
+            txTmp.vin.resize(1);
+        }
+    
+        // Serialize and hash
+        CDataStream ss(SER_GETHASH);
+        ss.reserve(10000);
+        ss << txTmp << nHashType;
+        return Hash(ss.begin(), ss.end());
+    }
+
+
+txTo是将要被签署的交易。它同时也是CreateTransaction()中的wtxNew对象。它的输入交易列表中的第nIn项，*txTo.vin[nIn]，是该函数将要起作用的目标*。
+
+scriptCode=scriptPrereq + txout.scriptPubKey，其中*txout是SignSignature()中定义的来源交易txFrom()的输出交易*。由于此时scriptPrereq为空，scriptCode事实上是来源交易txFrom中的输出交易列表当中被txTo作为输入交易引用的那笔的脚本代码。txout.scriptPubKey有可能包含两类脚本：
+
+1. 脚本A：OP_DUP OP_HASH160 <你地址的160位哈希> OP_EQUALVERIFY OP_CECKSIG。该脚本将来源交易txFrom中的币发送给你，其中<你地址的160位哈希>是你的比特币地址。
+1. 脚本B：<你的公钥> OP_CHECKSIG。该脚本将剩余的币退还至来源交易txFrom的发起人。由于你创建的新交易txTo/wtxNew将会花费来自txFrom的币，你必须同时也是txFrom的创建者。换句话讲，当你在创建txFrom的时候，你其实是在花费之前别人发送给你的币。因此，<你的公钥>即是txFrom创建者的公钥，也是你自己的公钥。
+
+我们在此停留片刻，来思考一下脚本A和脚本B。你有可能会问，这些脚本是从哪来的。中本聪在创造比特币的时候为比特币添加了一套脚本语言系统，所以比特币中的交易都是由脚本代码完成的。该脚本系统其实也是后来智能合约的雏形。脚本A来自第29行，位于方法CSendDialog::OnButtonSend()，脚本B则来自第44行，位于方法CreateTransaction()。
+
+1. 当用户发起一笔交易时，比特币客户端会调用CSendDialog::OnButtonSend()方法并将脚本A添加至txFrom中的一笔输出交易中。由于该输出交易的收款方为你本人，从而脚本中的<收款人地址160位哈希>，就是<你的地址160位哈希>。
+1. 如果txFrom是你本人创建的，则脚本B会被添加至CreateTransaction()中txFrom的某一笔输出交易。在这里，第44行位于CreateTransaction()中的公钥vchPubKey是你本人的公钥。
+
+在了解了输入交易之后，我们来一起了解SignatureHash()是怎样工作的。
+
+SignatureHash()首先将txTO拷贝至txTmp，接着清空txTmp.vin中每一笔输入交易的scriptSig，除了txTmp.vin[nIn]之外，该输入交易的scriptSig被设为scriptCode(第14、15行）。
+
+接着，该函数检验nHashType的值。该函数的调用者将一个枚举值传递至该函数nHashType = SIGHASH_ALL。
+
+    enum
+    {
+        SIGHASH_ALL = 1,
+        SIGHASH_NONE = 2,
+        SIGHASH_SINGLE = 3,
+        SIGHASH_ANYONECANPAY = 0x80,
+    };
+
+由于nHashType = SIGHASH_ALL，所有的if-else条件均不成立，该函数将直接执行最后4行代码。
+
+在最后4行代码中，txTmp和nHashType变成序列化后的类型CDataStream对象。该类型包括一个装有数据的字符容器类型。所返回的哈希值是Hash()方法在计算序列化后的数据所得到的。
+
+总而言之, 一笔交易可以包含多笔输入交易。SignatureHash()取其中一笔(nIn那一笔)作为目标。它通过以下步骤生成哈希：
+
+1. 清空除了目标交易之外的所有输入交易。
+1. 复制来源交易中被目标交易作为输入交易引用的那笔输出交易的脚本至目标交易的输入交易列表中。
+1. 为修改后的交易生成哈希值。
+
+----
+
+##Hash()
+
+该方法位于util.h。以下是生成哈希值的方法Hash()的源码：
+
+    template<typename T1>
+    inline uint256 Hash(const T1 pbegin, const T1 pend)
+    {
+        uint256 hash1;
+        SHA256((unsigned char*)&pbegin[0], (pend - pbegin) * sizeof(pbegin[0]), (unsigned char*)&hash1);
+        uint256 hash2;
+        SHA256((unsigned char*)&hash1, sizeof(hash1), (unsigned char*)&hash2);
+        return hash2;
+    }
+
+*该函数对目标数据执行两次SHA256()方法并返回结果*。SHA256()的声明可在openssl/sha.h中找到。
+
+----
+
+##Solver()
+
+该方法位于script.cpp。Solver()在SignSignature()中紧接着SignatureHash()被执行。它是真正用来为SignatureHash()返回的哈希值生成签名的函数。
+
+    bool Solver(const CScript& scriptPubKey, uint256 hash, int nHashType, CScript& scriptSigRet)
+    {
+        scriptSigRet.clear();
+    
+        vector<pair<opcodetype, valtype> > vSolution;
+        if (!Solver(scriptPubKey, vSolution))
+            return false;
+    
+        // Compile solution
+        CRITICAL_BLOCK(cs_mapKeys)
+        {
+            foreach(PAIRTYPE(opcodetype, valtype)& item, vSolution)
+            {
+                if (item.first == OP_PUBKEY)
+                {
+                    // Sign
+                    const valtype& vchPubKey = item.second;
+                    if (!mapKeys.count(vchPubKey))
+                        return false;
+                    if (hash != 0)
+                    {
+                        vector<unsigned char> vchSig;
+                        if (!CKey::Sign(mapKeys[vchPubKey], hash, vchSig))
+                            return false;
+                        vchSig.push_back((unsigned char)nHashType);
+                        scriptSigRet << vchSig;
+                    }
+                }
+                else if (item.first == OP_PUBKEYHASH)
+                {
+                    // Sign and give pubkey
+                    map<uint160, valtype>::iterator mi = mapPubKeys.find(uint160(item.second));
+                    if (mi == mapPubKeys.end())
+                        return false;
+                    const vector<unsigned char>& vchPubKey = (*mi).second;
+                    if (!mapKeys.count(vchPubKey))
+                        return false;
+                    if (hash != 0)
+                    {
+                        vector<unsigned char> vchSig;
+                        if (!CKey::Sign(mapKeys[vchPubKey], hash, vchSig))
+                            return false;
+                        vchSig.push_back((unsigned char)nHashType);
+                        scriptSigRet << vchSig << vchPubKey;
+                    }
+                }
+            }
+        }
+    
+        return true;
+    }
+
+以下是该方法所需要的4个参数：
+
+1. 位于第10行的调用函数SignSignature()将txOut.scriptPubKey，来源交易txFrom的输出脚本，作为输入值传入第一个参数scriptPubKey。记住它可能包含脚本A或者脚本B。
+1. 第二个参数hash是由SignatureHash()生成的哈希值。
+1. 第三个参数nHashType的值为SIGHASH_ALL。
+1. 第四个参数是该函数的返回值，即调用函数SignSIgnature()中位于第12行的txin.scriptSig。记住txin是新生成的交易wtxNew（在调用函数SignSignature()中作为txTo引用）位于第nIn的输入交易。因此，wtxNew第nIn笔输入交易的scriptSig将存放该函数返回的签名。
+
+该函数首先会调用另一个有2个参数的Solver()。我们来研究一下。
+
+----
+
+## 带有2个参数的solver()
+
+该方法位于script.cpp。以下是带有2个参数的Solver()的源码：
+
+    bool Solver(const CScript& scriptPubKey, vector<pair<opcodetype, valtype> >& vSolutionRet)
+    {
+        // Templates
+        static vector<CScript> vTemplates;
+        if (vTemplates.empty())
+        {
+            // Standard tx, sender provides pubkey, receiver adds signature
+            vTemplates.push_back(CScript() << OP_PUBKEY << OP_CHECKSIG);
+    
+            // Short account number tx, sender provides hash of pubkey, receiver provides signature and pubkey
+            vTemplates.push_back(CScript() << OP_DUP << OP_HASH160 << OP_PUBKEYHASH << OP_EQUALVERIFY << OP_CHECKSIG);
+        }
+    
+        // Scan templates
+        const CScript& script1 = scriptPubKey;
+        foreach(const CScript& script2, vTemplates)
+        {
+            vSolutionRet.clear();
+            opcodetype opcode1, opcode2;
+            vector<unsigned char> vch1, vch2;
+    
+            // Compare
+            CScript::const_iterator pc1 = script1.begin();
+            CScript::const_iterator pc2 = script2.begin();
+            loop
+            {
+                bool f1 = script1.GetOp(pc1, opcode1, vch1);
+                bool f2 = script2.GetOp(pc2, opcode2, vch2);
+                if (!f1 && !f2)
+                {
+                    // Success
+                    reverse(vSolutionRet.begin(), vSolutionRet.end());
+                    return true;
+                }
+                else if (f1 != f2)
+                {
+                    break;
+                }
+                else if (opcode2 == OP_PUBKEY)
+                {
+                    if (vch1.size() <= sizeof(uint256))
+                        break;
+                    vSolutionRet.push_back(make_pair(opcode2, vch1));
+                }
+                else if (opcode2 == OP_PUBKEYHASH)
+                {
+                    if (vch1.size() != sizeof(uint160))
+                        break;
+                    vSolutionRet.push_back(make_pair(opcode2, vch1));
+                }
+                else if (opcode1 != opcode2)
+                {
+                    break;
+                }
+            }
+        }
+    
+        vSolutionRet.clear();
+        return false;
+    }
+
+第一个参数scriptPubKey可能包含脚本A也可能是脚本B。再一次说明，*它是SignSignature()中来源交易txFrom的输出脚本*。
+
+第二个参数用来存放输出交易。它是一个容器对，每个对由一个脚本运算符（opcodetype类型）和脚本操作元（valtype类型）构成。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

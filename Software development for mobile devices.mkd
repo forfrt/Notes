@@ -1,0 +1,31 @@
+
+
+# Overview #
+
+http://bit.ly/2I997Km to download the slides
+
+## Assessment ##
+
+One project will constitute 100% of the assessment.
+
+A group assessment, Gourps must be composed of a max of 3 people
+
+## onboarding ##
+
+- A walkthrough
+- Introduces what an app does
+- And how to use it
+
+## Navigation ##
+
+- Make navigation self-evident
+
+    - Simple layouts
+    - Recognisable navigation icons
+
+- Navigation features should be 
+
+    - discoverable
+    - accessible
+    - take little screen space
+

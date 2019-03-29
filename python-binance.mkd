@@ -1,0 +1,194 @@
+
+#Getting Started
+
+#Installation
+
+`python-binance` is available on PYPI. Install with pip:
+
+    pip install python-binance
+
+
+## Register on Binance
+
+Firstly register an account with Binance.
+
+## Generate an API Key
+
+To use signed account methods you are required to create an API Key.
+
+## Initialise the client
+
+Pass your API Key and Secret
+
+    from binance.client import Client
+    client = Client(api_key, api_secret)
+
+----
+
+## Making API Calls
+
+Every method supports the passing of arbitrary parameters via keyword matching those in the `Binance API documentation <https://github.com/binance-exchange/binance-official-api-docs>`_. These keyword arguments will be sent directly to the relevant endpoint.
+
+Each API method returns a dictionary of the JSON response as per the Binance API documentation. The docstring of each method in the code references the endpoint it implements.
+
+The Binance API documentation references a timestamp parameter, this is generated for you where required.
+
+Some methods have a recvWindow parameter for timing security, see Binance documentation.
+
+API Endpoints are rate limited by Binance at 20 requests per second, ask them if you require more.
+
+----
+
+## API Rate Limit
+
+Check the `get_exchange_info()` call for up to date rate limits.
+
+At the current time Binance rate limits are:
+
+- 1200 requests per minute
+- 10 orders per second
+- 100,000 orders per 24hrs
+
+Some calls have a higher weight than others especially if a call returns information about all symbols. Read the `official Binance documentation <https://github.com/binance-exchange/binance-official-api-docs`_ for specific information.
+
+----
+
+## Requests Settings
+
+*python-binance uses the requests library.*
+
+You can set custom requests parameters for all API calls when creating the client.
+
+    client = Client("api-key", "api-secret", {"verify": False, "timeout": 20})
+
+You may also pass custom requests parameters through any API call to override default settings or the above settingsspecify new ones like the example below.
+
+    # this would result in verify: False and timeout: 5 for the get_all_orders call
+    client = Client("api-key", "api-secret", {"verify": False, "timeout": 20})
+    client.get_all_orders(symbol='BNBBTC', requests_params={'timeout': 5})
+
+Check out the requests documentation for all options.
+
+----
+
+### Proxy Settings
+
+You can use the Requests Settings method above
+
+    proxies = {
+        'http': 'http://10.10.1.10:3128',
+        'https': 'http://10.10.1.10:1080'
+    }
+    
+    # in the Client instantiation
+    client = Client("api-key", "api-secret", {'proxies': proxies})
+    
+    # or on an individual call
+    client.get_all_orders(symbol='BNBBTC', requests_params={'proxies': proxies})
+
+Or set an environment variable for your proxy if required to work across all requests.
+
+An example for Linux environments from the requests Proxies documentation is as follows.
+
+    $ export HTTP_PROXY="http://10.10.1.10:3128"
+    $ export HTTPS_PROXY="http://10.10.1.10:1080"
+
+For Windows environments
+
+    C:\>set HTTP_PROXY=http://10.10.1.10:3128
+    C:\>set HTTPS_PROXY=http://10.10.1.10:1080
+
+****
+
+# Binance Constants
+
+****
+
+# General Endpoints
+
+****
+
+# Market Data Endpoints
+
+****
+
+# Account Endpoints
+
+****
+
+# Websockets
+
+Sockets are handled through a Socket Manager BinanceSocketManager.
+
+Multiple socket connections can be made through the manager.
+
+*Only one instance of each socket type will be created*, i.e. only one BNBBTC Depth socket can be created and there can be both a BNBBTC Depth and a BNBBTC Trade socket open at once.
+
+*When creating socket connections a callback function is passed which receives the messages.*
+
+Messages are received as dictionary objects relating to the message formats defined in the Binance WebSocket API documentation.
+
+Websockets are setup to reconnect with a maximum of 5 retries.
+
+****
+
+## Websocket Usage
+
+Create the manager like so, passing the API client.
+
+    from binance.websockets import BinanceSocketManager
+    bm = BinanceSocketManager(client)
+    # start any sockets here, i.e a trade socket
+    conn_key = bm.start_trade_socket('BNBBTC', process_message)
+    # then start the socket manager
+    bm.start()
+
+A callback to process messages would take the format
+
+    def process_message(msg):
+        print("message type: {}".format(msg['e']))
+        print(msg)
+        # do something
+
+----
+
+## Websocket Errors
+
+If the websocket is disconnected and is unable to reconnect a message is sent to the callback to indicate this. The format is
+
+    {
+        'e': 'error',
+        'm': 'Max reconnect retries reached'
+    }
+
+    # check for it like so
+    def process_message(msg):
+        if msg['e'] == 'error':
+            # close and restart the socket
+        else:
+            # process message normally
+
+----
+
+### Multiplex Socket
+
+Create a socket combining multiple streams
+
+these streams can include the depth, kline, ticker and trade streams but not the user stream which requires extra authentication.
+
+Symbols in socket name must be lowercase i.e bnbbtc@aggTrade, neobtc@ticker
+
+See the Binance Websocket Streams API documentation for details on socket names.
+
+    def process_m_message(msg):
+        print("stream: {} data: {}".format(msg['stream'], msg['data']))
+    
+    # pass a list of stream names
+    conn_key = bm.start_multiplex_socket(['bnbbtc@aggTrade', 'neobtc@ticker'], process_m_message)
+
+
+
+
+
+
+

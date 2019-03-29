@@ -1,0 +1,1006 @@
+
+
+# John Clark 
+
+## AI for CAPTCHA breaking (JAC-8) 
+
+Completely Automated Public Turing test to tell Computers and Humans Apart (CAPTCHA) is a challenge–response test used ito decide whether or not the 'user' is human. They are used, for example, to prevent automated mass sign-ups for free accounts. The general idea is that some recognisable artifact (e.g. a sequence of letters) is subject to overlaid noise or other distortions that humans can cope with but automated recognition systems cannot. This project will seek to use ML to produce a CAPTCHA breaker. We will generate our own (simple) CAPTCHAS to begin with (e.g. just putting straight lines through a word) and train CAPTCHA breakers. If successful we can move on to widely used CAPTCHAS. You must like Machine Learning, though there is considerable flexibility as to what ML tools are harnessed for our purposes.
+
+Some news on the subject...
+
+REF 1 .AI Model Fundamentally Cracks CAPTCHAs, Scientists Say
+
+ https://www.npr.org/sections/thetwo-way/2017/10/26/560082659/ai-model-fundamentally-cracks-captchas-scientists-say?t=1542365284711
+
+REF 2:  CAPTCHA: Using Hard AI Problems for Security
+
+https://link.springer.com/chapter/10.1007/3-540-39200-9_18
+REF 3: Recognizing objects in adversarial clutter: Breaking a visual CAPTCHA
+
+https://ieeexplore.ieee.org/abstract/document/1211347
+
+## Can AI discover covert channels? (JAC-7)
+
+Some channels are meant to allow communication, e.g. files can be written by one process and read by another. Such channels are typically policed, i.e. controls may be imposed on their use. However, it is possible to make unusual use of some channels. For example, when reading a file a read lock may be engaged. However, if someone then attempt to write to that file the attempt fails.  If no read attempt is made than the write attempt would succeed.  Thus, a binary channel can be effected. Question is: can AI discover such channels?  We will use *genetic programing* and a suitably created function set to see if that approach can synthesise covert channels effectively? The channel just described is a storage channel.; another type of covert channel is a timing channel (where the channel works by modulating the times at which events are seen by the receiver. We will aim to use GP to synthesise storage and timing channels. The work could involve an assumed subset of operating system commends  being available or else a small simulator of a system (e.g. a file system) could be developed and act as the target for attack. 
+
+REF 1: 
+The Evolutionary Computation in Java (ECJ) Toolkit can be downloaded from: 
+
+https://cs.gmu.edu/~eclab/projects/ecj/
+
+## Can AI discover Low Rate Denial of Service? (JAC-5)
+
+Most approaches to Denial of Service (DoS) collect compromised hosts and use them to bombard victim nodes with packets or service requests of some form. However, this is a somewhat thuggish and brainless approach! You don't need to have a victim drown in packets.  You need only keep the node fully occupied.  If a server's request buffer is full any incoming requests may be discarded.  When a service request is dispatched, causing a slot to appear in the buffer, the attacker needs to get in quickly with his or her own request. This may require a little sophistication but for introductory purposes this is a  detail.  The question we wish to answer is : can AI discover such low rate DoS (LR-DoS) attacks? If you didn't know about LR-DoS attacks would AI be able to find them? [More generally can AI discover attacks that are currently unknown?]. We will consider one or more techniques. One approach is to see if genetic programming (GP),  a technique from evolutionary computation, can be used to synthesise such attacks. Implementations of GP can be found in the toolkit ECJ.  A good deal of the project will involve creating or harnessing an execution model that can provide feedback as to how effective a particular solution is.  (A variety of network simulators can be harnssed too if necessary)
+
+REF1. A specific kind of LR-Dos can be found at 
+
+http://www.cs.northwestern.edu/~akuzma/rice/shrew/
+
+REF 2. A survey of detection methods for such attacks can be found at: 
+
+http://ijsetr.org/wp-content/uploads/2015/03/IJSETR-VOL-4-ISSUE-3-572-576.pdf
+
+REF-3. The Evolutionary Computation in Java (ECJ) Toolkit can be downloaded from: 
+
+https://cs.gmu.edu/~eclab/projects/ecj/
+
+----
+
+## Bypassing Endpoint Detection and Response (EDR) solutions that employ AI (JAC-4)
+
+There are a growing number of EDR solutions in the market that run on endpoint devices and leverage ML/AI techniques to learn behaviour and detect patterns of potential abuse. This is radically different to traditional signature-based EDR solutions. There is therefore a need to understand the efficacy of EDR systems that employ AI – how do we assure such systems? Can they be bypassed or forced to misclassify? Can we manipulate their re-training process in order to avoid detection. A project that develops a methodology (and where possible, a capability) to test such solutions from a black-box perspective would be incredibly useful and valuable to the cyber security industry. We will seek to use AI approaches to carry out such attacks: AI against AI. *We will collaborate with major cybersecurity consultancy NCC as part of this project*. 
+
+----
+
+## Watson AI and IDS (JAC-1)
+
+Watson AI and IDS.
+
+An Intrusion Detection System (IDS) is a system that monitors various aspects of host or network behaviours (e.g. via packet inspection or audit log data) in order to highlight intrusive (or potentially intrusive) behaviours. This can be done in a variety of ways. AI's range of pattern classification techniques are obvious technologies to deploy to identify intrusions.  This project will use IBM Watson to build intrusion detection facilities rapidly. The project will make use of several publicly available datasets to train and evaluate IDSs. You should be prepared to familiarize yourself with the basics of Watson in advance of the project. There are on-line resources that will enable this.
+
+Ref 1.
+
+A.J. Deepa and V. Kavitha:A Comprehensive Survey on Approaches to Intrusion Detection System
+
+https://core.ac.uk/reader/82242338
+
+Ref 2. Getting Started For IBM Watson Analytics
+https://www.ibm.com/communities/analytics/watson-analytics-blog/new-getting-started-tutorial-ibm-watson-analytics-version-1-0-0/
+
+****
+
+# Robert Gaizauskas 
+
+****
+
+# Anthony Prescott
+
+## TJP-MSc-5: Evaluating OpenCog as a Model of Gardner's Multiple Inteliigences (1 Student, ASE, Cyber, CS with S&LP)
+
+OpenCog is a cognitive architecture developed by the OpenCog Foundation that seeks to replicate and go beyond the capability of human intelligence through AI.  OpenCog has teemed up with Hanson Robotics to create cognitive architecture running in the famous (or infamous?) Sophia humanoid robot.
+
+This project would look at CogNet in comparison to other cognitive architectures for robots such as the DAC Framework that we have been developing with collaborators as a control system for human-robot interaction for the iCub Humanoid Robot.   There is the possibility of testing control architectures on a robot such as Softbank's Pepper or Nao.
+
+****
+
+# Michael Stannett
+
+## "Alexa, cross-check with my calendar. Do I need my umbella?" (MPS-MSc-2 - Data Analytics / ACS / CSSLP / ASE)
+
+This project is suitable for Data Analytics / ACS / CSSLP / ASE. It requires an understanding of how data can be captured from multiple online sources and processed into a form suitable for conversation.
+
+Target system(s): Alexa and/or Android (you can do an iOS version as well if you want)
+
+Project description: The first words I say to my phone every morning are "OK Google, good morning", and it proceeds to tell me the weather in my current location, together with a summary of the news. That's great - but it doesn't take account of my movements during the day. I often travel long distances, and the weather "here" is rarely the same as the weather "there".
+
+Design a system that takes account of my movements, as determined by the information in my online Calendar. The conversation should go something like this:
+
+    "Good morning, Alexa" (or Google,  or whatever)
+    "Good morning, Mike. I see you're going to Liverpool this afternoon on the 3.40 train. It will still be dry in Sheffield by the time you leave. It's expected to rain in Liverpool this afternoon, but it should have stopped by the time you get there. But I suggest you take your umbrella anyway, as it's expected to rain across most of the North tomorrow. Here's a summary of the news ..."
+
+----
+
+## "Do my homework!" (MPS-MSc-4 - Data Analytics / ACS / CSSLP)
+
+This project is suitable for Data Analytics / ACS / CSSLP. It requires practical experience of ML and AI programming.
+
+Project description: I spend several hours every day sitting at one computer or another, typing away, day in day out. With all that data coming in, shouldn't my computer be able to work out for itself what my writing style is, even if it simply deduces what words I'm likely to type next, given what I've already written?
+
+Build a system that runs in the background, intercepts all keyboard input, and learns the user's writing style. Once trained, it should be capable (possibly after providing a few words to get it started) of performing this sort of task:
+
+    "computer, please write me a 100-word description of ..." (for any topic)
+
+so as to produce a summary as if written by the user.
+
+****
+
+# Haiping Lu
+
+## HL-MSc-1: Dictionary learning (sparse coding) for image separation, inpainting, restoration, etc.
+
+>> The Project
+
+Data: Any images you like.
+
+Background: **Dictionary learning** is a popular representation learning method. It learns a sparse representation of the input data via sparse coding using a dictionary consisting of some basic elements called atoms. Dictionary learning embodies the principle of compressive sensing, with many applications in image processing such as image separation, image inpainting, image compression, or image restoration. 
+
+Tasks: 
+
+1) You will first implement a recent dictionary learning method for various image processing tasks, choosing from one of the following papers (accessible on campus network):1a. ICCV2017 "Convolutional Dictionary Learning via Local Processing": https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=82378281b. IEEE TSP2016 "Trainlets: Dictionary learning in high dimensions": https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7430359
+
+2) You will then have the freedom to develop your own method to improve the performance further.
+
+>>The Student 
+
+1) If interested, please EMAIL me at h.lu@sheffield.ac.uk with your latest CV and a statement on why "this" project, highlighting your key interests and skills; 
+
+2) SINGLE student project, with collaborations to be encouraged when appropriate; 
+
+3) Suitable for all students (DA/ACS preferred) with strong data analytical skills, keen interest in research, and adequate background in mathematics, machine learning, and programming (Python or Matlab).
+
+4) Prerequisite/Related module: COM6509 Machine Learning and Adaptive Intelligence or related courses taken.
+
+>>The Supervisor
+
+1) Dr Haiping Lu, Lecturer in Machine Learning. Check out http://www.dcs.shef.ac.uk/people/H.Lu
+
+2) A meeting will be arranged in the week of 26 Nov - 30 Nov if you pass the preliminary screening.
+
+----
+
+## HL-MSc-2: TensorFlow for tensor analysis and learning
+
+>>The Project
+
+Data: Any multidimensional dataset you like, e.g., images, videos, sensory data, network data.
+
+Background: Many tensor analysis and learning methods have been developed in the past decades to do machine learning on tensor representations of multidimensional data. TensorFlow was originally developed for deep learning, where data frequently occur in tensors. However, many tensor analysis and learning methods are not available in TensorFlow. In this project, you will implement these methods using the TensorFlow library.
+
+Tasks: 
+
+1) You will first implement some basic tensor analysis and learning operations and methods in TensorFlow.
+
+2) You will then have the freedom to develop your own method to improve the performance further. 
+
+>>The Student 
+
+1) If interested, please EMAIL me at h.lu@sheffield.ac.uk with your latest CV and a statement on why "this" project, highlighting your key interests and skills; 
+
+2) SINGLE student project, with collaborations to be encouraged when appropriate; 
+
+3) Suitable for all students (DA/ACS preferred) with strong data analytical skills, keen interest in research, and adequate background in mathematics, machine learning, and programming (Python or Matlab).
+
+4) Prerequisite/Related module: COM6509 Machine Learning and Adaptive Intelligence or related courses taken.
+
+>>The Supervisor
+
+1) Dr Haiping Lu, Lecturer in Machine Learning. Check out http://www.dcs.shef.ac.uk/people/H.Lu
+
+2) A meeting will be arranged in the week of 26 Nov - 30 Nov if you pass the preliminary screening.
+
+----
+
+## HL-MSc-3: Machine learning on brain fMRI for disease diagnosis
+
+>>The Project
+
+Data: Public resting-state fMRI data of healthy subjects and patients with brain diseases such as ADHD, autism spectrum disorder, or Alzheimer's disease.
+
+Background: fMRI is an important medical imaging technique used widely in brain disease diagnosis and brain state decoding. fMRI data are images of our brain, measuring its activities. They are big, noisy, and challenging to deal with. You may use preprocessed data available or do the preprocessing yourself with a standard pipeline. You may refer to  http://crcv.ucf.edu/papers/networkFeatureForADHD_detection.pdf as an example. Our earlier works one brain state decoding are http://staffwww.dcs.shef.ac.uk/people/H.Lu/Publications/Remurs_AAAI17.pdfhttp://staffwww.dcs.shef.ac.uk/people/H.Lu/Publications/MPCAfMRI_MICCAI15.pdf
+
+Tasks: 
+
+1) You will first implement existing machine learning method(s) to classify fMRI data to healthy or disease, e.g., by following a paper or Github repository; 
+
+2) You will then have the freedom to develop your own method to improve the classification performance further.  
+
+>>The Student 
+
+1) If interested, please EMAIL me at h.lu@sheffield.ac.uk with your latest CV and a statement on why "this" project, highlighting your key interests and skills; 
+
+2) SINGLE student project, with collaborations to be encouraged when appropriate; 
+
+3) Suitable for all students (DA/ACS preferred) with strong data analytical skills, keen interest in research, and adequate background in mathematics, machine learning, and programming (Python or Matlab).
+
+4) Prerequisite/Related module: COM6509 Machine Learning and Adaptive Intelligence or related courses taken.
+
+>>The Supervisor
+
+1) Dr Haiping Lu, Lecturer in Machine Learning. Check out http://www.dcs.shef.ac.uk/people/H.Lu
+
+2) A meeting will be arranged in the week of 26 Nov - 30 Nov if you pass the preliminary screening.
+
+----
+
+## HL-MSc-4: Machine learning on brain fMRI for mind reading and/or pattern discovery
+
+>>The Project
+
+Data: Public task fMRI data of subjects performing certain tasks such as viewing picture or listening to music, and/or public brain network data from international projects such as the Human Connectome Project (HCP).
+
+Background: fMRI data are images of our brain measuring its activities. Brain networks are built from brain fMRI data to help elucidate the neural pathways that underlie brain function and behaviour. You may use preprocessed data available or do the preprocessing yourself with a standard pipeline.  
+
+Tasks: 
+
+1) You will first implement existing machine learning method(s) to classify fMRI data into the task performed (i.e., brain decoding or mind reading), cluster and discover patterns of brain activities, or analyse brain connectivity in brain networks, e.g., by following a paper or Github repository; 
+
+2) You will then have the freedom to develop your own method to improve the classification performance further.  
+
+>>The Student 
+
+1) If interested, please EMAIL me at h.lu@sheffield.ac.uk with your latest CV and a statement on why "this" project, highlighting your key interests and skills; 
+
+2) SINGLE student project, with collaborations to be encouraged when appropriate; 
+
+3) Suitable for all students (DA/ACS preferred) with strong data analytical skills, keen interest in research, and adequate background in mathematics, machine learning, and programming (Python or Matlab).
+
+4) Prerequisite/Related module: COM6509 Machine Learning and Adaptive Intelligence or related courses taken.
+
+>>The Supervisor
+
+1) Dr Haiping Lu, Lecturer in Machine Learning. Check out http://www.dcs.shef.ac.uk/people/H.Lu
+
+2) A meeting will be arranged in the week of 26 Nov - 30 Nov if you pass the preliminary screening.
+
+----
+
+## HL-MSc-5: Deep learning for cardiac imaging registration
+
+>>The Project
+
+Data: Cardiovascular MRI data (see an example here: https://giphy.com/gifs/mri-FzC7vAtKKJGyA) from the Royal Hallamshire Hospital and Northern General Hospital, Sheffield.
+
+Background: Cardiovascular diseases (CVD) cause 26% of all deaths in the UK, and 31% of all global deaths. Developing healthcare solutions for CVD is a critical task with pressing needs. Cardiac MRI (CMRI) is an advanced medical imaging technique that can provide such promising solutions. We hope to use machine learning to perform diagnosis on such data, but we have to register (align) these CMRI well for machine learning to work. We have data with landmarks labeled by radiologists and our objective is to automate this process using deep learning or other machine learning methods. 
+
+Tasks: 
+
+1) You will first implement existing deep learning method(s) to register CMRI data for CVD diagnosis, e.g., by following a paper or Github repository; 
+
+2) You will then have the freedom to develop your own method to improve the registration performance further.
+
+>>The Student 
+
+1) If interested, please EMAIL me at h.lu@sheffield.ac.uk with your latest CV and a statement on why "this" project, highlighting your key interests and skills; 
+
+2) SINGLE student project, with collaborations to be encouraged when appropriate; 
+
+3) Suitable for all students (DA/ACS preferred) with strong data analytical skills, keen interest in research, and adequate background in mathematics, machine learning, and programming (Python or Matlab).
+
+4) Prerequisite/Related module: COM6509 Machine Learning and Adaptive Intelligence or related courses taken.
+
+>>The Supervisor
+
+1) Dr Haiping Lu, Lecturer in Machine Learning. Check out http://www.dcs.shef.ac.uk/people/H.Lu
+
+2) A meeting will be arranged in the week of 26 Nov - 30 Nov if you pass the preliminary screening.
+
+----
+
+## HL-MSc-6: Deep learning for cardiac imaging segmentation
+
+>>The Project
+
+Data: Cardiovascular MRI data (see an example here: https://giphy.com/gifs/mri-FzC7vAtKKJGyA) from the Royal Hallamshire Hospital and Northern General Hospital, Sheffield.
+
+Background: Cardiovascular diseases (CVD) cause 26% of all deaths in the UK, and 31% of all global deaths. Developing healthcare solutions for CVD is a critical task with pressing needs. Cardiac MRI (CMRI) is an advanced medical imaging technique that can provide such promising solutions. Segmentation is one of the most active areas of research in applying deep learning to cardiac imaging. Segmentation refers to the task of identifying which pixels in a medical image correspond to the contour or interior of a particular anatomic region of interest, e.g. isolating the outline of a particular organ from an MRI. Not only can quantitative metrics be derived immediately from the size and volume of the segmented areas, but segmentation is also often an important preprocessing step ahead of pathology detection.
+
+Tasks: 
+
+1) You will first implement existing deep learning method(s) to segment CMRI into anatomic regions of interest, e.g., by following a paper or Github repository; 
+
+2) You will then have the freedom to develop your own method to improve the segmentation performance further.
+
+>>The Student 
+
+1) If interested, please EMAIL me at h.lu@sheffield.ac.uk with your latest CV and a statement on why "this" project, highlighting your key interests and skills; 
+
+2) SINGLE student project, with collaborations to be encouraged when appropriate; 
+
+3) Suitable for all students (DA/ACS preferred) with strong data analytical skills, keen interest in research, and adequate background in mathematics, machine learning, and programming (Python or Matlab).
+
+4) Prerequisite/Related module: COM6509 Machine Learning and Adaptive Intelligence or related courses taken.
+
+>>The Supervisor
+
+1) Dr Haiping Lu, Lecturer in Machine Learning. Check out http://www.dcs.shef.ac.uk/people/H.Lu
+
+2) A meeting will be arranged in the week of 26 Nov - 30 Nov if you pass the preliminary screening.
+
+----
+
+## HL-MSc-8: Machine learning on social/biological networks for link prediction, community detection and visualisation
+
+>>The Project
+
+Data: Public social network data from Amazon, Facebook, Twitter, Wikipedia, Bitcoin, or public biological data for cancer diagnosis or drug discovery.
+
+Background: Network data can help us better understand the interactions among people/genes for better business decision, policy making, health monitoring, and disease diagnosis/treatment. Such networks are often sparse and not fully connected. Link prediction is to predict the missing interactions between nodes (vertices). Also, we can often detect communities from such data to gain understanding for further actions such as marketing. Community detection is a typical clustering problem.
+
+Tasks: 
+
+1) You will first implement existing machine learning method(s) to do link prediction, and/or cluster  individual nodes into communities and visualise them, e.g., by following a paper or Github repository; 
+
+2) You will then have the freedom to develop your own method to improve the link prediction, detection and visualisation performance further.  
+
+>>The Student 
+
+1) If interested, please EMAIL me at h.lu@sheffield.ac.uk with your latest CV and a statement on why "this" project, highlighting your key interests and skills; 
+
+2) SINGLE student project, with collaborations to be encouraged when appropriate; 
+
+3) Suitable for all students (DA/ACS preferred) with strong data analytical skills, keen interest in research, and adequate background in mathematics, machine learning, and programming (Python or Matlab).
+
+4) Prerequisite/Related module: COM6509 Machine Learning and Adaptive Intelligence or related courses taken.
+
+>>The Supervisor
+
+1) Dr Haiping Lu, Lecturer in Machine Learning. Check out http://www.dcs.shef.ac.uk/people/H.Lu
+
+2) A meeting will be arranged in the week of 26 Nov - 30 Nov if you pass the preliminary screening.
+
+****
+
+# Mark Hepple
+
+## MRH-MSC-1: Automatic Correction of Second Language English
+
+ Suitable for:   all students
+
+Student numbers: Up to 2 students may take this project.
+Background:
+
+Learning a foreign language is difficult and requires a great deal of practice outside of the classroom. Even learners who have reached a level where they can communicate fairly effectively in a foreign language can be observed to make quite frequent errors. These errors may be systematic, and may reflect differences between the learner's native language and the newly-acquired language. A common case for ESL (English as a Foreign Language) speakers is misuse of articles (or determiners) such as a, an and the, e.g. saying "I bought pumpkin for Halloween", rather than "I bought a pumpkin for Halloween", as a native-speaker would prefer. Another common case involves errors with prepositions (such as in/of/at/with, etc), e.g. saying "I am pleased at you", rather than "I am pleased with you".
+
+As a consequence, there is a real practical and commercial value in technology that can automatically detect such errors in the written work of second-language speakers, and propose appropriate corrections. This is valuable not only in helping second-language learners to deliver correct documents, but also in helping them to be aware of their mistakes, so they can better learn to avoid them in future. In previous work, a range of approaches have been applied to this task, often with different methods being used to tackle different classes of errors.
+Project Description:
+
+This project will investigate the detection and correction of errors in second-language English. The work will begin with a review of previous work on the task, and of available resources. This review will lead on to selection of a focus for the work (i.e. one or more specific classes of errors) and of one or more methods for tackling the task, which will be implemented and evaluated within the project, and hopefully also extended, or used in a novel manner, as part of the work.
+Requirements:
+
+    This project requires good programming skills. The use of Python for programming work is preferred, but other languages may be used by agreement. 
+
+Initial reading and useful links:
+
+    Automated Grammatical Error Correction for Language Learners. Tutorial at COLING-2014, by Joel Tetreault and Claudia Leacock. Tutorial slide pack. 
+
+----
+
+## MRH-MSC-2: Automatic Plagiarism Detection against Large Text Collections 
+
+ Suitable for:   all students
+
+Student numbers: Up to 2 students may take this project.
+Background:
+
+Plagiarism is the dishonest practice of taking the words or ideas of another and presenting them as if they were your own. In some professions, such as academia and journalism, it is considered a serious offense, for which severe penalties may apply. The convenient availability of a wide range of textual content via the internet has made plagiarism much easier to commit, although it has also helped the development of some remedies for the problem, e.g. in internet-based plagiarism detection services, such as Turnitin. Plagiarism has an ethically acceptable relative in legal text reuse, e.g. newspapers may buy "copy" from a newswire service, such as Reuters, which they can use in creating their own news reports, with as much or as little rewriting as they choose.
+
+There are different approaches to automatic plagiarism detection. Intrinsic approaches rely on the characteristics of an individual document, without comparing it to any other. A teacher reading a student's assignment, who finds a paragraph of beautifully-crafted prose within an otherwise poorly-written essay, may suspect plagiarism, and intrinsic approaches seek to automate this idea, e.g. detecting changes with respect to stylistic features. Extrinsic approaches instead rely on a collection of documents which may have been used in plagiarism. For a suspect text, whose creation may have involved plagiarism, these approaches seek to identify possible source documents within the collection, and then align passages between the suspect text and the possible sources to expose the clearest evidence of the plagiarism.
+Project Description:
+
+This project will focus on the task of extrinsic plagiarism detection, i.e. plagiarism detection when there is a reference corpus of texts which are the candidate sources for possible plagiarism. The work will begin with a review of current work on extrinsic plagiarism detection, leading to the selection of a specific method for tackling the task which will be implemented and evaluated within the project, and hopefully also extended, or used in a novel manner, as part of the work.
+Requirements:
+
+    This project requires good programming skills. The use of Python for programming work is preferred, but other languages may be used by agreement. 
+
+Initial reading and useful links:
+
+    Extrinsic plagiarism detection has been tackled by many research groups as a competitive task across several years, as part of the International Competition on Plagiarism Detection. See papers on the PAN-PC-11 website. 
+
+----
+
+## MRH-MSC-3: Efficient Analysis of Textual Data using Randomised Methods
+
+ Suitable for:   all students
+
+Student numbers: This project is for 1 student only.
+Background:
+Many of the methods of modern NLP are data-driven, i.e. use statistical or ML (machine learning) techniques, that exploit information computed from very large collections of text data, known as corpora. In the past, such corpora were carefully assembled collections of (electronic) text of rather limited size, but, even so, the computational analysis needed to derived statistical models could challenge the resource capacities of the computers then available. Experience shows that, for many tasks, analysing greater and greater amounts of data yields better and better models, and so the availability of truly immense amounts of textual data on the world wide web holds the promise of creating systems that surpass current levels of performance.
+
+However, despite massive increases in computing power, the application of standard analysis methods to web-scale data sources is generally impractical, requiring infeasibly large amounts of memory or unacceptably long processing times. An answer to this problem comes from the use of randomised methods, which exploit mechanisms that introduce randomness, such as the repeatable randomness of hash functions, or other probabilistic processes. Using such techniques, the output of a standard analysis method can often be approximated, with some specifiably-limited error, but with greatly reduced resource requirements, e.g. with linear time complexity and/or with a fixed upper bound on memory requirement.
+Project Description:
+
+This project will begin with a review of current work involving randomised methods, leading to the selection of a specific NLP task and dataset, and the selection of a randomised method for tackling the task which will be implemented, and hopefully also extended, or used in a novel manner, within the project.
+Requirements:
+
+    This project requires good programming skills. The use of Python for programming work is preferred, but other languages may be used by agreement. 
+
+Initial reading and useful links:
+
+    Randomized Algorithms and NLP: Using Locality Sensitive Hash Functions for High Speed Noun Clustering. D. Ravichandran, P. Pantel and E. Hovy. Proc. of ACL-05. 2005.
+    Approximating Data with the Count-min Data Structure. G. Cormode and S. Muthukrishnan. IEEE Software. 2012. (Website on Count-min Sketch method and its applications).
+    Sketch Techniques for Scaling Distributional Similarity to the Web. A. Goyal et al.. GEMS 2010.
+    Efficient Online Locality Sensitive Hashing via Reservoir Counting. B. Van Durme and A. Lall. Proc. ACL-11. 2011. 
+
+----
+
+## MRH-MSC-4: Sentiment Detection and Tracking in Social Media Streams
+
+ Suitable for:   all students
+
+Student numbers: Up to 2 students may take this project.
+Background:
+
+Recent times have seen a rapid growth in the use of social media, such as Facebook and Twitter. Such media give citizens previously unheard of opportunities to disseminate content, and to voice their opinions on topics that concern them. Contributors to these media generate a massive amount of textual data, which could be mined for information of value to a range of organisations, such as companies interested in views about their products, or political parties interested in public opinion about their policies. Various organisations want help in targetting adverts to an audience where it will be most effective.
+
+The volume of text produced in these social media streams, however, is so great that a manual analysis of content is infeasible for anything other than a tiny sample. Consequently, there is a need — and potential commercial value — for systems that can automatically extract information from social media , and this has become an active area of research in current Natural Language Processing.
+
+A major sub-area of this work addresses the task of opinion mining (a.k.a.sentiment analysis). There are several aspects we might seek to extract about an opinion, including its polarity (positive view vs. negative) and degree (e.g. mildly positive vs strongly so), its topic (the thing about which a positive/negative view is expressed), and its source (the individual expressing the opinion). Opinion mining has been applied to social media in a wide range of settings, from generating synopses of customer reviews of consumer products on Amazon, to monitoring public sentiment about Barack Obama during the 2008 US presidential election, by analysing Twitter data and tracking the change over time of sentiment expressed.
+Project Description:
+
+This project will begin with a review of current work, leading to the selection of a specific opinion mining task and dataset. A method for tackling the task will be selected, implemented, and hopefully also extended, within the project.
+Requirements:
+
+    This project requires good programming skills. The use of Python for programming work is preferred, but other languages may be used by agreement. 
+
+Initial reading and useful links:
+
+    From Tweets to Polls: Linking Text Sentiment to Public Opinion Time Series. B. O'Connor, R. Balasubramanyan, B.R. Routledge, and N.A. Smith. Proc. of the 4th Int'l AAAI Conference on Weblogs and Social Media. 2010.
+    Bo Pang and Lillian Lee. 2008. Opinion mining and sentiment analysis. Foundations and Trends in Information Retrieval, 2(1-2), pp. 1-135. (pdf, page) 
+
+----
+
+## MRH-MSC-5: Event and Topic Detection in Social Media Streams
+
+ Suitable for:   all students
+
+Student numbers: This project is for 1 student only.
+Background:
+Recent times have seen a rapid growth in the use of social media, such as Facebook and Twitter. Such media give citizens previously unheard of opportunities to disseminate content, and to voice their opinions on topics that concern them. Contributors to these media generate a massive amount of textual data, which could be mined for information of value to a range of organisations, such as companies interested in views about their products, or news organisations seeking early warnings of breaking news events.
+
+The volume of text produced in these social media streams, however, is so great that a manual analysis of content is infeasible for anything other than a tiny sample. Consequently, there is a need — and potential commercial value — for systems that can automatically extract information from social media , and this has become an active area of research in current Natural Language Processing.
+
+One sub-area of this work is concerned with detecting the appearence of new 'topics', i.e. identifying within a stream of texts (such as newswire articles, blog postings or tweets) the point at which a new 'topic' is introduced, where the topic is typically a major event, such as a volcanic eruption or a terrorist bombing, plus perhaps grouping the postings that belong to this topic. A related task is identifying an event from distributed evidence, e.g. that a major flu outbreak might be indicated by many people from an area reporting symptoms.
+Project Description:
+
+This project will begin with a review of current work, leading to the selection of a specific event or topic detection task and dataset. A method for tackling the task will be selected, implemented, and hopefully also extended, within the project.
+Requirements:
+
+    This project requires good programming skills. The use of Python for programming work is preferred, but other languages may be used by agreement. 
+
+Initial reading and useful links:
+
+- Event Detection and Story Tracking in Social Streams. H. Sayyadi, M. Hurst, and A. Maykov. Proc. of 3rd Int'l AAAI Conference on Weblogs and Social Media. 2009.
+- Streaming First Story Detection with application to Twitter. S. Petrovic, M. Osborne and V. Lavrenko. Proc. of NAACL. 2010.
+- Flu Detector - Tracking Epidemics on Twitter. V. Lampos, T. De Bie, N. Cristianini. In Machine Learning and Knowledge Discovery in Databases, Vol 6323 of Lecture Notes in Computer Science, pp599-602. 
+
+----
+
+## MRH-MSC-6: Unsupervised Discovery of Word Morphology
+
+ Suitable for:   all students
+
+Student numbers: This project is for 1 student only.
+Background:
+In linguistics, the subfield of Morphology studies the structure of words in different languages, and how words are built up from smaller meaningful units, known as morphemes. For example, the following verbs of English are seen as consisting of a root form of a verb, plus a suffix (end) morpheme, that modifies the root verb's basic meaning:
+laughed 	= 	laugh + ed
+walking 	= 	walk + ing
+jumps 	= 	jump + s
+
+Computational morphological analysis is the task of automatically breaking words down into their component morphemes, and is an essential component in many language processing applications, ranging from spelling correction to machine translation. Systems performing this analysis can be manually coded, but this requires expertise in the language to be processed, as well as in relevant ideas from linguistic theory and computational methods, and expert time costs money. Hence, there is value in systems that can automically infer the morphological structure of words in a language from data (i.e. a collection of text), and use this to analyse new text. As a simple example, a system might observe that many words in English end in "ing", and hence infer this is suffix morpheme. Such a system could be applied to a range of languages, to create morphological analysers that would otherwise not be available, at very little cost.
+Project Description:
+The project will begin with a review of current approaches, leading to the selection of one or more methods for unsupervised discovery of morphological structure, which will be implemented and evaluated with the project. Data in multiple languages, along with evaluation resources and relevant papers, can be got from the Morpho Project web site (see link below).
+Requirements:
+
+    This project requires good programming skills. The use of Python for programming work is preferred, but other languages may be used by agreement. 
+
+Initial reading and useful links:
+
+    Unsupervised morphological segmentation and clustering with document boundaries. T. Moon, K. Erk and J. Baldridge. Proc. of EMNLP, 2009, pp668-677.
+    The Morpho Project. A web site with lots of papers about morphology induction, plus data sets used in competitive challenges, evaluation resources, etc. 
+
+----
+
+## MRH-MSC-7: Handling Unknown Words in Part-of-Speech Tagging
+
+ Suitable for:   all students
+
+Student numbers: This project is for 1 student only.
+Background:
+
+Part-of-speech tagging is the task of assigning to each word in a text a part-of-speech (POS) tag, such as NOUN or VERB. This is an essential component in many language processing applications. The task is difficult as many words have more than one part-of-speech and the correct tag to assign will depend on the context (e.g. study in "I study/VERB French" vs. "He is in the study/NOUN"). POS taggers are commonly produced by applying machine learning methods to a corpus of pretagged training data.
+
+A key obstacle to successful POS tagging is the quite frequent presence in texts of words that were not seen in the tagger's training data, and which may not even occur in a common dictionary. Consequently, practical POS taggers require a component for handling unknown words, which might assign a single most-probable tag to an unknown word, or perhaps a ranked list of several most-probable tag alternatives (allowing the tagger to chose amongst them, based on context). Various clues may be used in making this assignment, most particularly the presence of various "affixes", i.e. word prefixes and suffixes. For example, words ending in -ed in English are likely to be past tense or past participle verb forms. Another possible clue is capitalisation, i.e. since an uppercase-initial word is commonly a proper name in English text.
+Project Description:
+
+The project will start by reviewing existing approaches to handling unknown words in part-of-speech tagging. One or more approaches will then be implemented and evaluated, using one of the available corpora of pretagged text, such as the British National Corpus, as a basis for training and evaluation
+Requirements:
+
+    This project requires good programming skills. The use of Python for programming work is preferred, but other languages may be used by agreement. 
+
+Initial reading and useful links:
+
+    Foundations of Statistical Natural Language Processing. C. Manning and H. Schutze, 1999, MIT Press.
+    Different Approaches to Unknown Words in a Hidden Markov Model Part-of-Speech Tagger. Martin Haulrich. 2009. PDF 
+
+----
+
+## MRH-MSC-8: Automated Recognition of Dialogue Acts
+
+ Suitable for:   all students
+
+Student numbers: This project is for 1 student only.
+Background:
+
+Detailed study of dialogue, for example in conversational exchanges, has led to the proposal of a fixed set of dialogue acts, which concisely characterise a speaker's intention in producing a particular utterance or statement. Examples of dialogue acts are SUGGEST, INFORM, ACCEPT, REJECT, and so on. Recognising dialogue acts is crucial to effective automatic analysis of dialogue. Dialogue act recognition is a challenging task, however, because often the dialogue act cannot be directly inferred from a literal interpretation of an utterance. (For example, I may say "It's cold in here", apparently a simple statement of fact, with the intent of causing you to close the window, so that my utterance is an indirect form of request.)
+
+A number of dialogue corpora are available in which utterances have been manually annotated for their dialogue act. These resources have been used as training materials with a number of machine learning approaches to produce dialogue act recognition systems that automatically determine the dialogue act of an utterance using cues such as the word and phrases appearing within the utterance, as well as properties of the preceding utterances.
+Project Description:
+
+This project will review the literature on automatic dialogue act recognition, and will implement an approach for performing this task, train it on available data, and evaluate its effectiveness. A candidate approach is the cue-based method of Webb et al. (2005). An interesting question that might be pursued within the project is whether there is a set of cues to the dialogue act of utterances that are effective across domains.
+Requirements:
+
+    This project requires good programming skills. The use of Python for programming work is preferred, but other languages may be used by agreement. 
+
+Initial reading and useful links:
+
+    Webb, N., Hepple, M. & Wilks, Y. (2005). Dialogue Act Classification using Intra-Utterance Features, in Proc. AAAI Workshop on Spoken Language Understanding. (download)
+    Foundations of Statistical Natural Language Processing. C. Manning and H. Schutze, 1999, MIT Press. 
+
+----
+
+## MRH-MSC-9: Automatic Multidocument Summarizaton of News
+
+ Suitable for:   all students
+
+Student numbers: Up to 2 students may take this project.
+Background:
+
+Search for any topical news item on the web and you will find many articles about the same story — possibly reports written across several days, which bring in new information as the story has developed, but also with many details repeated. To avoid users having to read multiple documents, with much redundant content, a system that produces a short summary, which briefly states the key content, whilst avoiding repetition, would be very useful. A range of different approaches have been developed for performing this task of Automatic Multidocument Summarization, and implemented in various demonstrator systems (see e.g. the NewsBlaster system — link below). A common, very general, approach is to construct summaries by selecting (and concatenating) a number of sentences from the input documents that seem to represent their main content (as determined by the sentences containing the most important content words found across the documents), whilst avoiding redundant repetition of the same content. In contrast, the Guided Summarization task of TAC 2010 (Text Analysis Conference) aims to encourage a much more targetted approach, requiring systems that are developed to work for a only a predefined set of categories or topics (e.g. Natural Disasters, Terrorist Attacks, etc). For each category, a list of important aspects (such as WHAT_HAPPENED, WHO_AFFECTED, WHEN, WHERE, etc.) is specified, and summaries should, if possible, cover all of these aspects.
+Project Description:
+This project will develop am Automatic Multidocument Summarization system. Work will begin with a review of relevant methods, leading to the selection of an approach to tackling the task. A system implementing this approach will then be coded and evaluated.
+Requirements:
+
+    This project requires good programming skills. The use of Python for programming work is preferred, but other languages may be used by agreement. 
+
+Initial reading and useful links:
+
+    Newsblaster — an impressive multidocument summarization demo
+    The Document Understanding Conferences
+    Guided Summarization task at TAC 2010
+    Mani, I. & Maybury, M.T. (eds), (1999). Advances in Automatic Text Summarization. MIT Press.
+
+----
+
+## MRH-MSC-10: A Transformation-based Learning Tool in Python
+
+ Suitable for:   all students
+
+Student numbers: This project is for 1 student only.
+Background:
+
+Transformation-based Learning (TBL) is an intuitively simple rule-based machine learning approach which has been applied to a wide range of tasks in Natural Language Processing (NLP). The central process of this learning approach acquires a sequence of transformation rules (TRs), which are context dependent `correction' rules, that apply in turn to modify an initial guess at the correct annotation of some text, so that it better approximates truth. The learning process begins with an initial guess at the correct annotation of some text (created using simple heuristics), and proceeds by acquiring a sequence of transformation rules (TRs), which are context dependent `correction' rules, that apply in turn to modify the initial guess, so that it better approximates truth.
+
+NLP tasks to which TBL has been applied include part-of-speech tagging, robust grammatical analysis, word sense disambiguation and dialogue act recognition. Commonly, researchers investigating the use of TBL for some task have coded their own implementation of the approach tailored to the given purpose, and these implementations often cannot readily be reused for other tasks. Clearly, there are benefits to be gained from the availability of generic implementations of TBL, that can flexibly be applied to different learning problems. Currently, systems that have sought to address this need have been developed in C++ (fnTBL) and in Prolog (mu-TBL), but these systems have significant limitations in terms of either their generality or portability.
+Project Description:
+
+The aim of this project is to develop a generic tool for TBL in Python. This cross-platform object-oriented language has been chosen with a view both to the portability of the resulting system and to its future development beyond the lifetime of the immediate project. The project will start by looking at uses of TBL for various tasks, and by examining the existing generic TBL implementations, with a view to elaborating the requirements that the system should fulfill to produce an optimally generic/reusable tool. The subsequent implementation work will be aimed at producing a system which not only realises a reasonable subset of these requirements, but which is also well-designed so as to allow for future development. Ultimately, the aim is to produce an effective OpenSource generic tool for TBL which can genuinely facilitate the work of researchers in NLP and other fields.
+Requirements:
+
+    This project would suit students who have strong programming skills (and preferably also a good understanding of software design principles). 
+
+Initial reading and useful links:
+
+    Foundations of Statistical Natural Language Processing. C. Manning and H. Schutze, 1999, MIT Press.
+    Additional readings from supervisor
+
+----
+
+# Phil McMinn
+
+## PSM-MSc-1: Animating Search-Based Optimisation Algorithms in the AVMf
+
+Suitable for ACS/ASE/DA/CS+SLP
+Available for up to 2 students.
+
+Search-based optimisation algorithms can be used to find “good enough” solutions to hard problems in a reasonable amount of time. They do this through a “generate and test” method. Potential solutions are generated (at random, initially) and evaluated them using a problem-specific “fitness function”. A fitness function provides a numerical score of how “good” a potential solution is for the problem at hand. The optimisation algorithm will then try to improve the fitness of a potential solution by making a series of changes to it. If these changes result in worse fitness scores, the solution may be thrown away, else the solution may be subject to further changes with the goal of further improving fitness.
+
+The aim of this project is to implement a **visualiser** that animates the real-time progress of search-based optimisation algorithms as they optimise solutions for some instance of a problem. For example, they could show how the algorithm is considering different solutions, moving along the 2D or 3D surface of a fitness function, as it evaluates the fitness of those solutions. It could show, graphically, which aspects of the solution are being improved by the algorithm. It could also relay further real times statistics — perhaps in the form of graphs — such as how many fitness function evaluations have been considered by the search process, where or what the best solutions found so far are, etc.
+
+These animations would be implemented to work with an open-source library dedicated to a particular effective search-based optimisation algorithm called the “Alternating Variable Method” (AVM). The library is called the “AVMf” and is freely available on GitHub: https://github.com/AVMf/avmf
+
+Currently, all output produced by the framework is limited to the console only. This project therefore offers the opportunity to contribute to and improve an open-source tool,
+
+----
+
+# Anthony Prescott
+
+## TJP-MSc-2: How to train your robot: Using reinforcement learning and shaping to teach new behaviours to robots (ACS, ASE, Cyber, two students) 
+
+My research group works in biomimetic robotics, with particular focus on brain-inspired computing, active sensing, scene understanding, episodic and spatial memory, social cognition and human-robot interaction.  Over the past five years we have created MiRo—an animal-like companion robot designed for applications in education, therapy, and assistive living. In this project students will work to develop new behaviours for the MiRo robot using reinforcement learning methods (e.g. actor-critic or Q-learning) and will develop methods by which people can train the robot to do sequential tasks through “shaping”. The project will use both the physical robot and a robot simulation tool. Students should have good programming (Python or C++) and mathematical skills, an interest or experience with computational neuroscience would be useful. No prior familiarity with robots in needed. A maximum of two students can do this project.
+
+Tony Prescott’s Home page
+
+Mitchinson, B. and Prescott, T. J. (2016). MIRO: A Robot “Mammal” with a Biomimetic Brain-Based Control System. Living Machines V: Biomimetic and Biohybrid Systems, LNCAI 9793, pp. 179-191.
+
+Prescott, T. J., J. Ayers, F. W. Grasso and P. F. M. J. Verschure (2016). Embodied Models and Neurorobotics. In From Neuron to Cognition via Computational Neuroscience. M. A. Arbib and J. J. Bonaiuto (eds). Cambridge, MA, MIT Press.
+
+MiRo robot home-page
+
+The MiRo Project (on ResearchGate)
+
+
+----
+
+# Nikolaos Aletras
+
+## NA-MSc-5: Analysing User Feedback of the HM Courts of Tribunals Service Social Media using Neural Topic Models (DA, CS+SLP, ACS) - Single student, UK/EEA only
+
+Background
+
+The HM Courts of Tribunals Service (HMCTS) is increasing the number of channels it uses to listen, and respond, to users of its services, including social media through Twitter.  Direct tweets and mentions of the organisation, or to the CEO, are continually monitored and responded to by the Communications team. However, the organisation has not yet used data from its social media accounts to track the topics over time. 
+
+The project will aim to help the organisation understand and identify praise, feedback and pain points from citizens in order to improve its services. For that purpose, the project will focus on developing a Neural Topic Model to automatically track the underlying topics discussed in the HMCTS Twitter account and/or the complaints and feedback forms.
+
+The project will be co-supervised with the HMCTS Data Science team. The student will have the opportunity for research visits to the HMCTS at the Ministry of Justice in London. Note that this project is only available to UK and European Economic Area (EEA) students due to the data availability restrictions of the MoJ.
+
+References
+
+Larochelle et al. (2012). A Neural Autoregressive Topic Model. In NIPS. http://papers.nips.cc/paper/4613-a-neural-autoregressive-topic-model
+
+Miao et al. (2016). Neural Variational Inference for Text Processing. In ICML. http://proceedings.mlr.press/v48/miao16.pdf
+
+Preotiuc-Pietro, Gaman and Aletras (Under Review). Automatically Identifying Complaints in Social Media. PDF Available upon request.
+
+
+## NA-MSc-4: Topic Label Generation with Neural Networks (DA, CS+SLP, ACS) - Single student
+
+Background
+
+Topic  models are  a popular method  for organising and  interpreting large document collections by automatically grouping documents into various thematic subjects (e.g. sports,  politics or lifestyle) called topics. Topics are typically presented as a list of topic words
+
+Automatic topic labelling is the task of generating a succinct label that summarises the theme  or subject of a topic, with the intention of reducing the cognitive load of end-users  when interpreting  these topics. For example given the topic “pasta, bolognese, wine, olives, pizza” a  representative label would be “Italian Cuisine”. Current topic labelling systems work into two steps: (1) retrieve a set of candidate labels and (2) rank the candidate labels by relevance to the topic terms.
+
+The aim of this project is to develop a novel neural network approach for generating textual labels for topics in one go.  For example given the topic “pasta, bolognese, wine, olives, pizza” the developed system would be able to generate a label such as “Italian Cuisine” word-by-word  without having to retrieve a set of candidate labels. This will be achieved by developing new Sequence-to-Sequence Recurrent Neural Network models. 
+
+References
+
+N. Aletras and A. Mittal (2017). Labeling Topics with Images using Neural Networks. In ECIR. https://arxiv.org/pdf/1608.00470v2.pdf
+
+I. Soroduc, J. H. Lau, N. Aletras,  T. Baldwin (2017). Multimodal Topic Labelling. In EACL. http://aclweb.org/anthology/E/E17/E17-2111.pdf
+
+Sutskever et al. (2014). Sequence to Sequence Learning with Neural Networks. In NIPS. http://papers.nips.cc/paper/5346-sequence-to-sequence-learnin
+
+Nallapati et al. (2016). Abstractive Text Summarization using Sequence-to-sequence RNNs and Beyond. In CoNLL http://anthology.aclweb.org/K/K16/K16-1.pdf#page=298
+
+## NA-MSc-2: Automatically Identifying Parody on Twitter (CS+SLP, DA, ACS) - Single Student
+
+Background
+
+DPRK News Service‏ @DPRK_News : “Imbecilic Americans drunkenly fire missiles into East Sea of Korea, demonstrating near total ignorance of ballistic science.”
+
+Has this tweet been posted by a parody account or a real one? 
+
+The New York Times picked this tweet and featured it as a news story (https://www.nytimes.com/2017/07/04/world/asia/north-korea-missile-test-icbm.html). Later, the newspaper had to provide a correction when the journalists realised that it actually comes from a parody account. Twitter leaves it up to individuals and organisations to monitor parody accounts. While the aim of these accounts is to mimic real accounts with humorous purposes, they are often responsible for the diffusion of deceptive news online. 
+
+The aim of this project is twofold: (1) to develop a new dataset of parody and real tweets; (2) to build a text classification model that will be able to detect whether a given tweet comes from a real or a parody account. 
+
+References
+
+Lukasik et al. (2015). Classifying Tweet Level Judgements of Rumours in Social Media. https://arxiv.org/abs/1506.00468
+
+Highfield (2015). News via Voldemort: Parody accounts in topical discussions on Twitter. http://journals.sagepub.com/doi/abs/10.1177/146144481557670
+
+Kreuz and Roberts (2009). On Satire and Parody: The Importance of Being Ironic. https://www.tandfonline.com/doi/abs/10.1207/s15327868ms0802_2
+
+----
+
+## NA-MSc-3: Interpretable Probabilistic Deep Learning for Text Classification (DA, CS+SLP, ACS) - Single student
+
+Background
+
+Bayesian Neural Networks (BNNs) are probabilistic alternatives to standard neural networks where the point estimates of the weights are replaced with probability distributions. This makes them easier to interpret and more transparent into what they learn since they model uncertainty (i.e. how confident is a model when making a particular prediction).
+
+The aim of this project is to develop novel text classification models using BNNs and assess their data efficiency and interpretability in topic categorisation and sentiment analysis.
+
+References
+
+Yang et al. (2016). Hierarchical Attention Networks for Document Classification. http://www.cs.cmu.edu/~./hovy/papers/16HLT-hierarchical-attention-networks.pdf
+
+Fortunato et al. (2017). Bayesian Recurrent Neural Networks. https://arxiv.org/abs/1704.02798
+
+Blundell et al. (2015). Weight Uncertainty in Neural Networks. https://arxiv.org/abs/1505.05424
+
+Poerner et al. (2018). Evaluating neural network explanation methods using hybrid documents and morphosyntactic agreement. In  ACL. https://www.aclweb.org/anthology/P18-1032.pdf
+
+Ribeiro et al. (2016). "Why Should I Trust You?": Explaining the Predictions of Any Classifier. In KDD. https://dl.acm.org/citation.cfm?id=2939778
+
+----
+
+## NA-MSc-1: Transfer Learning for Deep Recurrent Neural Networks in NLP (DA, CS+SLP, ACS, DC) - Single student
+
+Background
+
+Transfer Learning is an important area of research in Machine Learning (ML) which deals with how we can leverage knowledge stored within models trained on a source domain and provides ways to transfer it to a target domain where a domain could be a dataset, task, game, etc.. For example, how can we reuse a model that is trained to recognise news articles about politics and sports in recognising articles about art and science? 
+
+Training deep learning models based on recurrent Neural Networks (RNNs) for NLP tasks such as text classification and question answering typically involve millions of parameters. These methods are data intensive and require access to large annotated corpora. Transfer learning for text classification is a less straightforward task compared to similar approaches in Computer Vision, with interesting underpinning research questions in academia and applications in industry.
+
+This project will focus on developing transfer learning methods for repurposing and reusing deep learning models for text classification. The main aim of the project is to extend the Xfer library to support RNNs and build novel transfer learning approaches using probabilistic machine learning models.
+
+The project will be co-supervised with Dr. Andreas Damianou and Dr. Pablo Moreno, research scientists in Amazon Research Cambridge. The student will also have the opportunity for a research visit at ARC.
+
+References
+
+Howard and Ruder (2018). Universal Language Model Fine-tuning for Text Classification. In ACL http://www.aclweb.org/anthology/P18-1031
+
+Chung et al. (2015). Empirical evaluation of gated recurrent neural networks on sequence modeling. https://arxiv.org/pdf/1412.3555.pdf
+
+Zoph et al. (2016). Transfer Learning for Low-Resource Neural Machine Translation. In EMNLP https://aclweb.org/anthology/D16-1163.pdf
+
+Fortunato et al. (2017). Bayesian Recurrent Neural Networks. https://arxiv.org/abs/1704.02798
+
+Blundell et al. (2015). Weight Uncertainty in Neural Networks. https://arxiv.org/abs/1505.05424
+
+Xfer - https://github.com/amzn/xfer
+
+MXNet Gluon - Text classification in Gluon
+
+****
+
+# Eleni Vasilaki
+
+## Spiking Neural Networks producing Stimulus Specific Adaptation (EV-MSc-5)
+
+It has been found that the cortical columns of mammals often respond to sensory stimuli by generating population spike characterized by a near coincident firing of a group of neurons within a short time interval. This interesting phenomenon can be simulated by a recurrent network with depressing synapses [1]. In this msc project, you will use leaky integrate and fire neuronw to build the  network [2]. The goal of the project is to help students have a deeper understanding of artificial neural network which is popular in the field of ML from a more biologically-detailed perspective.
+
+Skill requirements Python/Matlab, Calculus
+
+[1] Tsodyks, M., Uziel, A., Markram, H., et al. Synchrony generation in recurrent networks with frequency-dependent synapses. J Neurosci 20, 1 (2000), 825–835.
+
+[2] Gerstner, W., Kistler, W. M., Naud, R., and Paninski, L. Neuronal dynamics: From single neurons to networks and models of cognition. Cambridge University Press, 2014.
+
+[3] Vasilaki, E. and Giugliano, M. Emergence of Connectivity Motifs in Networks of Model Neurons with Short- and Long-Term Plastic Synapses. PLOS ONE (2014) 
+
+----
+
+## Designing a Braitenberg neuro-inspired controller for robot navigation tasks (EV-MSc-3)
+
+Valentino Braitenberg introduced the idea that the complex behaviour of agents navigating the world could be explained as simply being weighted connections between sensors and actuators [1]. A number of robotic studies have been published using Braitenberg’s principles to design “Braitenberg vehicles”; see Section 2 of [2]. But Braitenberg vehicles (or reactive controllers) offer an interesting platform on which reinforcement learning techniques could be employed to develop novel controllers in robots (see [3] and [4] for various examples), as well as them being biologically inspired.
+
+The project aim will be to develop a novel controller for an autonomous neuro-inspired robot that can navigate an environment in order to maximise task completion (moving items from one place to another, for instance) whilst minimising energy consumption. Using the principles of Braitenberg vehicles, the number of connections, or layers, between sensors and actuators is open for exploration, as are the methods in which the connections are configured. In this way the student will be designing a neuro-inspired robotic controller from the bottom up.
+
+ 
+
+SKILLS/REQUIREMENTS
+
+Python/C++, interest in biologically-inspired robotics
+
+ 
+
+REFERENCES
+
+[1] V. Braitenberg, Vehicles. Cambridge, Mass: MIT Press, 1984.
+
+[2] C. J. Headleand and W. Teahan, "Towards ethical robots: Revisiting Braitenberg's vehicles," 2016 SAI Computing Conference (SAI), London, 2016, pp. 469-477.
+
+[3] I. Vincent and Q. Sun, "A combined reactive and reinforcement learning controller for an autonomous tracked vehicle", Robotics and Autonomous Systems, vol. 60, no. 4, pp. 599-608, 2012.
+
+[4] O. Kroemer, R. Detry, J. Piater and J. Peters, "Combining active learning and reactive control for robot grasping", Robotics and Autonomous Systems, vol. 58, no. 9, pp. 1105-1116, 2010.
+
+----
+
+## Reinforcement Learning and videogames (EV-MSc-1)
+
+Reinforcement Learning methods provide a mathematical framework to understand how an agent can learn a complex behaviour by interacting with the environment through the consequences of its actions. The generality of its approach could give insights on how we learn to act and make decisions in many different scenarios and situations. In particular, Q-learning has been demonstrated to be a powerful tool to understand how an artificial intelligence could learn to play different games with performances that are comparable (or even better) than the human level.
+
+The aim of this proposal is to program a Reinforcement Learning agent that can learn to play efficiently one or more simple electronic videogames. The specific game/s and the complexity of the features exploited by the algorithm can be chosen by the candidate on the basis of his/her abilities and previous knowledge of the topic.
+
+ 
+
+Skill Requirements:
+
+    Good understanding of Reinforcement Learning basics, in particular of Temporal Difference methods and Q-Learning.
+    Knowledge of Python and/or Matlab.
+
+ 
+
+[1] Mnih, Volodymyr, et al. "Human-level control through deep reinforcement learning." Nature 518.7540 (2015): 529.
+
+[2] Sutton, Richard S., and Andrew G. Barto. "Reinforcement learning: An introduction." (2011).
+
+[3] Mnih, Volodymyr, et al. "Playing atari with deep reinforcement learning." arXiv preprint arXiv:1312.5602 (2013).
+
+[4] Schaul, Tom, et al. "Prioritized experience replay." arXiv preprint arXiv:1511.05952 (2015).
+
+****
+
+# Mark Stevenson
+
+## MS-MSc-1: Categorising Song Genre by Analysing Lyrics
+
+Suitable for: DA, CS+SLP, ACS, ASE
+This project is suitable for a student with an interest in Natural Language Processing and Machine Learning.
+
+Number of students: Project could be taken by a single student.
+
+Project Description: This project will make use of Machine Learning and Natural Language Processing to identify the genre of songs from their lyrics. The student(s) carrying out this project will create software to analyse the lyrics from song and predict its genre (e.g. pop, metal, rock).
+
+The project will make use of existing datasets containing song lyrics (e.g. https://www.smcnus.org/lyrics/ and
+https://labrosa.ee.columbia.edu/millionsong/musixmatch) and apply existing toolkits (e.g. scikitlearn and NLTK) to develop supervised classifiers that can identify the genre of a song automatically.
+
+Background Links:
+
+    https://web.stanford.edu/class/archive/cs/cs224n/cs224n.1174/reports/2728368.pdf
+    https://www.smcnus.org/wp-content/uploads/2015/08/LNS_ISMIR2015_116.pdf
+
+----
+
+## MS-MSc-6: Build a Recommendation System for Scientific Papers
+
+Suitable for: DA, CS+SLP, ACS, ASE
+This project is suitable for a student with an interest in Natural Language Processing and Machine Learning.
+
+Number of students Project could be taken by a single student.
+
+Project Description Recommendation systems suggest interesting content to users base on their individual preferences. They are now widely used in a wide range of areas including online shopping sites and social media to recommend many different types of items (such as songs, movies and books).
+
+The aim of this project is to create a recommendation system for scientific papers. It will be based on the ACL Anthology (https://aclanthology.coli.uni-saarland.de/, which contains papers on Natural Language Processing. The system will allow users to provide a set of papers representing their interests (e.g. a researcher's previous publications) and identify papers likely to be of interest to that user.
+
+The project will begin by reviewing previous approaches to creating recommendation systems, particularly for scientific literature. One of the approaches (or multiple approaches) will then be chosen, implemented and tested.
+Reply Quote Email Author
+
+
+****
+
+# Robert Hierons 
+
+## RMH-MSc-3: Machine Learning Directed Software Testing
+
+Probably one project - might be two (but different students would have to use different machine learning techniques)
+
+Suitable for: ACS, ASE, SSIT, Cyber
+
+It is most likely that this project will concern the testing of a state-based system where the system has internal states and an input can lead to both an output and a change of state. There are many examples of such systems. For example, when using an ATM, having input your card you move to a state where you input your PIN. When testing such a system one learns something about the state-structure of the system. If we can suitably express what we have learnt then we might use this information to direct further testing. For example, if we use machine learning techniques to learn a finite state machine model M that approximates the system behaviour then we could generate further tests from M. We can then apply the tests to the system, observe additional information, and update our model.
+
+
+This project will involve developing such an approach to testing. You will choose a machine-learning algorithm, that learns a finite state machine from examples, and implement it. You will then use this in a framework that iterates between inducing a model M and applying tests generated from M. You might evaluate your method by applying the tool to some examples of state-based systems and assessing the quality of the resultant models. Alternatively, you could apply your approach to incorrect variants (mutants) of a correct system and assess how effective it is at showing that these mutants are faulty.
+
+----
+
+## RMH-MSc-1: Using Search Techniques to Automate Metamorphic Testing
+
+Suitable for: ACS, ASE, SSIT, Cyber
+
+When testing a piece of code it is normal to have some way of determining whether the output observed is correct, a system that does this being called an oracle. However, for some problems it is extremely difficult or expensive to produce an oracle and this makes testing difficult and limits the opportunity for test automation. Metamorphic testing is designed to overcome this problem for some classes of system: the idea is that rather than check that the output from a test case is correct, we run several tests on related input and check that an expected property holds. For example, if we were to test a piece of code that is designed to implement the cosine function then we might note that for every input x we should have that cos(x)=cos(-x). So, we could run our code on pairs of values such as 0.1 and -0.1 and check that this property holds. Most examples relate to such ‘numerical’ functions. 
+
+
+In metamorphic testing we have a metamorphic relation or property, such as cos(x)=cos(-x), and we check that this holds for our test cases. There remains, however, the problem of choosing test data that is likely to ‘break’ this metamorphic relation for a faulty implementation. This project will apply search techniques, such as Genetic Algorithms, search for such test data. The aim is to run test cases, observe how ‘close’ they are to breaking the metamorphic relation and use this information to help us create new test cases that are likely to break this relation. 
+
+
+One possibility is to a Genetic Algorithm for the search but there are alternatives. Genetic Algorithms are loosely based on ideas from Darwinian evolution: we produce a set of candidate solutions, evaluate these with a fitness function, and on the basis of this produce new candidate solutions using crossover (which combines ‘genetic material’ from two current candidates) and mutation (which randomly changes some elements of a candidate solution that has been produced using crossover). Note that you are not expected to be an expert in Genetic Algorithms.
+
+----
+
+## RMH-MSc-2: Using Search Techniques in Software Testing
+
+Up to 3 projects, but students will have to consider different test problems
+
+Suitable for: ACS, ASE, SSIT, Cyber
+
+This project will use a search technique to automate the generation of test cases. It is likely that you will use Genetic Algorithms for the search but there are alternatives. Genetic Algorithms are loosely based on ideas from Darwinian evolution: we produce a set of candidate solutions, evaluate these with a fitness function, and on the basis of this produce new candidate solutions using crossover (which combines ‘genetic material’ from two current candidates) and mutation (which randomly changes some elements of a candidate solution that has been produced using crossover). Note that you are not expected to be an expert in Genetic Algorithms but you will have to learn about them - and it would help if you already had some background knowledge.
+
+
+There are several possible test generation problems that can be tackled by search and initial discussions will identify a particular problem. For example, when testing from a state-machine model (e.g. a UML statechart), we might identify a path through the model and then wish to find a test case that executes the path. There are several ways of approaching this problem: the ideal project would implement two and compare them but it is more likely that a project will implement on search-based solution and compare it with random generation.
+Possible other test generation problems include:
+
+
+a) Producing test cases to try to maximise the time it takes a program to complete (i.e. to assess 'how slow' it can get). Here, the ‘fitness’ of a test input x might simply be the time it takes the program to execute with input x.
+
+b) Test to try to get a program to access (or update) beyond the end of an array. Here, the contents of an array might be accessed (or updated) in a loop - the problem is to try to maximise the array index used.
+
+c) Test to try to maximise the network capacity used by a program. (This would require a strong background in network monitoring - I cannot help on this aspect!)
+
+****
+
+# Mauricio Alvarez Lopez
+
+## Automatic learning of the kernel function in Gaussian process regression (MAA – MSc 6)
+
+This project is suitable for students enrolled in DA/ACS/ASE
+
+How many students could take this project: one
+
+Description:
+
+Gaussian processes (GPs) are the method of choice for performing non-linear regression in machine learning. GPs borrow their flexibility from the properties of the multivariate Gaussian distribution and their definition is given by setting a mean function and a covariance function (or kernel function). The mean function is usually set to zero, whereas the covariance function is chosen from a well-known family of positive semi-definite functions.
+
+Choosing a covariance function in a practical setting is challenging. The user typically has to use cross-validation to select a covariance function from a handful of options. This project will compare different strategies to automatically learn the kernel function of the Gaussian process. We will look at the use of grammars that build combinations of standard kernel functions and spectral representations of kernels that build flexible representations in the frequency domain. 
+
+Preferred skills: Strong maths background, excellent programming skills
+
+Additional information:
+
+https://www.aaai.org/ocs/index.php/AAAI/AAAI14/paper/viewFile/8240/8564
+
+https://arxiv.org/pdf/1302.4245.pdf
+
+----
+
+## Learning fast physically-inspired kernels for predictive models (MAA – MSc 3)
+
+This project is suitable for students enrolled in DA/ACS/ASE
+
+How many students could take this project: one
+
+Description:
+
+Physically-inspired kernels attempt to introduce extrapolation abilities to kernel machines that, otherwise, would only perform well in interpolation scenarios.  However, the popular use of these more powerful kernels has been restricted since they are computational more expensive than traditional non-physically inspired kernels.
+
+In the kernel literature, concepts like Random Kitchen Sinks, and Fastfood methods have been introduced to accelerate the computation of non-physically inspired kernels. In this project, the student will apply these concepts to physically-inspired kernels, and will propose variants for these kernels that will reduce their computational cost.
+
+Preferred skills: Strong maths background, excellent programming skills
+
+Additional information: https://arxiv.org/abs/1805.07460
+
+----
+
+## Multi-task Bayesian optimisation for hyper-parameter selection (MAA – MSc 5)
+
+This project is suitable for students enrolled in DA/ACS/ASE
+
+How many students could take this project: one
+
+Description:
+
+Most machine learning models require the tuning of hyper-parameters: the regularization constant of a support vector machine, the hyper-parameters of the kernel in a kernel machine, the number of basis functions in generalized linear models, the depth of a decision tree, the number of layers and nodes per layer in a neural network, etc.
+
+Hyper-parameter selection is critical for the performance of the machine learning algorithm and there is documented evidence that even simple machine learning models can outperform more complex models if their hyper-parameters were carefully chosen.
+
+Bayesian optimisation has received a lot of interest in previous years since it is an effective way to explore the space of the hyper-parameter values. It involves a trade-off between exploration of new regions of the parameters space and exploitation of regions that have already provided good performance results.
+
+Multi-task Bayesian optimisation improves upon Bayesian optimisation by borrowing knowledge from related optimisation problems, for example, using a small dataset to learn the parameters of a model (one of the tasks) that needs to be trained with a large dataset (the other task); using a machine learning model that is cheap to train, e.g. a decision tree, (one task) to guide the training of a machine learning model that is more expensive to train, e.g. a deep neural network (the other task). 
+
+So far multi-task Bayesian optimisation has been based on simple forms of multi-task Gaussian processes. In this project, the student will have the opportunity to explore more powerful and recent multi-task Gaussian processes models.
+
+Preferred skills: Strong maths background, excellent programming skills
+
+----
+
+## Large scale neuro-imaging analysis using Apache Spark (MAA – MSc 2)
+
+This project is suitable for students enrolled in DA/ACS/ASE
+
+How many students could take this project:  one or two students
+
+Description:
+
+Although neuroimaging data is being acquired at an unprecedented scale, large-scale methods for analysing such data are still at their infancy. 
+
+Until recently, building predictive models in a classic supervised learning approach, where the input data was a whole 3D brain scan of a patient and the output data a particular clinical condition (disease/not disease), was out of the question.
+
+In this regard, neuroimaging analysis has been behind the progress of other fields where data observations are complex and structured high-dimensional objects like genomics. Indeed, in the omics sciences, sophisticated software engineering pipelines and data analytics methods have been developed and applied since many years ago.
+
+Thanks to recent governmental efforts across the oceans (the BRAIN project and the Human Connectome Project in the USA, and the Human Brain Project in the EU) the amount of available neuroimaging data has scaled to an unprecedented level and the quest for efficient software and data-analytics platforms applied to this data at this scale is just beginning.  
+
+In this project, we will look at how to use the Thunder library with Apache Spark for performing large-scale analytics on neuroimaging data. We will use as an example a subset of the data available in the Human Connectome Project, particularly the one related to diffusion tensor imaging for Alzheimer’s disease.
+
+Preferred skills: Excellent programming skills, Machine Learning.
+
+Additional information: https://github.com/thunder-project/thunder
+
+----
+
+## Large scale neuro-imaging analysis using Apache Spark (MAA – MSc 2)
+
+This project is suitable for students enrolled in DA/ACS/ASE
+
+How many students could take this project:  one or two students
+
+Description:
+
+Although neuroimaging data is being acquired at an unprecedented scale, large-scale methods for analysing such data are still at their infancy. 
+
+Until recently, building predictive models in a classic supervised learning approach, where the input data was a whole 3D brain scan of a patient and the output data a particular clinical condition (disease/not disease), was out of the question.
+
+In this regard, neuroimaging analysis has been behind the progress of other fields where data observations are complex and structured high-dimensional objects like genomics. Indeed, in the omics sciences, sophisticated software engineering pipelines and data analytics methods have been developed and applied since many years ago.
+
+Thanks to recent governmental efforts across the oceans (the BRAIN project and the Human Connectome Project in the USA, and the Human Brain Project in the EU) the amount of available neuroimaging data has scaled to an unprecedented level and the quest for efficient software and data-analytics platforms applied to this data at this scale is just beginning.  
+
+In this project, we will look at how to use the Thunder library with Apache Spark for performing large-scale analytics on neuroimaging data. We will use as an example a subset of the data available in the Human Connectome Project, particularly the one related to diffusion tensor imaging for Alzheimer’s disease.
+
+Preferred skills: Excellent programming skills, Machine Learning.
+
+Additional information: https://github.com/thunder-project/thunder
+
+
+
+

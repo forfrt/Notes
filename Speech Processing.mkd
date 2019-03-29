@@ -1,0 +1,228 @@
+
+# L2_Sound #
+
+What is sound?
+
+- Acoustic energy
+- A mechanical wave
+- Vibrations that travel through the air
+- Variation in pressure
+
+----
+
+## Sound Pressure Level ##
+
+Sound pressure is the **local pressure deviation** from the ambient atmospheric pressure caused by a sound wave.
+
+SPL is a logarithmic measure of the sound **amplitude** relative to  reference value
+
+L_p=20log_10(p_rms/p_ref)dB
+
+----
+
+## Sound Pressure Waveform
+
+The higher amplitude(SPL) the higher density in Waveform
+
+----
+
+## The Sound Spectrum
+
+A sound may be perceived as having pitch and timbre
+
+- pitch relates to the frequency
+- timber relates to the SPL at different frequencies
+
+----
+
+## Sound Frequency
+
+frequency:      f=n/t=1/T Hz
+wavelength:     \lambda = v/f
+
+----
+
+## Types of Sound
+
+- Impulsive
+- Noisy
+- Repetitive
+
+----
+
+## A Pure Tone
+
+The simplest repeating signal is a sinusoid
+
+A sine wave sound is known as a pure tone, with frequenchy f, amplitude A and phase \phi
+
+----
+
+## Superposition
+
+Sound waves travelling through a medium interfere with each other
+
+When sound waves combine they obey the superposition principle (they simply add)
+
+- constructive interference
+- destructive interference
+
+----
+
+## Resonance
+
+When waves encounter an obstacle, they are reflected
+
+Direct and reflected wave combine (using the principle of superposition)
+- constructive interference results in resonance
+- destructive interference results in anti-resonance
+
+A simple acoustic structure (such as tube) has straightforward resonant characteristics
+
+----
+
+## Resonant Tubes
+
+The resonant frequency f of a cylinder open *at both ends* is given by:
+
+f=nv/2L
+
+where ...
+- v is the speed of sound
+- L is the length of the tube
+- n is the positive integer
+
+n=1 gives the frequency of the fundamental
+n=2, 3 gives the frequencies of the harmonics
+
+----
+
+The resonant frequency f of a cylinder open *at both ends* is given by:
+
+f=(2n-1)v/4L
+
+----
+
+In the general case, the resonant frequency f of a cylinder is given by
+f=(2n-(x_1+x_2))v/4L
+
+x_1 is the degree of opening at one end of the tube
+x_2 is the degree of opening at the other end of the tube
+
+----
+
+## The Human Vocal Tract
+
+In the neural position, the adult male vocal tract is equivalent to a 17.5 cm tube open at one end (the mouth) and closed at the other (the larynx)
+
+----
+
+## Excitation
+
+In order for an acoustic structure to resonate it needs to be 'excited'
+
+So the effect of resonances/anti-resonances is to enhance/reduce the incoming energy at different frequencies.
+
+This can be thought of as 'filtering'
+
+----
+
+The three modes of excitation (impulsive, noisy, repetitive) give rise to three classic types of musical instrument
+- percussion (e.g. a drum)
+- wind (e.g. a flute)
+- string (e.g. a violin)
+
+****
+
+# L3_Speaking
+
+## The Speech Chain
+
+linguistic level->physiological level->acoustic level->physiological level->linguistic level
+
+----
+
+## Mammalian Vocalisation
+
+[The_Human_Vocal_Organs.png](./img/Speech Processing/The_Human_Vocal_Organs.png)
+
+Lungs->Larynx->Pharynx->Velum->Nasal Cavity
+                        ->Oral Cavity->Tongue
+                                        ->Lips
+                                        ->Passive Articulators
+
+Lungs: Main source of energy
+Larynx: Main source of sound
+Tongue: Main source of articulation
+
+Lungs->Larynx: Airflow (determined by lung capacity & exhalation rate)
+Larynx->Pharrynx: Harmonic-rich 'buzz' (fundamental frequency determined by body size)
+Oral cavity->Passive articulators: vocal tract resonant frequencies (determined by body size & position of articulators)
+
+----
+
+## Voice 'Source'
+
+Air Pressure from the lungs builds up behind closed 'vocal folds'
+
+The vocal folds are repeatedly forced apart and pulled together again, producing a series of small pulses of air
+
+This modulation of the airstream is known as 'phonation'
+
+----
+
+## Air-Flow Through Glottis
+
+The acoustic output from the vocal tract is initiated by the closure of the vocal folds
+
+- Sharp corner at glottal closure
+- More rounded corner at glottal opening
+
+----
+
+## Voice Filter
+
+The vocal tract forms a resonator with a cocmplex shape
+
+Resonances are known as formants
+
+Speech is produced by using the articulators to change the shape of the vocal tract, hence modifying its resonant characteristics
+
+The principal articulator is the tongue, but the jaw, lips, soft palate and teeth are also involved
+
+----
+
+## Sound Source
+
+Is the larynx the only source of sound in the human vocal tract
+- sound can be generated anywhere there is a partial constriction ("sh")
+- exciting a resonance (a whistle)
+- vibrating an articulator (the tongue)
+- releasing a blockage (the lips)
+
+----
+
+## Types of Speech Sound
+
+- A ‘voiced’ sound is one in which the vocal cords are vibrating
+- An ‘unvoiced’ sound is one in which the vocal cords are not vibrating
+- A ‘fricative’ sound results from a turbulent air flow at a constriction
+- A ‘plosive’ sound occurs after a blockage is released
+
+****
+
+# L4_Hearing
+
+## The Human Ear
+
+- acoustic sensing
+- sound localisation
+- communication
+
+The main function is frequency analysis
+
+
+
+
+
+

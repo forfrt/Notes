@@ -1,14 +1,4136 @@
 
-1°¢block.oneŒ™¡À±‹√‚∑®¬……œµƒ‘»Œ∑Áœ’£¨–˚∏Ê∂‘≥÷”–EoSŒﬁ»Œ∫Œ≥–≈µº∞“ÂŒÒ°£
-2°¢block.one÷ª «EoSµƒø™∑¢∑Ω£¨–˚∏ÊŒﬁ‘»Œ‘À––º∞Œ¨ª§EOS÷˜¡¥µƒ‘»Œ°££®Œ¥¿¥EOS÷˜¡¥ «”…°∞…Á«¯°±◊‘––∆Ù∂Ø£©
-3°¢block.oneµƒ¥¥ º»ÀDaniel Larimer…˘√˜π´Àæ“—”–◊ Ω◊„“‘ø™∑¢EoSœÓƒø£®‘⁄ICOƒººØ◊ ΩΩ· ¯«∞£©£¨ICOÀ˘”–ƒººØµƒ◊ ΩΩ´◊˜Œ™π´Àæ¿˚»Û£¨≤¢«“√ª”–“ÂŒÒ∫Õº∆ªÆ”√”⁄Œ¥¿¥EoSœÓƒøµƒø™∑¢°£
-4°¢XenonÕ®π˝ø’Õ∂£®√‚∑—∑¢∑≈£©∏¯“‘Ã´∑ª∫Õ±»Ãÿ±“≥÷”–’ﬂ£¨ø…“‘ªÒµ√∏¸π„∑∫µƒ…Á«¯πÿ◊¢∂»£®œ‡∂‘”⁄∏∂∑—µƒICO∑Ω Ω£¨≤Œ”Îµƒ»À∏¸∂‡£©£¨¥˙±“∑¢∑≈∏¯ø™∑¢’ﬂ£®œ‡∂‘”⁄block.oneπ´ÀæµƒπÕ”∂ø™∑¢»À‘±∑Ω Ω£©∏¸”–º§¿¯°£
-5°¢ŒﬁICO∑®¬…∑Áœ’°££®block.oneπ´Àæ“ªµ´œ›»ÎÀﬂÀœ£¨≤ª»Á”√◊‘”…µƒ◊È÷Ø–Œ Ω£¨¥ÊªÓƒ‹¡¶∏¸«ø£ª»•ƒÍ◊Ó¥ÛICOœÓƒøtezos£¨“≤ «“‘»°¥˙“‘Ã´∑ªŒ™∫≈’Ÿ£¨µ´ «‘⁄±¨≥ˆ◊ Ωπ‹¿ÌÀﬂÀœƒ⁄¬“÷Æ∫Û£¨œÓƒøœ›»Î—”∫Û¿ßæ≥£©
 
-◊˜’ﬂ£∫π≈Õ¡¿◊∞ÿ
-¡¥Ω”£∫https://www.zhihu.com/question/61830669/answer/226841335
-¿¥‘¥£∫÷™∫ı
-÷¯◊˜»®πÈ◊˜’ﬂÀ˘”–°£…Ã“µ◊™‘ÿ«Î¡™œµ◊˜’ﬂªÒµ√ ⁄»®£¨∑«…Ã“µ◊™‘ÿ«Î◊¢√˜≥ˆ¥¶°£
+1„ÄÅblock.one‰∏∫‰∫ÜÈÅøÂÖçÊ≥ïÂæã‰∏äÁöÑË¥£‰ªªÈ£éÈô©ÔºåÂÆ£ÂëäÂØπÊåÅÊúâEoSÊó†‰ªª‰ΩïÊâøËØ∫Âèä‰πâÂä°„ÄÇ
+2„ÄÅblock.oneÂè™ÊòØEoSÁöÑÂºÄÂèëÊñπÔºåÂÆ£ÂëäÊó†Ë¥£‰ªªËøêË°åÂèäÁª¥Êä§EOS‰∏ªÈìæÁöÑË¥£‰ªª„ÄÇÔºàÊú™Êù•EOS‰∏ªÈìæÊòØÁî±‚ÄúÁ§æÂå∫‚ÄùËá™Ë°åÂêØÂä®Ôºâ
+3„ÄÅblock.oneÁöÑÂàõÂßã‰∫∫Daniel LarimerÂ£∞ÊòéÂÖ¨Âè∏Â∑≤ÊúâËµÑÈáëË∂≥‰ª•ÂºÄÂèëEoSÈ°πÁõÆÔºàÂú®ICOÂãüÈõÜËµÑÈáëÁªìÊùüÂâçÔºâÔºåICOÊâÄÊúâÂãüÈõÜÁöÑËµÑÈáëÂ∞Ü‰Ωú‰∏∫ÂÖ¨Âè∏Âà©Ê∂¶ÔºåÂπ∂‰∏îÊ≤°Êúâ‰πâÂä°ÂíåËÆ°ÂàíÁî®‰∫éÊú™Êù•EoSÈ°πÁõÆÁöÑÂºÄÂèë„ÄÇ
+4„ÄÅXenonÈÄöËøáÁ©∫ÊäïÔºàÂÖçË¥πÂèëÊîæÔºâÁªô‰ª•Â§™ÂùäÂíåÊØîÁâπÂ∏ÅÊåÅÊúâËÄÖÔºåÂèØ‰ª•Ëé∑ÂæóÊõ¥ÂπøÊ≥õÁöÑÁ§æÂå∫ÂÖ≥Ê≥®Â∫¶ÔºàÁõ∏ÂØπ‰∫é‰ªòË¥πÁöÑICOÊñπÂºèÔºåÂèÇ‰∏éÁöÑ‰∫∫Êõ¥Â§öÔºâÔºå‰ª£Â∏ÅÂèëÊîæÁªôÂºÄÂèëËÄÖÔºàÁõ∏ÂØπ‰∫éblock.oneÂÖ¨Âè∏ÁöÑÈõá‰Ω£ÂºÄÂèë‰∫∫ÂëòÊñπÂºèÔºâÊõ¥ÊúâÊøÄÂä±„ÄÇ
+5„ÄÅÊó†ICOÊ≥ïÂæãÈ£éÈô©„ÄÇÔºàblock.oneÂÖ¨Âè∏‰∏Ä‰ΩÜÈô∑ÂÖ•ËØâËÆºÔºå‰∏çÂ¶ÇÁî®Ëá™Áî±ÁöÑÁªÑÁªáÂΩ¢ÂºèÔºåÂ≠òÊ¥ªËÉΩÂäõÊõ¥Âº∫ÔºõÂéªÂπ¥ÊúÄÂ§ßICOÈ°πÁõÆtezosÔºå‰πüÊòØ‰ª•Âèñ‰ª£‰ª•Â§™Âùä‰∏∫Âè∑Âè¨Ôºå‰ΩÜÊòØÂú®ÁàÜÂá∫ËµÑÈáëÁÆ°ÁêÜËØâËÆºÂÜÖ‰π±‰πãÂêéÔºåÈ°πÁõÆÈô∑ÂÖ•Âª∂ÂêéÂõ∞Â¢ÉÔºâ
+
+‰ΩúËÄÖÔºöÂè§ÂúüÈõ∑Êüè
+ÈìæÊé•Ôºöhttps://www.zhihu.com/question/61830669/answer/226841335
+Êù•Ê∫êÔºöÁü•‰πé
+Ëëó‰ΩúÊùÉÂΩí‰ΩúËÄÖÊâÄÊúâ„ÄÇÂïÜ‰∏öËΩ¨ËΩΩËØ∑ËÅîÁ≥ª‰ΩúËÄÖËé∑ÂæóÊéàÊùÉÔºåÈùûÂïÜ‰∏öËΩ¨ËΩΩËØ∑Ê≥®ÊòéÂá∫Â§Ñ„ÄÇ
+
+****
+
+
+<!-- vim-markdown-toc GFM -->
+
+* [EOS.IO DAWN 2.0 Released & Development Update](#eosio-dawn-20-released--development-update)
+* [New Features in Dawn 2.0](#new-features-in-dawn-20)
+    * [Genesis Import Testing](#genesis-import-testing)
+    * [Token Faucets](#token-faucets)
+    * [Resource  Usage & Rate Limiting](#resource--usage--rate-limiting)
+    * [Bandwidth](#bandwidth)
+    * [Computational Bandwidth](#computational-bandwidth)
+    * [Database Storage](#database-storage)
+    * [P2P Network Code](#p2p-network-code)
+    * [DOS Dawn 3.0](#dos-dawn-30)
+    * [Infinite Scaling and Infinite Decentralization](#infinite-scaling-and-infinite-decentralization)
+    * [Public / Private Communication](#public--private-communication)
+    * [Development Progress](#development-progress)
+    * [Working Integration with Apple's Secure Enclave](#working-integration-with-apples-secure-enclave)
+    * [500 ms Block Confirmation](#500-ms-block-confirmation)
+    * [Removing Runner Up Producers](#removing-runner-up-producers)
+    * [One Second Irreversibility](#one-second-irreversibility)
+    * [Removing Producer Schedule Shuffling](#removing-producer-schedule-shuffling)
+    * [Known Issues](#known-issues)
+    * [Conclusion](#conclusion)
+* [EOS.IO - The Most Powerful Infrastructure for Decentralized Applications](#eosio---the-most-powerful-infrastructure-for-decentralized-applications)
+* [Rouseces](#rouseces)
+* [Getting Started](#getting-started)
+* [Setting up a build/development environement](#setting-up-a-builddevelopment-environement)
+    * [Automated build script](#automated-build-script)
+    * [Clean install Linux (Amazon, Centos, Fedora, Mint, & Ubuntu) for the public testnet](#clean-install-linux-amazon-centos-fedora-mint--ubuntu-for-the-public-testnet)
+* [Building EOS and running a node](#building-eos-and-running-a-node)
+    * [Getting the code](#getting-the-code)
+    * [Building EOSIO](#building-eosio)
+        * [Automated build script](#automated-build-script-1)
+    * [Creating and Launching a Single Node Testnet](#creating-and-launching-a-single-node-testnet)
+    * [Validate the Environment - "Currency" Contract Walkthrough](#validate-the-environment---currency-contract-walkthrough)
+        * [Create a wallet](#create-a-wallet)
+    * [Load the Bios Contract](#load-the-bios-contract)
+        * [Create an account for the "currency" contract](#create-an-account-for-the-currency-contract)
+        * [Upload the sample "currency" contract to the blockchain](#upload-the-sample-currency-contract-to-the-blockchain)
+        * [Transfer funds using the "currency" contract](#transfer-funds-using-the-currency-contract)
+        * [Check the "currency" contract balances](#check-the-currency-contract-balances)
+    * [Troubleshooting Guide](#troubleshooting-guide)
+* [Programs & Tools](#programs--tools)
+    * [Programs](#programs)
+        * [nodes](#nodes)
+        * [cleos](#cleos)
+        * [keosd](#keosd)
+        * [launcher](#launcher)
+        * [snapshot](#snapshot)
+    * [Tools](#tools)
+        * [eosiocpp](#eosiocpp)
+            * [Examples](#examples)
+            * [Declaring multiple actions using the same interface](#declaring-multiple-actions-using-the-same-interface)
+            * [Declaring multiple actions using the same interface](#declaring-multiple-actions-using-the-same-interface-1)
+            * [Declaring a table](#declaring-a-table)
+* [include <eoslib/types.hpp>](#include-eoslibtypeshpp)
+* [include <eoslib/string.hpp>](#include-eoslibstringhpp)
+            * [Declaring a table with explicit index type](#declaring-a-table-with-explicit-index-type)
+            * [Declaring a table and an action that use the same struct](#declaring-a-table-and-an-action-that-use-the-same-struct)
+            * [Example of typedef exporting](#example-of-typedef-exporting)
+            * [Calling contract with test values](#calling-contract-with-test-values)
+* [Accounts & Permission](#accounts--permission)
+    * [Wallets](#wallets)
+    * [Acccounts](#acccounts)
+    * [Authorities and Permissions](#authorities-and-permissions)
+    * [Putting it all Together](#putting-it-all-together)
+        * [Default Account Configuration](#default-account-configuration)
+    * [Multi-sig Account & Custom Permissions](#multi-sig-account--custom-permissions)
+        * [Observations](#observations)
+* [CLi Wallet](#cli-wallet)
+    * [Overview](#overview)
+    * [How to run keosd](#how-to-run-keosd)
+    * [Comamnd Reference](#comamnd-reference)
+        * [Create](#create)
+        * [Open](#open)
+        * [Lock](#lock)
+        * [Unlock wallet](#unlock-wallet)
+        * [Import private key into wallet](#import-private-key-into-wallet)
+        * [List](#list)
+        * [Keys](#keys)
+* [Persistence API](#persistence-api)
+    * [Overview](#overview-1)
+        * [The Need for Persistence Servies](#the-need-for-persistence-servies)
+    * [The EOSIO Multi-Index API](#the-eosio-multi-index-api)
+        * [EOSIO Multi-Index Iterators](#eosio-multi-index-iterators)
+    * [Putting It All Together](#putting-it-all-together-1)
+        * [How to Create Your EOSIO Multi-Index Table](#how-to-create-your-eosio-multi-index-table)
+        * [How to Use Your EOSIO Multi-Index Table](#how-to-use-your-eosio-multi-index-table)
+    * [Vehicle Maintenance Tracker Example](#vehicle-maintenance-tracker-example)
+        * [Vehicle Maintenance Tracker service Table](#vehicle-maintenance-tracker-service-table)
+* [Smart Contract](#smart-contract)
+    * [Introduction to EOSIO Smart Contract](#introduction-to-eosio-smart-contract)
+        * [Required Background Knowledge](#required-background-knowledge)
+        * [Basics of EOSIO Smart Contract](#basics-of-eosio-smart-contract)
+    * [Smart Contract Files](#smart-contract-files)
+        * [hpp](#hpp)
+        * [cpp](#cpp)
+        * [wast](#wast)
+        * [abi](#abi)
+    * [Debugging Smart Contract](#debugging-smart-contract)
+        * [Method](#method)
+        * [Print](#print)
+        * [Example](#example)
+* [Tutoial](#tutoial)
+    * [Getting Started With Contracts](#getting-started-with-contracts)
+    * [Starting a Private Blockchain](#starting-a-private-blockchain)
+    * [Creating a Wallet](#creating-a-wallet)
+    * [Loading the Bios Contract](#loading-the-bios-contract)
+    * [Creating Accounts](#creating-accounts)
+    * [Create Two User Accounts](#create-two-user-accounts)
+* [Tutorial eosio token Contract](#tutorial-eosio-token-contract)
+    * [Eosio.token, Exchange, and Eosio.msig Contracts](#eosiotoken-exchange-and-eosiomsig-contracts)
+        * [Create the EOS Token](#create-the-eos-token)
+        * [Issue Tokens to Account "User"](#issue-tokens-to-account-user)
+        * [Transfer Tokens to Account "Tester"](#transfer-tokens-to-account-tester)
+    * [Deploy Exchange Contract](#deploy-exchange-contract)
+    * [Deploy Eosio.msig Contract](#deploy-eosiomsig-contract)
+    * [Deploy Eosio.msig Contract](#deploy-eosiomsig-contract-1)
+* [Hello World Contract](#hello-world-contract)
+    * [Hello World Ricardian Contract](#hello-world-ricardian-contract)
+* [Tutorial Comprehensive Accounts and Wallets](#tutorial-comprehensive-accounts-and-wallets)
+    * [Comprehensive Accounts & Wallets Tutorial](#comprehensive-accounts--wallets-tutorial)
+        * [Tutorial Audience](#tutorial-audience)
+        * [What You'll Learn](#what-youll-learn)
+    * [EOSIO Accounts and Wallets Conceptual Overview](#eosio-accounts-and-wallets-conceptual-overview)
+    * [Creating and Managing Wallets](#creating-and-managing-wallets)
+    * [Managing Multiple Wallets and Wallet Names](#managing-multiple-wallets-and-wallet-names)
+    * [Generating and Importing EOSIO Keys](#generating-and-importing-eosio-keys)
+    * [Backing up your wallet](#backing-up-your-wallet)
+    * [Creating an Account](#creating-an-account)
+        * [Account Related Operations](#account-related-operations)
+* [Tic-Tac-Toe](#tic-tac-toe)
+    * [Objective](#objective)
+    * [Assumption](#assumption)
+        * [Board](#board)
+        * [Action](#action)
+        * [Contract account](#contract-account)
+    * [Start!](#start)
+    * [Defining Stucture](#defining-stucture)
+        * [Gaming Table](#gaming-table)
+        * [Game Structure](#game-structure)
+        * [Action Structure](#action-structure)
+    * [Main](#main)
+        * [Action handler](#action-handler)
+        * [Create Action Handler](#create-action-handler)
+        * [Restart Action Handler](#restart-action-handler)
+        * [Close Action Handler](#close-action-handler)
+        * [Move Action Handler](#move-action-handler)
+        * [Movement Validation](#movement-validation)
+        * [Get Winner](#get-winner)
+    * [Creating ABI](#creating-abi)
+        * [Table ABI](#table-abi)
+        * [Actions ABI](#actions-abi)
+        * [Compile!](#compile)
+        * [Deploy!](#deploy)
+    * [Play!](#play)
+        * [Create](#create-1)
+        * [Move](#move)
+        * [Restart](#restart)
+        * [Close](#close)
+        * [See the game status](#see-the-game-status)
+* [Testnet Single Host Multinode](#testnet-single-host-multinode)
+    * [Start the Wallet Manager](#start-the-wallet-manager)
+    * [Create a Default Wallet](#create-a-default-wallet)
+    * [Start the First Producer Node](#start-the-first-producer-node)
+    * [Start the Second Producer Node](#start-the-second-producer-node)
+* [Smart Contract API References](#smart-contract-api-references)
+    * [Background](#background)
+    * [Application Strucutre](#application-strucutre)
+        * [Entry Points](#entry-points)
+        * [Example Apply Entry Handler](#example-apply-entry-handler)
+* [Account API](#account-api)
+    * [Functions](#functions)
+* [Action API](#action-api)
+    * [Functions](#functions-1)
+    * [Detailed Description](#detailed-description)
+* [Chain API](#chain-api)
+    * [Chain C API](#chain-c-api)
+* [Database API](#database-api)
+    * [Detailed Description](#detailed-description-1)
+* [Math API](#math-api)
+    * [Modules](#modules)
+    * [Math C API](#math-c-api)
+* [Console API](#console-api)
+    * [Console C API](#console-c-api)
+* [System API](#system-api)
+    * [Privileged API](#privileged-api)
+    * [Privileged C API](#privileged-c-api)
+    * [System C API](#system-c-api)
+* [Token API](#token-api)
+* [transaction API](#transaction-api)
+    * [Transaction C API](#transaction-c-api)
+    * [Transaction C++ API](#transaction-c-api-1)
+    * [Detailed Description](#detailed-description-2)
+* [Builtin Types](#builtin-types)
+    * [Modules](#modules-1)
+    * [fixed size key sorted lexicographically](#fixed-size-key-sorted-lexicographically)
+    * [Variable Length Integer](#variable-length-integer)
+    * [Classes](#classes)
+    * [struct public_key](#struct-public_key)
+    * [struct signature](#struct-signature)
+    * [struct checksum256](#struct-checksum256)
+    * [struct checksum160](#struct-checksum160)
+    * [struct checksum512](#struct-checksum512)
+    * [struct fixed_string16](#struct-fixed_string16)
+    * [struct fixed_string32](#struct-fixed_string32)
+    * [struct account_permission](#struct-account_permission)
+    * [struct eosio:name](#struct-eosioname)
+
+<!-- vim-markdown-toc -->
+
+
+
+https://steemit.com/eos/@eosio/eos-io-dawn-2-0-released-and-development-update
+
+# EOS.IO DAWN 2.0 Released & Development Update
+
+EOS.IO Dawn 2.0 has been released along with a public test network which will be maintained by the block.one team. This release provides an Alpha implementation of most of the remaining features described in our Roadmap for Fall 2017 and originally targeted for completion by December 21, 2017. As published in our Roadmap, "Phase 2--Minimal Viable Test Network" was to demonstrate the following by Fall 2017:
+- P2P Network Code
+- Wasm Saniitation & CPU Sandboxing
+- Resource Usage Tracking / Rate Limiting
+- Genesis Import Testing
+- Inter-Blockchain Communication
+
+At this time, we have achieved the initial implementation of most of these features; however, due to parallel development paths our implementation of inter-Blockchain Communication exists on a separate branch that will not be used for the initial test network.
+
+Those interested in performance-testing our EOS.IO Dawn 2.0 release will find that *all blockchian and network code necessary to launch and operate a private network can be found in our Github repository*. Our internal testing shows we can sustain several tousand transfers per second and 1 second blocks using our single-threaded implementation on average hardware. That said, there are known attack vectors for which we have unimplemented solutions. For example, compilation of new contracts for the first time can take up to 34ms, which if exploited could cause the network to fragment a transaction rates over 30 TPS.
+
+Our solution for this issue is to *place limits on the frequency with which contract code can be updated*, as well as *a time delay between when code is updated and when transactions using that new code can be processed*. This time delay wil lbe on the order of 60 seconds to allow all block producers time to compile/cache the optimized x86 instructions from the web assembly.
+
+Because of these outstanding attack vectors, performancee testing will remain a task for private test networks, but feature testing can now be performed on a public test network which we are artificially limiting to 30 TPS to ensure uptime and access.
+
+Over the next 6 mouths, we will be continuously testing and debugging the network to improve stability and performance.
 
 ----
+
+# New Features in Dawn 2.0
+
+## Genesis Import Testing
+
+We have implemented a snapshot tool that will import initial state based upon the EOS ERC-20 token distribution on the Ethereum network. Our test network will only include balances which registered a valid EOS public key. *About 20% of ERC-20 tokens have been properly registered to an EOS public key*. Our snapshot tool also implements a fallback tool for all unregistered ERC-20 tokens held by an Ethereum account for which we can recover a public key from signed ethereum transactions. This covers 99% of all EOS ERC-20 tokens, but will require importing your Ethereum private key into your EOS.IO wallet.
+
+For security purposes, our test network will not ask users to import their Ethereum private keys recovered via the fallback process. If your EOS private key is compromised while testing, you can always register a new key on the Ethereum network.
+
+----
+
+## Token Faucets
+
+We have also implementted a "faucet" facility to allow testing of the network by those who do not hold tokens or have not yet registered a valid EOS public key.
+
+----
+
+## Resource  Usage & Rate Limiting
+
+We have implemented basic rate limiting and resource usage tracking. *This tracks bandwidth, database storage, and computational usage*. At this time there are some known bugs with our rate limiting algorithm, but nothing that should interfere with testing and developing of applications.
+
+We know that many people have been asking for more information about how rate limiting will operate, who will be billed, and how they can lease their staked tokens for income.
+
+----
+
+## Bandwidth
+
+All transactions consume some of the maximum network bandwidth as configured by the block producers. All accounts whose authority is required for the transaction will have their 3-day average bandwidth incremented based upon the size of the transaction. Bandwidth will require the authorizing accound (not the contract) to have staked tokens or to be delegated staked tokens by the application provider.
+
+----
+
+## Computational Bandwidth
+
+All transactions consume some computation. Computation can be executed in parallel, so it can be viewed as a multi-lane highway with each lane having different congestion. Each scope (lance) will have its own independent rate limit and a user will be billed O(s^2) for the number of simultaneous scopes (lances) requested and rate limited based upon the most congested scope.
+
+----
+
+##Database Storage
+
+*EOS.IO contracts have access to an in-memory database where they can store application state*. The contract is billed based upon the total data they store plus a constant overhead factor for each independent database entry. This in-memory database is independent and separate from the EOS.IO Storage protocol for decentralized bulk hosting and storage.
+
+----
+
+## P2P Network Code
+
+We have a basic implementation of mesh network code that is being demonstrated by our public test network. Block.one is operating 21 independent servers each with one of the initial producers configured.
+
+----
+
+## DOS Dawn 3.0
+
+*EOS Dawn 3.0 will re-introduce horizontal scaling of single chains and infinite scaling via secure inter-blockchain communication*. With these two features there will be no limit to what can be built on blockchain technology, nor for how decentralized the network of blockchains can become.
+
+----
+
+## Infinite Scaling and Infinite Decentralization
+
+The holy grail of blockchain technology is to enable secure communication between two independent blockchains without requiring both blockchains to validate everything on the other blockchain. This requires making one blockchain a light-client of another blockchain.
+
+Light clients authenticate transactions using only the block headers and merkle proofs. *EOS.IO will be the first proof-of-stake protocol with support for light client validation*. More importantly, *it will be the only one capable of generating proof-of-completeness*. This means it will be possible to prove you have received all relevant prior messages from another chain in order without having a waiting/challenge period.
+
+Whereas traditionally light clients have to process all block header, EOS.IO will enable light client that only have to process block headers when producer change or when a new message is required from a more recent block. This will enable efficient infrequent communication between chains along with frequent communication. In the worst case, the overhead of two blockchains communicating every 500 ms will be about 2 transactions per second above the total number of message sent.
+
+Under this model, the communication will be secured so long as at least ‚Öì of producers are honest. Furthermore, if even one producer is corrupt they can be automatically punished if they sign any message that could potentially corrupt a light client (aka foreign blockchain).
+
+Lastly, the round-trip time for communicating to another blockchain depends upon the latency until irreversibility of each chain. An EOS.IO based chains will be able to send a message to a foreign EOS.IO chain and get a cryptographically verified response in under 3 seconds.
+
+This level of interchain communication and security enables the craetion of two-way pegs between chains with very low latency. While the two-way peg is the most obvious example, any business-to-business communication can be performed using this same method.
+
+----
+
+## Public / Private Communication
+
+*With interchain communication it will be possible for private blockchains to have secure two-way communication with public blockchains*. This enables all kinds of blockchain applications which are not well suited to the public nature of traditional blockchains. For example, someone could create the Swiss-Bank of blockchains that is super secret to everyone but the bank owners and the individuals.
+
+----
+
+## Development Progress
+
+In order to deliver our public test network, we divided our development into two parallel paths so that we could refactor significant portions of our code for readability, performance, and inter-blockchain communication. This refactoring work has been occurring in the eos-noon branch.
+
+In past updates *we indicated our intention to focus on shared-memory architectures so that developers could easily perform synchronous read-access and atomic transactions with other contracts*. *The consequence of this approach was a loss of horizontal scaling beyond a single high end machine*.
+
+With EOS Dawn 3.0 we will be restoring the ability to do multi-machine horizontal scaling by *use of up to 65,000 different regions*. All regions will share the same accounts and contract code, but have independent in memory databases. Contracts within one region must use asynchronous transactions to communicate with their counterparts in other regions. With this architecture a single block producer could be implemented as a cluster.
+
+----
+
+## Working Integration with Apple's Secure Enclave
+
+In our last update we announced our intention to support the same elliptic curve used by Apple, Android, and many smart cards. Our eos-noon branch now includes a fully functional proof-of-concept where messages are signed and verified using Touch ID (and also Face ID) on the latest MacBook Pro‚Äôs. Similar code also works on native iPhone applications. This means that EOS.IO based mobile applications will be among the most secure blockchain wallets known.
+
+Furthermore, the eos-noon branch has now integrated this support for multiple signature types which means it is possible to use secure enclave to sign transactions which will be validated on eos-noon.
+
+----
+
+## 500 ms Block Confirmation
+
+On our eos-noon branch we have implemented a number of changes to the underlying DPOS framework to support 500 ms blocks (2 blocks every second). This change will dramatically increase the responsiveness of decentralized applications. To achieve this we have introduced some changes in how block scheduling occurs.
+
+*The same producer will now produce 12 blocks in a row before handing off to the next producer. This solves the single biggest bottleneck on block production which is producer-to-producer handoff*. Under the new structure unexpected latency may cause a few blocks to be missed every time there is a hand off, but between handoffs there should be very fast confirmation. We will be experimenting with different hand-off periods. *The longer the handoff period the fewer missed blocks during normal operation, but the longer the outage will be if a single node goes down*. With 500ms and hand off every 12 blocks, the ‚Äúdown time‚Äù is no worse than when a single producer misses a single block on Steem and BitShares. In this event it could take 6 seconds for first confirmation.
+
+----
+
+## Removing Runner Up Producers
+
+Inter-blockchain communication requires light clients to keep track of all blocks where the set of active producers changes. *The ‚Äúrunner up producer list‚Äù causes a new producer to be added or removed every minute which forces light clients to process at least one block header per minute, if not more*. In order to reduce the frequency of producer set changes we have changed block scheduling to only include the top 21 producers. We are considering offering some kind of stand-by pay for the runner ups, but they will not actually be tasked with producing blocks.
+
+----
+
+## One Second Irreversibility
+
+Every block producer will sign every block which will enable a block to be marked irreversible as soon as ‚Öî+ producers have signed it. Producers are only allowed to sign one block header per block height. This means that in the event of a fork producers cannot sign blocks at the same height on both forks. Any such a signature will be cryptographic proof of misbehavior of a producer which can be dealt with by a number of methods including automatic loss of producer position, potential loss of bond, and potentially liability for damages under arbitration.
+
+Unlike other protocols which gather ‚Öî+ signatures before the next block can be produced, EOS DPOS does optimistic pipelining that allows the blockchain to advance in ‚Äúpending state‚Äù while the signatures are gathered. These additional signatures occur outside the blockchain and can be pruned after a block becomes irreversible under traditional DPOS rules of Steem or BitShares.
+
+Under this model, it is possible to achieve byzantine fault tolerance because it is impossible for any block to receive ‚Öî+ signatures without cryptographic evidence of the byzantine nodes.
+
+----
+
+## Removing Producer Schedule Shuffling
+
+In order to minimize the number of missed blocks during producer handoff, *it is desirable to minimize the latency between consecutive producers*. If a producer in New York is scheduled to follow a producer in China it may take 250ms to receive a block under normal conditions (50% of block interval) and potentially much longer if there is network congestion. A producer in New York and Texas on the other hand would only have 50ms of latency (10% of block interval). This means there is a significantly lower probability of missing blocks during a handoff from New York to Texas than from New York to China.
+
+If we schedule block production such that it rotates from New York, to Texas, to California, to Hawaii, to Japan, China, India, Israel, Italy, England, Iceland, and back to New York then there is never a hand off of more than 50 to 100ms. However if the order is randomized then the average hand off will be significantly higher.
+
+*Producer shuffling was introduced to minimize the potential of one producer to pick on a subsequent producer*. This risk was in a world where producers were presumed to be potentially malicious, but in the world of highly vetted, public, producers with high quality data centers it no longer makes sense. There is a constitution and expected level of behavior along with a process for resolving disputes in the event one producer intentionally harms his neighbor.
+
+Under EOS the producers will vote on the production rotation order in a way that minimizes average latency and minimizes total missed block due to Internet network congestion.
+
+----
+
+## Known Issues
+
+There are a number of known issues with EOS Dawn 2.0 and it is expected for there to be significant instability with this early release. The purpose of this release is to demonstrate a basic capability and our team will be ironing out bugs and improving stability and performance over the the next 6 months.
+
+In order to support stability of the test network, we have disabled producer voting.
+
+----
+
+## Conclusion
+
+We would like to thank our development team for working around the clock and around the globe to build and deliver EOS Dawn 2.0, an alpha version of what will become the most robust, highest performance, most decentralized application platform available. We are executing according to our published roadmap and delivering more features and capabilities than originally planned. We look forward to 2018 and are confident that all features will be complete and bugs resolved by the time the EOS token distribution is concluded.
+
+****
+
+https://github.com/EOSIO/eos
+
+#EOS.IO - The Most Powerful Infrastructure for Decentralized Applications
+
+Welcome to the EOS.IO source code repository! EOS.IO software enables developers to create and deploy high-performance, horizontally scalable, blockchain infrastructure upon which decentralized applications can be built.
+
+This code is currently alpha-quality and under rapid development. That said, there is plenty early experimenters can do including running a private multi-node test network and developing applications (smart contracts).
+
+The public testnet described in the wiki is running the dawn-2.x branch. The master branch is no longer compatible with the public testnet. Instructions are provided below for building a local testnet using the master branch. This document will be updated later with instructions for running on the dawn-3.x public testnet.
+
+Supported Operating Systems
+
+EOS.IO currently supports the following operating systems:
+
+1. Amazon 2017.09 and higher.
+2. Centos 7.
+3. Fedora 25 and higher (Fedora 27 recommended).
+4. Mint 18.
+5. Ubuntu 16.04 (Ubuntu 16.10 recommended).
+6. MacOS Darwin 10.12 and higher (MacOS 10.13.x recommended).
+
+----
+
+#Rouseces
+
+1. EOS.IO Website
+1. Documentation
+1. Blog
+1. Community Telegram Group
+1. Developer Telegram Group
+1. White Paper
+1. Roadmap
+1. Wiki
+
+----
+
+# Getting Started
+
+The following instructions detail the process of getting the software, building it, running a simple test network that produces blocks, account creation and uploading a sample contract to the blockchain.
+
+----
+
+# Setting up a build/development environement
+
+## Automated build script
+
+Supported Operating Systems:
+
+1. Amazon 2017.09 and higher.
+1. Centos 7.
+1. Fedora 25 and higher (Fedora 27 recommended).
+1. Mint 18.
+1. Ubuntu 16.04 (Ubuntu 16.10 recommended).
+1. MacOS Darwin 10.12 and higher (MacOS 10.13.x recommended).
+
+Choose whether you will be building for a local testnet or for the public testnet and jump to the appropriate section below. Clone the EOS repository recursively as described and run eosio_build.sh located in the root eos folder.
+
+*clean install Linux (Amazon, Centos, Fedora, Mint, & Ubuntu) for a local testnet*.
+
+Clone the eos repository and run the build script.
+
+    git clone https://github.com/eosio/eos --recursive
+    cd eos
+    ./eosio_build.sh
+
+The eosio_build.sh script puts content in the `build` folder. Key executables (nodeos, cleos, etc.) can be found in the `build/programs` folder.
+
+Optionally, a set of tests can be run against your build to perform some basic validation.
+
+    cd build
+    make test
+
+For ease of contract development, content can be installed in the `/usr/local` folder using the `make install` target. This step is run from the `build` folder.
+
+If not already in the `build` folder:
+
+    cd build
+
+Run `make install`
+
+    sudo make install
+
+Now you can proceed to the next step - Creating and launching a single-node testnet
+
+----
+
+## Clean install Linux (Amazon, Centos, Fedora, Mint, & Ubuntu) for the public testnet
+
+The master branch is no longer compatible with the dawn-2.x public testnet. To run on the public testnet, please see DAWN-2018-02-14/eos/README.md
+
+----
+
+# Building EOS and running a node
+
+## Getting the code
+
+To download all of the code, download EOS source code and a recursion or two of submodules. The easiest way to get all of this is to do a recursive clone:
+
+    git clone https://github.com/eosio/eos --recursive
+
+If a repo is cloned without the --recursive flag, the submodules can be retrieved after the fact by running this command from within the repo:
+
+    git submodule update --init --recursive
+
+## Building EOSIO
+
+EOS comes with a number of programs you can find in ~/eos/build/programs. They are listed below:
+
+- noeosd    - server-side blockchain node component
+- cleos     - command line interface to interact with the blockchain
+- keosd     - EOS wallet
+- eosio-launcher  - application to assist with deploying a multi-node blockchain network; more on eosio-launcher
+
+The build places content in the eos/build folder, where eos is the top level of your cloned repository. The executables can be found in subfolders within the eos/build/programs folder.
+
+----
+
+### Automated build script
+
+
+****
+
+##Creating and Launching a Single Node Testnet
+
+After successfully building the project, the nodeos binary should be present in the build/programs/nodeos folder. nodeos can be run directly from the build folder using programs/nodeos/nodeos.
+
+You can start your own single-node blockchain with this single command:
+
+    $ nodeos -e -p eosio --plugin eosio::wallet_api_plugin --plugin eosio::chain_api_plugin --plugin eosio::account_history_api_plugin 
+    ...
+    eosio generated block 046b9984... #101527 @ 2018-04-01T14:24:58.000 with 0 trxs
+    eosio generated block 5e527ee2... #101528 @ 2018-04-01T14:24:58.500 with 0 trxs
+
+The more advanced user will likely have need to modify the configuration. nodeos uses a custom configuration folder. The location of this folder is determined by your system.
+
+- Mac OS: ~/Library/Application Support/eosio/nodeos/config
+- Linux: ~/.local/share/eosio/nodeos/config
+
+The build seeds this folder with a default `genesis.json` file. For the more advanced user, a configuration folder can be specified using the `--config-dir` command line argument to `nodeos`. If you use this option, you will need to manually copy a genesis.json file to your config folder.
+
+nodeos will need a properly configured config.ini file in order to do meaningful work. On startup, nodeos looks in the config folder for config.ini. If one is not found, a default config.ini file is created. If you do not already have a config.ini file ready to use, run nodeos and then close it immediately with Ctrl-C. A default configuration (config.ini) will have been created in the config folder. Edit the config.ini file, adding/updating the following settings to the defaults already in place:
+
+    # Load the testnet genesis state, which creates some initial block producers with the default key
+    genesis-json = /path/to/eos/source/genesis.json
+    # Enable production on a stale chain, since a single-node test chain is pretty much always stale
+    enable-stale-production = true
+    # Enable block production with the testnet producers
+    producer-name = eosio
+    # Load the block producer plugin, so you can produce blocks
+    plugin = eosio::producer_plugin
+    # Wallet plugin
+    plugin = eosio::wallet_api_plugin
+    # As well as API and HTTP plugins
+    plugin = eosio::chain_api_plugin
+    plugin = eosio::http_plugin
+    # This will be used by the validation step below, to view account history
+    plugin = eosio::account_history_api_plugin
+
+Now it should be possible to run `nodeos` and see it begin producing blocks.
+
+    programs/nodeos/nodeos
+
+When running `nodeos` you should get log messages simiilar to below. It means the block are successfully produced.
+
+    1575001ms thread-0   chain_controller.cpp:235      _push_block          ] initm #1 @2017-09-04T04:26:15  | 0 trx, 0 pending, exectime_ms=0
+    1575001ms thread-0   producer_plugin.cpp:207       block_production_loo ] initm generated block #1 @ 2017-09-04T04:26:15 with 0 trxs  0 pending
+    1578001ms thread-0   chain_controller.cpp:235      _push_block          ] initc #2 @2017-09-04T04:26:18  | 0 trx, 0 pending, exectime_ms=0
+    1578001ms thread-0   producer_plugin.cpp:207       block_production_loo ] initc generated block #2 @ 2017-09-04T04:26:18 with 0 trxs  0 pending
+    ...
+
+At this point, `nodeos` is running with a single producer, `eosid`, that is defined in the `genesis.json` file.
+
+`nodeos` stores runtime data  (e.g., shared memory and log content) in a custom data folder. The location of this folder is determined by your system.
+
+- Mac OS: ~/Library/Application Support/eosio/nodeos/data
+- Linux: ~/.local/share/eosio/nodeos/data
+
+A data folder can be specified using the --data-dir command line argument to nodeos.
+
+----
+
+##Validate the Environment - "Currency" Contract Walkthrough
+
+EOS comes with example contracts that can be uploaded and run for testing purposes. We will validate our single node setup using the sample contract "currency". It is assumed nodeos is running as described above.
+
+### Create a wallet
+
+Every contract requires an associated account, so first you need to create a wallet. To create a wallet, you need to have the wallet_api_plugin loaded into the nodeos process. This can be accomplished in one of two ways:
+
+- Via a plugin entry in the config.ini file (i.e. plugin = eosio::wallet_api_plugin)
+- Via a plugin command-line option when invoking nodeos (i.e. --plugin eosio::wallet_api_plugin)
+
+Recall that in the previous section above, we added the wallet plugin to the config.ini file before starting nodeos. Thus, our currently running nodeos already has the necessary plugin.
+
+Use the wallet create subcommand of cleos to create a wallet.
+
+    cd ~/eos/build/programs/cleos/
+    ./cleos wallet create # Outputs a password that you need to save to be able to lock/unlock the wallet
+
+Important: Save the wallet password for future reference.
+
+----
+
+## Load the Bios Contract
+
+Set `eosio.bios` as the default system contract. This contract enables you to have direct control over the resource allocation of other accounts and to access other privileged API calls.
+
+    $ ./cleos set contract eosio ../../contracts/eosio.bios -p eosio
+
+----
+
+### Create an account for the "currency" contract
+
+The account named "currency" will be used for the "currency" contract. Generate two public/private key pairs that will be later assigned as the public-OwnerKey and the public-ActiveKey.
+
+    cd ~/eos/build/programs/cleos/
+    ./cleos create key # OwnerKey
+    ./cleos create key # ActiveKey
+
+This will output two pairs of public and private keys of the form:
+
+    Private key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    Public key: EOSXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+> Important: Save the values for future refernces.
+
+Import the two private keys int othe wallet.
+
+    ./cleos wallet import <private-OwnerKey>
+    ./cleos wallet import <private-ActiveKey>
+
+Create the currency account using the `cleos create account` command. The create will be authorized by the eosio account. The two public keys generated above will be associated with the account, one as its OwnerKey and the other as its ActiveKey.
+
+    ./cleos create account eosio currency <public-OwnerKey> <public-ActiveKey>
+
+You should get a JSON response back with a transaction ID confirming it was executed successfully, e.g.:
+
+    executed transaction: fe5c9db1b5173dd4bd1ed79c23056104427ab62b0086cf117175abb322532d93  346 bytes  101544 cycles
+    #         eosio <= eosio::newaccount            {"creator":"eosio","name":"currency","owner":{"threshold":1,"keys":[{"key":"EOS6eRfSRYNcrsLmLMomWbBk..." +
+
+You can verify that the account was successfully created:
+
+    ./cleos get account currency
+
+If all has gone well, you will receive an output similar to the follwoing:
+
+    {
+      "account_name": "currency",
+      "permissions": [{
+          "perm_name": "active",
+          "parent": "owner",
+          "required_auth": {
+            "threshold": 1,
+            "keys": [{
+                "key": "EOS8kjeKVzFfqYyqcG8EnRLvMyLjJ7nmSM8p7QqDazGnjMEtQd1dp",
+                "weight": 1
+              }
+            ],
+            "accounts": []
+          }
+        },{
+          "perm_name": "owner",
+          "parent": "",
+          "required_auth": {
+            "threshold": 1,
+            "keys": [{
+                "key": "EOS6eRfSRYNcrsLmLMomWbBk317gz2TcBqArL7JwaqvaYkWYALe73",
+                "weight": 1
+              }
+            ],
+            "accounts": []
+          }
+        }
+      ]
+    }
+
+-----
+
+### Upload the sample "currency" contract to the blockchain
+
+Before uploading a contract, verify that there is no current contract:
+
+    ./cleos get code currency
+    code hash: 0000000000000000000000000000000000000000000000000000000000000000
+
+Upload the sample currency contract using the currency account:
+
+    ./cleos set contract currency ../,,/contracts/currency
+
+The response should be a `transaction_id` with some JSON. This indicates your contract was successfuly uploaded.
+
+    Reading WAST...
+    Assembling WASM...
+    Publishing contract...
+    executed transaction: 8c3d31da2d3a3f148949644209001d0471ae734eff38cb08c6eacda42f1249b8  7112 bytes  2200576 cycles
+    #         eosio <= eosio::setcode               {"account":"currency","vmtype":0,"vmversion":0,"code":"0061736d010000000199011860000060027e7e0060017...
+    #         eosio <= eosio::setabi                {"account":"currency","abi":{"types":[{"new_type_name":"account_name","type":"name"}],"structs":[{"n...
+
+You can also verify that the code has been set with the following command:
+
+    ./cleos get code currency
+
+It will return something like:
+
+    code hash: d6c891fbdfcff597d82e17c81354574399b01d533e53d412093f03e1950fb9d4
+
+Before using the currency contract, you must first create, then issue the currency.
+
+    ./cleos push action currency create '{"issuer":"currency","maximum_supply":"1000000.0000 CUR","can_freeze":"0","can_recall":"0","can_whitelist":"0"}' --permission currency@active
+    ./cleos push action currency issue '{"to":"currency","quantity":"1000.0000 CUR","memo":""}' --permission currency@active
+
+Next verify the currency contract has the proper initial balance:
+
+    ‚ûú  cleos git:(master) ./cleos get table currency currency accounts
+    {
+      "rows": [{
+          "balance": "1000.0000 CUR",
+          "frozen": 0,
+          "whitelist": 1
+        }
+      ],
+      "more": false
+    }
+
+----
+
+### Transfer funds using the "currency" contract
+
+The following command shows a "transfer" action being sent to the currency contract, transferring "20.0000 CUR" from the currency account to the "eosio" account.
+
+    ./cleos push action currency transfer '{"from": "currency", "to": "eosio", "quantity":"20.0000 CUR","memo":"my first transfer"}' --permission currency@active
+
+A successfully submitted transaction will generate a transaction ID and JSON output similar to the following.
+
+    executed transaction: de83ee65f983be89bebd2fc5d5ba066acaadcdebdbfc15f8f1221b98f76551ea  271 bytes  109135 cycles
+    #      currency <= currency::transfer           {"from":"currency","to":"eosio","quantity":"20.0000 CUR","memo":"my first transfer"}
+    >> transfer
+    #         eosio <= currency::transfer           {"from":"currency","to":"eosio","quantity":"20.0000 CUR","memo":"my first transfer"}
+
+----
+
+### Check the "currency" contract balances
+
+Check the state of both accounts involved in the previous transaction as follows:
+
+    ./cleos get table currency eosio accounts
+    {
+      "rows": [{
+          "balance": "20.0000 CUR",
+          "frozen": 0,
+          "whitelist": 1
+        }
+      ],
+      "more": false
+    }
+    ./cleos get table currency currency accounts
+    {
+      "rows": [{
+          "balance": "980.0000 CUR",
+          "frozen": 0,
+          "whitelist": 1
+        }
+      ],
+      "more": false
+    }
+
+As expected, the receiving account eosio now has a balance of 20, and the sending account currency now has 20 less than its initial issue.
+
+----
+
+## Troubleshooting Guide
+
+1. You get an error such as St9exception: content of memory does not match data expected by executable when trying to start nodeos
+
+> Try restarting nodeos with --resync
+
+1. How do I find which version of nodeos I'm running or connecting to?
+
+> Use cleos -H ${nodeos_host} -p ${nodeos_port} get info and you will see the version number in the field called server_version
+
+    ‚ûú  cleos git:(master) ./cleos -H 127.0.0.1 -p 8888 get info
+    {
+      "server_version": "124c62d0",
+      "head_block_num": 11368,
+      "last_irreversible_block_num": 11367,
+      "head_block_id": "00002c68a5f5f4fcd895d00603cf2e2a9903718db3e5dad96157a55e7a28b5c7",
+      "head_block_time": "2018-04-09T09:17:01",
+      "head_block_producer": "eosio"
+    }
+
+----
+
+# Programs & Tools
+
+Tools/Programs included in eosio reposity.
+
+## Programs
+
+### nodes
+
+The core EOSIO daemon that can be configured with plugins to run a node. Example uses are block production, dedicated API endpoints, and local development.
+
+----
+
+### cleos
+
+cleos is a command line tool that interfaces with the REST API exposed by nodeos. In order to use cleos you will need to have the end point (IP address and port number) to a nodeos instance and also configure cleos to load the 'eosio::chain_api_plugin'. cleos contains documentation for all of its commands. For a list of all commands known to cleos, simply run it with no arguments:
+
+    $ cleos
+    ERROR: RequiredError: Subcommand required
+    Command Line Interface to EOSIO Client
+    Usage: ./cleos [OPTIONS] SUBCOMMAND
+
+    Options:
+      -h,--help                   Print this help message and exit
+      -H,--host TEXT=localhost    the host where nodeos is running
+      -p,--port UINT=8888         the port where nodeos is running
+      --wallet-host TEXT=localhost
+                                  the host where keosd is running
+      --wallet-port UINT=8888     the port where keosd is running
+      -v,--verbose                output verbose messages on error
+
+    Subcommands:
+      version                     Retrieve version information
+      create                      Create various items, on and off the blockchain
+      get                         Retrieve various items and information from the blockchain
+      set                         Set or update blockchain state
+      transfer                    Transfer EOS from account to account
+      net                         Interact with local p2p network connections
+      wallet                      Interact with local wallet
+      benchmark                   Configure and execute benchmarks
+      push                        Push arbitrary transactions to the blockchain
+
+To get help with any particular subcommand, run it with no arguments as well:
+
+    $ cleos create
+    ERROR: RequiredError: Subcommand required
+    Create various items, on and off the blockchain
+    Usage: ./cleos create SUBCOMMAND
+
+    Subcommands:
+      key                         Create a new keypair and print the public and private keys
+      account                     Create a new account on the blockchain
+      producer                    Create a new producer on the blockchain
+
+    $ cleos create account
+    ERROR: RequiredError: creator
+    Create a new account on the blockchain
+    Usage: ./cleos create account [OPTIONS] creator name OwnerKey ActiveKey
+
+    Positionals:
+      creator TEXT                The name of the account creating the new account
+      name TEXT                   The name of the new account
+      OwnerKey TEXT               The owner public key for the account
+      ActiveKey TEXT              The active public key for the account
+
+    Options:
+      -s,--skip-signature         Specify that unlocked wallet keys should not be used to sign transaction
+      -x,--expiration             set the time in seconds before a transaction expires, defaults to 30s
+      -f,--force-unique           force the transaction to be unique. this will consume extra bandwidth and remove any protections against accidently issuing the same transaction multiple times
+
+----
+
+### keosd
+
+An EOSIO wallet daemon that loads wallet related plugins, such as the HTTP interface and RPC API
+
+### launcher
+
+The launcher application simplifies the distribution of multiple nodeos nodes across a LAN or a wider network. It can be configured via CLI to compose per-node configuration files, distribute these files securely amongst the peer hosts and then start up the multiple instances of nodeos.
+
+### snapshot
+
+A submodule referencing EOSIO/genesis repository that contains a nodejs application for generating a snapshot from crowdsale contract, a web GUI for configuring a genesis block and other genesis related tools.
+
+----
+
+## Tools
+
+### eosiocpp
+
+Using eosiocpp to generate the ABI specification file
+
+eosiocpp can generate the ABI specification file by inspecting the content of types declared in the contract source code.
+
+To indicate that a type must be exported to the ABI (as an action or a table), the @abi annotation must be used in the comment attached to the type declaration.
+
+The syntax for the annotation is as following:
+
+- @abi action [name name2 ... nameN]
+- @abi table [index_type name] To generate the ABI file, eosiocpp must be called with the -g option
+
+    ‚ûú eosiocpp -g abi.json types.hpp
+    Generated abi.json ...
+
+eosiocpp can also be used to generate helper functions that serialize/deserialize the types defined in the ABI spec.
+
+    ‚ûú eosiocpp -g abi.json -gs types.hpp
+    Generated abi.json ...
+    Generated types.gen.hpp ...
+
+----
+
+#### Examples
+
+Declaring an action
+
+    #include <eoslib/types.hpp>
+    #include <eoslib/string.hpp>
+
+    //@abi action
+    struct action_name {
+      uint64_t    param1;
+      uint64_t    param2;
+      eosio::string param3;
+    };
+    {
+      "types": [],
+      "structs": [{
+          "name": "action_name",
+          "base": "",
+          "fields": {
+            "param1": "uint64",
+            "param2": "uint64",
+            "param3": "string"
+          }
+        }
+      ],
+      "actions": [{
+          "action_name": "actionname",
+          "type": "action_name"
+        }
+      ],
+      "tables": []
+    }
+
+----
+
+#### Declaring multiple actions using the same interface
+
+    #include <eoslib/types.hpp>
+    #include <eoslib/string.hpp>
+    
+    //@abi action action1 action2
+    struct action_name {
+      uint64_t param1;
+      uint64_t param2;
+      eosio::string   param3;
+    };
+    {
+      "types": [],
+      "structs": [{
+          "name": "action_name",
+          "base": "",
+          "fields": {
+            "param1": "uint64",
+            "param2": "uint64",
+            "param3": "string"
+          }
+        }
+      ],
+      "actions": [{
+          "action_name": "action1",
+          "type": "action_name"
+        },{
+          "action_name": "action2",
+          "type": "action_name"
+        }
+      ],
+      "tables": []
+    }
+
+----
+
+#### Declaring multiple actions using the same interface
+
+    #include <eoslib/types.hpp>
+    #include <eoslib/string.hpp>
+    
+    //@abi action action1 action2
+    struct action_name {
+      uint64_t param1;
+      uint64_t param2;
+      eosio::string   param3;
+    };
+    {
+      "types": [],
+      "structs": [{
+          "name": "action_name",
+          "base": "",
+          "fields": {
+            "param1": "uint64",
+            "param2": "uint64",
+            "param3": "string"
+          }
+        }
+      ],
+      "actions": [{
+          "action_name": "action1",
+          "type": "action_name"
+        },{
+          "action_name": "action2",
+          "type": "action_name"
+        }
+      ],
+      "tables": []
+    }
+
+----
+
+#### Declaring a table
+
+#include <eoslib/types.hpp>
+#include <eoslib/string.hpp>
+
+    //@abi table
+    struct my_table {
+      uint64_t key;
+    };
+    {
+      "types": [],
+      "structs": [{
+          "name": "my_table",
+          "base": "",
+          "fields": {
+            "key": "uint64"
+          }
+        }
+      ],
+      "actions": [],
+      "tables": [{
+          "table_name": "mytable",
+          "index_type": "i64",
+          "key_names": [
+            "key"
+          ],
+          "key_types": [
+            "uint64"
+          ],
+          "type": "my_table"
+        }
+      ]
+    }
+
+----
+
+#### Declaring a table with explicit index type
+
+* a struct with 3 uint74_t can be both i64 or i64i64i64*
+
+    #include <eoslib/types.hpp>
+    
+    //@abi table i64
+    struct my_new_table {
+      uint64_t key;
+      uint64_t name;
+      uint64_t age;
+    };
+    {
+      "types": [],
+      "structs": [{
+          "name": "my_new_table",
+          "base": "",
+          "fields": {
+            "key": "uint64",
+            "name": "uint64",
+            "age": "uint64"
+          }
+        }
+      ],
+      "actions": [],
+      "tables": [{
+          "table_name": "mynewtable",
+          "index_type": "i64",
+          "key_names": [
+            "key"
+          ],
+          "key_types": [
+            "uint64"
+          ],
+          "type": "my_new_table"
+        }
+      ]
+    }
+
+----
+
+#### Declaring a table and an action that use the same struct
+
+    #include <eoslib/types.hpp>
+    #include <eoslib/string.hpp>
+    
+    /*
+     * @abi table
+     * @abi action
+     */ 
+    struct my_type {
+      eosio::string key;
+      eosio::name value;
+    };
+    {
+      "types": [],
+      "structs": [{
+          "name": "my_type",
+          "base": "",
+          "fields": {
+            "key": "string",
+            "value": "name"
+          }
+        }
+      ],
+      "actions": [{
+          "action_name": "mytype",
+          "type": "my_type"
+        }
+      ],
+      "tables": [{
+          "table_name": "mytype",
+          "index_type": "str",
+          "key_names": [
+            "key"
+          ],
+          "key_types": [
+            "string"
+          ],
+          "type": "my_type"
+        }
+      ]
+    }
+
+----
+
+#### Example of typedef exporting
+
+    #include <eoslib/types.hpp>
+    struct simple {
+      uint64_t u64;
+    };
+    
+    typedef simple simple_alias;
+    typedef eosio::name name_alias;
+    
+    //@abi action
+    struct action_one : simple_alias {
+      uint32_t u32;
+      name_alias name;
+    };
+    {
+      "types": [{
+          "new_type_name": "simple_alias",
+          "type": "simple"
+        },{
+          "new_type_name": "name_alias",
+          "type": "name"
+        }
+      ],
+      "structs": [{
+          "name": "simple",
+          "base": "",
+          "fields": {
+            "u64": "uint64"
+          }
+        },{
+          "name": "action_one",
+          "base": "simple_alias",
+          "fields": {
+            "u32": "uint32",
+            "name": "name_alias"
+          }
+        }
+      ],
+      "actions": [{
+          "action_name": "actionone",
+          "type": "action_one"
+        }
+      ],
+      "tables": []
+    }
+
+Using the generated serialization/deserialization functions
+
+    #include <eoslib/types.hpp>
+    #include <eoslib/string.hpp>
+    
+    struct simple {
+      uint32_t u32;
+      fixed_string16 s16;
+    };
+    
+    struct my_complex_type {
+      uint64_t u64;
+      eosio::string str;
+      simple simple;
+      bytes bytes;
+      public_key pub;
+    };
+    
+    typedef my_complex_type complex;
+    
+    //@abi action
+    struct test_action {
+      uint32_t u32;
+      complex cplx;
+    };
+    void apply( uint64_t code, uint64_t action ) {
+       if( code == N(mycontract) ) {
+          if( action == N(testaction) ) {
+            auto msg = eosio::current_message<test_action>();
+            eosio::print("test_action content\n");
+            eosio::dump(msg);
+             
+            bytes b = eosio::raw::pack(msg);
+            printhex(b.data, b.len);
+         }
+      }
+    }
+
+> NOTE: table names and action names cannot use an underscore ("_").
+
+#### Calling contract with test values
+
+    cleos push message mycontract testaction '{"u32":"1000", "cplx":{"u64":"472", "str":"hello", "bytes":"B0CA", "pub":"EOS8CY2pCW5THmzvPTgEh5WLEAxgpVFXaPogPvgvVpVWCYMRdzmwx", "simple":{"u32":"164","s16":"small-string"}}}' -S mycontract
+    
+Will produce the following output in nodeos console
+
+    test_action content
+    u32:[1000]
+    cplx:[
+      u64:[472]
+      str:[hello]
+      simple:[
+        u32:[164]
+        s16:[small-string]
+      ]
+      bytes:[b0ca]
+      pub:[03b41078f445628882fe8c1e629909cbbd67ff4b592b832264dac187ac730177f1]
+    ]
+    e8030000d8010000000000000568656c6c6fa40000000c736d616c6c2d737472696e6702b0ca03b41078f445628882fe8c1e629909cbbd67ff4b592b832264dac187ac730177f1
+
+****
+
+# Accounts & Permission
+
+An account is a human-readable identifier that is stored on the blockchain. Every transaction has its permissions evaluated under the configured authority of an account. Each named permission has a threshold that must be met for a transaction signed under that authority to be considered valid. Transactions are signed by utilizing a client that has a loaded and unlocked wallet. A wallet is software that protects and makes use of your keys. These keys may or may not be granted permission to an account authority on the blockchain.
+
+----
+
+## Wallets
+
+Wallets are clients that store keys that may or may not be associated with the permissions of one or more accounts. Ideally, a wallet has a locked (encrypted) and unlocked (decrypted) state that is protected by a high entropy password. The EOSIO/eos repository comes bundled with a command line interface client called *cleos that interfaces with a lite-client called keosd and together*, they demonstrate this pattern.
+
+----
+
+## Acccounts
+
+An account is a human-readable name that is stored on the blockchain. It can be owned by an individual or group of individuals depending on permissions configuration. *An account is required to transfer or otherwise push a transaction to the blockchain*.
+
+----
+
+## Authorities and Permissions
+
+Authorities determine whether or not any given action is properly authorized.
+
+Every account has two **native** named permissions
+
+- owner authority symbolizes ownership of an account. There are only a few transactions that require this authoirity. But most notably, are actions that make any kind of change to the owner authority. Generally, it is suggested that owner is kept in cold storage and not shared with anyone. owner can be used to recover another permission that may have been compromised.
+- active authority is used for transferring funds, voting for producers and making other high-level account changes.
+
+In addition to the native permissions, an account can possess custom named permissions that are available to further extend account management. Custom permissions are incredibly flexible and address numerous possible use cases when implemented. Much of this is up to the developer community in how they are employed, and what conventions if any, are adopted.
+
+Permission for any given authority can be assigned to one or multiple public keys or a valid account name.
+
+----
+
+## Putting it all Together
+
+Below is the combination of all the above concepts and some loose examples of how they might be practically employed.
+
+### Default Account Configuration
+
+This is how an account is configured after it has been created, it has a single key for both the owner and active permissions, both keys with a weight of 1 and permissions both with a threshold of 1. The default configuration requires a single signature to authorize a action for the native permissions.
+
+@bob account authorities
+| Permission | Account                                               | Weight | Threshold |
+|------------|-------------------------------------------------------|--------|-----------|
+| owner      |                                                       |        | 1         |
+|            | EOS5EzTZZQQxdrDaJAPD9pDzGJZ5bj34HaAb8yuvjFHGWzqV25Dch | 1      |           |
+| active     |                                                       |        | 1         |
+|            | EOS61chK8GbH4ukWcbom8HgK95AeUfP8MBPn7XRq8FeMBYYTgwmcX | 1      |           |
+
+To push a transaction under the owner authority, only @bob needs to sign the transaction with his owner key for the transaction to be eligible for validation. This key would be stored in a wallet, and then processed using cleos.
+
+----
+
+## Multi-sig Account & Custom Permissions
+
+The below examples are authorities for a fictional account named @multisig. In this scenario, two users are authoritized to both the owner and active permissions of a fictional @multisig account, with three users permissioned to a custom publish permission with varying weight.
+
+@mutlsig account authorities
+| Permission | Account                                | Weight | Threshold |
+|------------|----------------------------------------|--------|-----------|
+| owner      |                                        |        | 2         |
+|            | @bob                                   | 1      |           |
+|            | @stacy                                 | 1      |           |
+| active     |                                        |        | 1         |
+|            | @bob                                   | 1      |           |
+|            | @stacy                                 | 1      |           |
+| publish    |                                        |        | 2         |
+|            | @bob                                   | 2      |           |
+|            | @stacy                                 | 2      |           |
+|            | EOS7Hnv4iBWo1pcEpP8JyFYCJLRUzYcXSqt... | 1      |           |
+
+In this scenario, a weight threshold of 2 is required to make changes to the owner permission level, which means that because all parties have a weight of 1, all users are required to sign the transaction for it to be fully authorized.
+
+To send a transaction which requires the active authority, the threshold is set to 1. This implies that only 1 signature is required authorize a action from the active authority of the account.
+
+There's also a third custom named permission called publish. For the sake of this example, the publish permission is used to publish posts to the @multisig's blog using a theoretical blog dApp. The publish permission has a threshold of 2, @bob and @stacy both have a weight of 2, and a public key has a weight of 1. This implies that both @bob and @stacy can publish without an additional signature, whereas the public key requires an additional signature in order for a action under the public permission to be authorized.
+
+Thus the above permissions table implies that @bob and @stacy, as owners of the account, have elevated priviledges similar to a moderator or editor. While this primitive example has limitations particularly with scalability and is not necessarily a good design, it does adequately demonstrate the flexible nature of the EOSIO permissions system.
+
+Also, notice in the above table, permissions are set using both an account name and a key. At first glance this may seem trivial, however it does suggest some added dimensions of flexibility.
+
+----
+
+### Observations
+
+- @bob and @stacy can be explicitly identified as the owners of this account
+- The public key cannot push a action under publish authority without an additional signature from @bob or @stacy
+- @bob and @stacy can push a action under publish authority without any additional signatures.
+
+****
+
+# CLi Wallet
+
+## Overview
+
+The program keosd, located in the eos/build/rpograms/keosd folder within the EOSIO/eos repository, can be used to *store private keys that will be used to sign transactions send to the block chain*. keosd runs on your local machine and stores your private keys locally.
+
+## How to run keosd
+
+Start keosd on as follows:
+
+    $ keosd
+
+By default, keosd creates the folder ~/eosio-wallet and popoulates it with a basic config.ini file. The location of the config file can be specified on the command line using the --config-dir argument. *The configuration file contains the http server endpoint for incoming http connections and other parameters for cross origin resource sharing*.
+
+By default, keosd stores wallets in the ~/eosio-wallet folder. *Wallet files follow the naming convention <wallet-name>.wallet*. For example, the  default wallet will be stored in a file named default.wallet. As other wallets are created, similar files will be created for each. For example, a wallet named "foo" will have a corresponding wallet named foo.wallet. The location of the wallet data  folder can be specifed on the command line using the --data-dir argument.
+
+----
+
+## Comamnd Reference
+
+The command line tool to interact with keosd is called "cleos". It is found in eos/build/programs/cleos folder.
+
+It provides the following commands to interact with keosd:
+
+### Create
+
+    $cleos wallet create ${options}
+
+Options:
+
+    - -n,--name TEXT=default The name of the new wallet
+
+If you don‚Äôt provide an optional name it creates a default wallet.
+
+### Open
+
+Open an already created wallet. You need to open a wallet to operate on it.
+
+    $ cleos wallet open ${options}
+
+Options:
+
+    - -n, --name TEXT the name of the wallet to open
+
+### Lock
+
+Locks a wallet
+
+    $ cleos wallet lock ${options}
+
+Options:
+
+    - -n, --name TEXT The name of the wallet to lock
+
+### Unlock wallet
+
+    $ cleos wallet unlock ${options}
+
+Options:
+
+    - -n, --name TEXT The name of the wallet to unlock
+    - --password TEXT The password returned by wallet create
+
+### Import private key into wallet
+
+    $ cleos wallet import ${options} key
+
+positionsals:
+
+    - key TEXT private key in WIF format to import
+
+Options:
+
+    - -n, --name TEXT The name of the wallet to import key into
+
+### List
+
+List opened wallets, *=uncloked
+
+    $ cleos wallet list
+
+### Keys
+
+List of private keys from all unlocked wallets in WIF format.
+
+    $ cleos wallet key
+
+----
+
+# Persistence API #
+
+## Overview ##
+
+EOSIO provides a set of services and interfaces that enable contract developers to persist state across action, and consequently transaction, boundaries. Without persistence, state that is generated during the processing of actions and transactions will be lost when processing goes out of scope. The persistence components include:
+
+1. Services to persist state in a database
+1. Enhanced query capabilities to find and retrieve database content
+1. C++ APIs to these services, intended for use by contract developers
+1. C APIs for access to core services, of interest to library and system developers
+
+This document covers the first three topics.
+
+### The Need for Persistence Servies ###
+
+Actions perform the work of EOSIO contracts. Actions operate within an environment known as the  action context. As illustrated in the diagram below, an action context provides several things necessary for the execution of the action. One of those things is the action's working memory. This is where the action maintains its working state. Before processing an action, EOSIO sets up a clean working memory for the action. Variables that might have been set when another action executed are not available within the new action's context. The only way to pass state among actions is to persist it to and retrieve it from the EOSIO database.
+
+[action-apply-context-diagram.png](./img/EOS/action-apply-context-diagram.png)
+
+----
+
+## The EOSIO Multi-Index API ##
+
+The EOSIO Multi-Index API provides a C++ interface to the EOSIO database. The EOSIO Multi-Index API a is patterned after *Boost Multi-Index Containers*. This API provides a model for object storage with rich retrieval capabilities, enabling the use of multiple indices with different sorting and access semantics. The Multi-Index API is provided by the eosio::multi_index C++ class found in the **contracts/eosiolib** folder of the EOSIO/eos GitHub repository. This class enables a contract written in C++ to read and modify persistent state in the EOSIO database.
+
+The Multi-Index container interface eosio::multi_index provides a homogeneous container of an arbitrary C++ type  (and it does not need to be a plain-old data type or be fixed-size) that is *kept sorted in multiple indices* by *keys of various types that are derived from the objects*. It can be compared to a traditional database table with rows, columns, and indices. It can also be easily compared to Boost Multi-index Containers. In fact many of the member function signatures of eosio::multi_index are modeled after boost::multi_index, although there are important differences.
+
+eosio::multi_index can be conceptually viewed as tables in a conventional database in which the rows are the individual objects in the container, the columns are the memberproperties of the objects in the container, and the indices provide fast lookup of an object by a key compatible with an object member property.
+
+Traditional database tables *allow the index to be a user-defined function over some number of columns of the table*. eosio::multi_index similarly allows the index to be any user-defined function (provided as )a member function of the class / struct of the element type) but with its return value retricted to one of a limited set of supported key types.
+
+Traditional database table typically have a single unique primary key that allows unambiguously identifying a particualr row in the table and also provides the standard sort order for the rows in the table. eosio::multi_index supports a similar semantic, but *the primary key of the object in the eosio::multi_index container must be a unique unsigned 64-bit integer*. The objects in the eosio::multi_index container are sorted by the primary key index in ascending order of the unsigned 64-bit integer primary key.
+
+----
+
+### EOSIO Multi-Index Iterators ###
+
+A key differentiator of the EOSIO persisitence services over other blockchain infrastructures is its Multi-Index iterators. Unlike some other blockchains that only provide a key-value store. EOSIO Multi-Index tables allow a contract developer to keep a collection of objects sorted by a variety of different key types, which could be derived from the data within the object. This enables rich retrieval capabilities. Up to 16 secondary indices can be defined, each having its own way of ordering and retrieving table contents.
+
+The EOSIO Multi-Index iterators follow a pattern that is common to C++ iterators. All iterators are bi-directional const, either const_iterator or const_reverse_iterator. The iterators can be dereferenced to provide access to an object in the Multi-Index table.
+
+----
+
+## Putting It All Together ##
+
+### How to Create Your EOSIO Multi-Index Table ###
+
+Here is a summary of the steps to create your own persistent data using EOSIO Multi-Index tables.
+
+- Define your object(s) using C++ class or struct. Each object will be in its own Multi-Index table.
+- Define a const member function in the class/struct called primary_key that returns the uint64_t primary key value of your object.
+- Determine the secondary indices. Up to 16 additional indices are supported. A secondary index supports several key types, listed below.
+
+    - idx64 - Primitive 64-bit unsigned integer key
+    - idx128 - Primitive 128-bit unsigned integer key
+    - idx256 - 256-bit fixed-size lexicographical key
+    - idx_double - Double precision floating point key
+    - idx_long_double - Quadruple precision floating point key
+
+- Define a key extractor for each secondary index. The key extractor is a function used to obtain the keys from the elements of the Multi-Index table. See Multi-Index Constructor and indexed_by sections below.
+
+----
+
+### How to Use Your EOSIO Multi-Index Table ###
+
+- Instantiate your Multi-Index table.
+- Insert ( emplace ) into, and subsequently modify or erase objects in your table as required by your contract.
+- Locate and traverse objects in your table using get, find and iterator operations.
+
+----
+
+## Vehicle Maintenance Tracker Example ##
+
+In the following example, we will look at how to use the EOSIO Multi-Index API to implement a simple vehicle maintenance tracker. The tracker will keep a ledger of vehicle maintenance activities.
+
+The target users of the tracker are service mechanics and their customers. A service mechanic will add records to the ledger as service jobs are done. They can use this information to track service history and notify customers when service is due. Customers can also track their service history. They can also periodically update their vehicle mileage to enable their mechanic to better determine when service is needed.
+
+If we were implementing the full contract for this example, we might have action such as:
+- Create a new service record, which can only be done by the mechanic
+- Update mileage, which can be done by the mechanaic for any vehicle or a customer for its vehicle
+- Various types of reporting actions
+
+For the purposes of this example, we will focus on the aspects of storage and retrieval, and not the contract actions.
+
+We actually need two tables for our application. The first table will contain individual service transactions created by the mechanic. The same customer can have many records in this table, representing each time the vehicle was serviced. Our second table will contain the current state for a customer. Each customer will have one entry in this table. Note that for simplicity, our design here limits one vehicle per customer.
+
+----
+
+### Vehicle Maintenance Tracker service Table ###
+
+We'll call the table that contains individual service transactions the service table. This table will be used to create service record reports. The records of this table will contain the following properties:
+
+- Primary key - the Customer ID can't be the primary key, since a customer can have many records. In fact, we don't need the primary key directly, so we can let the system generate one for us.
+- Customer ID - this will correspond to the account name (a uint64_t value) of the customer
+- Date of Service - the date when the service was performed
+- Odometer - the vehicle's odometer reading at date of service
+
+We want to be able to search this table by customer, so we will create a secondary index on the customer property. The diagram below illustrates the service table and its secondary index, by customer.
+
+[service-table-example.png](./img/EOS/service-table-example.png)
+
+We will declare a struct service_rec with these properties to represent our service record object:
+
+    struct service_rec {
+        uint64_t        pkey;           // opaque, will use available_primary_key()
+        account_name    customer;       // will create a secondary index on this
+        uint32_t        service_date;
+        uint32_t        odometer;
+
+        auto            primary_key()const { return pkey; }
+        account_name    get_customer()const { return customer; }
+
+        EOSLIB_SERIALIZE( service_rec, (pkey)(customer)(service_date)(odometer) )
+    };
+
+To instantiate our service table (we'll call our instance service_table), we write the following in our contract, where mechanic is the account name for the mechanic.
+
+    using service_table_type=multi_index<service, service_rec, indexed_by<N(bycustomer), const_mem_func<service_rec, account_name, &service_rec::get_customer>>>;
+    service_table_type service_table(current_receiver(), mechanic);
+
+The two parameters passed to the constructor establish access privileges to the table. The first parameter (the code parameter, see below) determines whether the action is accessing the contract's own persistent state (i.e., code == current_receiver()), in which case the action context has both read and write access to the table, or if it is accessing some other contract's persistent state and is, therefore, read-only.
+
+
+
+
+
+
+
+----
+
+# Smart Contract
+
+## Introduction to EOSIO Smart Contract
+
+### Required Background Knowledge
+
+C / C+++ Experience
+
+EOSIO based blockchains execute user-generated applications and code uuusing WebAssembly (WASM). WASM is an emerging web standard with widespread support of Google, Microsoft, Apple, and  others. At the moment the most mature toolchain for building applications that compile to WASM is clang/llvm with their C/C++ compiler.
+
+Other toolchains in develpment by 3rd parties include: Rust, Python, and Solidity. While these other language may appear simpler, their performance will likely impact the scle of application  you can build. We expect  that C++ will be the best language for developing high-performance and secure smart contracts and plan to use C++ for the foreseeable future.
+
+Linux / Mac OS Experience
+
+The EOSIO software supports the following environments:
+
+- Amazon 2017.09 and higher
+- Centos 7
+- Fedora 25 and higher (Fedora 27 recommended)
+- Mint 18
+- Ubuntu 16.04 (Ubuntu 16.10 recommended)
+- MacOS Darwin 10.12 and higher (MacOS 10.13.x recommended)
+
+Command Line Knowledge
+
+There are a variety of tools provided along with EOSIO which requires you to have basic command line knowledge in order to interact with.
+
+### Basics of EOSIO Smart Contract
+
+Communication Model
+
+*EOSIO Smart Contracts communicate with each other in the form of actions and shared memory database access*, e.g. a contract can read the state of another contract's database as long as it is included within the read scope of the transaction with a async vibe. The async communication may result in spam which the resource limiting algorithm will resolve. There are two communication modes that can be defined within a contract:
+
+- Inline. Inline is guaranteed to execute with the current transaction or unwind; no notification will be communicated regardless of success of failure. Inline operates with the *same scopes* and authorities with the same scopes and authorities the original transaction had.
+- Deferred. Defer wil gt scheduled later at producer's discretion; It is possible to communicate the result of the communication or can simply timeout. Deferred can reach out to *different scopes* and carry the authority of the contract that sends theme.
+
+Action Vs Transaction
+
+A action represents a single operation, whereas a transaction is a collection of one or more actions. A contract and an account communicate in the form of actions. Actions can be sent individually, or in combined form if they are intended to be executed as a whole.
+
+Transaction with 1 action.
+
+    {
+      "expiration": "2018-04-01T15:20:44",
+      "region": 0,
+      "ref_block_num": 42580,
+      "ref_block_prefix": 3987474256,
+      "net_usage_words": 21,
+      "kcpu_usage": 1000,
+      "delay_sec": 0,
+      "context_free_actions": [],
+      "actions": [{
+          "account": "eosio.token",
+          "name": "issue",
+          "authorization": [{
+              "actor": "eosio",
+              "permission": "active"
+            }
+          ],
+          "data": "00000000007015d640420f000000000004454f5300000000046d656d6f"
+        }
+      ],
+      "signatures": [
+        ""
+      ],
+      "context_free_data": []
+    }
+
+Transaction with multiple actions, there actions should either all be successed or all failed.
+
+    {
+      "expiration": "...",
+      "region": 0,
+      "ref_block_num": ...,
+      "ref_block_prefix": ...,
+      "net_usage_words": ..,
+      "kcpu_usage": ..,
+      "delay_sec": 0,
+      "context_free_actions": [],
+      "actions": [{
+          "account": "...",
+          "name": "...",
+          "authorization": [{
+              "actor": "...",
+              "permission": "..."
+            }
+          ],
+          "data": "..."
+        }, {
+          "account": "...",
+          "name": "...",
+          "authorization": [{
+              "actor": "...",
+              "permission": "..."
+            }
+          ],
+          "data": "..."
+        }
+      ],
+      "signatures": [
+        ""
+      ],
+      "context_free_data": []
+    }
+
+Action Name Restrictions
+
+Action Types are actually base32 encoded 64-bit integers. This means they are limited to the characters a-z, 1-5, and '.' for the first 12 characters. If there is a 13 character then it is restricted to the first 16 characters ('.' and a-p)
+
+Transaction Confirmation
+
+Receiving a transaction hash does not mean that the transaction  has been confirmed, it only means that the node accepted it without error, which also means that there is a high probability other producers will accept it.
+
+By means of confirmation, you should see the transaction in the transaction history with the block number of which it is included.
+
+----
+
+## Smart Contract Files
+
+To keep this simple we have created a tool called eosio which can be used to bootstrap a new contract. The eosiocpp tool will create the 3 smart contract files with the basic skeleton for you to get started.
+
+    $ eosiocpp -n ${contract}
+
+The above will create a new empty project in the ./${project} flfoder with three files:
+
+    ${contract}.abi ${contract}.hpp ${contract}.cpp
+
+### hpp
+
+${contract}.hpp is the header file that contain the variables, constants, and functions referenced by the .cpp file.
+
+### cpp
+
+The ${contract}.cpp file is the source file that contains the function of the contract
+
+If you generate the .cpp file using the eosiocpp tool, the generated .cpp file would look similar to the following:
+
+    #include <${contract}.hpp>
+
+    /**
+     *  The init() and apply() methods must have C calling convention so that the blockchain can lookup and
+     *  call these methods.
+     */
+    extern "C" {
+    
+        /**
+         *  This method is called once when the contract is published or updated.
+         */
+        void init()  {
+           eosio::print( "Init World!\n" ); // Replace with actual code
+        }
+    
+        /// The apply method implements the dispatch of actions to this contract
+        void apply( uint64_t code, uint64_t action ) {
+           eosio::print( "Hello World: ", eosio::name(code), "->", eosio::name(action), "\n" ); 
+        }
+    
+    } // extern "C"
+
+In this example you can see there are two functions, init and apply. All they do are log the actions delivered and makes no other checks. Anyone can deliver any action at any time provided the block producers allow it. Absent any required signatures, the contract will be billed for the bandwidth consumed.
+
+**init**
+
+The init function will only be executed once at initial deployment. It is used for initializing contract variables, e.g. the token supply for a currency contract.
+
+**apply**
+
+*apply is the action handler*, it listens to all incoming actions and reacts according to the specifications within the function. The apply function requires two input parameters, code and action.
+
+**code filter**
+
+In order to *respond to a particular contract*, structuure the apply function as follows. You may also construct a response to general actions by omitting the code filter.l
+
+    if (code == N($(contract_name)){
+        // your handler to respond to particular contract
+    }
+
+You can also define responses to respective actions in the code block.
+
+**action filter**
+
+To respond to a particular action, structure your apply function as follows. This is normally used in conjuction with the code filter.
+
+    if(action == N(${action_name}){
+        //your handler to respond to a particular action
+    }
+
+### wast
+
+Any program to be deployed to the EOSIO blockchain must be compiled into WASM format. This is the only format the blockchain accepts.
+
+Once you have the CPP file ready, you can compile it into a text version of WASM (.wast) using the eosiocpp tool.
+
+Any program to be deployed to the EOSIO blockchain must be compiled into WASM format. This is the only format the blockchain accepts.
+
+Once you have the CPP file ready, you can compile it into a text version of WASM (.wast) using the eosiocpp tool.
+
+    $ eosiocpp -o ${contract}.wast ${contract}.cpp
+
+----
+
+### abi
+
+The Application Binary Interface (ABI) is a JSON-based description on how to convert user actions between their JSON and Binary representations. The ABI also describes how to convert the database state to/from JSON. *Once you have described your contract via an ABI then developers and users will be able to interact with your contract seamlessly via JSON*.
+
+The ABI file can be generated from the .hpp files using the eosiocpp tool:
+
+    $ eosiocpp -g ${contract}.abi ${contract}.hpp
+
+The following is an exmaple of what the skeleton contract ABI looks like:
+
+    {
+      "types": [{
+          "new_type_name": "account_name",
+          "type": "name"
+        }
+      ],
+      "structs": [{
+          "name": "transfer",
+          "base": "",
+          "fields": {
+            "from": "account_name",
+            "to": "account_name",
+            "quantity": "uint64"
+          }
+        },{
+          "name": "account",
+          "base": "",
+          "fields": {
+            "account": "name",
+            "balance": "uint64"
+          }
+        }
+      ],
+      "actions": [{
+          "action": "transfer",
+          "type": "transfer"
+        }
+      ],
+      "tables": [{
+          "table": "account",
+          "type": "account",
+          "index_type": "i64",
+          "key_names" : ["account"],
+          "key_types" : ["name"]
+        }
+      ]
+    }
+
+You will notice that this ABI defines an action transfer of type transfer. This tells EOSIO that when ${account}->transfer action is seen that the payload is of type transfer. The type transfer is defined in the structs array in the object with name set to transfer.
+
+    ...
+      "structs": [{
+          "name": "transfer",
+          "base": "",
+          "fields": {
+            "from": "account_name",
+            "to": "account_name",
+            "quantity": "uint64"
+          }
+        },{
+    ...
+
+----
+
+## Debugging Smart Contract
+
+In order to be able to debug your smart contract, you will need to setup local nodeos node. This local nodeos node can be run as separate private testnet or as an extension of public testnet (or the official testnet).
+
+When you are creating your smart contract for the first time, *it is recommended to test and debug your smart contract on a private testnet first, since you have full control of the whole blockchain*. This enables you to have unlimited amount of eos needed and you can just reset the state of the blockchain whenever you want. When it is ready for production, debugging on the public testnet (or official testnet) can be done by connecting your local nodeos to the public testnet (or official testnet) so you can see the log of the testnet in your local nodeos.
+
+The concept is the same, so for the following guide, debugging on the private testnet will be covered.
+
+If you haven't set up your own local nodeos, please follow the setup guide. By default, your local nodeos will just run in a private testnet unless you modify the config.ini file to connect with public testnet (or official testnet) nodes as described in the following guide.
+
+### Method
+
+The main method used to debug smart contract is Caveman Debugging, where we utilize the priting functionality to inspect the value of a variable and check the flow of the contract. Printing in smart contract can be done through the Print API (C and C++). The C++ API is the wrapper for C API, so most often we will just use the C++ API.
+
+### Print
+
+Print C API supports the following data type that you can print:
+
+- prints - a null terminated char array (string)
+- prints_l - any char array (string) with given size
+- printi - 64-bit unsigned integer
+- printi128 - 128-bit unsigned integer
+- printd - double encoded as 64-bit unsigned integer
+- printn - base32 string encoded as 64-bit unsigned integer
+- printhex - hex given binary of data and its size
+
+While Print C++ API wraps some of the above C API by overriding the print() function so user doesn't need to determine which specific print function he needs to use. Print C++ API supports
+
+- a null terminated char array (string)
+- integer (128-bit unsigned, 64 unsigned, 32-bit unsigned, signed, unsigned)
+- base32 string encoded as 64-bit unsigned integer
+- struct that has print() method
+
+### Example
+
+Let's write a new contract as example for debugging
+
+- debug.hpp
+
+    #include <eoslib/eos.hpp>
+    #include <eoslib/db.hpp>
+    
+    namespace debug {
+        struct foo {
+            account_name from;
+            account_name to;
+            uint64_t amount;
+            void print() const {
+                eosio::print("Foo from ", eosio::name(from), " to ",eosio::name(to), " with amount ", amount, "\n");
+            }
+        };
+    }
+
+- debug.cpp
+
+    #include <debug.hpp>
+
+    extern "C" {
+    
+        void init()  {
+        }
+    
+        void apply( uint64_t code, uint64_t action ) {
+            if (code == N(debug)) {
+                eosio::print("Code is debug\n");
+                if (action == N(foo)) {
+                     eosio::print("Action is foo\n");
+                    debug::foo f = eosio::current_message<debug::foo>();
+                    if (f.amount >= 100) {
+                        eosio::print("Amount is larger or equal than 100\n");
+                    } else {
+                        eosio::print("Amount is smaller than 100\n");
+                        eosio::print("Increase amount by 10\n");
+                        f.amount += 10;
+                        eosio::print(f);
+                    }
+                }
+            }
+        }
+    } // extern "C"
+
+- debug.abi
+
+    {
+      "structs": [{
+          "name": "foo",
+          "base": "",
+          "fields": {
+            "from": "account_name",
+            "to": "account_name",
+            "amount": "uint64"
+          }
+        }
+      ],
+      "actions": [{
+          "action_name": "foo",
+          "type": "foo"
+        }
+      ]
+    }
+
+Let's deploy it and send a message to it. Assume that you have debug account created and  have its key in your wallet.
+
+    $ eosiocpp -o debug.wast debug.cpp
+    $ cleos set contract debug debug.wast debug.abi
+    $ cleos push message debug foo '{"from": "inita", "to":"initb", "amount": 10}' --scope debug
+
+When you check your local nodeos node log, you will see the following lines after the above message is sent.
+
+    Code is debug
+    Action is foo
+    Amount is smaller than 100
+    Increaese amount by 10
+    Foo from inita to initb with amount 20
+
+There, you can confirm that your message is going to the right control flow and the amount is updated correctly. You might see the above message at least 2 times and that's normal because each transaction is being applied during verification, block generation, and block application.
+
+----
+
+# Tutoial 
+
+## Getting Started With Contracts
+
+The purpose of this tutorial is to demonstrate how to setup a local blockchain that can be used to experiment with samrt contracts. The first part of this tutorial will focus on:
+
+- Starting a Private Blockchain
+- Creating a Wallet
+- Loading the Bios Contract
+- Creating Accounts
+
+The second part of this tutorial will walk you through creating and deploying your own contracts.
+
+- eosio.token Contract
+- Exchange Contract
+- Hello World Contract
+
+This tutorial assumes that you have installed EOSIO and that nodes and cleos are in your path
+
+----
+
+## Starting a Private Blockchain
+
+You can start your own single-node blockcchain with this single command:
+
+    $ nodeos -e -p eosio --plugin eosio::wallet_api_plugin --plugin eosio::chain_api_plugin --plugin eosio::account_history_api_plugin 
+    ...
+    eosio generated block 046b9984... #101527 @ 2018-04-01T14:24:58.000 with 0 trxs
+    eosio generated block 5e527ee2... #101528 @ 2018-04-01T14:24:58.500 with 0 trxs
+
+command sets many flags and loads some optional plugins which we will need for the rest of this tutorial. Assuming everything worked properly, you should see a block generation message every 0.5 seconds.
+
+    eosio generated block 046b9984... #101527 @ 2018-04-01T14:24:58.000 with 0 trxs
+
+This means your local blockchain is live, producing blocks, and ready to be used.
+
+For more information about the arguments to nodeos you can use:
+
+    nodeos --help
+    This command 
+
+----
+
+## Creating a Wallet
+
+A wallet is a repository of private keys necessary to authorize actions on the blockchain. These keys are stored on disk encrypted using a password generated for you. This password should be stored in a secure password manager.
+
+    $ cleos wallet create
+    Creating wallet: default
+    Save password to use in the future to unlock this wallet.
+    Without password imported keys will not be retrievable.
+    "PW5JuBXoXJ8JHiCTXfXcYuJabjF9f9UNNqHJjqDVY7igVffe3pXub"
+
+For the purpose of this simple development environment, your wallet is being managed by your local nodeos via the eosio::wallet_api_plugin we enabled when we started nodeos. Any time you restart nodeos you will have to unlock your wallet before you can use the keys within.
+
+    $ cleos wallet unlock --password PW5JuBXoXJ8JHiCTXfXcYuJabjF9f9UNNqHJjqDVY7igVffe3pXub
+    Unlocked: default
+
+It is generally not secure to use your password directly on the commandline where it gets logged to your bash history to your bash history, so you can also unlock in interactive mode:
+
+    $ cleos wallet unlock
+    password:
+
+For security purposes it is generally best to leave your wallet locked when you are not using it. To lock your wallet without shutting down nodeos you can do:
+
+    $ cleos wallet lock
+    Locked: default
+
+You will need your wallet unlocked for the rest of this tutorial.
+
+All new blockchains start out with a master key for the sole initial account, eosio. To interact with the blockchain you will need to import this initial account's private key into your wallet.
+
+Import the master key for the eosio account into your wallet. The master key can be found in the config.ini file in the config folder for nodeos. In this example, the default config folder is used. On Linux systems, this will be in ~/.local/share/eosio/nodeos/config and on MacOS, this will be in ~/Library/Application Support/eosio/nodeos/config.
+
+    $ cleos wallet import 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
+    imported private key for: EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+
+----
+
+## Loading the Bios Contract
+
+Now that we have a wallet with the key for the eosio account loaded, we can set a default system contract. For the purposes of development, the default eosio.bios contract can be used. This contract *enables you to have direct control over the resource allocation of other accounts and to access other privileged API calls*. In a public blockchain, this contract will *manage the staking and unstaking of tokens to reserve bandwidth for CPU and network activity, and memory for contracts*.
+
+The eosio.bios contract can be found in the contracts/eosio.bios folder of your EOSIO source code. The command sequence below assumes it is being executed from the root of the EOSIO source, but you can execute it from anywhere by specifying the full path to ${EOSIO_SOURCE}/build/contracts/eosio.bios.
+
+    $ cleos set contract eosio build/contracts/eosio.bios -p eosio
+    Reading WAST...
+    Assembling WASM...
+    Publishing contract...
+    executed transaction: 414cf0dc7740d22474992779b2416b0eabdbc91522c16521307dd682051af083  4068 bytes  10000 cycles
+    #         eosio <= eosio::setcode               {"account":"eosio","vmtype":0,"vmversion":0,"code":"0061736d0100000001ab011960037f7e7f0060057f7e7e7e...
+    #         eosio <= eosio::setabi                {"account":"eosio","abi":{"types":[],"structs":[{"name":"set_account_limits","base":"","fields":[{"n...
+
+The result of this command sequence is that cleos generated a transaction with two actions, eosio::setcode and eosio::setabi.
+
+*The code defines how the contract runs* and *the abi describes how to convert between binary and json representation of the arguments*. While an abi is technically optional, all of the EOSIO tooling depends upon it for ease of use.
+
+Any time you execute a transaction you will see output like:
+
+    executed transaction: 414cf0dc7740d22474992779b2416b0eabdbc91522c16521307dd682051af083  4068 bytes  10000 cycles
+    #         eosio <= eosio::setcode               {"account":"eosio","vmtype":0,"vmversion":0,"code":"0061736d0100000001ab011960037f7e7f0060057f7e7e7e...
+    #         eosio <= eosio::setabi                {"account":"eosio","abi":{"types":[],"structs":[{"name":"set_account_limits","base":"","fields":[{"n...
+
+This can be read as: The action setcode as defined by eosio was executed by eosio contract with {args...}
+
+    #         ${executor} <= ${contract}:${action} ${args...}
+    > console output from this execution, if any
+
+As we will see in a bit, actions can be processed by more than one contract.
+
+The last argument to this call was -p eosio. This tells cleos to sign this action with the **active** authority of the eosio account, i.e., to sign the action using the private key for the eosio account that we imported earlier.
+
+----
+
+## Creating Accounts
+
+Now that we have setup the  basic system contract, we can start to create our own accounts. We will create two accounts, user and tester, and we will need to associate a key with each account. In this example, the same key will be used for both accounts.
+
+To do this we first generate a key for the accounts.
+
+    $ cleos create key
+    Private key: 5Jmsawgsp1tQ3GD6JyGCwy1dcvqKZgX6ugMVMdjirx85iv5VyPR
+    Public key: EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4
+
+Then we import this key into our wallet:
+
+    $ cleos wallet import 5Jmsawgsp1tQ3GD6JyGCwy1dcvqKZgX6ugMVMdjirx85iv5VyPR
+    imported private key for: EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4
+
+NOTE: Be sure to use the actual key value generated by the cleos command and not the one shown in the example above!
+
+Keys are not automatically added to a wallet, so skipping this step could result in losing control of your account.
+
+----
+
+## Create Two User Accounts
+
+Next we will create two accounts, user and tester, using the key we created and imported above.
+
+    $ cleos create account eosio user EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4 EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4
+    executed transaction: 8aedb926cc1ca31642ada8daf4350833c95cbe98b869230f44da76d70f6d6242  364 bytes  1000 cycles
+    #         eosio <= eosio::newaccount            {"creator":"eosio","name":"user","owner":{"threshold":1,"keys":[{"key":"EOS7ijWCBmoXBi3CgtK7DJxentZZ...
+    
+    $ cleos create account eosio tester EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4 EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4
+    executed transaction: 414cf0dc7740d22474992779b2416b0eabdbc91522c16521307dd682051af083 366 bytes  1000 cycles
+    #         eosio <= eosio::newaccount            {"creator":"eosio","name":"tester","owner":{"threshold":1,"keys":[{"key":"EOS7ijWCBmoXBi3CgtK7DJxentZZ...
+
+NOTE: The create account subcommand requires two keys, one for the OwnerKey (which in a production environment should be kept highly secure) and one for the ActiveKey. In this tutorial example, the same key is used for both.
+
+Because we are using the eosio::account_history_api_plugin we can query all accounts that are controlled by our key:
+
+    $ cleos get accounts EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4
+    {
+      "account_names": [
+        "tester",
+        "user"
+      ]
+    }
+
+----
+
+# Tutorial eosio token Contract
+
+## Eosio.token, Exchange, and Eosio.msig Contracts
+
+This tutorial assumes that you have completed the tutorial Getting Started with Contracts
+
+At this stage the blockchain doesn't do much, so let's deploy the eosio.token contract. *This contract enables the creation of many different tokens all running on the same contract but potentially managed by different users*.
+
+Before we can deploy the token contract we must create an account to deploy it to.
+
+    $ cleos create account eosio eosio.token  EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4 EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4
+    ...
+
+Then we can deploy the contract which can be found in ${EOSIO_SOURCE}/build/contracts/eosio.token
+
+    $ cleos set contract eosio.token build/contracts/eosio.token -p eosio.token
+    Reading WAST...
+    Assembling WASM...
+    Publishing contract...
+    executed transaction: 528bdbce1181dc5fd72a24e4181e6587dace8ab43b2d7ac9b22b2017992a07ad  8708 bytes  10000 cycles
+    #         eosio <= eosio::setcode               {"account":"eosio.token","vmtype":0,"vmversion":0,"code":"0061736d0100000001ce011d60067f7e7f7f7f7f00...
+    #         eosio <= eosio::setabi                {"account":"eosio.token","abi":{"types":[],"structs":[{"name":"tran
+
+----
+
+### Create the EOS Token
+
+You can view the interface to eosio.token as defined by contracts/eosio.token/eosio.token.hpp:
+
+    void create( account_name issuer,
+                    asset        maximum_supply,
+                    uint8_t      can_freeze,
+                    uint8_t      can_recall,
+                    uint8_t      can_whitelist );
+
+
+    void issue( account_name to, asset quantity, string memo );
+
+    void transfer( account_name from,
+                    account_name to,
+                    asset        quantity,
+                    string       memo );
+
+To create a new token we must call the create(...) action with the proper arguments. *This command will use the symbol of the maximum supply to uniquely identify this token from other tokens*. The issuer will be the one with authority to call issue and or perform other actions such as freezing, recalling, and whitelisting of owners.
+
+The concise way to call this method, using positional arguments:
+
+    $ cleos push action eosio.token create '[ "eosio", "1000000000.0000 EOS", 0, 0, 0]' -p eosio.token
+    executed transaction: 0e49a421f6e75f4c5e09dd738a02d3f51bd18a0cf31894f68d335cd70d9c0e12  260 bytes  1000 cycles
+    #   eosio.token <= eosio.token::create          {"issuer":"eosio","maximum_supply":"1000000000.0000 EOS","can_freeze":0,"can_recall":0,"can_whitelis...
+
+Alternatively, a more verbose way to call this method, using named arguments:
+
+    $ cleos push action eosio.token create '{"issuer":"eosio", "maximum_supply":"1000000000.0000 EOS", "can_freeze":0, "can_recall":0, "can_whitelist":0}' -p eosio.token
+    executed transaction: 0e49a421f6e75f4c5e09dd738a02d3f51bd18a0cf31894f68d335cd70d9c0e12  260 bytes  1000 cycles
+    #   eosio.token <= eosio.token::create          {"issuer":"eosio","maximum_supply":"1000000000.0000 EOS","can_freeze":0,"can_recall":0,"can_whitelis...
+
+This command created a new token EOS with a pecision of 4 decimials and a maximum supply of 1000000000.0000 EOS.
+
+In order to create this token we required the permission of the eosio.token contract because it "owns" the symbol namespace (e.g. "EOS"). Future versions of this contract may allow other parties to buy symbol names automatically. For this reason we must pass -p eosio.token to authorize this call.
+
+> owns the symbol namespace?
+
+----
+
+### Issue Tokens to Account "User"
+
+Now that we have created the token, the issuer can issue new tokens to the account user we created earlier.
+
+We will use the positional calling convention (vs named args).
+
+    $ cleos push action eosio.token issue '[ "user", "100.0000 EOS", "memo" ]' -p eosio
+    executed transaction: 822a607a9196112831ecc2dc14ffb1722634f1749f3ac18b73ffacd41160b019  268 bytes  1000 cycles
+    #   eosio.token <= eosio.token::issue           {"to":"user","quantity":"100.0000 EOS","memo":"memo"}
+    >> issue
+    #   eosio.token <= eosio.token::transfer        {"from":"eosio","to":"user","quantity":"100.0000 EOS","memo":"memo"}
+    >> transfer
+    #         eosio <= eosio.token::transfer        {"from":"eosio","to":"user","quantity":"100.0000 EOS","memo":"memo"}
+    #          user <= eosio.token::transfer        {"from":"eosio","to":"user","quantity":"100.0000 EOS","memo":"memo"}
+
+This time the output contains several different actions: one issue and three transfers. *While the only action we signed was issue, the issue action performed an "inline transfer" and the "inline transfer" notified the sender and receiver accounts*. The output indicates all of the action handlers that were called, the order they were called in, and whether or not any output was generated by the action.
+
+Technically, the eosio.token contract could have skipped the inline transfer and opted to just modify the balances directly. However, in this case, the eosio.token contract is following *our token convention that requires that all account balances be derivable by the sum of the transfer actions that reference them*. It also requires that the sender and receiver of funds be notified so they can automate handling deposits and withdrawals.
+
+If you want to see the actual transaction that was broadcast, you can use the -d -j options to indicate "don't broadcast" and "return transaction as json".
+
+    $ cleos push action eosio.token issue '["user", "100.0000 EOS", "memo"]' -p eosio -d -j
+    {
+      "expiration": "2018-04-01T15:20:44",
+      "region": 0,
+      "ref_block_num": 42580,
+      "ref_block_prefix": 3987474256,
+      "net_usage_words": 21,
+      "kcpu_usage": 1000,
+      "delay_sec": 0,
+      "context_free_actions": [],
+      "actions": [{
+          "account": "eosio.token",
+          "name": "issue",
+          "authorization": [{
+              "actor": "eosio",
+              "permission": "active"
+            }
+          ],
+          "data": "00000000007015d640420f000000000004454f5300000000046d656d6f"
+        }
+      ],
+      "signatures": [
+        "EOSJzPywCKsgBitRh9kxFNeMJc8BeD6QZLagtXzmdS2ib5gKTeELiVxXvcnrdRUiY3ExP9saVkdkzvUNyRZSXj2CLJnj7U42H"
+      ],
+      "context_free_data": []
+    }
+
+----
+
+### Transfer Tokens to Account "Tester"
+
+Now that account user has tokens, we will transfer some to account tester. We indicate that user authorized this action using  the permission argument -p user.
+
+    $ cleos push action eosio.token transfer '[ "user", "tester", "25.0000 EOS", "m" ]' -p user
+    executed transaction: 06d0a99652c11637230d08a207520bf38066b8817ef7cafaab2f0344aafd7018  268 bytes  1000 cycles
+    #   eosio.token <= eosio.token::transfer        {"from":"user","to":"tester","quantity":"25.0000 EOS","memo":"m"}
+    >> transfer
+    #          user <= eosio.token::transfer        {"from":"user","to":"tester","quantity":"25.0000 EOS","memo":"m"}
+    #        tester <= eosio.token::transfer        {"from":"user","to":"tester","quantity":"25.0000 EOS","memo":"m"}
+
+----
+
+## Deploy Exchange Contract
+
+Similar to the examples shown above, we can deploy the exchange contract. *The exchange contract provides capabilities to create and trade currency*. It is assumed this is being run from the root of the EOSIO source.
+
+    $ cleos create account eosio exchange  EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4 EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4
+    executed transaction: 4d38de16631a2dc698f1d433f7eb30982d855219e7c7314a888efbbba04e571c  364 bytes  1000 cycles
+    #         eosio <= eosio::newaccount            {"creator":"eosio","name":"exchange","owner":{"threshold":1,"keys":[{"key":"EOS7ijWCBmoXBi3CgtK7DJxe...
+    
+    $ cleos set contract exchange build/contracts/exchange -p exchange
+    Reading WAST...
+    Assembling WASM...
+    Publishing contract...
+    executed transaction: 5a63b4de8a1da415590778f163c5ed26dc164c960185b20fd834c297cf7fa8f4  35172 bytes  10000 cycles
+    #         eosio <= eosio::setcode               {"account":"exchange","vmtype":0,"vmversion":0,"code":"0061736d0100000001f0023460067f7e7f7f7f7f00600...
+    #         eosio <= eosio::setabi                {"account":"exchange","abi":{"types":[{"new_type_name":"account_name","type":"name"}],"structs":[{"n...
+
+----
+
+##Deploy Eosio.msig Contract
+
+Similar to the examples shown above, we can deploy the exchange contract. The exchange contract provides capabilities to create and trade currency. It is assumed this is being run from the root of the EOSIO source.
+
+    $ cleos create account eosio exchange  EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4 EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4
+    executed transaction: 4d38de16631a2dc698f1d433f7eb30982d855219e7c7314a888efbbba04e571c  364 bytes  1000 cycles
+    #         eosio <= eosio::newaccount            {"creator":"eosio","name":"exchange","owner":{"threshold":1,"keys":[{"key":"EOS7ijWCBmoXBi3CgtK7DJxe...
+    
+    $ cleos set contract exchange build/contracts/exchange -p exchange
+    Reading WAST...
+    Assembling WASM...
+    Publishing contract...
+    executed transaction: 5a63b4de8a1da415590778f163c5ed26dc164c960185b20fd834c297cf7fa8f4  35172 bytes  10000 cycles
+    #         eosio <= eosio::setcode               {"account":"exchange","vmtype":0,"vmversion":0,"code":"0061736d0100000001f0023460067f7e7f7f7f7f00600...
+    #         eosio <= eosio::setabi                {"account":"exchange","abi":{"types":[{"new_type_name":"account_name","type":"name"}],"structs":[{"n...
+
+----
+
+## Deploy Eosio.msig Contract
+
+*The eosio.msig contract allows multiple parties to sign a single transaction asynchronously. EOSIO has multi-signature (multisig) support at a base level, but it requires a synchronous side channel where data is ferried around and signed*. Eosio.msig is a more user friendly way of asynchronously proposing, approving and eventually publishing a transaction with multiple parties's consent.
+
+The following steps can be used to deploy the eosio.msig contract
+
+    $ cleos create account eosio eosio.msig  EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4 EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4
+    #         eosio <= eosio::newaccount            {"creator":"eosio","name":"eosio.msig","owner":{"threshold":1,"keys":[{"key":"EOS7ijWCBmoXBi3CgtK7DJ...
+      
+    $ cleos set contract eosio.msig build/contracts/eosio.msig -p eosio.msig
+    Reading WAST...
+    Assembling WASM...
+    Publishing contract...
+    executed transaction: a113a7db8c878dfd894671792770b59a04efb3aa8295f5b3d585daf89c314ec9  8964 bytes  10000 cycles
+    #         eosio <= eosio::setcode               {"account":"eosio.msig","vmtype":0,"vmversion":0,"code":"0061736d0100000001bd011b60047f7e7e7f0060047...
+    #         eosio <= eosio::setabi                {"account":"eosio.msig","abi":{"types":[{"new_type_name":"account_name","type":"name"},{"new_type_na...
+
+----
+
+# Hello World Contract
+
+This tutorial assumes that you have completed tutorials Getting Started With Contracts and Eosio.token, Exchange, and Eosio.msig Contracts.
+
+We will now create our first "hello world" contract. Create a new folder called "hello", cd into the folder, then create a file "hello.cpp" with the following contents:
+
+*hello/hello.cpp*
+
+    #include <eosiolib/eosio.hpp>
+    #include <eosiolib/print.hpp>
+    using namespace eosio;
+    
+    class hello : public eosio::contract {
+      public:
+          using contract::contract;
+    
+          /// @abi action 
+          void hi( account_name user ) {
+             print( "Hello, ", name{user} );
+          }
+    };
+    
+    EOSIO_ABI( hello, (hi) )
+
+You can compile your code to web assembly (.wast) as follows:
+
+    $ eosiocpp -o hello.wast hello.cpp
+
+*NOTE*: The compiler might generate warnings. There can be safely ignored.
+
+Now generate the abi:
+
+    $ eosiocpp -g hello.abi hello.cpcp
+    Generated hello.abi
+
+Create an account and upload the contract:
+
+    $ cleos create account eosio hello.code EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4 EOS7ijWCBmoXBi3CgtK7DJxentZZeTkeUnaSDvyro9dq7Sd1C3dC4
+    ...
+    $ cleos set contract hello.code ../hello -p hello.code
+    ...
+
+Now we can run the contract:
+
+    $ cleos push action hello.code hi '["user"]' -p user
+    executed transaction: 4c10c1426c16b1656e802f3302677594731b380b18a44851d38e8b5275072857  244 bytes  1000 cycles
+    #    hello.code <= hello.code::hi               {"user":"user"}
+    >> Hello, user
+
+At this time the contract allows anyone to authorize it, we could also say:
+
+    $ cleos push action hello.code hi '["user"]' -p tester
+    executed transaction: 28d92256c8ffd8b0255be324e4596b7c745f50f85722d0c4400471bc184b9a16  244 bytes  1000 cycles
+    #    hello.code <= hello.code::hi               {"user":"user"}
+    >> Hello, user
+
+In this case tester is the one who authorized it and user is just an argument. If we want our contract to authenticate the user we are saying "hi" to, then we need to modify the contract to require authentication.
+
+Modify the hi() function in hello.cpp as follows:
+
+    void hi( account_name user ) {
+       require_auth( user );
+       print( "Hello, ", name{user} );
+    }
+
+Repeat the steps to compile the wast file and generate the abi, then set the contract again to deploy the update.
+
+Now if we attempt to mismatch the user and the authority, the contract will throw an error:
+
+    $ cleos push action hello.code hi '["tester"]' -p user
+    Error 3030001: missing required authority
+    Ensure that you have the related authority inside your transaction!;
+    If you are currently using 'cleos push action' command, try to add the relevant authority using -p option.
+    Error Details:
+    missing authority of tester
+
+We can fix this by giving the permission of tester:
+
+    $ cleos push action hello.code hi '["tester"]' -p tester
+    executed transaction: 235bd766c2097f4a698cfb948eb2e709532df8d18458b92c9c6aae74ed8e4518  244 bytes  1000 cycles
+    #    hello.code <= hello.code::hi               {"user":"tester"}
+    >> Hello, tester
+
+----
+
+## Hello World Ricardian Contract
+
+Every smart contract must have a matching Ricardian contract. The Ricardian Contract specifies the legalling binding behavior associated with each action of the smart contract. The Ricardian Contract for the Hello World is listed here
+
+    ## CONTRACT FOR HELLO WORLD
+    
+    ### Parameters
+    Input paramters: NONE
+    
+    Implied parameters: 
+    
+    * _**account_name**_ (name of the party invoking and signing the contract)
+    
+    ### Intent
+    INTENT. The intention of the author and the invoker of this contract is to print output. It shall have no other effect.
+    
+    ### Term
+    TERM. This Contract expires at the conclusion of code execution.
+    
+    ### Warranty
+    WARRANTY. {{ account_name }} shall uphold its Obligations under this Contract in a timely and workmanlike manner, using knowledge and recommendations for performing the services which meet generally acceptable standards set forth by EOS.IO Blockchain Block Producers.
+      
+    ### Default
+    DEFAULT. The occurrence of any of the following shall constitute a material default under this Contract: 
+    
+    ### Remedies
+    REMEDIES. In addition to any and all other rights a party may have available according to law, if a party defaults by failing to substantially perform any provision, term or condition of this Contract, the other party may terminate the Contract by providing written notice to the defaulting party. This notice shall describe with sufficient detail the nature of the default. The party receiving such notice shall promptly be removed from being a Block Producer and this Contract shall be automatically terminated. 
+      
+    ### Force Majeure
+    FORCE MAJEURE. If performance of this Contract or any obligation under this Contract is prevented, restricted, or interfered with by causes beyond either party's reasonable control ("Force Majeure"), and if the party unable to carry out its obligations gives the other party prompt written notice of such event, then the obligations of the party invoking this provision shall be suspended to the extent necessary by such event. The term Force Majeure shall include, without limitation, acts of God, fire, explosion, vandalism, storm or other similar occurrence, orders or acts of military or civil authority, or by national emergencies, insurrections, riots, or wars, or strikes, lock-outs, work stoppages, or supplier failures. The excused party shall use reasonable efforts under the circumstances to avoid or remove such causes of non-performance and shall proceed to perform with reasonable dispatch whenever such causes are removed or ceased. An act or omission shall be deemed within the reasonable control of a party if committed, omitted, or caused by such party, or its employees, officers, agents, or affiliates. 
+      
+    ### Dispute Resolution
+    DISPUTE RESOLUTION. Any controversies or disputes arising out of or relating to this Contract will be resolved by binding arbitration under the default rules set forth by the EOS.IO Blockchain. The arbitrator's award will be final, and judgment may be entered upon it by any court having proper jurisdiction. 
+      
+    ### Entire Agreement
+    ENTIRE AGREEMENT. This Contract contains the entire agreement of the parties, and there are no other promises or conditions in any other agreement whether oral or written concerning the subject matter of this Contract. This Contract supersedes any prior written or oral agreements between the parties. 
+    
+    ### Severability
+    SEVERABILITY. If any provision of this Contract will be held to be invalid or unenforceable for any reason, the remaining provisions will continue to be valid and enforceable. If a court finds that any provision of this Contract is invalid or unenforceable, but that by limiting such provision it would become valid and enforceable, then such provision will be deemed to be written, construed, and enforced as so limited. 
+    
+    ### Amendment
+    AMENDMENT. This Contract may be modified or amended in writing by mutual agreement between the parties, if the writing is signed by the party obligated under the amendment. 
+    
+    ### Governing Law
+    GOVERNING LAW. This Contract shall be construed in accordance with the Maxims of Equity. 
+    
+    ### Notice
+    NOTICE. Any notice or communication required or permitted under this Contract shall be sufficiently given if delivered to a verifiable email address or to such other email address as one party may have publicly furnished in writing, or published on a broadcast contract provided by this blockchain for purposes of providing notices of this type. 
+      
+    ### Waiver of Contractual Right
+    WAIVER OF CONTRACTUAL RIGHT. The failure of either party to enforce any provision of this Contract shall not be construed as a waiver or limitation of that party's right to subsequently enforce and compel strict compliance with every provision of this Contract. 
+    
+    ### Arbitrator's Fees to Prevailing Party
+    ARBITRATOR‚ÄôS FEES TO PREVAILING PARTY. In any action arising hereunder or any separate action pertaining to the validity of this Agreement, both sides shall pay half the initial cost of arbitration, and the prevailing party shall be awarded reasonable arbitrator's fees and costs.
+      
+    ### Construction and Interpretation
+    CONSTRUCTION AND INTERPRETATION. The rule requiring construction or interpretation against the drafter is waived. The document shall be deemed as if it were drafted by both parties in a mutual effort. 
+      
+    ### In Witness Whereof
+    IN WITNESS WHEREOF, the parties hereto have caused this Agreement to be executed by themselves or their duly authorized representatives as of the date of execution, and authorized as proven by the cryptographic signature on the transaction that invokes this contract.
+
+----
+
+# Tutorial Comprehensive Accounts and Wallets
+
+## Comprehensive Accounts & Wallets Tutorial
+
+Note This tutorial is geared towards use on a private single node testnet, but will work on a public testnet with minor modifications.
+
+### Tutorial Audience
+
+This tutorial is for users who want to learn about wallet and account management, how to use cleos to manage wallets and accounts, and how the wallet and account management EOSIO components interact with each other. Additional information can be found in the command Referneces.
+
+### What You'll Learn
+
+You'll learn how to create and manage wallets, their keys and then use this wallet to interact with the blockchain through cleos. You will then learn how to create accounts using cleos. The tutorial will introduce you to some of the interaction between cleo, keosd, and nodeos to sign content published to the blockchain.
+
+*Prerequisites*
+
+- Built and running copy of cleos and keosd on your system.
+- Built and ready to run copy of nodes on your system.
+- Basic understanding of command line interfaces
+
+Note: Instructions require sligh modification when applied to a docker installation.
+
+## EOSIO Accounts and Wallets Conceptual Overview
+
+The diagram below  provides a simple conceptual view of accounts and wallets in EOSIO. While there are other supported deployment configurations, this view matches the one that we will use for this tutorial.
+
+[Accounts-and-Wallets-Overview.png](./img/EOS/Accounts-and-Wallets-Overview.png)
+
+*The wallet can be thought of as a repository of public-private key pairs*. These are needed to sign operations performed on the blockchain. Wallets and their content are managed by keosd. Wallets are accessed using cleos.
+
+*An account can be thought of as an on-chain identifier that has access permissions associated with it* (i.e., a security principal). nodeos manages the publishing of accounts and account-related actions on the blockchain. The account management capabilities of nodeos are also accessed using cleos.
+
+There is no inherent relationship between accounts and wallets. Accounts do not know about wallets, and vice versa. Correspondingly, there is no inherent relationship between nodeos and keosd. Their basic functions are fundamentally different. (Having said that, there are deployment configurations that blur the distinction. However, that topic is beyond the scope of this tutorial.)
+
+Where overlap occurs is when signatures are required, e.g., to sign transactions, The wallet facilitates obtaining signatures in a secure manner by storing keys locally in an encrypted store that can be locked. cleos effectively serves as an intermediary between keosd key retrieval operations and nodeos account (and other) blockchain actions that require signatures generated using those keys.
+
+----
+
+## Creating and Managing Wallets
+
+Open your terminal and change to the directory where EOSIO was built. This will make it easier for us to interact with cleos, which is a command line interface for interacting with nodeos and keosd.
+
+    $ cd /path_to_eos/build/programs/cleos
+
+The first thing you'll need to do is create a wallet; use the wallet create command of cleos
+
+    $ cleos wallet crerate
+    Creating wallet: default
+    Save password to use in the future to unlock this wallet.
+    Without password imported keys will not be retrievable.
+    "A MASTER PASSWORD"
+
+A wallet called default is now inside keosd and has returned the master password for this wallet. Be sure to save this password somewhere safe. This password is used to unlock your wallet file.
+
+The file for this wallet is named default.wallet. By default, keosd stored wallets in the ~/eos-wallet folder. The location of the wallet data folder can be specified on the command line using the --data-dir argument.
+
+----
+
+## Managing Multiple Wallets and Wallet Names
+
+cleos is capable of managing multiple wallets. Each individual wallet is protected by different wallet master passwords. The example below creates another wallet and demonstrates how to name it by using the -n argument.
+
+    $ cleos wallet create -n periwinkle
+    Creating wallet: periwinkle
+    Save password to use in the future to unlock this wallet.
+    Without password imported keys will not be retrievable.
+    "A MASTER PASSWORD"
+
+Now confirm that the wallet was created with your chosen name.
+
+    $ cleos wallet list
+    Wallets:
+    [
+      "default *",
+      "periwinkle *"
+    ]
+
+It's important to notice the asterisk (*) after each listed wallet, which means that the respective wallet is unlocked. When using create wallet the resulting wallet is unlocked by default for your convenience.
+
+Lock that second wallet using wallet lock
+
+    $ cleos wallet lock -n periwinkle
+    Locked: 'periwinkle'
+
+Upon running wallet list again, you will see that the asterisk is gone, meaning that the wallet is now locked.
+
+    $ cleos wallet list
+    Wallets:
+    [
+      "default *",
+      "periwinkle"
+    ]
+
+Unlocking a named wallet entails calling wallet unlock with an -n parameter followed by the name of the wallet and then entering the wallet's master password in the password prompt (yes, you can paste the password). Go ahead and grab the master key for the second wallet you created, execute the command below and when the password prompt appears, paste and press enter. You'll be presented with a confirmation.
+
+    $cleos wallet unlock -n periwinkle
+
+cleos will let you know that the wallet was unlocked
+
+    Unlocked: 'periwinkle'
+
+Note: You can also use a --password argument followed by the master password to skip the prompt, but this results in your master password being visible in the console history
+
+Now check your progress:
+
+    $ cleos wallet list
+    Wallets:
+    [
+      "default *",
+      "periwinkle *"
+    ]
+
+The periwinkle wallet is followed by an asterisk, so it is now unlocked.
+
+Note: Interacting with the 'default' wallet using the wallet command does not require the -n parameter
+
+Restart keosd now, and then go back to where you were calling cleos and run the following command
+
+    $ cleos wallet list
+    Wallets:
+    []
+
+Wallets first need to be opened before they can be operated on, including listing them. The wallets were locked when you shut down keosd. When keosd was restarted, the wallet wasn't open. Run the following commands to open, then list the default wallet.
+
+    $ cleos wallet open
+    $ cleos wallet list
+    Wallets:
+    [
+      "default"
+    ]
+
+*Note*: if you wanted to open a named wallet, you would run `$cleos wallet wallet open -n periwinkle`.
+
+You'll notice in the last response that the default wallet is locked by default. Unlock the now; you'll need it in the subsequent steps.
+
+Run the wallet unlock command and paste your default wallet's master password when the password prompt appears.
+
+    $ cleos wallet unlock
+    Unlocked: 'default'
+
+Check that the wallet is unlocked:
+
+    $ cleos wallet list
+    Wallets:
+    [
+      "default *"
+    ]
+
+The wallet is accompanied by an asterisk, so it's unlocked.
+
+You've learned how to create multiple wallets, and interact with them in cleos. However, an empty wallet doesn't do you much good. We will now learn to import keys into the wallet.
+
+----
+
+## Generating and Importing EOSIO Keys
+
+There are several ways to generate an EOSIO key pair, but his tutorial will focus on the create key command in cleos.
+
+Generate two public/private key pairs. Note the general format of the keys.
+
+    $ cleos create key
+    Private key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    Public key: EOSXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    $ cleos create key
+    Private key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    Public key: EOSXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+You now have two EOSIO keypairs. At this point, these are just arbitrary keypairs and by themselves have no authority.
+
+If you followed all of the previous steps, your default wallet should be open and unlocked.
+
+In this next step, we will import the private keys into the wallet. To do this, execute wallet import twice, once for each private key that was generated earlier.
+
+    $ cleos wallet import ${private_key_1}
+
+And then again with the second private key
+
+    $ cleos wallet import ${private_key_2}
+
+If successful, each time wallet import command responds with the public key corresponding to your private key, your console should look something like..
+
+    $ cleos wallet import 5Hvgh37WMCWAc4GuyRBiFrk4SArCnSQVMhNtEQVoszhBh6RgdWr
+    imported private key for: EOS84jJqXj5XBz3RqLreXZCMxXRKspUadXg3AVy8eb5J2axj8cywc
+
+We can check which keys are loaded by calling wallet keys
+
+    $ cleos wallet keys
+    [[
+        "EOS6....",
+        "5KQwr..."
+      ],
+      [
+        "EOS3....",
+        "5Ks0e..."
+      ]
+    ]
+
+the wallet file itself is encrypted, so the wallet will protect these keys when it's locked. Accessing the keys in a locked wallet requires the master password that was provided to you during wallet creation.
+
+----
+
+## Backing up your wallet
+
+Now that your wallet contains keys, it's good to get into the habit of backing up the wallet, e.g. to a flash drive or other media, to protect against the loss of the wallet file. Without the password, the wallet file is encrypted with high entrpy, and the keys inside are incredibly difficult (improbable by all reasonable measures) to access.
+
+You can find your wallet files in the data dir. If you did not specify a --data-dir parameter when launching eos, your wallet files are stored in the ~/eosio.wallet folder.
+
+    $ cd ~/eosio-wallet && ls
+    blockchain   blocks   config.ini   default.wallet   periwinkle.wallet
+
+If you've been following the setps of this tutorial, you will have two files, defualt.wallet and periwinkle.wallet. Save these files in a safe location.
+
+----
+
+## Creating an Account
+
+Performing actions on the blockchain requires the use of accounts. We use cleos to request nodeos to create accounts and publish them on the blockchain. At this point in our tutorial, we need to start nodeos. The following command will start a single node testnet. See Creating and Launching a Single Node Testnet for more on setting up a local environment.
+
+    For this part of the tutorial, we need keosd and nodeos to run simultaneously. Presently, the default port for keosd and nodeos is the same (port 8888). To simplify running nodeos for this part of the tutorial, we will change the port for keosd to 8899. There are two ways that we can do this:
+
+        1. Edit the keosd config file (~/eosio-wallet/config.ini) and change the http-server-address property to:
+
+            http-server-address = 127.0.0.1:8899
+
+        1. Start keosd using the command line argument --http-server-address=localhost:8899
+
+    Restart keosd using the comand line argument:
+
+      $ pkill keosd
+      $ keosd --http-server-address=localhost:8899
+
+    Unlock your default wallet (it was locked when keosd was restarted). Since keosd was started listening on port 8899, you will need to use the --wallet-port command line argument to cleos.
+
+      cleos --wallet-port=8899 wallet unlock
+
+    When prompted for the password, enter the wallet password generated in the previous section when the wallet was created.
+
+To start nodes, open a new terminal window. go to the folder that conntains your nodeos executable, and run the following.
+
+    $ cd eos/build/programs/nodeos
+    $ nodeos -e -p eosio --plugin eosio::chain_api_plugin --plugin eosio::account_history_api_plugin
+
+Now we can create the account. Here is the structure of the cleos create account command.
+
+    $ cleos create account ${authorizing_account} ${new_account} ${owner_key} ${active_key}
+
+- authorizing_account is the name of the account that will fund the account creation, and subsequently the new account.
+- new_account is the name of the account you would like to create
+- owner_key is a public key to be assigned to the owner authority of the account. (See Accounts & Permissions)
+- active_key is a public key to be assigned to the active authority of the account. of your account, and the second one will be permissioned for the active authority of your account.
+
+In this tutorial, eosio is the authorizing account. The actions performed on the blockchain must be signed using the keys associated with the eosio account. The eosio account is a special account used to bootstrap EOSIO nodes. The keys for this account can be found in the nodeos config file, located at ~/.local/shared/eosio/config/config.ini on Linux platforms, and ~/Libraries/Application Support/eosio/nodeos/config/config.ini on MacOS.
+
+We need a name for our new account. Account names must conform to the following guidelines.
+- Must be less than 13 characters
+- Cana only contain the following symbols: .12345abcdefghijklmnopqrstuvwxyz
+
+We will use the name "myaccount" for the new account.
+
+We will use the public keys that you generated above and imported into your wallet (recall that the public keys begin with EOS). The keys are arbitrary until you have assigned them to an authority. However,. once assigned, it is important to remeber the assignments. Your owner key quates to full contral of your account, whreas your active key equates to full access over funds in your account.
+
+Use cleos create account to create your account.
+
+    $ cleos --wallet-port=8899 create account eosio myaccount ${public_key_1} ${public_key_2}
+
+If successful, you will see output similar to the following.
+
+    executed transaction: 7f1c6b87cd6573365a7bb3c6aa12f8162c3373d57d148f63f2a2d3373ad2fd54  352 bytes  102400 cycles
+    #         eosio <= eosio::newaccount            {"creator":"eosio","name":"myaccount","owner":{"threshold":1,"keys":[{"key":"EOS5kkAs8HZ88m2N7iZWy4J...
+
+----
+
+### Account Related Operations
+
+There are a number of cleos commands specific to accounts
+
+| cleos command    | Description                                                                    |
+|------------------|--------------------------------------------------------------------------------|
+| create account   | Create a new account on the blockchain                                         |
+| get account      | Retrieve an account from the blockchain                                        |
+| get code         | Retrieve the code and ABI for an account                                       |
+| get accounts     | Retrieve accounts associated with a public key                                 |
+| get servants     | Retrieve accounts which are servants of a given account                        |
+| get transactions | Retrieve all transactions with specific account name referenced in their scope |
+| set contract     | Create or update the contract on an account                                    |
+| set account      | set or update blockchain account state                                         |
+| transfer         | Transfer EOS from account to account                                           |
+
+----
+
+# Tic-Tac-Toe
+
+## Objective
+
+The following tutorial will guide the user to build a sample Player vs Player game contract. We will use tic tac toe game to demonstrate this. Final result of this tutorial can be found here.
+
+## Assumption
+
+For this game, we are using a standard 3x3 tic tac toe board. Players are divided into two roles: host and challenger. Host always makes the first move. Each pair of players can ONLY have up to two games at the same time, one where the first player becomes the host and the other one where the second player becomes the host.
+
+### Board
+
+Instead of using o and x as in the raditional tic tac toe game. We use 1 to denote movment by host, 2 to denote movment by challenger, and 0 to denote empty cell. Furthermore, we will use one dimensional array to store the board. Hence:
+
+|       | (0,0) | (1,0) | (2,0) |
+|-------|-------|-------|-------|
+| (0,0) | -     | o     | x     |
+| (0,1) | -     | x     | -     |
+| (0,2) | x     | o     | o     |
+
+Assuming x is host, the above board is equal to [0, 2, 1, 0, 1, 0, 1, 2, 2]
+
+### Action
+
+User will have the following actions to interact with this contract:
+
+- create: create a new game
+- restart: restart an existing game, host or challenger is allowed to do this
+- close: close an existing game, which frees up the storage used to store the game, only host is allowed to do this
+- move: make a movement
+
+### Contract account
+
+For the following guuuide, we are going to push the contract to an account called tic.tac.toe. In case tic.tac.toe account name is already taken, you can also use another account by replacing any occurence of tic.tac.toe in the code with your account name. If you haven't created the account, please create the account first.
+
+    $ cleos create account ${creator_name} ${contract_account_name} ${contract_pub_owner_key} ${contract_pub_active_key} --permission ${creator_name}@active
+    # e.g. $ cleos create account inita tic.tac.toe  EOS4toFS3YXEQCkuuw1aqDLrtHim86Gz9u3hBdcBw5KNPZcursVHq EOS7d9A3uLe6As66jzN8j44TXJUqJSK3bFjjEEqR4oTvNAB3iM9SA --permission inita@active
+
+Ensure that you have your wallet unlocked and the creator's private active key in the wallet imported, otherwise the above command will fail..
+
+----
+
+## Start!
+
+We are going to create three files here:
+
+- tic_tac_toe.hpp => header file where the structure of the contract is defined
+- tic_tac_toe.cpp => main logic of the contract
+- tic_tac_toe.abi => interface for user to interact with the contract 
+
+NB: In this example we use the account name of N(tic.tac.toe) for the contract account. If you plan to use a differnt name for the contract account, then replace tic.tac.toe with your account name.
+
+----
+
+## Defining Stucture
+
+Let's first start with the header file and define the structure of the contract. Open tic_tac_toe.hpp and start with the following boilerplate
+
+    // Import necessary library
+    #include <eosiolib/eosio.hpp> // Generic eosio library, i.e. print, type, math, etc
+    
+    using namespace eosio;
+    namespace tic_tac_toe {
+       static const account_name games_account = N(games);
+       static const account_name code_account = N(tic.tac.toe);
+        // Your code here
+    }
+
+----
+
+### Gaming Table
+
+For this contract, we will need to have a table that stores a list of games. Let's define it:
+
+    ...
+    namespace tic_tac_toe {
+        ...
+        typedef eosio::multi_index< games_account, game> games;
+    }
+
+
+- First template parameter defines the name of the table
+- Second template parameter defines the structure that it stores (will be defined in the next section)
+
+----
+
+### Game Structure
+
+Let's define structure for the game. Ensure that this struct definition appears before the table definition in the code.
+
+    ...
+    namespace tic_tac_toe {
+       static const uint32_t board_len = 9;
+       struct game {
+          game() {}
+          game(account_name challenger, account_name host):challenger(challenger), host(host), turn(host) {
+             // Initialize board
+             initialize_board();
+          }
+          account_name     challenger;
+          account_name     host;
+          account_name     turn; // = account name of host/ challenger
+          account_name     winner = N(none); // = none/ draw/ account name of host/ challenger
+          uint8_t          board[9]; //
+    
+          // Initialize board with empty cell
+          void initialize_board() {
+             for (uint8_t i = 0; i < board_len ; i++) {
+                board[i] = 0;
+             }
+          }
+    
+          // Reset game
+          void reset_game() {
+             initialize_board();
+             turn = host;
+             winner = N(none);
+          }
+    
+          auto primary_key() const { return challenger; }
+    
+          EOSLIB_SERIALIZE( game, (challenger)(host)(turn)(winner)(board) )
+       };
+    }
+
+The primary_key method is required by the above table definition for games. That is how the table knows what field is the lookup key for the table.
+
+----
+
+### Action Structure
+
+*Create*
+
+To create the game, we need host account name and challenger's account name. The EOSLIB_SERIALIZE macro provides serialize and deserialize methods so that actions can be passed back and forth between the contracts and the nodeos system.
+
+    ...
+    namespace tic_tac_toe {
+       ...
+       struct create {
+          account_name   challenger;
+          account_name   host;
+    
+          EOSLIB_SERIALIZE( create, (challenger)(host) )
+       };
+       ...
+    }
+
+*Restart*
+
+To restart the game, we need host account name and challenger's account name to identify the game. Furthermore, we need to specify who wants to restart the game, so we can verify the correct signature is provided.
+
+    ...
+    namespace tic_tac_toe {
+       ...
+       struct restart {
+          account_name   challenger;
+          account_name   host;
+          account_name   by;
+    
+          EOSLIB_SERIALIZE( restart, (challenger)(host)(by) )
+       };
+       ...
+    }
+
+*Close*
+
+To close the game, we need host account name and challenger's account name to identify the game.
+
+    ...
+    namespace tic_tac_toe {
+       ...
+       struct close {
+          account_name   challenger;
+          account_name   host;
+    
+          EOSLIB_SERIALIZE( close, (challenger)(host) )
+       };
+       ...
+    }
+
+*Move*
+
+To make a move, we need host account name and challenger's account name to identify the game. Furthermore, we need to specify who makes this move and the movement he is making.
+
+    ...
+    namespace tic_tac_toe {
+       ...
+       struct movement {
+          uint32_t    row;
+          uint32_t    column;
+    
+          EOSLIB_SERIALIZE( movement, (row)(column) )
+       };
+    
+       struct move {
+          account_name   challenger;
+          account_name   host;
+          account_name   by; // the account who wants to make the move
+          movement       mvt;
+    
+          EOSLIB_SERIALIZE( move, (challenger)(host)(by)(mvt) )
+       };
+       ...
+    }
+
+You can see the final tic_tac_toe.hpp here.
+
+----
+
+## Main
+
+Let's open tic_tac_toe.cpp and setup the boilerplate
+
+    #include "tic_tac_toe.hpp"
+    using namespace eosio;
+    /**
+    *  The apply() method must have C calling convention so that the blockchain can lookup and
+    *  call these methods.
+    */
+    extern "C" {
+    
+       using namespace tic_tac_toe;
+       /// The apply method implements the dispatch of events to this contract
+       void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
+          // Put your action handler here
+       }
+    
+    } // extern "C"
+
+----
+
+### Action handler
+
+We want tic_tac_toe *contract to only react to actions sent to the tic.tac.toe account and react differently according to the type of the action*. Let's add an impl struct with overloaded 'on' methods taking the different action types (this may seem like  overkill for this example, but you will see this pattern employed in other contracts that you can extend, like currency):
+
+    using namespace eosio;
+    namespace tic_tac_toe {
+    struct impl {
+       ...
+       /// The apply method implements the dispatch of events to this contract
+       void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
+    
+          if (code == code_account) {
+             if (action == N(create)) {
+                impl::on(eosio::unpack_action_data<tic_tac_toe::create>());
+             } else if (action == N(restart)) {
+                impl::on(eosio::unpack_action_data<tic_tac_toe::restart>());
+             } else if (action == N(close)) {
+                impl::on(eosio::unpack_action_data<tic_tac_toe::close>());
+             } else if (action == N(move)) {
+                impl::on(eosio::unpack_action_data<tic_tac_toe::move>());
+             }
+          }
+       }
+    
+    };
+    }
+    
+    ...
+    extern "C" {
+    
+       using namespace tic_tac_toe;
+       /// The apply method implements the dispatch of events to this contract
+       void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
+          impl().apply(receiver, code, action);
+       }
+    
+    } // extern "C"
+
+Notice that we use unpack_action_data<T></T>() before passing it to specific handler. uppack_action_data<T>() is converting the action that the contract receives to struct T.
+
+To make things tidy, we will encapsulate the action handlers inside struct impl:
+
+    ...
+    struct impl {
+    ...
+       /**
+        * @param create - action to be applied
+        */
+       void on(const create& c) {
+          // Put code for create action here
+       }
+    
+       /**
+        * @brief Apply restart action
+        * @param restart - action to be applied
+        */
+       void on(const restart& r) {
+          // Put code for restart action here
+       }
+    
+       /**
+        * @brief Apply close action
+        * @param close - action to be applied
+        */
+       void on(const close& c) {
+          // Put code for close action here
+       }
+    
+       /**
+        * @brief Apply move action
+        * @param move - action to be applied
+        */
+       void on(const move& m) {
+          // Put code for move action here
+       }
+    
+       /// The apply method implements the dispatch of events to this contract
+       void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
+    ...
+
+### Create Action Handler
+
+For the create action handler, we want to:
+
+1. Ensure that the action has signature from the host
+1. Ensure that the challenger and host are not the same player
+1. Ensure that there is no existing game
+1. Store the newly created game into the db
+
+    struct impl {
+       ...
+       /**
+        * @brief Apply create action
+        * @param create - action to be applied
+        */
+       void on(const create& c) {
+          require_auth(c.host);
+          eosio_assert(c.challenger != c.host, "challenger shouldn't be the same as host");
+    
+          // Check if game already exists
+          games existing_host_games(code_account, c.host);
+          auto itr = existing_host_games.find( c.challenger );
+          eosio_assert(itr == existing_host_games.end(), "game already exists");
+    
+          existing_host_games.emplace(c.host, [&]( auto& g ) {
+             g.challenger = c.challenger;
+             g.host = c.host;
+             g.turn = c.host;
+          });
+       }
+       ...
+    }
+
+### Restart Action Handler
+
+For the restart action handler, we want to:
+
+1. Ensure that the action has signature from the host/challenger
+2. Ensure that the game exists
+3. Ensure that the restart action is done by host/challenger
+4. Reset the game
+5. Store the updated game to be db
+
+    struct impl {
+       ...
+       /**
+        * @brief Apply restart action
+        * @param restart - action to be applied
+        */
+       void on(const restart& r) {
+          require_auth(r.by);
+    
+          // Check if game exists
+          games existing_host_games(code_account, r.host);
+          auto itr = existing_host_games.find( r.challenger );
+          eosio_assert(itr != existing_host_games.end(), "game doesn't exists");
+    
+          // Check if this game belongs to the action sender
+          eosio_assert(r.by == itr->host || r.by == itr->challenger, "this is not your game!");
+    
+          // Reset game
+          existing_host_games.modify(itr, itr->host, []( auto& g ) {
+             g.reset_game();
+          });
+       }
+       ...
+    }
+
+### Close Action Handler
+
+For the close action handler, we want to:
+1. Ensure that the action has signature from the host
+2. Ensure that the game exists
+3. Remove the game from the db
+
+    struct impl {
+       ...
+       /**
+        * @brief Apply close action
+        * @param close - action to be applied
+        */
+       void on(const close& c) {
+          require_auth(c.host);
+    
+          // Check if game exists
+          games existing_host_games(code_account, c.host);
+          auto itr = existing_host_games.find( c.challenger );
+          eosio_assert(itr != existing_host_games.end(), "game doesn't exists");
+    
+          // Remove game
+          existing_host_games.erase(itr);
+       }
+       ...
+    }
+
+----
+
+### Move Action Handler
+
+For the move action handler, we want to:
+
+1. Ensure that the action has signature from the host/challenger
+2. Ensure that the game exists
+3. Ensure that the game is not finished yet
+4. Ensure that the move action is done by host/ challenger
+5. Ensure that this is the right user's turn
+6. Verify movement is valid
+7. Update board with the new emove
+8. Change the move_turn to the other player
+9. Determine if there is a winner
+10. Sotre the updated game to the db
+
+    struct impl {
+       ...
+       bool is_valid_movement(const movement& mvt, const game& game_for_movement) {
+          // Put code here
+       }
+    
+       account_name get_winner(const game& current_game) {
+          // Put code here
+       }
+       ...
+       /**
+        * @brief Apply move action
+        * @param move - action to be applied
+        */
+       void on(const move& m) {
+          require_auth(m.by);
+    
+          // Check if game exists
+          games existing_host_games(code_account, m.host);
+          auto itr = existing_host_games.find( m.challenger );
+          eosio_assert(itr != existing_host_games.end(), "game doesn't exists");
+    
+          // Check if this game hasn't ended yet
+          eosio_assert(itr->winner == N(none), "the game has ended!");
+          // Check if this game belongs to the action sender
+          eosio_assert(m.by == itr->host || m.by == itr->challenger, "this is not your game!");
+          // Check if this is the  action sender's turn
+          eosio_assert(m.by == itr->turn, "it's not your turn yet!");
+    
+    
+          // Check if user makes a valid movement
+          eosio_assert(is_valid_movement(m.mvt, *itr), "not a valid movement!");
+    
+          // Fill the cell, 1 for host, 2 for challenger
+          const auto cell_value = itr->turn == itr->host ? 1 : 2;
+          const auto turn = itr->turn == itr->host ? itr->challenger : itr->host;
+          existing_host_games.modify(itr, itr->host, [&]( auto& g ) {
+             g.board[m.mvt.row * 3 + m.mvt.column] = cell_value;
+             g.turn = turn;
+    
+             //check to see if we have a winner
+             g.winner = get_winner(g);
+          });
+       }
+       ...
+    }
+
+### Movement Validation
+
+Valid movement is defined as movement done inside the board on ana empty cell:
+
+    struct impl {
+       ...
+       /**
+        * @brief Check if cell is empty
+        * @param cell - value of the cell (should be either 0, 1, or 2)
+        * @return true if cell is empty
+        */
+       bool is_empty_cell(const uint8_t& cell) {
+          return cell == 0;
+       }
+    
+       /**
+        * @brief Check for valid movement
+        * @detail Movement is considered valid if it is inside the board and done on empty cell
+        * @param movement - the movement made by the player
+        * @param game - the game on which the movement is being made
+        * @return true if movement is valid
+        */
+       bool is_valid_movement(const movement& mvt, const game& game_for_movement) {
+          uint32_t movement_location = mvt.row * 3 + mvt.column;
+          bool is_valid = movement_location < board_len && is_empty_cell(game_for_movement.board[movement_location]);
+          return is_valid;
+       }
+       ...
+    }
+
+----
+
+### Get Winner
+
+Winner is defined as the first player who succeeds in placing three of their marks in a horizontal, vertical, or diagonal row.
+
+    struct impl {
+       ...
+       /**
+        * @brief Get winner of the game
+        * @detail Winner of the game is the first player who made three consecutive aligned movement
+        * @param game - the game which we want to determine the winner of
+        * @return winner of the game (can be either none/ draw/ account name of host/ account name of challenger)
+        */
+       account_name get_winner(const game& current_game) {
+          if((current_game.board[0] == current_game.board[4] && current_game.board[4] == current_game.board[8]) ||
+             (current_game.board[1] == current_game.board[4] && current_game.board[4] == current_game.board[7]) ||
+             (current_game.board[2] == current_game.board[4] && current_game.board[4] == current_game.board[6]) ||
+             (current_game.board[3] == current_game.board[4] && current_game.board[4] == current_game.board[5])) {
+             //  - | - | x    x | - | -    - | - | -    - | x | -
+             //  - | x | -    - | x | -    x | x | x    - | x | -
+             //  x | - | -    - | - | x    - | - | -    - | x | -
+             if (current_game.board[4] == 1) {
+                return current_game.host;
+             } else if (current_game.board[4] == 2) {
+                return current_game.challenger;
+             }
+          } else if ((current_game.board[0] == current_game.board[1] && current_game.board[1] == current_game.board[2]) ||
+                     (current_game.board[0] == current_game.board[3] && current_game.board[3] == current_game.board[6])) {
+             //  x | x | x       x | - | -
+             //  - | - | -       x | - | -
+             //  - | - | -       x | - | -
+             if (current_game.board[0] == 1) {
+                return current_game.host;
+             } else if (current_game.board[0] == 2) {
+                return current_game.challenger;
+             }
+          } else if ((current_game.board[2] == current_game.board[5] && current_game.board[5] == current_game.board[8]) ||
+                     (current_game.board[6] == current_game.board[7] && current_game.board[7] == current_game.board[8])) {
+             //  - | - | -       - | - | x
+             //  - | - | -       - | - | x
+             //  x | x | x       - | - | x
+             if (current_game.board[8] == 1) {
+                return current_game.host;
+             } else if (current_game.board[8] == 2) {
+                return current_game.challenger;
+             }
+          } else {
+             bool is_board_full = true;
+             for (uint8_t i = 0; i < board_len; i++) {
+                if (is_empty_cell(current_game.board[i])) {
+                   is_board_full = false;
+                   break;
+                }
+             }
+             if (is_board_full) {
+                return N(draw);
+             }
+          }
+          return N(none);
+       }
+       ...
+    }
+
+You can see the final tic_tac_toe.cpp here.
+
+----
+
+## Creating ABI
+
+Abi (a.k.a Application Binary Interface) is needed here, so the contract can understand the action that you sen d as binary. Let's open tic_tac_toe.abi and defines the boilerplate here:
+
+    {
+      "types": [],
+      "structs": [{
+          "name": "...",
+          "base": "...",
+          "fields": { ... }
+      }, ...],
+      "actions": [{
+          "name": "...",
+          "type": "...",
+          "ricardian_contract": "..."
+      }, ...],
+      "tables": [{
+          "name": "...",
+          "type": "...",
+          "index_type": "...",
+          "key_names" : [...],
+          "key_types" : [...]
+      }, ...],
+      "clauses: [...]
+
+- types: list of types that can be represented by another data structure or built-in-type (think typedef in c/c++)
+- structs: list of data structures used by the action/ table in the contract
+- actions: list of actions available in the contract
+- tables: list of tables available in the contract
+
+----
+
+### Table ABI
+
+Remember that in tic_tac_toe.hpp, we create a single index i64 table called games. It stores game structure and use challengere as the key, which data type is account_name. Hence, the abi will be:
+
+    {
+      ...
+      "structs": [{
+          "name": "game",
+          "base": "",
+          "fields": [
+            {"name":"challenger", "type":"account_name"},
+            {"name":"host", "type":"account_name"},
+            {"name":"turn", "type":"account_name"},
+            {"name":"winner", "type":"account_name"},
+            {"name":"board", "type":"uint8[]"}
+          ]
+        },...
+      ],
+      "tables": [{
+            "name": "games",
+            "type": "game",
+            "index_type": "i64",
+            "key_names" : ["challenger"],
+            "key_types" : ["account_name"]
+          }
+      ],
+      ...
+    }
+
+----
+
+### Actions ABI
+
+For the actions, we define the actions inside actions and the sturcture of the actions inside structs.
+
+    {
+      ...
+      "structs": [{
+        ...
+        },{
+          "name": "create",
+          "base": "",
+          "fields": [
+            {"name":"challenger", "type":"account_name"},
+            {"name":"host", "type":"account_name"}
+          ]
+        },{
+          "name": "restart",
+          "base": "",
+          "fields": [
+            {"name":"challenger", "type":"account_name"},
+            {"name":"host", "type":"account_name"},
+            {"name":"by", "type":"account_name"}
+          ]
+        },{
+          "name": "close",
+          "base": "",
+          "fields": [
+            {"name":"challenger", "type":"account_name"},
+            {"name":"host", "type":"account_name"}
+          ]
+        },{
+          "name": "movement",
+          "base": "",
+          "fields": [
+            {"name":"row", "type":"uint32"},
+            {"name":"column", "type":"uint32"}
+          ]
+        },{
+          "name": "move",
+          "base": "",
+          "fields": [
+            {"name":"challenger", "type":"account_name"},
+            {"name":"host", "type":"account_name"},
+            {"name":"by", "type":"account_name"},
+            {"name":"mvt", "type":"movement"}
+          ]
+        }
+      ],
+      "actions": [{
+          "name": "create",
+          "type": "create",
+          "ricardian_contract": ""
+        },{
+          "name": "restart",
+          "type": "restart",
+          "ricardian_contract": ""
+        },{
+          "name": "close",
+          "type": "close",
+          "ricardian_contract": ""
+        },{
+          "name": "move",
+          "type": "move",
+          "ricardian_contract": ""
+        }
+      ],
+      ...
+    }
+
+----
+
+### Compile!
+
+Now we need to compile tic_tac_toe.cpp to create the tic_tac_toe.wast file that we will uuse to deploy the contract into nodes.
+
+    $ eosiocpp -o tic_tac_toe.wast tic_tac_toe.cpp
+
+----
+
+### Deploy!
+
+Now the wast and abi files (tic_tac_toe.wast and tic_tac_toe.abi) are ready. Time to deploy! Create a directory (let's call it tic_tac_toe) and copy your generated tic_tac_toe.wast tic_tac_toe.abi files.
+
+    $ cleos set contract tic.tac.toe tic_tac_toe
+
+Ensure that your wallet is unlocked and you have tic.tac.toe key imported. If you are going to upload the contract to another account beside tic.tac.toe, replace tic.tac.toe with your account name and ensure you have the key for that account in your wallet
+
+----
+
+## Play!
+
+After the deployment and the  trasaction is comfirmed, the contract is already available in the blockchain. You can play with it now!
+
+### Create
+
+    $ cleos push action tic.tac.toe create '{"challenger":"inita", "host":"initb"}' --permission initb@active 
+
+### Move 
+
+    $ cleos push action tic.tac.toe move '{"challenger":"inita", "host":"initb", "by":"initb", "mvt":{"row":0, "column":0} }' --permission initb@active
+    $ cleos push action tic.tac.toe move '{"challenger":"inita", "host":"initb", "by":"inita", "mvt":{"row":1, "column":1} }' --permission inita@active
+
+### Restart
+
+    $ cleos push action tic.tac.toe restart '{"challenger":"inita", "host":"initb", "by":"initb"}' --permission initb@active 
+
+### Close
+
+    $ cleos push action tic.tac.toe close '{"challenger":"inita", "host":"initb"}' --permission initb@active
+
+### See the game status
+
+    $ cleos get table tic.tac.toe initb games
+    {
+      "rows": [{
+          "challenger": "inita",
+          "host": "initb",
+          "turn": "inita",
+          "winner": "none",
+          "board": [
+            1,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "more": false
+    }
+
+----
+
+# Testnet Single Host Multinode
+
+This tutorial describes how to set up a multi-node blockchain configuraton running on a single host. This is referred to as a single host, multi-node testnet. We will set up two nodes on your local computer and have them communicate with each other. The examples in this section rely on three command-line application, nodeos, keosd, and cleos. The following diagram depicts the desired testnet configuration.
+
+It is assumed that keosd, cleos, and nodeos have been installed in your path, or that you know how to start these applications from the location in the file system. (See Setting Up A Local Environment)
+
+----
+
+## Start the Wallet Manager
+
+In the first terminal window, start keosd, the wallet management application:
+
+    keosd --http-server-address 127.0.0.1:8899
+
+If successful, keosd will display some information, starting with:
+
+    2493323ms thread-0   wallet_plugin.cpp:39          plugin_initialize    ] initializing wallet plugin
+    2493323ms thread-0   http_plugin.cpp:141           plugin_initialize    ] host: 127.0.0.1 port: 8899
+    2493323ms thread-0   http_plugin.cpp:144           plugin_initialize    ] configured http to listen on 127.0.0.1:8899
+    2493323ms thread-0   http_plugin.cpp:213           plugin_startup       ] start listening for http requests
+    2493324ms thread-0   wallet_api_plugin.cpp:70      plugin_startup       ] starting wallet_api_plugin
+
+Look for *a line saying the wallet is listening on 127.0.0.1:8899*. This will indicate that keosd started correctly and is listening on the correct port. If you see anything else, or you see some error report prior to "starting wallet_api_plugin", then you need to diagnose the issue and restart.
+
+When keosd is running correctly, leave that window open with the wallet app running and move to the next terminal window.
+
+----
+
+## Create a Default Wallet
+
+In the next terminal window, use cleos, the command line utility to create the default wallet.
+
+    cleos --wallet-port 8899 wallet create
+
+cleos will indicate that it created the "default" wallet, and will provide a password for future wallet access. As the message says, be sure to preserve this password for future use. Here is an example of this output:
+
+    Creating wallet: default
+    Save password to use in the future to unlock this wallet.
+    Without password imported keys will not be retrievable.
+    "PW5JsmfYz2wrdUEotTzBamUCAunAA8TeRZGT57Ce6PkvM12tre8Sm"
+
+keosd will generate some status output in its window. We will continue to use this second window for subsequent cleos commands.
+
+----
+
+## Start the First Producer Node
+
+We can now start the first producer node. In the third terminal window run:
+
+    nodeos --enable-stale-production --producer-name eosio --plugin eosio::chain_api_plugin --plugin eosio::net_api_plugin
+
+This creates a special producer, known as the "bios" producer. Assuming everthing has executed correctly to this point, you should see output from the nodeos process reporting block creation.
+
+----
+
+## Start the Second Producer Node
+
+The following commands assume that you are running this tutorial from your ${EOSIO_SOURCE} directory, from which you ran ./eosio_build.sh to build. See Getting the Code for more information if this is not clear.
+
+To start additional nodes, you must first load the eosio.bios contract. This contract enables you to have direct control over the resource allocation of other accounts and to access other privileged API calls. Return to the second terminal window and run the following command to load the contract:
+
+    cleos --wallet-port 8899 set contract eosio build/contracts/eosio.bios
+
+We will create an account to become a producer, using the account name inita. To create the account, we need to generate keys to associate with the account, and import those into our wallet.
+
+Run the create key command:
+
+    cleos create key
+
+This will report newly generated public and private keypairs that will look similar to the following.
+
+IMPORTANT: The command line instructions that follow use the keys shown below. In order to be able to cut-and-paste the command line instructions directly from this tutorial, do NOT use the keys that you just generated. If, instead, you want to use your newly generated keys, you will need to replace the key values with yours in the commands.
+
+    Private key: 5JgbL2ZnoEAhTudReWH1RnMuQS6DBeLZt4ucV6t8aymVEuYg7sr
+    Public key: EOS6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg
+
+Now import the private key portion into your wallet.  If successful, the matching public key will be reported. This should match the previously generated public key:
+
+    cleos --wallet-port 8899 wallet import 5JgbL2ZnoEAhTudReWH1RnMuQS6DBeLZt4ucV6t8aymVEuYg7sr
+    imported private key for: EOS6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg
+
+Create the inita account that we will use to become a producer. The create account command requires two public keys, one for the account's owner key and one for its active key. In this example, the newly created public key is used twice, as both the owner key and the active key. Example output from the create command is shown:
+
+    cleos --wallet-port 8899 create account eosio inita EOS6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg EOS6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg
+    executed transaction: d1ea511977803d2d88f46deb554f5b6cce355b9cc3174bec0da45fc16fe9d5f3  352 bytes  102400 cycles
+    #         eosio <= eosio::newaccount            {"creator":"eosio","name":"inita","owner":{"threshold":1,"keys":[{"key":"EOS6hMjoWRF2L8x9YpeqtUEcsDK...
+
+We now have an account that is available to have a contract assigned to it, enabling it to do meaningful work. In other tutorial, the account has been used to establish simple contracts. In this case, the account will be designed as a block producer.
+
+In the fourth terminal window, start a second nodeos instance. Notice that this command line is substantially longer than the one we used above to create the first producer. This is necessary to avoid collisions with the first nodeos instance. Fortuantely, you can just cut and paste this command line and adjust the keys:
+
+    nodeos --producer-name inita --plugin eosio::chain_api_plugin --plugin eosio::net_api_plugin --http-server-address 127.0.0.1:8889 --p2p-listen-endpoint 127.0.0.1:9877 --p2p-peer-address 127.0.0.1:9876 --config-dir node2 --data-dir node2 --private-key [\"EOS6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg\",\"5JgbL2ZnoEAhTudReWH1RnMuQS6DBeLZt4ucV6t8aymVEuYg7sr\"]
+
+The output from this new node will show a little activity but will stop reporting until the last step in this tutorial, when the inita account is registered as a producer account and activated. Here is some example output from a newly started node. Your output might look a little different, depending on how much time you took entering each of these commands. Furthermore, this example is only the last few lines of output:
+
+    2393147ms thread-0   producer_plugin.cpp:176       plugin_startup       ] producer plugin:  plugin_startup() end
+    2393157ms thread-0   net_plugin.cpp:1271           start_sync           ] Catching up with chain, our last req is 0, theirs is 8249 peer dhcp15.ociweb.com:9876 - 295f5fd
+    2393158ms thread-0   chain_controller.cpp:1402     validate_block_heade ] head_block_time 2018-03-01T12:00:00.000, next_block 2018-04-05T22:31:08.500, block_interval 500
+    2393158ms thread-0   chain_controller.cpp:1404     validate_block_heade ] Did not produce block within block_interval 500ms, took 3061868500ms)
+    2393512ms thread-0   producer_plugin.cpp:241       block_production_loo ] Not producing block because production is disabled until we receive a recent block (see: --enable-stale-production)
+    2395680ms thread-0   net_plugin.cpp:1385           recv_notice          ] sync_manager got last irreversible block notice
+    2395680ms thread-0   net_plugin.cpp:1271           start_sync           ] Catching up with chain, our last req is 8248, theirs is 8255 peer dhcp15.ociweb.com:9876 - 295f5fd
+    2396002ms thread-0   producer_plugin.cpp:226       block_production_loo ] Previous result occurred 5 times
+    2396002ms thread-0   producer_plugin.cpp:244       block_production_loo ] Not producing block because it isn't my turn, its eosio
+
+At this point, the second nodeos is an idle producer. To turn it into an active producer, inita needs to be registered as a producer with the bios node, and the bios node needs to perform an action to update the producer schedule.
+
+    cleos --wallet-port 8899 push action eosio setprods "{ \"version\": 1, \"producers\": [{\"producer_name\": \"inita\",\"block_signing_key\": \"EOS6hMjoWRF2L8x9YpeqtUEcsDKAyxSuM1APicxgRU1E3oyV5sDEg\"}]}" -p eosio@active
+    executed transaction: 2cff4d96814752aefaf9908a7650e867dab74af02253ae7d34672abb9c58235a  272 bytes  105472 cycles
+    #         eosio <= eosio::setprods              {"version":1,"producers":[{"producer_name":"inita","block_signing_key":"EOS6hMjoWRF2L8x9YpeqtUEcsDKA...
+
+Congratulations, you have now configured a two-node testnet! You can see that the original node is no longer producing blocks but it is receiving them. You can verify this by running the get info command against each node.
+
+Get info about the first node:
+
+    cleos get info
+
+This should produce output that looks similar to this:
+
+    {
+      "server_version": "223565e8",
+      "head_block_num": 11412,
+      "last_irreversible_block_num": 11411,
+      "head_block_id": "00002c94daf7dff456cd940bd585c4d9b38e520e356d295d3531144329c8b6c3",
+      "head_block_time": "2018-04-06T00:06:14",
+      "head_block_producer": "inita"
+    }
+
+Now for the second node:
+
+    cleos --port 8889 get info
+
+This should produce output that looks similar to this:
+
+    {
+      "server_version": "223565e8",
+      "head_block_num": 11438,
+      "last_irreversible_block_num": 11437,
+      "head_block_id": "00002cae32697444fa9a2964e4db85b5e8fd4c8b51529a0c13e38587c1bf3c6f",
+      "head_block_time": "2018-04-06T00:06:27",
+      "head_block_producer": "inita"
+    }
+
+In a later tutorial we will explore how to use more advanced tools to run a multi-host, multi-node testnet.
+
+****
+
+# Smart Contract API References #
+
+
+Modules
+
+1. Account API
+
+    Define API for querying account data.
+
+1. Action API
+
+    Define API for querying action properties.
+
+1. Chain API
+
+    Define API for querying internal chain state.
+
+1. Database API
+
+    APIs that store and retreive data on the blockchainEOS.IO organizes data according to the following broad structure:
+
+1. Math API
+
+    Defines common math functions.
+
+1. Console API
+
+    Enables applications to log/print text messages.
+
+1. System API
+
+    Define API for interacting with system level intrinsics.
+
+1. Token API
+
+    Defines the ABI for interfacing with standard-compatible token messages and database tables.
+
+1. transaction API
+
+    Define API for sending transactions and inline messages.
+
+1. Builtin Types
+
+    Specifies typedefs and aliases.
+
+----
+
+## Background
+
+EOS.IO contracts (aka applications) are deployed to a blockchain as pre-compiled Web Assembly (aka WASM). WASM is compiled from C/C++ using LLVM and clang, which means that you will require knowledge of C/C++ in order to develop your blockchain applications. While it is possible to develop in C, we strongly recommend that all developers use the EOS.IO C++ API which provides much stronger type safety and is generally easier to read.
+
+----
+
+## Application Strucutre
+
+EOS.IO applications are designed around event (aka action) handlers that respond to user actions. For example, a user might transfer tokens to another user. This event can be processed and potentially rejected by the sender, the receiver, and the currency application itself.
+
+As an application developer you get to decide what actions users can take and which handlers may or must be called in response to those events.
+
+----
+
+### Entry Points
+
+EOS.IO applications have a apply which is like main in traditional applications:
+
+    extern "C" {
+        void init();
+        void  apply(uint64_t code, uint64_t action);
+    }
+
+apply is given the arguments code and action which uniquely identify every event in the system. For example, code could be a currency contract and action could be transfer. This event (code, action) may be passed to several contracts including the sender and receiver. It is up to your application to figure out what to do in response to such an event.
+
+init is another entry point that is called once immediately aftere loading the code. It is where you should perform one-time initialization of state.
+
+----
+
+### Example Apply Entry Handler
+
+Generally speaking, you should use your entry handler to dispatch events to functions that implement the majority of your logic and optionally reject events that your contract is unable or unwilling to accept.
+
+    extern "C" {
+       void apply( uint64_t code, uint64_t action ) {
+          if( code == N(currency) ) {
+             if( action == N(transfer) ) 
+                currency::apply_currency_transfer( current_action< currency::transfer >() );
+          } else {
+             eosio_assert( false, "rejecting unexpected event" );
+          }
+       }
+    }
+
+> Note
+> When defining your entry points it is required that they are placed in an extern "C" code block so that c++ name mangling does not get applied to the function. 
+
+----
+
+# Account API
+
+C API for querying account data
+
+## Functions
+
+1. bool account_balance_get (void *balance, uint32_t len)
+
+    Retrieve the balance for the provided account. More...
+
+    /**
+     *
+     * @param balance a pointer to a range of memory to store balance data
+     * @param len length of the range of memory to store balance data
+     *
+     * @return true if account information is retrieved
+     *
+     */
+
+----
+
+# Action API
+
+Define API for querying action properties.
+
+## Functions
+
+1. uint32_t read_action_data (void *msg, uint32_t len)
+
+    Copy current action data to the specified location. More..
+
+2. uint32_t action_data_size ()
+
+    Get the length of current action's data field. More...
+
+3. void require_recipient (account_name name)
+
+    Add the specified account to set of accounts to be notified. More...
+
+4. void require_auth (account_name name)
+
+    Verify specified account exists in the set of provided auths. More...
+
+5. bool has_auth (account_name name)
+6. void require_auth2 (account_name name, permission_name permission)
+
+    Verify specified account exists in the set of provided auths. More...
+
+7. void send_inline (char *serialized_action, size_t size)
+8. void send_context_free_inline (char *serialized_action, size_t size)
+9. void require_write_lock (account_name name)
+
+    Verifies that name exists in the set of write locks held.
+
+10. void require_read_lock (accoun_name name)
+
+    Verifies that name exists in the set of read locks held.
+
+11. time publication_time ()
+
+    Get the publication time. More...
+
+12. account_name current_sender ()
+
+    Get the sender of the action. More...
+
+1. account_name current_receiver ()
+
+    Get the current receiver of the action. More...
+
+----
+
+## Detailed Description
+
+A EOS.IO action has the following abstract structure:
+
+    struct action {
+        scope_name scope;                   // The contract defining the primary code to execute for code/type
+        action_name name;                   // The action to be taken
+        permission_level[] authorization;   // The accounts and permission levels provided
+        byte data;                          // Opaque data processed by code 
+    }
+
+This API enables youu contract to inspect the fields on the current action and act accordingly.
+
+Example:
+
+    // Assume this asction is used for the following examples:
+    // {
+    //  "code": "eos",
+    //  "type": "transfer",
+    //  "authorization": [{"account": "inita", "permission": "active" }],
+    //  "data": {
+    //      "from": "inita",
+    //      "to": "initb",
+    //      "amount": 1000
+    //  }
+    // }
+
+    char buffer[128];
+    uint32_t total=read_action(buffer, 5);  // buffer contains the content of the action up to 5 bytes
+    print(total);                           // Output: 5
+
+    uint32_t msgzie=action_size();
+    print(msgsize);                         // Output: size of the above action's data field
+
+    require_recipient(N(initc));            // initc account will be notified for this action
+
+    require_auth(N(inita));                 // Do nothing since inita exists in the auth list
+    require_auth(N(initb));                 // Throws an exception
+
+    print(now());                           // Output: timestamp of last accepted block
+
+----
+
+# Chain API
+
+## Chain C API
+
+C API for querying internal chain state. More...
+
+Functions:
+
+1. uint32_t get_active_producers(account_name *producers, uint32_t datalen)
+
+    Return the set of active producers
+
+Example:
+
+    account_name producers[21];
+    uint32_t bytes_populated=get_active_producers(producers, sizeof(account_name)*21);
+
+----
+
+# Database API
+
+APIs that store and retreive data on the blockchain. EOS.IO organizes data according to the following broad structure: More...
+
+## Detailed Description
+
+* code theaccount name which has write permission
+    * scope an account where the data is stored
+        * table a name for the table that is being stored
+            * record a row in the table
+
+Every transaction specifies the set of valid scopes that may be read and/or written to. The code that is running determines what can be written to; therefore, wrie operations do not allow you to specify/configure the code.
+
+----
+
+# Math API
+
+Defines common math functions. More...
+
+## Modules
+
+## Math C API
+
+Defines basic mathematical operations for higher abstractions to use. More...
+
+Functions:
+
+1. void multeq_i128 (uint128_t *self, const uint128_t *other)
+     Multiply two 128 unsigned bit integers. Throws exception if pointers are invalid. More...
+
+1. void diveq_i128 (uint128_t *self, const uint128_t *other)
+     Divide two 128 unsigned bit integers and throws an exception in case of invalid pointers. More...
+
+1. uint64_t double_add (uint64_t a, uint64_t b)
+     Addition between two double. More...
+
+1. uint64_t double_mult (uint64_t a, uint64_t b)
+     Multiplication between two double. More...
+
+1. uint64_t double_div (uint64_t a, uint64_t b)
+     Division between two double. More...
+     
+     Example:
+     
+        uint64_t a = double_div( i64_to_double(10), i64_to_double(100) );
+        printd(a); // Output: 0.1
+    
+    > How to print 0.1 in the format of uint64_t
+
+1. uint32_t double_lt (uint64_t a, uint64_t b)
+     Less than comparison between two double. More...
+
+1. uint32_t double_eq (uint64_t a, uint64_t b)
+     Equality check between two double. More...
+
+1. uint32_t double_gt (uint64_t a, uint64_t b)
+     Greater than comparison between two double. More...
+
+1. uint64_t double_to_i64 (uint64_t a)
+     Convert double to 64 bit unsigned integer. More...
+
+1. uint64_t i64_to_double (uint64_t a)
+     Convert 64 bit unsigned integer to double (interpreted as 64 bit unsigned integer) More...
+
+----
+
+# Console API
+
+## Console C API
+
+1. void print (const char *cstr)
+
+    Prints string. More...
+1. void prints_l (const char *cstr, uint32_t len)
+
+    Prints string. More...
+1. void printi (int64_t value)
+
+    Prints value as a 64 bit unsigned integer. More...
+1. void printui (uint64_t value)
+2. void printi128 (const uint128_t *value)
+
+    Prints value as a 128 bit unsigned integer. More...
+1. void printdf (double value)
+
+    Prints value as double. More...
+1. void printff (float value)
+2. void printdi (int64_t value)
+3. void printn (uint64_t name)
+
+    Prints a 64 bit names as base32 encoded string. More...
+1. void printhex (const void *data, uint32_t datalen)
+
+----
+
+# System API
+
+Define API for interacting with system
+
+## Privileged API
+
+Defines an API for accessing configuration of the chain that can only be done by privileged accounts. More...
+
+## Privileged C API
+
+Define C Privileged API.
+
+1. void set_resource_limits (account_name account, uint64_t ram_bytes, uint64_t net_weight, uint64_t cpu_weight)
+1. void set_active_producers (char *producer_data, uint32_t producer_data_size)
+1. bool is_privileged (account_name account)
+1. void set_privileged (account_name account, bool is_priv)
+1. void set_blockchain_parameters_packed (char *data, uint32_t datalen)
+1. uint32_t get_blockchain_parameters_packed (char *data, uint32_t datalen)
+1. void activate_feature (int64_t f)
+
+## System C API
+
+Define API for interacting with system level intrinsics.
+
+1. void eosio_assert (uint32_t test, const char *cstr)
+
+    Aborts processing of this action and unwinds all pending changes.
+
+2. void eosio_exit (int32_t code)
+
+    This method will abort execution of wasm without falling the contract. This is used to bypass all cleanup/desctructors that would normally be called.
+
+4. time now()
+
+    Get time of the last accepted block.
+
+----
+
+# Token API
+
+Defines the ABI for interfacing with stadard-compatible token messages and database tables.
+
+Class:
+
+1. struct eosio::price<BaseToken, QuoteToken>
+
+    Defines a fixed precision price between two tokens.
+
+1. struct eosio::token<Code, Symbol, NumberType>
+
+----
+
+# transaction API
+
+Define API for sending transactions and inline messages.
+
+## Transaction C API
+
+Define API for sending transactions.
+
+Functions
+
+1. void send_deferred (const uint128_t &sender_id, account_name payer, const char *serialized_transaction, size_t size)
+1. void cancel_deferred (const uint128_t &sender_id)
+1. size_t read_transaction (char *buffer, size_t size)
+1. size_t transaction_size ()
+1. int tapos_block_num ()
+1. int tapos_block_prefix ()
+1. time expiration ()
+1. int get_action (uint32_t type, uint32_t index, char *buff, size_t size)
+1. int get_context_free_data (uint32_t index, char *buff, size_t size)
+1. void check_auth (const char *serialized_transaction, size_t size, const char *permissions, size_t psize)
+
+## Transaction C++ API
+
+Type-safe C++ wrappers for transaction C API.
+
+1. action eosio::get_action (uint32_t type, uint32_t index)
+2. void eosio::check_auth (const bytes &trx_packed, const vector<permission_level> &permissions)
+3. void eosio::check_auth (const char *serialized_transaction, size_t size, const vecotr<permission_level> &permissoins)
+4. void eosio::check_auth (const transaction &trx, const vector<permission_level> &permissions)
+
+## Detailed Description
+
+A EOS.IO transaction has the following abstract structure.
+
+    struct transaction {
+        Name scope[]; 
+        Name readScope[]; 
+        message messages[]; 
+    };
+
+This API enables your contract to construct and send transactions.
+
+Deferred transactions will not be processed until a future block. They can therefore have no effect on the success or failure of their parent transaction so long as they appear well formed. If any other condition causes the parent transaction to be marked as failing, then the deferred transaction will never be processed.
+
+Deffered transactions must adhere to the permissions  available to the parent transaction or, in the future, delegated to the contract account for future use.
+
+An inline message allows one contract to send another contract a message which is processed immediately after the current message's processing ends such that the success or failure of the parent transaction is dependent on the success of the message. If an inline message fails in processing then the whole tree of transactions and messages rooted in the block will marked as failing and none of effects on the database will persist.
+
+Because of this and the parallel nature of transaction application, inline messages may not affect any scope which is not listed in their parent transaction's scope. They also may not read any scope not listed in either their parent transaction's scope or readScope.
+
+Inline messages and Deferred transactions must adhere to the permissions available to the parent transaction or, in the future, delegated to the contract account for future use. 
+
+----
+
+# Builtin Types
+
+Specifies typedefs and aliases.
+
+## Modules
+
+## fixed size key sorted lexicographically
+
+## Variable Length Integer
+
+## Classes
+
+## struct public_key
+
+## struct signature
+
+## struct checksum256
+
+## struct checksum160
+
+## struct checksum512
+
+## struct fixed_string16
+
+## struct fixed_string32
+
+## struct account_permission
+
+## struct eosio:name
+
+    wraps a uint64_t to ensure it is only passed to mehods that expect a Name
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

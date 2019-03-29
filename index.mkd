@@ -6,57 +6,59 @@
 
 1. [[AJAX]]
 1. [[Android]]
-1. [[Assembly Language]]
-1. [[AWS]]
-1. [[Bash]]
-1. [[Beautiful Codes]]
-1. [[Best Practice]]
-1. [[Bing API]]
-1. [Check](Check)
-1. [[Cpp]]
-1. [[Comment Style]]
-1. [[Django]]
-1. [[Docker]]
-1. [Data Structure](Data Structure)
-1. [[Ecryptfs]]
-1. [[GCC]]
-1. [GNU C Library](GNU C Library)
-1. [[JUnit]]
-1. [ld](ld)
-1. [[LibGDX]]
-1. [[Lua]]
-1. [[truecrypt]]
-1. [[FiST]]
-1. [[Kconfig]]
-1. [[FUSE]]
-1. [[Photoshop]]
-1. [[Python]]
-1. [[Regex]]
-1. [[GDB]]
-1. [[BSE(The Bristol Stock Exchange)]]
-1. [MySQL](MySQL)
-1. [[Makefile]]
-1. [[Markdown]]
-1. [Maven](Maven)
-1. [[Mercurial]]
-1. [[Multi-precision multiplication]]
-1. [[MongoDB]]
-1. [[Node.js]]
-1. [[Nginx]]
-1. [[PHP]]
-1. [[PHP Sandbox]]
-1. [[PHP_SourceCode]]
-1. [[PHP_Ext]]
-1. [[PostgreSQL]]
-1. [[Socket]]
-1. [[Software Configuration Tool]]
-1. [SQL](SQL)
-3. [[STL]]
-1. [WAM](WAM)
-1. [[Web Shell]]
-1. [[Windows Batch Processing]]
-1. [[Web Shell]]
-1. [[Lua]]
+2. [Android Design](Android Design)
+3. [[Assembly Language]]
+4. [[AWS]]
+5. [[Bash]]
+6. [[Beautiful Codes]]
+7. [[Best Practice]]
+8. [[Bing API]]
+9. [Boost](Boost)
+10. [Check](Check)
+11. [[Cpp]]
+12. [[Comment Style]]
+13. [[Django]]
+14. [[Docker]]
+15. [Data Structure](Data Structure)
+16. [[Ecryptfs]]
+17. [[GCC]]
+18. [GNU C Library](GNU C Library)
+19. [[JUnit]]
+20. [ld](ld)
+21. [[LibGDX]]
+22. [[Lua]]
+23. [[truecrypt]]
+24. [[FiST]]
+25. [[Kconfig]]
+26. [[FUSE]]
+27. [[Photoshop]]
+28. [[Python]]
+29. [[Regex]]
+30. [[GDB]]
+31. [[BSE(The Bristol Stock Exchange)]]
+32. [MySQL](MySQL)
+33. [[Makefile]]
+34. [[Markdown]]
+35. [Maven](Maven)
+36. [[Mercurial]]
+37. [[Multi-precision multiplication]]
+38. [[MongoDB]]
+39. [[Node.js]]
+40. [[Nginx]]
+41. [[PHP]]
+42. [[PHP Sandbox]]
+43. [[PHP_SourceCode]]
+44. [[PHP_Ext]]
+45. [[PostgreSQL]]
+46. [[Socket]]
+47. [[Software Configuration Tool]]
+48. [SQL](SQL)
+49. [[STL]]
+50. [WAM](WAM)
+51. [[Web Shell]]
+52. [[Windows Batch Processing]]
+53. [[Web Shell]]
+54. [[Lua]]
 
 ##Theory
 
@@ -99,32 +101,40 @@
 3. [[密歇根州公开课_平面设计]]
 4. [[みんなの日本語]]
 5. [[HTTP权威指南]]
+6. [机器学习 - 机械工业出版社](机器学习 - 机械工业出版社)
 
 ##Articles
 
-<<<<<<< HEAD
 1. [[A SANDBOX-BASED APPROACH TO THE DEOBFUSCATION AND DISSECTION OF PHP-BASED MALWARE]]
-1. [[CVE-2015-4852_breenmachine]]
-1. [DID Spec-Implementers Draft 01](DID Spec-Implementers Draft 01)
-1. [How Sovrin works](How Sovrin works)
-1. [Linux内核的5个子系统](Linux内核的5个子系统)
-1. [Method For Generating Public and Private Key Pairs Without Using a Passpharase](Method For Generating Public and Private Key Pairs Without Using a Passpharase)
-1. [Practical Byzantine Fault Tolerance](Practical Byzantine Fault Tolerance)
-1. [Skip Lists: A Probabilistic Alternative to Balanced Tree](Skip Lists A Probabilistic Alternative to Balanced Tree)
-1. [[Webhsell威胁情报分析]]
-1. [[Webshell文件名]]
-1. [[Webshell路径]]
-1. [统一市场下撮合交易系统优化研究与性能模拟](统一市场下撮合交易系统优化研究与性能模拟)
-1. [Delegated Proof of Stake (DPOS) vs Proof of Work (POW)](Delegated Proof of Stake (DPOS) vs Proof of Work (POW))
-1. [基于区块链的去中心化交易关键技术研究及应用](基于区块链的去中心化交易关键技术研究及应用)
+2. [[CVE-2015-4852_breenmachine]]
+3. [DID Spec-Implementers Draft 01](DID Spec-Implementers Draft 01)
+4. [How Sovrin works](How Sovrin works)
+5. [Linux内核的5个子系统](Linux内核的5个子系统)
+6. [Method For Generating Public and Private Key Pairs Without Using a Passpharase](Method For Generating Public and Private Key Pairs Without Using a Passpharase)
+7. [Practical Byzantine Fault Tolerance](Practical Byzantine Fault Tolerance)
+8. [Skip Lists: A Probabilistic Alternative to Balanced Tree](Skip Lists A Probabilistic Alternative to Balanced Tree)
+9. [[Webhsell威胁情报分析]]
+10. [Pax算法小结](Pax算法小结)
+11. [[Webshell文件名]]
+12. [[Webshell路径]]
+13. [统一市场下撮合交易系统优化研究与性能模拟](统一市场下撮合交易系统优化研究与性能模拟)
+14. [Delegated Proof of Stake (DPOS) vs Proof of Work (POW)](Delegated Proof of Stake (DPOS) vs Proof of Work (POW))
+15. [基于区块链的去中心化交易关键技术研究及应用](基于区块链的去中心化交易关键技术研究及应用)
+16. [Hyper-heuristics: a survey of the state of the art](Hyper-heuristics: a survey of the state of the art)
+17. [On the Runtime Analysis of Generalised Selection Hyper-heuristics for Pseudo-Boolean Optimization](On the Runtime Analysis of Generalised Selection Hyper-heuristics for Pseudo-Boolean Optimization)
+18. [On the Time Complexity of Algorithm Selection Hyper-Heuristics for Multimodal Optimisation](On the Time Complexity of Algorithm Selection Hyper-Heuristics for Multimodal Optimisation)
 
 ##Research Details
 1. [Bitshares](Bitshares)
 2. [EOS](EOS)
 3. [侧链, 锚定](侧链, 锚定)
 4. [IPFS](IPFS)
+5. [Heuristics](Heuristics)
+6. [NLP](NLP)
+7. [Combinational Optimization](Combinational Optimization)
 
 ##Work
+
 1. [[日常]]
 1. [[问题]]
 1. [[补丁]]
@@ -141,8 +151,16 @@
 3. [天善智能 数据分析师之路](天善智能-数据分析师之路)
 4. [机器学习中的数据基础](机器学习中的数据基础)
 5. [徐小湛高数](徐小湛高数)
+6. [计算机组成原理](计算机组成原理)
+9. [Standford Compilers By Alex Aiken](Standford Compilers By Alex Aiken)
+10. [一致性算法(Paxos, Raft, ZAB) By 张阳](一致性算法(Paxos, Raft, ZAB) By 张阳)
+11. [Speech Processing](Speech Processing)
+12. [Machine Learning](Machine Learning)
+13. [Msc Dissertation Project](Msc Dissertation Project)
+14. [Discrete Optimization by The University of Melbourne](Discrete Optimization by The University of Melbourne)
 
 ##Tools
+
 1. [[Linux Commands]]
 1. [[eclipse]]
 1. [[vim]]
@@ -159,6 +177,7 @@
 1. [[Re-thinking security to detect active data breaches]]
 1. [[OpenSSH Information-leak vulnerability (CVE-2016-0777)]]
 1. [[10 social engineering exploits your users should be aware of]]
+1. [EOSID Dawn 3.0 Now Available](EOSID Dawn 3.0 Now Available)
 
 # Product
 
@@ -166,15 +185,29 @@
 1. [[Ossim]]
 1. [[vArmour]]
 1. [[青藤云安全]]
-10. [uPort Whitepaper](uPort Whitepaper)
-8. [PikcioChain](PikcioChain)
+1. [uPort Whitepaper](uPort Whitepaper)
+1. [PikcioChain](PikcioChain)
+1. [CYBEX](CYBEX)
+1. [blackbird](blackbird)
 
 # Sources
 
 1. [Tinyhttpd](Tinyhttpd)
 1. [Redis](Redis)
 1. [dpdk](dpdk)
+1. [bitcoin](bitcoin)
+
+#API
+
+1. [binance](binance)
+1. [huobi.pro](huobi.pro)
+2. [python binance](python-binance)
 
 # Exercise
 
 1. [English](English)
+
+# Background Research
+
+1. [知识图谱](知识图谱)
+2. 

@@ -1,0 +1,88 @@
+
+#Introduction
+
+The high level idea behid the field of hyper-heuristcs is to overcome this difficulty by evoving the search heuristc for the problem rather than choosing one in advance.
+
+The overall goal is to automate the design and the tuning of the algorithm for the optimisation problem, and hence achieve a more generally applicable systtem.
+
+Hyper-heuristics are usually classified into two categories:
+1. selection hyper-heuristics
+
+    select from a set of low-level heuristics to create new solutions for the problem
+2. generation hyper-heuristics
+
+    generate new heuristics from componenets of existing heuristics
+    
+The low-level heuristics can be further classified as either construction heuristics, or perturbation heuristics
+1. The former build a solution incremnetally
+2. The latter start with a complete solution and try to iteratively improve the current solution
+
+Alanazi and Lehre considered several common selection mechanisms:
+1. simple random
+2. permutation
+3. random gradient
+4. greedy
+
+The runtime analysis results show that the four selection methods have the same asymptotic runtime, while experimental trials indicate that the runtimes are practically equivalent.
+
+Recently, additive reinforcement learning selection was also shown to often have roughly equivalent performance to simple random selection, including for the same problem setting.
+
+In particular, the results indicate that selection mechanisms such as reinforcement learning and random gradient do not learn to exploit the more successful low-level heuristics and end up having the same performance as simple random selection.
+
+# Preliminaries
+
+1. Simple Random
+
+    selects a low-level heuristic independently with probability p_h in each iteration
+2. Permutation
+
+    generates a random ordering of low-level heuristics and returns them in that sequence when called by the hyper-heuristic
+3. Greedy
+
+    applieds all available low-level heuristics in parallel and returns the best found solution
+4. Random Gradient
+
+    randomly selects a low-level heuristic, and keeps using it as long as it obtains improvements
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

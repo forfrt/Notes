@@ -1,0 +1,28 @@
+
+
+
+
+NaturalLanguageACSProjectProposals : http://www.wiki.cl.cam.ac.uk/rowiki/NaturalLanguage/ACSProjectProposals
+
+# Reading Comprehension
+
+![CCCF专栏 | 朱晨光：机器阅读理解：如何让计算机读懂文章 ](http://www.zhuanzhi.ai/document/fd950a521dea8f2025b33424362b7b93)
+
+
+# Question Answering 
+
+[Two-Stage Synthesis Networks for Transfer Learning in Machine Comprehension](https://arxiv.org/abs/1706.09789)
+
+### 4.1.1 Answer Synthesis Module
+
+IN our answer synthesis module we train a simple IOB tagger to predict whether each word in the paragraph is part of an answer or not.
+
+### 4.1.2 Answer Synthesis Module
+
+
+
+
+
+
+
+

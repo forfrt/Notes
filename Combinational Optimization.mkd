@@ -1,0 +1,7 @@
+
+
+# 遗传算法
+1. [遗传算法解决路线规划问题（Vehicle Routing Problem based on GA）](https://blog.csdn.net/mnmlist/article/details/52675002)
+
+# 强化学习
+1. [什么是 Q-Learning](https://zhuanlan.zhihu.com/p/24808797)

@@ -1,0 +1,437 @@
+
+# Boost Multi-index Containers Library
+
+The Boost Multi-index Containers Library provides a class template named **multi_index_container** which *enables the construction of containers maintaining one or more indices with different sorting and access semantics*. Indices provide interfaces similar to those of STL containers, making using them familiar. The concept of multi-indexing over the same collection of elements is borrowed from relational database terminology and allows for the specification of complex data structures in the spirit of multiply indexed relational tables where simple sets and maps are not enough. A wide selection of indices is provided, modeled after analogous STL containers like std::set, std::list and std::unordered_set.
+
+Boost.MultiIndex features additional functionalities, like subobject searching, range querying, in-place updating of elements and calculation of ranks, which make it a convenient replacement for std::set and set::multiset even when no multi-indexing capabilities are needed.
+
+The versatile nature of Boost.MultiIndex allows for the specification of a wide spectrum of different data structures. The following are possible examples of use developed in the documentation: 
+
+----
+
+# Boost.MultiIndex Tutorial
+
+## Rationale
+
+STL containers are designed around the concept that each container controls its own collection of elements, giving access to them in a manner specified by the container's type: so, an std::set maintains the elements ordered by a specified sorting criterion, std::list allows for free positioning of elements along a linear sequence, and so on.
+
+Sometimes, the necessity arises of having different access interfaces to the same underlying collection: for instance, some data might need to be sorted according to more than one comparison predicate, or a bidirectional list might benefit from a supplemental logarithmic lookup interface. In these situations, programmers typically resort to manual compositions of different containers, a solution that generally involves a fair amount of code devoted to preserve the synchronization of the different parts of the composition. *Boost.MultiIndex allows for the specification of multi_index_containers comprised of one or more indices with different interfaces to the same collection of elements*. The resulting constructs are conceptually cleaner than manual compositions, and often perform much better. *An important design decision has been taken that the indices of a given multi_index_container instantiation be specified at compile time: this gives ample room for static type checking and code optimization*.
+
+Boost.MultiIndex *takes inspiration from basic concepts of indexing arising in the theory of relational databases*, though it is not intended to provide a full-fledged relational database framework. multi_index_container integrates seamlessly into the STL container/algorithm design, and features some extra capabilities regarding lookup operations and element updating which are useful extensions even for single-indexed containers. 
+
+[multi_index_cont_example.png](./img/Boost/multi_index_cont_example.png)
+
+The figure above depicts a multi_index_container composed of three indices: the first two present a set-like interface to the elements sorted by shape and id, respectively, while the latter index provides the functionality of a bidirectional list in the spirit of std::list. These indices act as "views" to the internal collection of elements, but they do not only provide read access to the set: insertion/deletion methods are also implemented much as those of std::sets or std::lists. Insertion of an element through one given index will only succeed if the uniqueness constraints of all indices are met. 
+
+## Namespace
+
+All the public types of Boost.MultiIndex reside in namespace ::boost::multi_index. Additionaly, the main class template multi_index_container and global functions get and project are lifted to namespace ::boost by means of using declarations. For brevity of exposition, the fragments of code in the documentation are written as if the following declarations were in effect: 
+
+    using namespace ::boost;
+    using namespace ::boost::multi_index;
+
+----
+
+# Basics
+
+## Introduction
+
+We introduce the main concepts of Boost.MultiIndex through the study of two typical use cases.
+
+## Multiple sorts on a single set
+
+STL sets and multisets are varying-length containers where elements are efficiently sorted according to a given comparison predicate. *These container classes fall short of functionality when the programmer wishes to efficiently sort and look up the elements following a different sorting criterion*. Consider for instance: 
+
+    struct employee
+    {
+      int         id;
+      std::string name;
+    
+      employee(int id,const std::string& name):id(id),name(name){}
+    
+      bool operator<(const employee& e)const{return id<e.id;}
+    };
+
+The fact that IDs are unique to each employee is reflected by the way operator is defined, so a natural data structure for storing of employees is just a std::set<exmployee>. Now, if one wishes to print out a listing of all employees in alphabetical order, available solutions may have disadvantages either in terms of storage space, complexity of ease of maintenance:
+
+- Copy the employee set into a vector or similar and sort this by a comparison functor dependent upon exployee::name.
+- Keep a seccondary data structure of pointers to the elements of the set, appropriately sorted by name.
+
+Of these, probably the second solution will be the one adopted by most programmers concerned about efficiency, but it imposes the annoying burden of keeping the two structures in sync. If the code is additionally required to be exception-safe, this construct easily becomes unmaintainable. 
+
+Boost.MultiIndex features **ordered indices**, which sort the elements according to a particular key, and are designed to help programmers in need of sequences of elements for which more than one sorting criteria are relevant. *We do so by defining a multi_index_container instantiation composed of several ordered indices: each index, viewed in isolation, behaves much as an ordered std::set (or std::multiset), whilst the overall integrity of the entire data structure is preserved. Our example problem thus can be solved with Boost.MultiIndex as follows: 
+
+    #include <boost/multi_index_container.hpp>
+    #include <boost/multi_index/ordered_index.hpp>
+    #include <boost/multi_index/identity.hpp>
+    #include <boost/multi_index/member.hpp>
+    
+    // define a multiply indexed set with indices by id and name
+    typedef multi_index_container<
+      employee,
+      indexed_by<
+        // sort by employee::operator<
+        ordered_unique<identity<employee> >,
+        
+        // sort by less<string> on name
+        ordered_non_unique<member<employee,std::string,&employee::name> >
+      > 
+    > employee_set;
+    
+    void print_out_by_name(const employee_set& es)
+    {
+      // get a view to index #1 (name)
+      const employee_set::nth_index<1>::type& name_index=es.get<1>();
+      // use name_index as a regular std::set
+      std::copy(
+        name_index.begin(),name_index.end(),
+        std::ostream_iterator<employee>(std::cout));
+    }
+
+Instead of a single comparison predicate type, as it happens for STL associative containers, multi_index_container is passed *a list of index specifications* (indexed_by), each one inducing the corresponding index. Indices are accessed via get<N>() where N ranges between 0 and the number of comparison predicates minus one. The functionaliity of index #0 can be accessed directly from a multi_index_container object without using get<0>(): for instance, es.begin() is equivalent to es.get<0>().gegin()
+
+Note that *get returns a reference to the index, and not an index object*. Indices cannot be constructed as separate objects from the container they belong to, so the following
+
+    // Wrong: we forgot the & after employee_set::nth_index<1>::type
+    const employee_set::nth_index<1>::type_name_index=es.get<1>();
+
+does not compile, since it is trying to construct the index object name_index. This is a common source of errors in user code.
+
+----
+
+## A bidirectional list with fast lookup
+
+This study case allows us to introduce so-called *sequenced indices*, and how they interact with ordered indices to construct powerful containers. Suppose we have a text parsed into words and stored in a list like this: 
+
+    typedef std::list<std::string> text_container;
+
+    std::string text=
+      "Alice was beginning to get very tired of sitting by her sister on the "
+      "bank, and of having nothing to do: once or twice she had peeped into the "
+      "book her sister was reading, but it had no pictures or conversations in "
+      "it, 'and what is the use of a book,' thought Alice 'without pictures or "
+      "conversation?'";
+    
+    // feed the text into the list
+    text_container tc;
+    boost::tokenizer<boost::char_separator<char> > tok
+      (text,boost::char_separator<char>(" \t\n.,;:!?'\"-"));
+    std::copy(tok.begin(),tok.end(),std::back_inserter(tc));
+
+If we want to count the occurrences of a given word into the text we will resort to std::count:
+
+    std::size_t occurrences(const std::string& word)
+    {
+      return std::count(tc.begin(),tc.end(),word);
+    }
+But this implementation of occurrences performs in linear time, which could be unacceptable for large quantities of text. Similarly, other operations like deletion of selected words are just too costly to carry out on a std::list:
+
+    void delete_word(const std::string& word)
+    {
+      tc.remove(word); // scans the entire list looking for word
+    }
+
+When performance is a concern, we will *need an additional data structure that indexes the elements in tc*, presumably in alphabetical order. Boost.MultiIndex does precisely this through the combination of sequenced and ordered indices:
+
+    #include <boost/multi_index_container.hpp>
+    #include <boost/multi_index/sequenced_index.hpp>
+    #include <boost/multi_index/ordered_index.hpp>
+    #include <boost/multi_index/identity.hpp>
+
+    // define a multi_index_container with a list-like index and an ordered index
+    typedef multi_index_container<
+      std::string,
+      indexed_by<
+        sequenced<>, // list-like index
+        ordered_non_unique<identity<std::string> > // words by alphabetical order
+      >
+    > text_container;
+
+    std::string text=...
+
+    // feed the text into the list
+    text_container tc;
+    boost::tokenizer<boost::char_separator<char> > tok
+      (text,boost::char_separator<char>(" \t\n.,;:!?'\"-"));
+    std::copy(tok.begin(),tok.end(),std::back_inserter(tc));
+
+So far, the substitution of multi_index_container for std::list does not show any advantage. The code for inserting the text into the container does not change as sequenced indices provide an interface similar to that of std::list (no explicit access to this index through get<0>() is needed as multi_index_container inherits the functionality of index #0.) But the specification of an additional ordered index allows us to implement occurrences and delete_word in a much more efficient manner: 
+
+    std::size_t occurrences(const std::string& word)
+    {
+      // get a view to index #1
+      text_container::nth_index<1>::type& sorted_index=tc.get<1>();
+
+      // use sorted_index as a regular std::set
+      return sorted_index.count(word);
+    }
+
+    void delete_word(const std::string& word)
+    {
+      // get a view to index #1
+      text_container::nth_index<1>::type& sorted_index=tc.get<1>();
+
+      // use sorted_index as a regular std::set
+      sorted_index.erase(word);
+    }
+
+Now, occurrences and delete_word have logarithmic complexity. The programmer can use index #0 for accessing the text as with std::list, and use index #1 when logarithmic lookup is needed. 
+
+----
+
+## Index Specification
+
+The indices of a multi_index_container instantiation are specified by means of the indexed_by construct. For instance, the instantiation
+
+    typedef multi_index_container<
+      employee,
+      indexed_by<
+        ordered_unique<identity<employee> >,
+        ordered_non_unique<member<employee,std::string,&employee::name> >
+      > 
+    > employee_set;
+
+is comprised of a **unique ordered index** and a **non-unique ordered index**, while in
+
+    typedef multi_index_container<
+      std::string,
+      indexed_by<
+        sequenced<>,
+        ordered_non_unique<identity<std::string> >
+      >
+    > text_container;
+
+we specify two indices, the first of **sequenced type**, the second a **non-unique ordered index**. In general, we can specify an arbitrary number of indices: *each of the arguments of indexed_by is called an index specifier*. Depending on the type of index being specified, the corresponding specifier will need additional information: for instance, the specifiers ordered_unique and ordered_non_unique are provided with a **key extractor** and an **optional comparison predicate** which jointly indicate how the sorting of elements will be performed.
+
+A multi_index_container instantiation can be declared with supplying the indexed_by part: in this case, default index values are taken so that the resulting type is equivalent to a regular std::set. Concretely, the instantiation:
+
+    multi_index_container<(element)>
+
+is equivalent to 
+
+    multi_index_container<
+        (element),
+        indexed_by<
+            ordered_unique<identity<(element)> >
+        >
+    >
+
+## Tagging
+
+In order to retrieve (a reference to) an index of a given multi_index_container, the programmer must provide its order number, which is cumbersome and not very self-descriptive. *Optionally, indices can be assigned tags (C++ types) that act as more conveninet mnemonics*. If provided, tags must be passed as the first parameter of the corresponding index specifier. The following is a reviesd version of employee_set with inclusion of tags:
+
+    // tags
+    struct name{};
+    
+    typedef multi_index_container<
+        employee,
+        indexed_by<
+            ordered_unique<identity<employee> >,
+            ordered_non_unique<tag<name>, member<employee, std::string, &employee::name>>
+        >
+    > employee_set;
+
+Tags have to be passed inside the tag construct. Any type can be used as a tag for an index, although in general one will choose names that are descriptive of the index they are associated with. The tagging mechanism allows us to write expressions like
+
+    typedef employee_set::index<name>::type employee_set_by_name;
+    employee_set_by_name::iterator it=es.get<name>().begin();
+
+If no tag is provided for an index (as is the case for index #0 of the previous example), access to that index can only be performed by number. Note the existence of two different `typedef nth_index` and `index` for referring to an index by number and by tag, respectively; for instance,
+
+- employee_set::nth_index<1>::type is the type of index #1,
+- employee_set::index<name>::type is the type of the index tagged with name (the same index #1 in this case.)
+
+`get()`, on the other hand, is overloaded to serve both styles of access:
+
+    employee_set::index<name>::type& name_index=es.get<name>();
+    employee_set::nth_index<1>::type& name_index2=es.get<1>();
+
+Additionally, the tag class template accepts several tags for one index, that we can use interchangeably: for instance, the specification of index #1 in the previous example can be rewritten to hold two different tags `name` and `by_name`:
+
+    // tags
+    struct name{};
+    struct by_name{};
+
+    typedef multi_index_container<
+    ...
+    ordered_non_unique<
+        tag<name, by_name>,
+        member<employee, std::string, &employee::name>
+    >
+    ...
+    > employee_set;
+
+----
+
+## Iterator access
+
+Each index of a `multi_index_container` uses its own iterator types, which are different from those of another indices. As is the rule with STL containers, these iterators are defined as nested types of the index:
+
+    employee_set::nth_index<1>::type::iterator it=
+        es.get<1>().find("Judy Smith");
+
+This kind of expressions can be rendered more readable by means of user-defined `typedef`s:
+
+    typedef employee_set::nth_index<1>::type employee_set_by_name;
+    employee_set_by_name::iterator it=es.get<1>().find("Judy Smith");
+
+**The iterators provided by every index are constant**, that is, the elements they point to cannot be mutated directly. This follows the iterface of `std::set` for ordered indices but might come as a surprise for other types such as sequenced indices, which are modeled after `std::list`, where this limitation does not happen. This seemingly odd behavior is imposed by the way `multi_index_containers` work; if elements were allowed to be mutated indiscriminately, we could introduce inconsistencies in the ordered indices of the `multi_index_container` *without the container being notified about it*. Element modification is properly done by means of update operations on any index.
+
+----
+
+## Index types
+
+Currently, Boost.MultiIndex provides th e following index types:
+
+- Ordered indices sort the elements like `std::set`s do and provide a similar interface. There are unique and non-unique variants: the former do not allow for duplicates, while the latter permit them (like `std::multiset`.)
+- Ranked indices are a variation of ordered indices providing extra capabilities for querying and accessing elements based on their rank (the numerical position they occupy in the index).
+- Sequenced indices are modeled after the semantics and interface of `std::list`: they arrange the elements as if in a bidirectional list.
+- Hashed indices provide fast access to the elements through hashing techniques, in a similar way as non-standard `hash_set`s provided by some vendors. Recently, *unordered associative containers* have been proposed as part of an extension of the C++ standard library known in the standardization commitee as TR1. Hashed indices closely model this proposal.
+- Random access indices provide an interface similar to that of sequenced indices, and additionally feature random access iterators and positional access to the elements.
+
+The examples in the introduction exercise ordered and sequenced indices, which are the most commonly used; the other kinds of indices are presented in the index_types section of the tutorial.
+
+----
+
+## Ordered indices
+
+Ordered indices sort the elements in a `multi_index_containter` according to a specified key and an associated comparison predicate. These indices can be viewed as analogues of the standard container `std::set`, and in fact they do replicate its interface, albeit with some minor differences dictated by the general constraints of Boost.MultiIndex.
+
+### Unique and non-unique variants
+
+Ordered indices are classified into **unique**, which prohibit two elements to have the same key value, and *non-unique* indices, which allow for duplicates. Consider again the definition
+
+    typedef multi_index_container<
+      employee,
+      indexed_by<
+        ordered_unique<identity<employee> >,
+        ordered_non_unique<member<employee,std::string,&employee::name> >
+      > 
+    > employee_set;
+
+In this instantiation of multi_index_container, the first index is to be treated as unique (since IDs are exclusive to each employee) and thus is declared using **ordered_unique**, whereas the second index is non-unique (as the possibility exists that say two John Smiths are hired in the same company), which is specified by the use of **ordered_non_unique**. 
+
+The classification of ordered indices in unique and non-unique has an impact on which elements are allowed to be inserted into a given multi_index_container; briefly put, unique ordered indices mimic the behavior of std::sets while non-unique ordered indices are similar to std::multisets. For instance, an employee_set can hold the objects employee(0,"George Brown") and employee(1,"George Brown"), but will not accept the insertion of an employee object whose ID coincides with that of some previously inserted employee. 
+
+More than one unique index can be specified. For instance, if we augment employee to include an additional member for the Social Security number, which is reasonably treated as unique, the following captures this design: 
+
+    struct employee
+    {
+      int         id;
+      std::string name;
+      int         ssnumber;
+    
+      employee(int id,const std::string& name,int ssnumber):
+        id(id),name(name),ssnumber(ssnumber){}
+    
+      bool operator<(const employee& e)const{return id<e.id;}
+    };
+    
+    typedef multi_index_container<
+      employee,
+      indexed_by<
+        // sort by employee::operator<
+        ordered_unique<identity<employee> >,
+        
+        // sort by less<string> on name
+        ordered_non_unique<member<employee,std::string,&employee::name> >,
+        
+        // sort by less<int> on ssnumber
+        ordered_unique<member<employee,int,&employee::ssnumber> >
+      >
+    > employee_set;
+
+----
+
+### Specification
+
+Ordered index specifiers in indexed_by must ocnform to one of the following syntaxes:
+
+    (ordered_unique | ordered_non_unique)
+      <[(tag)[,(key extractor)[,(comparison predicate)]]]>
+    
+    (ordered_unique | ordered_non_unique)
+      <[(key extractor)[,(comparison predicate)]]>
+
+The first optional argument is used if tags are associated with the index. We now proceed to briefly discuss the remaining arguments of an ordered index specifier.
+
+----
+
+### Key extraction
+
+The first template parameter (or the second, if tags are supplied) in the specification of an ordered index provideds a **key extraction predicate**. *This predicate takes a whole element (in our example, a references to an employee object) and returns the piece of information by which the sorting is performed*. In most cases, one of the following two situations arises:
+
+- The whole element serves as the key, as is the case of the first index in `employee_set`. The predefined `identity` predicate can be used here as a key extractor; `identity` returns as the key the same object passed as argument.- The comparison is  performed on a particular data member of the element; *this closely follows the specification of indices on a column of a table in relational databases*. Boost.MultiIndex provides `member`, which returns as the key as member of the element specified by a given pointer.
+
+As an example, consider again the definition of employee_set. The definition of the first index:
+
+    ordered_unique<identity<employee>>
+
+specifies by means of `identity` that `element` objects themselves serve as key for this index. On the other hand, in the second index:
+
+> But how could MultiIndex container know that identity refers to the `id` field of struct employee
+
+    ordered_non_unique<member<employee, std::string, &employee::name>>
+
+we use `member` to extract the `name` part of the `employee` object. The key type of this index is then `std::string`.
+
+Apart from `identity` and `member`, Boost.MultiIndex provides several other predefined key extractors and powerful ways to combine them. Key extractors can also be defined by the user. Consult the key extraction section of the tutorial for a more detailed exposition of this topic. 
+
+----
+
+### Comparison predicates
+
+The last part of the specification of an ordered index is the **associated comparison predicate**, which must order the keys in a less-than fashion. These comparison predicates are not different from those used by STL containers like std::set. By default (i.e. if no comparison predicate is provided), an index with keys of type `key_type` sorts the elements by `std::less<key_type>`. Should other comparison criteria be needed, they can be specified as an additional parameter in the index declaration: 
+
+    // define a multiply indexed set with indices by id and by name
+    // in reverse alphabetical order
+    typedef multi_index_container<
+      employee,
+      indexed_by<
+        ordered_unique<identity<employee> >, // as usual
+        ordered_non_unique<
+          member<employee,std::string,&employee::name>,
+          std::greater<std::string>  // default would be std::less<std::string>
+        >
+      >
+    > employee_set;
+
+----
+
+### Special lookup operations
+
+
+
+****
+
+# Boost.Hana
+
+:x
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

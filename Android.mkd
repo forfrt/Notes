@@ -92,23 +92,126 @@ Eclipse选择AVD时会同时考虑程序使用的Android版本和minSdkVersion�
 #Intent
 调用 Android 专有类 Intent 进行架构屏幕之间的切换。Intent 是描述应用想要做什么。Intent 数据结构两个最重要的部分是**动作**和**动作对应的数据**  
 
-##InterFilter
-相对于 intent 是一个有效的做某事的请求，一个 intentfilter 则用于描述一个 activity （或者 IntentReceiver ）能够操作哪些 intent  
+1. 显式调用Intent
+2. 隐式调用Intent
 
-##IntentReceiver:
-虽然 IntentReceiver 在感兴趣的事件发生时，会使用 NotificationManager通知用户，但它并不能生成一个 UI。IntentReceiver 在 AndroidManifest.xml 中注册，但也可以在代码中使用Context.registerReceiver()进行注册  
+    intent-filter
+4. 通过隐式调用其他程序
 
-#Service
-一个 Service 是一段长生命周期的，没有用户界面的程序  
+    1. `android:scheme`
+    2. `intent.setData`
+6. 向其他Activity传递数据
+
+    `putExtra`, `getStringExtra`
+1. 返回数据给上一个Activity
+
+    `startActivityForResult`, `putExtra`, `setResult`, `onActivityResult`, `onBackPressed`
+
+## 活动的生命周期
+
+活动状态
+1. 运行状态
+2. 暂停状态
+3. 停止状态
+4. 销毁状态
+
+1. onCreate
+2. onStart
+3. onResume
+4. onPause
+5. onStop
+6. onDestroy
+7. onRestart
+
+活动的生存期
+1. 完整生存期: onCreate->onDestroy
+1. 可见生存期: onStart->onStop
+1. 前台生存期: onResume->onPause
+
+## 活动的启动模式
+
+`android:launchMode`
+1. standard
+2. singleTop
+
+## Activity 最佳实践
+
+1. 知晓当前是在哪一个活动
+    
+    创建一个基类Activity, onCreate的时候`Log.d("BaseActivity", getClass().getSimpleName());`
+2. 随时随地退出程序
+
+    建立一个集合类(静态变量, 静态方法), 每个Activity创建时自动添加进集合, 销毁时从集合中删除
+    需要退出时遍历集合中所有Activity, 全部`finish`, 并且`killProcess`
+
+3. 启动Activity的最佳写法
+
+    把启动Activity需要的参数封装成一个`actionStart`静态方法放在Activity中, 一目了然
 
 
-#Fragment
-Fragment类让程序界面分割成多个区域。这种Fragment程序接口具有以下特性：  
+****
 
-1. 程序的运行界面可以由多个Fragment组成
-1. 每一个Fragment都有各自独立的运行状态，并且接受各自的处理事件
-1. 在程序运行的过程中，Fragment可以动态加入和移除。
+# UI
 
+## 控件
 
+### TextView
+
+### Button
+
+### ImageView
+
+1. android:src
+2. imageView.setImageSource
+
+### ProgressBar
+
+1. android:visibility
+2. progressBar.setVisibility
+3. style="?android:attr/progressBarStyleHorizontal", android:max=100
+4. progressBar.setProgress()
+
+### AlertDialog
+
+1. `new AlertDialog.Builder`
+2. `dialog.setPositiveButton`, `dialog.setNegativeButton`
+
+### ProgressDialog
+
+1. `new ProgressDialog`
+
+## Layout
+
+### LinearLayout
+
+1. `android:orientation`, `android:layout_weight`
+
+### RelativeLayout
+
+1. `android:layout_alignParentTop`, `android:layout_alignParentLeft`, `android:layout_alignParentRight`, `android:layout_alignParentBottom`, `android:layout_centerInParent`
+1. `android:layout_toRightOf`, `android:layout_toLeftOf`, `android:layout_above`, `android:layout_below`
+
+### FrameLayout
+
+1. `android:layout_gravity`
+
+### PercentageFrameLayout & PercentageRelativeLayout
+
+1. `compile 'com.android.support.percent:24.2.1'`
+2. `app:layout_widthPercent`, `app:layout_heightPercent`
+
+### <include layout="@layout/title" />
+
+### Create Custom Widget
+
+1. LayoutInflater.from(context).inflate(R.layout.title, this)
+2. <com.example.uiscustomviews.TitleLayout...>
+
+### ListView
+
+1. `ArrayAdapter<String> adpter=new ArrayAdpater<String>(MainActivity.this, android.R.layout.simple_list_item_1, data)`, `listView.setAdapter(adpter)`
+2. `public class FruitAdapter extends ArrayAdatper<Fruit>`, override the `getView` method, **false** in `LayoutInflater.from(getContext()).inflate(resourceId, parent, false)`
+3. Reuse `convertView` in override `getView` method
+4. `view.setTag(viewHolder)`, `view.getTag()`
 
 
