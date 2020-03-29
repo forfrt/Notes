@@ -8,85 +8,42 @@
 1. [[Android]]
 2. [Android Design](Android Design)
 3. [[Assembly Language]]
-4. [[AWS]]
 5. [[Bash]]
 6. [[Beautiful Codes]]
-7. [[Best Practice]]
-8. [[Bing API]]
-9. [Boost](Boost)
-10. [Check](Check)
 11. [[Cpp]]
 12. [[Comment Style]]
-13. [[Django]]
 14. [[Docker]]
 15. [Data Structure](Data Structure)
 16. [[Ecryptfs]]
 17. [[GCC]]
 18. [GNU C Library](GNU C Library)
 19. [[JUnit]]
-20. [ld](ld)
 21. [[LibGDX]]
-22. [[Lua]]
 23. [[truecrypt]]
 24. [[FiST]]
-25. [[Kconfig]]
 26. [[FUSE]]
-27. [[Photoshop]]
-28. [[Python]]
 29. [[Regex]]
 30. [[GDB]]
-31. [[BSE(The Bristol Stock Exchange)]]
-32. [MySQL](MySQL)
 33. [[Makefile]]
 34. [[Markdown]]
-35. [Maven](Maven)
-36. [[Mercurial]]
 37. [[Multi-precision multiplication]]
-38. [[MongoDB]]
-39. [[Node.js]]
-40. [[Nginx]]
-41. [[PHP]]
-42. [[PHP Sandbox]]
-43. [[PHP_SourceCode]]
-44. [[PHP_Ext]]
 45. [[PostgreSQL]]
-46. [[Socket]]
 47. [[Software Configuration Tool]]
-48. [SQL](SQL)
-49. [[STL]]
-50. [WAM](WAM)
-51. [[Web Shell]]
-52. [[Windows Batch Processing]]
-53. [[Web Shell]]
-54. [[Lua]]
+48. [Swagger](Swagger)
+49. [[Web Shell]]
 
 ##Theory
 
-1. [3gpp](3gpp)
-1. [[Advanced Computer Architecture]]
-1. [[Algorithmic and Economic Aspects of the Internet]]
-1. [[Artificial Intelligence]]
 1. [[BigTable]]
-1. [[Cloud Computing]]
-1. [[Coding]]
 1. [[Computer Network]]
 1. [[Design Pattern]]
 1. [[English]]
-1. [[File Filter]]
-1. [[GFS]]
-1. [[Git]]
-1. [[GRE]]
-1. [[Hack]]
 1. [[High Profermance Computing]]
-1. [[LaTeX]]
 1. [[Linux]]
 1. [[Linux Shell]]
 1. [[Japanese]]
 2. [json ld](json-ld)
-3. [[Microservice]]
 4. [[Modern Cryptography]]
-5. [[MindMapping]]
-1. [[SLAM]]
 6. [[System Security]]
 7. [UMA](UMA)
 8. [[Watermaking]]
@@ -101,7 +58,8 @@
 3. [[密歇根州公开课_平面设计]]
 4. [[みんなの日本語]]
 5. [[HTTP权威指南]]
-6. [机器学习 - 机械工业出版社](机器学习 - 机械工业出版社)
+6. [Machine Learning_Stanford](Machine Learing_Stanford)
+8. [Machine Learning](Machine Learning)
 
 ##Articles
 
@@ -120,9 +78,6 @@
 13. [统一市场下撮合交易系统优化研究与性能模拟](统一市场下撮合交易系统优化研究与性能模拟)
 14. [Delegated Proof of Stake (DPOS) vs Proof of Work (POW)](Delegated Proof of Stake (DPOS) vs Proof of Work (POW))
 15. [基于区块链的去中心化交易关键技术研究及应用](基于区块链的去中心化交易关键技术研究及应用)
-16. [Hyper-heuristics: a survey of the state of the art](Hyper-heuristics: a survey of the state of the art)
-17. [On the Runtime Analysis of Generalised Selection Hyper-heuristics for Pseudo-Boolean Optimization](On the Runtime Analysis of Generalised Selection Hyper-heuristics for Pseudo-Boolean Optimization)
-18. [On the Time Complexity of Algorithm Selection Hyper-Heuristics for Multimodal Optimisation](On the Time Complexity of Algorithm Selection Hyper-Heuristics for Multimodal Optimisation)
 
 ##Research Details
 1. [Bitshares](Bitshares)
@@ -135,13 +90,8 @@
 
 ##Work
 
-1. [[日常]]
-1. [[问题]]
-1. [[补丁]]
 1. [[password]]
 1. [investment](investment)
-1. [[Webshell文件名]]
-1. [[Webshell路径]]
 
 ##Course
 
@@ -154,8 +104,6 @@
 6. [计算机组成原理](计算机组成原理)
 9. [Standford Compilers By Alex Aiken](Standford Compilers By Alex Aiken)
 10. [一致性算法(Paxos, Raft, ZAB) By 张阳](一致性算法(Paxos, Raft, ZAB) By 张阳)
-11. [Speech Processing](Speech Processing)
-12. [Machine Learning](Machine Learning)
 13. [Msc Dissertation Project](Msc Dissertation Project)
 14. [Discrete Optimization by The University of Melbourne](Discrete Optimization by The University of Melbourne)
 
@@ -202,12 +150,3 @@
 1. [binance](binance)
 1. [huobi.pro](huobi.pro)
 2. [python binance](python-binance)
-
-# Exercise
-
-1. [English](English)
-
-# Background Research
-
-1. [知识图谱](知识图谱)
-2. 

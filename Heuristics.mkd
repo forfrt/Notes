@@ -1,3 +1,31 @@
+
+
+# Background
+
+[Hyper-heuristic Bibliography](https://mustafamisir.github.io/hh.html)
+
+[Heuristic Design and Optimization](http://www.mit.edu/~moshref/Heuristics.html)
+
+[Heuristic Algorithms for Combinatorial Optimization Problems ](https://www.ida.liu.se/~zebpe83/heuristic/)
+
+[Hyper-heuristics: a survey of the state of the art](https://link.springer.com/article/10.1057/jors.2013.71#Sec35)
+
+[智能论文笔记](http://aixpaper.com/search?q=Pietro+Oliveto)
+
+----
+
+#Evolutionary Algorithm
+
+[On the Runtime of Randomized Local Search and Simple Evolutionary Algorithms for Dynamic Makespan Scheduling](https://www.ijcai.org/Proceedings/15/Papers/526.pdf)
+
+----
+
+#Meta-Heuristic
+
+[Metaheuristics in Combinatorial Optimization: Overview and Conceptual Comparison](https://www.researchgate.net/profile/Christian_Blum/publication/221900771_Metaheuristics_in_Combinatorial_Optimization_Overview_and_Conceptual_Comparison/links/02bfe510587dd1ca65000000.pdf)
+
+----
+
 # How can one define low level heuristics in the sense of hyper heuristics? #
 
 Hyperheuristics could be regarded as high-level heuristics to select or generate low-level heuristics. The high-level heuristics may be metaheuristics such as tabu search and evolutionary algorithms, and the low-level heuristics may be some simple rules for selecting solution components or neighborhood functions for modifying solutions.
@@ -8,5 +36,28 @@ http://www.graham-kendall.com/publications/index.php?type=hyper-heuristic
 Hope my information is useful to you.
 
 ----
+
+# Dissertation
+
+Pietro Oliveto Instructor Manager
+Evaluating the performance of hyper-heuristics
+Collapse
+
+Many successful applications of randomised search heuristics (such as evolutionary algorithms) to real-world optimisation problems have been reported. Despite these successes, it is still difficult to decide which particular search heuristic is a good choice for the problem at hand, and what parameter settings should be used.
+
+The high level idea behind the field of hyper-heuristics is to overcome this difficulty by evolving the search heuristic for the problem rather than choosing one in advance. The overall goal is to automate the design and the tuning of the algorithm for the optimisation problem, and hence achieve a more generally applicable system.
+
+Many hyper-heuristics decide which search operators to use according to how well they perform during the optimisation process. Hence, learning which operators are most effective for the problem at hand is considered crucial for the success of hyper-heuristics.
+
+The aim of this project is to analyse the performance of widely used hyper-heuristics, for which several successes have been reported, against some recently proposed new hyper-heuristics.
+
+References:
+
+Edmund K Burke, Michel Gendreau, Matthew Hyde, Graham Kendall, Gabriela Ochoa, Ender Özcan, and Rong Qu. 2013. Hyper-heuristics: A survey of the state of the art. Journal of the Operational Research Society 64, 12 (2013), 1695–1724.
+
+A. Lissovoi, P. S. Oliveto, J.A. Warwicker. On the runtime analysis of generalised selection hyper-heuristics for pseudo-boolean optimisation.
+http://staffwww.dcs.shef.ac.uk/people/P.Oliveto/images/pap462s3-file1.pdf
+
+---
 
 

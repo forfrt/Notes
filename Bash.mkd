@@ -1,3 +1,30 @@
+[Advanced Bash-Scripting Guide](http://tldp.org/LDP/abs/html/)
+
+# Introduction
+
+The shell is a command interpreter. More than just *the insulating layer between the operating system kernel and the user*, it's also a fairly powerful programming language. A shell program, called a script, is an easy-to-use tool for building applications by "gluing together" system calls, tools, utilities, and compiled binaries. Virtually the entire repertoire of UNIX commands, utilities, and tools is available for invocation by a shell script. If that were not enough, internal shell commands, such as testing and loop constructs, lend additional power and flexibility to scripts. Shell scripts are especially well suited for administrative system tasks and other routine repetitive tasks not requiring the bells and whistles of a full-blown tightly structured programming language.
+
+
+## Shell Programming!
+
+A working knowledge of shell scripting is essential to anyone wishing *to become reasonably proficient at system administration*, even if they do not anticipate ever having to actually write a script. Consider that as a Linux machine boots up, it executes the shell scripts in /etc/rc.d to restore the system configuration and set up services. A detailed understanding of these startup scripts is important for analyzing the behavior of a system, and possibly modifying it.
+
+The craft of scripting is not hard to master, since scripts can be built in bite-sized sections and there is only a fairly small set of shell-specific operators and options [1] to learn. *The syntax is simple -- even austere* -- similar to that of invoking and chaining together utilities at the command line, and there are only a few "rules" governing their use. Most short scripts work right the first time, and debugging even the longer ones is straightforward.
+
+A shell script is *a quick-and-dirty method of prototyping a complex application*. Getting even a limited subset of the functionality to work in a script is often a useful first stage in project development. In this way, the structure of the application can be tested and tinkered with, and the major pitfalls found before proceeding to the final coding in C, C++, Java, Perl, or Python.
+
+Shell scripting hearkens back to *the classic UNIX philosophy of breaking complex projects into simpler subtasks, of chaining together components and utilities*. Many consider this a better, or at least more esthetically pleasing approach to problem solving than using one of the new generation of high-powered all-in-one languages, such as Perl, which attempt to be all things to all people, but at the cost of forcing you to alter your thinking processes to fit the tool.
+
+
+
+
+
+
+
+
+====
+
+<鸟哥私房菜> 第十章
 
 #简介
 
@@ -19,11 +46,11 @@ Linux的/etc/shells文件中, 提供了所有可以使用的shells:
 ##Bash
 
 Bash的主要优点:
-1. 命令编修能力(history
+1. 命令编修能力(history)
 
     能够记忆使用过的命令
     命令记录存储在家目录的.bash_history里, 记录着前一次登录以前所运行的命令, 而这一次登录所运行的命令则被缓存在内存中, 当你成功徐晓系统后 该命令记忆才会被记录到.bash_history中
-1. 命令与文件不全功能
+1. 命令与文件补全功能
 1. 命令别名配置功能:
 
     `alias lm='ls -al'`

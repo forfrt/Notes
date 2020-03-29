@@ -1,6 +1,4 @@
 
-
-
 ##Formally Proving Properties
 
 1. To show a positive property we need to give a proof of security or reduction. For symmetric modes of operation this goes slightly beyond this course, but we can give intuition.
