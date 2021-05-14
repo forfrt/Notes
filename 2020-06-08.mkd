@@ -1,0 +1,39 @@
+
+# Weekly Schedule
+
+## TODO
+4. [ ] 继续优化量化机器学习模型
+5. [ ] [Standford CS224N](https://www.bilibili.com/video/BV1Wb411W7Nr), 完成第12课
+6. [ ] 阅读A comprehensive Survey on Graph Neural Networks by Zonghan Wu, Shirui Pan
+7. [ ] 阅读数量金融前三章
+8. [ ] [机器学习-白板推导系列](https://space.bilibili.com/97068901/video), 完成1-6节
+
+# 2020-06-08 07:04 上午
+
+## Done
+
+1. 俯卧撑25*3
+2. 数量金融从2.10-3.2
+3. A comprehensive Survey on Graph Neural Networks by Zonghan Wu, Shirui Pan, 读完introduction&definition
+
+## Tomorrow's Plan
+
+1. [ ] 将量化机器学习模型的结果从预测准确价格改为预测上涨/大幅上涨/下跌/大幅下跌
+2. [ ] [机器学习-白板推导系列](https://space.bilibili.com/97068901/video), 完成1-3节
+3. A comprehensive Survey on Graph Neural Networks by Zonghan Wu, Shirui Pan, 读到section4
+
+====
+
+# 2020-06-09 05:41 上午
+
+## Done
+
+1. 推举哑铃, 右臂36个, 左臂32个, 4+组
+2. 屈臂哑铃, 右臂32个, 左臂28个, 3组
+3. 读完了[Time Series Forecasting with LSTMs using TensorFlow 2 and Keras in Python](https://towardsdatascience.com/time-series-forecasting-with-lstms-using-tensorflow-2-and-keras-in-python-6ceee9c6c651)
+
+## Tomorrow's Plan
+
+1. [ ] 将量化机器学习模型的结果从预测准确价格改为预测上涨/大幅上涨/下跌/大幅下跌
+2. [ ] [机器学习-白板推导系列](https://space.bilibili.com/97068901/video), 完成1-3节
+3. A comprehensive Survey on Graph Neural Networks by Zonghan Wu, Shirui Pan, 读到section4

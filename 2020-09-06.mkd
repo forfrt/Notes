@@ -1,0 +1,89 @@
+
+# Weekly Schedule
+
+## TODO
+1. [ ] [Standford CS520](https://www.bilibili.com/video/BV1Wb411W7Nr), 完成第12课
+1. [ ] 阅读数量金融前三章
+1. [ ] [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 完成1, 2节
+1. [ ] 重构量化预测代码
+2. [ ] 阅读[虚幻引擎入门教程视频](https://learn.unrealengine.com/course/2449698/module/5394430)
+3. [ ] 阅读[Causal Inference Course Lectures](https://www.youtube.com/watch?v=CfzO4IEMVUk&list=PLoazKTcS0Rzb6bb9L508cyJ1z-U9iWkA0)前6节课
+
+# 2020-09-06 03:06 上午 
+
+## Done
+
+1. 俯卧撑30*3
+2. 推举哑铃, 右臂36个, 左臂36个, 4+组
+3. 屈臂哑铃, 右臂32个, 左臂30个, 3组
+4. 动感单车30分钟
+1. 回顾[graykode/nlp-tutorial](https://github.com/graykode/nlp-tutorial)的BiLSTM代码
+2. 虚幻引擎入门[内容浏览器, 主工具栏, 编辑器基础知识总结, 世界大纲视图]
+3. 阅读[Causal Inference Course Lectures](https://www.youtube.com/watch?v=CfzO4IEMVUk&list=PLoazKTcS0Rzb6bb9L508cyJ1z-U9iWkA0)第一第二节课程
+1. 阅读[机器学习-白板推导系列](https://space.bilibili.com/97068901/video)[绪论]
+
+## Tomorrow's Plan
+
+1. 动感单车, 卷腹
+2. 继续回顾[graykode/nlp-tutorial](https://github.com/graykode/nlp-tutorial)
+3. 阅读[再见RNN，你好TCN！](https://zhuanlan.zhihu.com/p/215849822)
+4. 开始重构量化预测模型, 完成33.3%工作量
+5. 虚幻引擎入门[虚拟引擎简介测试2, 设置概括介绍, 编辑器首选项]
+
+====
+
+# 2020-09-08 04:10 上午
+
+玩游戏， 啥也没干
+
+====
+
+# 2020-09-09 04:10 上午
+
+玩游戏， 啥也没干
+
+====
+
+# 2020-09-10 04:11 上午 上午 
+
+## Done
+
+1. 俯卧撑30*4
+4. 动感单车45分钟
+5. 申请了Télécom Paris的The NoRDF Project
+6. 给之前套磁导师发教师节节日问候
+7. 虚幻引擎入门[设置概括介绍， 编辑器首选项， 项目设置， 世界场景设置， 设置概括总结]
+8. 简单了解[SemEval-2020]内容(https://semeval.github.io/SemEval2021/tasks)
+
+## Tomorrow's Plan
+
+1. 继续回顾[graykode/nlp-tutorial](https://github.com/graykode/nlp-tutorial)
+2. 阅读[再见RNN，你好TCN！](https://zhuanlan.zhihu.com/p/215849822)
+3. 开始重构量化预测模型, 完成10%工作量
+4. 与梁圣讨论[SemEval-2020]内容(https://semeval.github.io/SemEval2021/tasks)
+5. 申请[Dr. Jennifer D'Souza](https://www.tib.eu/en/research-development/data-science-digital-libraries/staff/jennifer-dsouza)相关的职位
+6. 申请[Mats Wirén](https://www.su.se/profiles/mwir-1.186343)相关的职位
+7. 了解如何替换电子签证
+
+====
+
+# 2020-09-10 04:11 上午 上午 
+
+## Done
+
+1. 深蹲50*4
+4. 卧推哑铃4*25
+1. 与梁圣讨论[SemEval-2020]内容(https://semeval.github.io/SemEval2021/tasks)
+2. 简单准备Télécom Paris的The NoRDF Project面试
+3. 预约替换电子签证
+
+## Tomorrow's Plan
+
+2. 继续回顾[graykode/nlp-tutorial](https://github.com/graykode/nlp-tutorial)
+3. 阅读[再见RNN，你好TCN！](https://zhuanlan.zhihu.com/p/215849822)
+4. 开始重构量化预测模型, 完成10%工作量
+2. 申请[Dr. Jennifer D'Souza](https://www.tib.eu/en/research-development/data-science-digital-libraries/staff/jennifer-dsouza)相关的职位
+3. 申请[Mats Wirén](https://www.su.se/profiles/mwir-1.186343)相关的职位
+4. 替换电子签证
+5. 阅读[xhuang31/KEQA_WSDM19](https://github.com/xhuang31/KEQA_WSDM19)源码
+2. 11:00am面试Télécom Paris的The NoRDF Project

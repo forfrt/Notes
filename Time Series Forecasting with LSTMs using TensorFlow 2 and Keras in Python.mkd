@@ -1,0 +1,200 @@
+
+# [Time Series Forecasting with LSTMs using TensorFlow 2 and Keras in Python](https://towardsdatascience.com/time-series-forecasting-with-lstms-using-tensorflow-2-and-keras-in-python-6ceee9c6c651)
+
+
+1. Understand what Time Series are
+2. Learn about Recurrent Neural Networks
+3. Forecast Time Series Data with LSTMs in Keras
+4. Evaluate the model
+
+[The complete project on GitHub](https://github.com/curiousily/Deep-Learning-For-Hackers)
+
+
+# Time Series
+
+Time Series is a collection of data points indexed based on the time they were collected. Most often, the data is recorded at regular time intervals
+
+Time Series data introduces a ¡°hard dependency¡± on previous time steps, so the assumption that independence of observations doesn¡¯t hold. What are some of the properties that a Time Series can have?
+
+Stationarity, seasonality, and autocorrelation are some of the properties of the Time Series you might be interested in.
+
+1. Stationarity
+   
+    A Times Series is said to be stationary when the mean and variance remain constant over time. A Time-Series has a trend if the mean is varying over time. Often you can eliminate it and make the series stationary by applying log transformation(s).
+    
+2. Seasonality
+
+    Seasonality refers to the phenomenon of variations at specific time-frames. eg people buying more Christmas trees during Christmas (who would¡¯ve thought). A common approach to eliminating seasonality is to use differencing.
+
+3. Autocorrelation 
+
+    Autocorelation refers to the correlation between the current value with a copy from a previous time (lag).
+    
+Why we would want to seasonality, trend and have a stationary Time Series? This is required data preprocessing step for Time Series forecasting with classical methods like ARIMA models. Luckily, we¡¯ll do our modeling using Recurrent Neural Networks.
+
+# Recurrent Neural Networks
+
+Recurrent neural networks (RNNs) can predict the next value(s) in a sequence or classify it. A sequence is stored as a matrix, where each row is a feature vector that describes it. Naturally, the order of the rows in the matrix is important.
+
+RNNs are a really good fit for solving Natural Language Processing (NLP) tasks where the words in a text form sequences and their position matters. That said, cutting edge NLP uses the Transformer for most (if not all) tasks.
+
+Time Series is just one type of a sequence.
+
+RNNs contain loops. Each unit has a state and receives two inputs ¡ª states from the previous layer and the stats from this layer from the previous time step.
+
+The Backpropagation algorithm breaks down when applied to RNNs because of the recurrent connections. Unrolling the network, where copies of the neurons that have recurrent connections are created, can solve this problem. This converts the RNN into a regular Feedforward Neural Net, and classic Backpropagation can be applied. The modification is known as [Backpropagation through time](https://en.wikipedia.org/wiki/Backpropagation_through_time).
+
+
+# Problems with Classical RNNs
+
+Unrolled Neural Networks can get very deep (that¡¯s what he said), which creates problems for the gradient calculations. The weights can become very small ( Vanishing gradient problem) or very large ( Exploding gradient problem).
+
+Classic RNNs also have a problem with their memory (long-term dependencies), too. The begging of the sequences we use for training tends to be ¡°forgotten¡± because of the overwhelming effect of more recent states.
+
+In practice, those problems are solved by using gated RNNs. They can store information for later use, much like having a memory. Reading, writing, and deleting from the memory are learned from the data. The two most commonly used gated RNNs are Long Short-Term Memory Networks and Gated Recurrent Unit Neural Networks.
+
+
+# Time Series Prediction with LSTMs
+
+We¡¯ll start with a simple example of forecasting the values of the Sine function using a simple LSTM network.
+
+
+## Setup
+
+Let¡¯s start with the library imports and setting seeds:
+
+```
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+import pandas as pd
+import seaborn as sns
+from pylab import rcParams
+import matplotlib.pyplot as plt
+from matplotlib import rc
+
+%matplotlib inline
+%config InlineBackend.figure_format='retina'
+
+sns.set(style='whitegrid', palette='muted', font_scale=1.5)
+
+rcParams['figure.figsize'] = 16, 10
+
+RANDOM_SEED = 42
+
+np.random.seed(RANDOM_SEED)
+tf.random.set_seed(RANDOM_SEED)
+```
+
+
+## Data
+
+We¡¯ll generate 1,000 values from the sine function and use that as training data. But, we¡¯ll add a little bit of zing to it:
+
+```
+time = np.arange(0, 100, 0.1)
+sin = np.sin(time) + np.random.normal(scale=0.5, size=len(time))
+```
+
+A random value, drawn from a normal distribution, is added to each data point. That¡¯ll make the job of our model a bit harder.
+
+
+## Data Preprocessing
+
+We need to ¡°chop the data¡± into smaller sequences for our model. But first, we¡¯ll split it into training and test data:
+
+```
+df = pd.DataFrame(dict(sine=sin), index=time, columns=['sine'])
+
+train_size = int(len(df) * 0.8)
+test_size = len(df) - train_size
+train, test = df.iloc[0:train_size], df.iloc[train_size:len(df)]
+print(len(train), len(test))
+```
+
+Preparing the data for Time Series forecasting (LSTMs in particular) can be tricky. Intuitively, we need to predict the value at the current time step by using the history ( n time steps from it). Here¡¯s a generic function that does the job:
+
+```
+
+def create_dataset(X, y, time_steps=1):
+    Xs, ys = [], []
+    for i in range(len(X) - time_steps):
+        v = X.iloc[i:(i + time_steps)].values
+        Xs.append(v)
+        ys.append(y.iloc[i + time_steps])
+    return np.array(Xs), np.array(ys)
+```
+
+The beauty of this function is that it works with univariate (single feature) and multivariate (multiple features) Time Series data. Let¡¯s use a history of 10 time steps to make our sequences:
+
+```
+time_steps = 10
+
+# reshape to [samples, time_steps, n_features]
+
+X_train, y_train = create_dataset(train, train.sine, time_steps)
+X_test, y_test = create_dataset(test, test.sine, time_steps)
+
+print(X_train.shape, y_train.shape)
+```
+
+We have our sequences in the shape (samples, time_steps, features). How can we use them to make predictions?
+
+
+## Modeling
+
+Training an LSTM model in Keras is easy. We¡¯ll use the LSTM layer in a sequential model to make our predictions:
+
+```
+
+model = keras.Sequential()
+model.add(keras.layers.LSTM(
+  units=128,
+  input_shape=(X_train.shape[1], X_train.shape[2])
+))
+model.add(keras.layers.Dense(units=1))
+model.compile(
+  loss='mean_squared_error',
+  optimizer=keras.optimizers.Adam(0.001)
+)
+```
+
+The LSTM layer expects the number of time steps and the number of features to work properly. The rest of the model looks like a regular regression model. How do we train an LSTM model?
+
+
+## Training
+
+The most important thing to remember when training Time Series models is to not shuffle the data (the order of the data matters). The rest is pretty standard:
+
+```
+history = model.fit(
+    X_train, y_train,
+    epochs=30,
+    batch_size=16,
+    validation_split=0.1,
+    verbose=1,
+    shuffle=False
+)
+```
+
+Our dataset is pretty simple and contains the randomness from our sampling. After about 15 epochs, the model is pretty much-done learning.
+
+
+## Evaluation
+
+Let¡¯s take some predictions from our model:
+
+```
+y_pred = model.predict(X_test)
+```
+
+We can plot the predictions over the true values from the Time Series:
+
+The model seems to be doing a great job of capturing the general pattern of the data. It fails to capture random fluctuations, which is a good thing (it generalizes well).
+
+
+
+
+
+
+

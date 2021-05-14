@@ -1,0 +1,52 @@
+
+
+# 遗留任务
+
+1. [ ] [MIT Linear Algebra](https://www.bilibili.com/video/BV1ii4y187Dj), 已完成p1-p13
+1. [ ] [Standford CS224N](https://www.bilibili.com/video/BV1Wb411W7Nr), 已完成p1-p11
+1. [ ] [Standford CS520](https://www.bilibili.com/video/BV1D5411W7Ri), 已完成p1-p2
+2. [ ] 阅读数量金融
+3. [ ] [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 已完成p9-p13
+4. [ ] 重构量化预测代码
+5. [ ] 阅读[Causal Inference Course Lectures](https://www.youtube.com/watch?v=CfzO4IEMVUk&list=PLoazKTcS0Rzb6bb9L508cyJ1z-U9iWkA0)
+6. [ ] 阅读[因果推断入门](https://www.bilibili.com/video/BV1sJ41177sg), 已完成p1-p7
+7. [ ] Semeval-2021-task-9, 在TABERT的基础上encode表格全部内容, 并加入row name信息
+8. [ ] 开发Note网站
+9. [ ] [一个大学生的日常笔记](https://www.zhihu.com/column/c_119426147)
+10. [ ] [35岁程序员的退路：量化投资学习笔记](https://www.zhihu.com/column/c_1307382898916896768)
+11. [ ] [数据降维算法](https://www.zhihu.com/column/c_1194552337170214912)
+12. [ ] [强化学习前沿](https://www.zhihu.com/column/reinforcementlearning)
+1. [ ] [2019年最全最新Vue、Vuejs教程，从入门到精通](https://www.bilibili.com/video/BV15741177Eh), 已完成p1-p23, p76-p99
+
+
+# 2021-03-08 Weekly Schedule
+
+## TODO
+
+7. [ ] 学习vue.js, vue/cli的基础知识
+7. [ ] Semeval-2021-task-9, 在TABERT的基础上encode表格全部内容, 并加入row name信息
+8. [ ] 阅读[Analytical Methods for Interpretable Ultradense Word Embeddings](https://arxiv.org/abs/1904.08654)
+9. [ ] 完成2个kaggle竞赛
+
+
+----
+
+## 2021-01-23 -- 2021-03-08
+
+1. [MIT Linear Algebra](https://www.bilibili.com/video/BV1ii4y187Dj), p3-p10
+
+## 2021-03-08 -- 2021-03-12
+
+1. [MIT Linear Algebra](https://www.bilibili.com/video/BV1ii4y187Dj), p11-15
+2. [【五分钟机器学习】随机森林（RandomForest](https://www.bilibili.com/video/BV1H5411e73F)
+3. [【五分钟机器学习】可视化的决策过程：决策树 Decision Tree](https://www.bilibili.com/video/BV1Xp4y1U7vW)
+4. 完成[Alexis Cook’s Titanic Tutorial](https://www.kaggle.com/alexisbcook/titanic-tutorial)
+
+## 2021-03-13 -- 2021-03-17
+
+1. 约思睿吃饭, 调整作息, 玩黄油
+
+## 2021-03-18
+
+1. [[小萌五分钟] 机器学习 | 模型评估: ROC曲线与AUC值](https://www.bilibili.com/video/BV1wz4y197LU)
+2. 预约公证

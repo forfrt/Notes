@@ -1,0 +1,74 @@
+
+# 遗留任务
+
+1. [ ] [MIT Linear Algebra](https://www.bilibili.com/video/BV1ii4y187Dj), 完成1-35
+1. [ ] [Standford CS224N](https://www.bilibili.com/video/BV1Wb411W7Nr), 完成12-20
+1. [ ] [Standford CS520](https://www.bilibili.com/video/BV1D5411W7Ri), 完成3-10
+2. [ ] 阅读数量金融前三章
+3. [ ] [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 完成线性回归与线性分类
+4. [ ] 重构量化预测代码
+5. [ ] 阅读[Causal Inference Course Lectures](https://www.youtube.com/watch?v=CfzO4IEMVUk&list=PLoazKTcS0Rzb6bb9L508cyJ1z-U9iWkA0)前6节课
+6. [ ] 阅读[因果推断入门](https://www.bilibili.com/video/BV1sJ41177sg)1-9节
+7. [ ] Semeval-2021-task-9, 在TABERT的基础上encode表格全部内容, 并加入row name信息
+8. [ ] 开发Note网站
+9. [ ] [一个大学生的日常笔记](https://www.zhihu.com/column/c_119426147)
+10. [ ] [35岁程序员的退路：量化投资学习笔记](https://www.zhihu.com/column/c_1307382898916896768)
+11. [ ] [数据降维算法](https://www.zhihu.com/column/c_1194552337170214912)
+12. [ ] [强化学习前沿](https://www.zhihu.com/column/reinforcementlearning)
+
+# Weekly Schedule
+
+## TODO
+
+7. [ ] 学习vue.js, vue/cli的基础知识
+7. [ ] Semeval-2021-task-9, 在TABERT的基础上encode表格全部内容, 并加入row name信息
+
+
+----
+
+# 2021-01-04 06:23 上午
+
+1. [2019年最全最新Vue、Vuejs教程，从入门到精通](https://www.bilibili.com/video/BV15741177Eh), p12-p17
+2. [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 复习线性回归-最小二乘法
+
+
+## Tomorrow's Plan
+
+1. 重新阅读[TAPAS: Weakly Supervised Table Parsing via Pre-training](https://arxiv.org/pdf/2004.02349.pdf), [Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task](https://arxiv.org/pdf/1809.08887.pdf)
+2. [2019年最全最新Vue、Vuejs教程，从入门到精通](https://www.bilibili.com/video/BV15741177Eh), p17-p22
+3. [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 复习线性回归-正则化, 线性分类
+4. [MIT Linear Algebra](https://www.bilibili.com/video/BV1ii4y187Dj), 完成1-2
+
+
+----
+
+# 2021-01-05 06:23 上午
+
+1. [2019年最全最新Vue、Vuejs教程，从入门到精通](https://www.bilibili.com/video/BV15741177Eh), p18-p23
+3. [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 复习线性回归-正则化(p9-p10)
+1. [MIT Linear Algebra](https://www.bilibili.com/video/BV1ii4y187Dj), p1-2
+
+
+## Tomorrow's Plan
+
+1. [MIT Linear Algebra](https://www.bilibili.com/video/BV1ii4y187Dj), p3-4
+2. [2019年最全最新Vue、Vuejs教程，从入门到精通](https://www.bilibili.com/video/BV15741177Eh), webpack介绍p76-79
+3. [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd, 复习线性分类
+
+----
+
+# 2021-01-06 06:23 上午
+
+1. [MIT Linear Algebra](https://www.bilibili.com/video/BV1ii4y187Dj), p3-3.5
+2. [2019年最全最新Vue、Vuejs教程，从入门到精通](https://www.bilibili.com/video/BV15741177Eh), webpack介绍p76-79
+3. [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 复习线性分类(p13-14)
+
+## Tomorrow's Plan
+
+1. [MIT Linear Algebra](https://www.bilibili.com/video/BV1ii4y187Dj), p3-4
+2. [2019年最全最新Vue、Vuejs教程，从入门到精通](https://www.bilibili.com/video/BV15741177Eh), webpack介绍p76-79
+3. [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd, 复习线性分类
+1. 重新阅读[TAPAS: Weakly Supervised Table Parsing via Pre-training](https://arxiv.org/pdf/2004.02349.pdf), [Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task](https://arxiv.org/pdf/1809.08887.pdf)
+2. 复习TaBert代码
+
+----

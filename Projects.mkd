@@ -1,0 +1,27 @@
+
+1. 个人网站
+
+2. 共享笔记网站
+
+    使用markdown与latex结合的语法(KaTeX, jupytere notebook): [typora markdown 语法](http://support.typora.io/Markdown-Reference/)
+        1. 在线markdown编辑器: [benweet/stackedit.js](https://github.com/benweet/stackedit.js)
+
+    可以在线编辑自己笔记库中的笔记, 或者直接fork别人的笔记拿来修改
+    支持markdown的画图语法[markdown - 画图](https://blog.csdn.net/lis_12/article/details/80693975)
+    并提供类似[lucidchart](https://www.lucidchart.com/)这样的工具以随时画图并插入笔记:[projectstorm/react-diagrams](https://github.com/projectstorm/react-diagrams)
+    可以绘制类似UML的函数调用图, 分两个图层, 上层是UML类图, 下层是类中不同函数的互相调用关系
+    
+    - 相关资料:
+        1. [Phodit：打造智能的 Markdown 编辑器](https://zhuanlan.zhihu.com/p/40908242)
+    
+    - 相关技术
+        1. node.js, npm
+        2. vue.js, vue/cli
+        3. [benweet/stackedit.js](https://github.com/benweet/stackedit.js)
+        4. [hack-chat](https://github.com/hack-chat/main)
+        5. [phodal/phodit](https://github.com/phodal/phodit)
+    
+3. 基于地理位置(群体认同)的聊天软件
+
+    可以通过该软件和附近人组成一个桌游小组, 从而更好一起约狼人杀
+    自动推荐小区业主/租户群, 关心小区新闻

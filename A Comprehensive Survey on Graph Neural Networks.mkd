@@ -1,0 +1,49 @@
+
+# A comprehensive Survey on Graph Neural Networks by Zonghan Wu, Shirui Pan
+
+## Abstract
+
+The data in many ML tasks are typically represented in the Euclidean space. However, there is an increasing number of application where data are genereated from non_Euclidean domains and are represented as graphs with complex relationships and interdependency between objects.
+
+A new taxonomy to divide the SOTA GNN into 4 categories:
+1. recurrent graph neural networks
+2. convolutional graph neural networks
+3. graph autoencoders
+4. spatial-temporal graph neural networks
+
+
+## Introduction
+
+We can represent an image as a regular gird in the Euclidean space. A convolutional neural network is able to exploit the shift-invariance, local connectivity and compositionality of image data. As a result, CNNs can extract local meaningful features that are shared with the entire data sets for various image analysis.
+Many data are represented in the form of graphs. The complexity of graph data has imposed significant challenges on existing machine learning algorithms.
+1. Graphs can be irregular, have a avriable size of unordered nodes, and nodes from a graph may have a different number of neighbours.->some important operations (e.g., convolutions) being difficualt to apply to the graph domain
+2. A core assumption of existing machine learning algorithms is that instances are independent of each other. This assumption no longer holds for graph data since each instance is related to others by links.
+
+generalizations and definitions of immport opterions have been developed to handle the complexity of graph data.
+
+2D convolution-> graph convolution
+
+Contributions:
+1. New taxonomy
+2. Comprehensive review
+3. Abundant resources
+4. Future directions
+
+
+## Background and Definition
+
+1. RecGNNs: Recurrent graph neural networks lean a targent node's representation by propagating neighbor information in an iterative manner until a a stable fixed point is reached. 
+2. ConvGnns re-define the notions of convolution for graph data
+
+    1. spectral-based ConvGNNs develop a graph convolution based on the spectral graph theory
+    2. spatial-based ConvGNN address graph mutual dependency by architecturally composite non-recursive layers while inheriting ideas of message passing from RecGNNs.
+3. GAE: graph autoencoders, STGNNs: spatial-temporal graph neural networks
+    can be built on RecGNNs, ConvGNNs, or other neural architectures for graph modeling.
+    
+Graph neural networks vs network embedding
+
+wt
+
+
+
+

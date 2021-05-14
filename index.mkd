@@ -60,6 +60,7 @@
 5. [[HTTP权威指南]]
 6. [Machine Learning_Stanford](Machine Learing_Stanford)
 8. [Machine Learning](Machine Learning)
+9. [](数量金融)
 
 ##Articles
 
@@ -78,8 +79,16 @@
 13. [统一市场下撮合交易系统优化研究与性能模拟](统一市场下撮合交易系统优化研究与性能模拟)
 14. [Delegated Proof of Stake (DPOS) vs Proof of Work (POW)](Delegated Proof of Stake (DPOS) vs Proof of Work (POW))
 15. [基于区块链的去中心化交易关键技术研究及应用](基于区块链的去中心化交易关键技术研究及应用)
+16. [A Comprehensive Survey on Graph Neural Networks](A Comprehensive Survey on Graph Neural Networks)
+17. [Time Series Forecasting with LSTMs using TensorFlow 2 and Keras in Python](Time Series Forecasting with LSTMs using TensorFlow 2 and Keras in Python)
+18. [Foundations of Fuzzy Logic](Foundations of Fuzzy Logic)
 
-##Research Details
+## Essays
+
+1. [Perturbed Masking Parameter-free Probing for Analyzing and Interpreting BERT](Perturbed Masking Parameter-free Probing for Analyzing and Interpreting BERT)
+
+
+## Research Details
 1. [Bitshares](Bitshares)
 2. [EOS](EOS)
 3. [侧链, 锚定](侧链, 锚定)
@@ -92,6 +101,7 @@
 
 1. [[password]]
 1. [investment](investment)
+2. [量化](量化)
 
 ##Course
 
@@ -106,6 +116,8 @@
 10. [一致性算法(Paxos, Raft, ZAB) By 张阳](一致性算法(Paxos, Raft, ZAB) By 张阳)
 13. [Msc Dissertation Project](Msc Dissertation Project)
 14. [Discrete Optimization by The University of Melbourne](Discrete Optimization by The University of Melbourne)
+15. [SJTU许志钦_最优化](SJTU许志钦_最优化)
+16. [机器学习-白板推导系列](机器学习-白板推导系列)
 
 ##Tools
 
@@ -145,8 +157,27 @@
 1. [dpdk](dpdk)
 1. [bitcoin](bitcoin)
 
-#API
+# API
 
 1. [binance](binance)
-1. [huobi.pro](huobi.pro)
-2. [python binance](python-binance)
+2. [huobi.pro](huobi.pro)
+3. [python binance](python-binance)
+
+# Dairy
+1. [2020-04-01](2020-04-01)
+2. [2020-05-01](2020-05-01)
+3. [2020-06-08](2020-06-08)
+4. [2020-07-27](2020-07-27)
+5. [09 06](2020-09-06)
+6. [2020-09-21](2020-09-21)
+7. [2020-10-21](2020-10-21)
+8. [2020-10-27](2020-10-27)
+9. [2020-01-04](2020-01-04)
+9. [2020-01-18](2020-01-18)
+9. [2021-03](2021-03)
+
+# Inspires
+
+1. [Game](Game)
+2. [Projects](Projects)
+

@@ -1,0 +1,117 @@
+
+
+# Weekly Schedule
+
+## TODO
+1. [ ] [Standford CS520](https://www.bilibili.com/video/BV1Wb411W7Nr), 完成第12课
+2. [ ] 阅读数量金融前三章
+3. [ ] [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 完成线性回归与线性分类
+4. [ ] 重构量化预测代码
+5. [ ] 阅读[Causal Inference Course Lectures](https://www.youtube.com/watch?v=CfzO4IEMVUk&list=PLoazKTcS0Rzb6bb9L508cyJ1z-U9iWkA0)前6节课
+6. [ ] 阅读[因果推断入门](https://www.bilibili.com/video/BV1sJ41177sg)1-9节
+
+----
+
+
+# 2020-10-20 05:19 上午
+
+## Done
+
+1. 为了开发note网站, 学习vue.js
+2. 阅读[facebookresearch/TaBERT](https://github.com/facebookresearch/TaBERT)源码, 绘制关系图
+
+
+## Tomorrow's Plan
+
+1. 动感单车, 深蹲
+2. 继续阅读[facebookresearch/TaBERT](https://github.com/facebookresearch/TaBERT)源码, 绘制关系图
+3. 继续vue.js
+
+----
+
+# 2020-10-21 06:25 上午
+
+## Done
+
+1. 动感单车30min
+2. 学习vue.js, 接触到了[phodal/phodit](https://github.com/phodal/phodit), 了解了travis ci, stencil, Electron, 感觉好无力, 要学习的好多, 技术路线好多
+3. 阅读[facebookresearch/TaBERT](https://github.com/facebookresearch/TaBERT)源码, 绘制关系图
+
+
+## Tomorrow's Plan
+
+1. 动感单车, 卷腹
+4. 重新阅读[TABERT: Pretraining for Joint Understanding of Textual and Tabular Data](https://arxiv.org/pdf/2005.08314.pdf), [TAPAS: Weakly Supervised Table Parsing via Pre-training](https://arxiv.org/pdf/2004.02349.pdf), [Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task](https://arxiv.org/pdf/1809.08887.pdf)
+5. 和USC的导师开会
+
+----
+
+# 2020-10-22 06:10 上午
+
+## Done
+
+1. 动感单车30min
+2. 和USC的导师开会
+2. 调整作息
+
+
+## Tomorrow's Plan
+
+1. 动感单车, 卷腹
+2. 重新阅读[TABERT: Pretraining for Joint Understanding of Textual and Tabular Data](https://arxiv.org/pdf/2005.08314.pdf), [TAPAS: Weakly Supervised Table Parsing via Pre-training](https://arxiv.org/pdf/2004.02349.pdf), [Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task](https://arxiv.org/pdf/1809.08887.pdf)
+
+----
+
+# 2020-10-23 06:11 上午
+
+## Done
+
+1. 阅读npm相关资料, 尤其是[How to use NPM (and import/export modules) in JavaScript](https://medium.com/javascript-in-plain-english/how-to-use-npm-and-import-export-modules-in-javascript-31a7f66a2064), 完成了50%
+2. 重新阅读了[TABERT: Pretraining for Joint Understanding of Textual and Tabular Data](https://arxiv.org/pdf/2005.08314.pdf), [TAPAS: Weakly Supervised Table Parsing via Pre-training](https://arxiv.org/pdf/2004.02349.pdf)
+2. 继续阅读[facebookresearch/TaBERT](https://github.com/facebookresearch/TaBERT)源码
+
+
+## Tomorrow's Plan
+
+1. 动感单车, 卷腹
+2. 重新阅读[TAPAS: Weakly Supervised Table Parsing via Pre-training](https://arxiv.org/pdf/2004.02349.pdf), [Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task](https://arxiv.org/pdf/1809.08887.pdf)
+3. 继续阅读[facebookresearch/TaBERT](https://github.com/facebookresearch/TaBERT)源码
+
+----
+
+# 2020-10-24 06:23 上午
+
+1. 动感单车30min
+2. 继续阅读[facebookresearch/TaBERT](https://github.com/facebookresearch/TaBERT)源码, 沿着主要逻辑基本读完了一遍
+
+
+## Tomorrow's Plan
+
+1. 重新阅读[TAPAS: Weakly Supervised Table Parsing via Pre-training](https://arxiv.org/pdf/2004.02349.pdf), [Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task](https://arxiv.org/pdf/1809.08887.pdf)
+2. 继续阅读[facebookresearch/TaBERT](https://github.com/facebookresearch/TaBERT)源码
+
+----
+
+# 2020-10-25 06:23 上午
+
+1. 动感单车30min
+2. 继续阅读[facebookresearch/TaBERT](https://github.com/facebookresearch/TaBERT)源码
+3. 主要时间用来玩游戏了
+
+
+## Tomorrow's Plan
+
+2. 继续阅读[facebookresearch/TaBERT](https://github.com/facebookresearch/TaBERT)源码
+
+----
+
+# 2020-10-26 06:23 上午
+
+1. 和梁总开会讨论Semeval2021-task9
+2. 继续阅读[facebookresearch/TaBERT](https://github.com/facebookresearch/TaBERT)源码
+
+
+## Tomorrow's Plan
+
+1. 重新阅读[TAPAS: Weakly Supervised Table Parsing via Pre-training](https://arxiv.org/pdf/2004.02349.pdf), [Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task](https://arxiv.org/pdf/1809.08887.pdf)
+----

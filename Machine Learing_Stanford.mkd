@@ -1,0 +1,106 @@
+
+
+#[Machine Learning by Stanford](https://www.coursera.org/learn/machine-learning/home/welcome)
+
+#Introduction
+
+##Welcome
+
+Machine Learning 
+- Grew out of work in AI
+- New capability for computers
+
+Examples:
+- Database mining
+
+    Large datasets from growth of automation/web
+    E.g., Web click data, medical records, biology, engineering
+
+- Applications cannot program by hand
+
+    E.g., Autonomous helicopter, handwriting recognition, most of Natural Language Processing(NLP), Computer Vision
+
+- Self-customizing programs
+
+    E.g., Amazon, Netflix product recommendations
+
+- Understanding human learning (brain, real AI)
+
+----
+
+##What is Machine Learning
+
+> Arthur Samuel described it as: "the field of study that gives computers the ability to learn without being explicitly programmed." This is an older, informal definition.
+
+> Tom Mitchell provides a more modern definition: "A computer program is said to learn from experience E with respect to some class of tasks T and performance measure P, if its performance at tasks in T, as measured by P, improves with experience E."
+
+Example: playing checkers.
+
+E = the experience of playing many games of checkers
+T = the task of playing checkers.
+P = the probability that the program will win the next game.
+
+
+Machine learning algorithms:
+- Supervised learning
+- Unsupervised learning
+
+Others: Reinforcement learning, recommender systems.
+
+Also talk about: Practical advice for applying learning algorithms.
+
+##Supervised Learning
+
+in supervised learning, in every example in our data set, we are told what is the "correct answer" that we would have quite liked the algorithms have predicted on that example.
+
+1. regression problem:
+
+    the goal is to predict a continuous valued output.
+1. classification problem:
+
+    the goal is to predict a discrete value output.
+
+----
+
+##Unsupervised Learning
+
+Unsupervised learning allows us to approach problems with little or no idea what our results should look like. We can derive structure from data where we don't necessarily know the effect of the variables.
+
+We can derive this structure by clustering the data based on relationships among the variables in the data.
+
+With unsupervised learning there is no feedback based on the prediction results.
+
+Example:
+
+Clustering: Take a collection of 1,000,000 different genes, and find a way to automatically group these genes into groups that are somehow similar or related by different variables, such as lifespan, location, roles, and so on.
+
+Non-clustering: The "Cocktail Party Algorithm", allows you to find structure in a chaotic environment. (i.e. identifying individual voices and music from a mesh of sounds at a cocktail party).
+
+----
+
+#Model and Cost Function
+
+##Model Representation
+
+To establish notation for future use, we’ll use $$x^{(i)}$$ to denote the “input” variables (living area in this example), also called input features, and $$y^{(i)}$$ to denote the “output” or target variable that we are trying to predict (price). A pair $$(x^{(i)} , y^{(i)} )$$ is called a training example, and the dataset that we’ll be using to learn—a list of m training examples $${(x^{(i)} , y^{(i)} ); i = 1, . . . , m}$$—is called a training set. Note that the superscript “(i)” in the notation is simply an index into the training set, and has nothing to do with exponentiation. We will also use X to denote the space of input values, and Y to denote the space of output values. In this example, X = Y = ℝ. 
+
+To describe the supervised learning problem slightly more formally, our goal is, given a training set, to learn a function h : X → Y so that h(x) is a “good” predictor for the corresponding value of y. For historical reasons, this function h is called a hypothesis. Seen pictorially, the process is therefore like this:
+
+![Model Representation.png](./img/Machine Learning/Model Representation.png)
+
+1. When the target variable that we’re trying to predict is continuous, such as in our housing example, we call the learning problem a regression problem. 
+2. When y can take on only a small number of discrete values (such as if, given the living area, we wanted to predict if a dwelling is a house or an apartment, say), we call it a classification problem.
+
+----
+
+##Cost Function
+
+We can measure the accuracy of our hypothesis function by using a cost function. This takes an average difference (actually a fancier version of an average) of all the results of the hypothesis with inputs from x's and the actual output y's.
+
+![Cost Function.png](./img/Machine Learning/Cost Function.png)
+
+To break it apart, it is 12 x¯ where x¯ is the mean of the squares of hθ(xi)−yi , or the difference between the predicted value and the actual value.
+
+
+
+

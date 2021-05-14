@@ -1,0 +1,34 @@
+# 遗留任务
+
+1. [ ] [Standford CS224N](https://www.bilibili.com/video/BV1Wb411W7Nr), 完成12-20
+1. [ ] [Standford CS520](https://www.bilibili.com/video/BV1D5411W7Ri), 完成3-10
+1. [ ] [MIT Linear Algebra](https://www.bilibili.com/video/BV1ii4y187Dj), 完成1-35
+2. [ ] 阅读数量金融前三章
+3. [ ] [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 完成线性回归与线性分类
+4. [ ] 重构量化预测代码
+5. [ ] 阅读[Causal Inference Course Lectures](https://www.youtube.com/watch?v=CfzO4IEMVUk&list=PLoazKTcS0Rzb6bb9L508cyJ1z-U9iWkA0)前6节课
+6. [ ] 阅读[因果推断入门](https://www.bilibili.com/video/BV1sJ41177sg)1-9节
+7. [ ] Semeval-2021-task-9, 在TABERT的基础上encode表格全部内容, 并加入row name信息
+8. [ ] 开发Note网站
+
+# Weekly Schedule
+
+## TODO
+
+7. [ ] 学习vue.js, vue/cli的基础知识
+7. [ ] Semeval-2021-task-9, 在TABERT的基础上encode表格全部内容, 并加入row name信息
+
+
+----
+
+# 2020-10-26 06:23 上午
+
+7. [ ] 学习vue.js, vue/cli的基础知识, 并发现了一个新网站https://hack.chat/, 源码在[hack-chat](https://github.com/hack-chat/main)
+1. 和梁总开会讨论Semeval2021-task9
+2. 继续阅读[facebookresearch/TaBERT](https://github.com/facebookresearch/TaBERT)源码
+
+
+## Tomorrow's Plan
+
+1. 重新阅读[TAPAS: Weakly Supervised Table Parsing via Pre-training](https://arxiv.org/pdf/2004.02349.pdf), [Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task](https://arxiv.org/pdf/1809.08887.pdf)
+----

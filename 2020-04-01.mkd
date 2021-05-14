@@ -1,0 +1,68 @@
+
+# Weekly Schedule
+
+## TODO
+4. [ ] 完成proposal的初稿
+5. [ ] [Standford CS224N](https://www.bilibili.com/video/BV1Wb411W7Nr), 完成第8, 第9课
+6. [ ] Kaggle Titanic Challenge, 完成数据处理
+7. [ ] 看完[Learning to Retrieve Reasoning Paths over Wikipedia Graph for Question Answering](https://openreview.net/forum?id=SJgVHkrYDH), [KEPLER: A Unified Model for Knowledge Embedding and Pre-trained Language Representation](https://arxiv.org/pdf/1911.06136.pdf)和[Measuring Compositional Generalization](https://ai.googleblog.com/2020/03/measuring-compositional-generalization.html)
+
+# 2020-04-01 07:45 下午
+
+## Done
+
+1. 推举哑铃, 右臂36个, 左臂32个, 4+组
+2. 屈臂哑铃, 右臂32个, 左臂28个, 4+组
+3. 卷腹, 40个, 4组
+4. 动感单车, 20分钟
+5. 大致看了一下[KEPLER: A Unified Model for Knowledge Embedding and Pre-trained Language Representation](https://arxiv.org/pdf/1911.06136.pdf)和
+6. 修改proposal, 180分钟, 预计还需要180分钟完成初步修改
+7. 修改BidAsk页面, 0分钟
+8. Standford CS224N, 第8讲, Translation Seq2Seq Attention, 25分钟
+
+# Dairy
+
+晨曦的aws面试已经顺利通过啦, 是时候开始规划回到北京的时间了
+
+同时也要开始构思如何表白, 情书怎么写
+
+练字已经来不及了
+
+唉, 不知道晨曦怎么想, 感觉她还太单纯, 可能会觉得太急, 希望能成
+
+开始早睡
+
+## Tomorrow's Plan
+
+1. [ ] 完成BidAsk网站的发送邮件功能
+2. [ ] 看完[Measuring Compositional Generalization](https://ai.googleblog.com/2020/03/measuring-compositional-generalization.html)
+3. [ ] 完成对proposal初稿的最后修改
+4. [ ] 看完Standford CS224N, 第8讲, Translation Seq2Seq Attention
+
+====
+
+# 2020-04-03 09:39 上午
+
+## Done
+
+1. [x] 完成BidAsk网站的发送邮件功能
+2. [x] 看完[Measuring Compositional Generalization](https://ai.googleblog.com/2020/03/measuring-compositional-generalization.html)
+3. [ ] 完成对proposal初稿的最后修改
+1. 锻炼
+    1. 推举哑铃, 右臂36个, 左臂32个, 2组
+    3. 屈臂哑铃, 右臂32个, 左臂28个, 1组
+    4. 俯卧撑, 15个, 3组
+    5. 骑车买菜, 30分钟
+3. 修改proposal, 30分钟, 预计还需要150分钟完成初步修改
+
+## Tomorrow's Plan
+
+1. [ ] 调研BidAsk的SEO
+2. [ ] 过一遍[Measuring Compositional Generalization](https://ai.googleblog.com/2020/03/measuring-compositional-generalization.html)的pdf
+4. [ ] 完成对proposal初稿的最后修改
+5. [ ] 看完Standford CS224N, 第8讲, Translation Seq2Seq Attention
+
+====
+
+
+

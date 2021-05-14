@@ -1,0 +1,94 @@
+
+# 遗留任务
+
+1. [ ] [MIT Linear Algebra](https://www.bilibili.com/video/BV1ii4y187Dj), 已完成p1-p3.5
+1. [ ] [Standford CS224N](https://www.bilibili.com/video/BV1Wb411W7Nr), 已完成p1-p11
+1. [ ] [Standford CS520](https://www.bilibili.com/video/BV1D5411W7Ri), 已完成p1-p2
+2. [ ] 阅读数量金融
+3. [ ] [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 已完成p9-p13
+4. [ ] 重构量化预测代码
+5. [ ] 阅读[Causal Inference Course Lectures](https://www.youtube.com/watch?v=CfzO4IEMVUk&list=PLoazKTcS0Rzb6bb9L508cyJ1z-U9iWkA0)
+6. [ ] 阅读[因果推断入门](https://www.bilibili.com/video/BV1sJ41177sg), 已完成p1-p7
+7. [ ] Semeval-2021-task-9, 在TABERT的基础上encode表格全部内容, 并加入row name信息
+8. [ ] 开发Note网站
+9. [ ] [一个大学生的日常笔记](https://www.zhihu.com/column/c_119426147)
+10. [ ] [35岁程序员的退路：量化投资学习笔记](https://www.zhihu.com/column/c_1307382898916896768)
+11. [ ] [数据降维算法](https://www.zhihu.com/column/c_1194552337170214912)
+12. [ ] [强化学习前沿](https://www.zhihu.com/column/reinforcementlearning)
+1. [ ] [2019年最全最新Vue、Vuejs教程，从入门到精通](https://www.bilibili.com/video/BV15741177Eh), 已完成p1-p23, p76-p78
+
+# Weekly Schedule
+
+## TODO
+
+7. [ ] 学习vue.js, vue/cli的基础知识
+7. [ ] Semeval-2021-task-9, 在TABERT的基础上encode表格全部内容, 并加入row name信息
+
+
+----
+
+
+# 2021-01-19 22:23 下午
+
+2. [2019年最全最新Vue、Vuejs教程，从入门到精通](https://www.bilibili.com/video/BV15741177Eh), webpack介绍p79-88
+3. [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 复习线性分类(p13-14)
+
+## Tomorrow's Plan
+
+1. [MIT Linear Algebra](https://www.bilibili.com/video/BV1ii4y187Dj), p3-4
+2. [2019年最全最新Vue、Vuejs教程，从入门到精通](https://www.bilibili.com/video/BV15741177Eh), webpack介绍p89-94
+3. [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd, 复习线性分类p15-16
+4. 重新阅读[TAPAS: Weakly Supervised Table Parsing via Pre-training](https://arxiv.org/pdf/2004.02349.pdf), [Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task](https://arxiv.org/pdf/1809.08887.pdf)
+5. 复习TaBert代码
+
+----
+
+# 2021-01-20 22:23 下午
+
+2. [2019年最全最新Vue、Vuejs教程，从入门到精通](https://www.bilibili.com/video/BV15741177Eh), webpack介绍p89-92
+3. [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 复习线性分类-线性判别分析(p15-16)
+
+## Tomorrow's Plan
+
+1. [MIT Linear Algebra](https://www.bilibili.com/video/BV1ii4y187Dj), p3-4
+2. [2019年最全最新Vue、Vuejs教程，从入门到精通](https://www.bilibili.com/video/BV15741177Eh), vue-cli介绍p93-96
+3. [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd, 复习线性分类-逻辑回归p17
+
+----
+
+# 2021-01-21 22:23 下午
+
+2. [2019年最全最新Vue、Vuejs教程，从入门到精通](https://www.bilibili.com/video/BV15741177Eh), vue-cli介绍p93-96
+3. [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 复习线性分类-逻辑回归(p17)
+
+## Tomorrow's Plan
+
+1. [MIT Linear Algebra](https://www.bilibili.com/video/BV1ii4y187Dj), p3-4
+2. [2019年最全最新Vue、Vuejs教程，从入门到精通](https://www.bilibili.com/video/BV15741177Eh), vue-cli3介绍p97-99
+3. [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd, 复习线性分类-高斯判别分析p18-20
+
+----
+
+# 2021-01-22 22:23 下午
+
+1. 与思睿约会
+
+## Tomorrow's Plan
+
+1. 阅读stackedit代码
+
+----
+
+# 2021-01-22 22:23 下午
+
+1. 阅读[stackedit](https://github.com/benweet/stackedit)代码
+2. 了解[phodit](https://github.com/phodal/phodit)
+
+## Tomorrow's Plan
+
+1. 阅读[stackedit](https://github.com/benweet/stackedit)代码
+2. 阅读[phodit](https://github.com/phodal/phodit)代码, 熟悉[simplemde](https://github.com/phodal/phodit-editor)的使用
+
+
+
+

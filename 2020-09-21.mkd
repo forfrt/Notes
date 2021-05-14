@@ -1,0 +1,101 @@
+
+# Weekly Schedule
+
+## TODO
+1. [ ] [Standford CS520](https://www.bilibili.com/video/BV1Wb411W7Nr), 完成第12课
+2. [ ] 阅读数量金融前三章
+3. [ ] [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 完成线性回归与线性分类
+4. [ ] 重构量化预测代码
+5. [ ] 阅读[Causal Inference Course Lectures](https://www.youtube.com/watch?v=CfzO4IEMVUk&list=PLoazKTcS0Rzb6bb9L508cyJ1z-U9iWkA0)前6节课
+6. [ ] 阅读[因果推断入门](https://www.bilibili.com/video/BV1sJ41177sg)1-9节
+7. [ ] 阅读梁圣推荐的table embedding论文
+
+----
+
+# 2020-09-21 05:24 上午  
+
+## Done
+
+4. 动感单车30分钟
+
+----
+
+# 2020-09-22 05:24 上午  
+
+## Done
+
+1. 动感单车30分钟
+
+----
+
+# 2020-09-23 05:24 上午  
+
+## Done
+
+1. 动感单车30分钟
+
+----
+
+# 2020-09-24 05:24 上午  
+
+## Done
+
+1. 动感单车30分钟
+
+----
+
+# 2020-09-25 05:24 上午  
+
+## Done
+
+4. 动感单车30分钟
+6. 阅读[因果推断入门](https://www.bilibili.com/video/BV1sJ41177sg)1-7节
+
+
+## Tomorrow's Plan
+
+1. 动感单车, 卷腹
+2. 继续回顾[graykode/nlp-tutorial](https://github.com/graykode/nlp-tutorial)
+3. 阅读[再见RNN，你好TCN！](https://zhuanlan.zhihu.com/p/215849822)
+4. 开始重构量化预测模型, 完成33.3%工作量
+5. 将Barcleys银行卡信息输入Digidentity
+
+----
+
+2020-09-26 05:19 上午
+
+## Done
+
+1. 俯卧撑30*4+25*3
+2. 开始开发note网站, 修订了note网站的目标, 确定使用[typora markdown 语法](http://support.typora.io/Markdown-Reference/), [benweet/stackedit.js](https://github.com/benweet/stackedit.js)以及[projectstorm/react-diagrams](https://github.com/projectstorm/react-diagrams), 使用django框架进行开发
+3. 阅读[再见RNN，你好TCN！](https://zhuanlan.zhihu.com/p/215849822)
+4. 推迟重构量化预测模型, 将近期重心只放在note网站以及nlp学习中
+5. 阅读[机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 完成线性回归1
+
+
+## Tomorrow's Plan
+
+1. 动感单车, 卷腹
+2. 继续回顾[graykode/nlp-tutorial](https://github.com/graykode/nlp-tutorial)
+3. 将Barcleys银行卡信息输入Digidentity
+4. 阅读梁圣推荐的table embedding论文
+
+----
+
+2020-09-27 06:25 上午
+
+## Done
+
+1. 动感单车30min
+2. 开始尝试使用 [benweet/stackedit.js](https://github.com/benweet/stackedit.js)
+5. 阅读[机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 完成线性回归2
+6. 阅读[TABERT: Pretraining for Joint Understanding of Textual and Tabular Data](https://arxiv.org/pdf/2005.08314.pdf)到第三章
+
+
+## Tomorrow's Plan
+
+1. 动感单车, 卷腹
+2. 继续回顾[graykode/nlp-tutorial](https://github.com/graykode/nlp-tutorial)
+3. 将Barcleys银行卡信息输入Digidentity
+4. 阅读[TABERT: Pretraining for Joint Understanding of Textual and Tabular Data](https://arxiv.org/pdf/2005.08314.pdf), [TAPAS: Weakly Supervised Table Parsing via Pre-training](https://arxiv.org/pdf/2004.02349.pdf), [Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain Semantic Parsing and Text-to-SQL Task](https://arxiv.org/pdf/1809.08887.pdf)
+
