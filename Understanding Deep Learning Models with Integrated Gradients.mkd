@@ -1,0 +1,139 @@
+
+# [Understanding Deep Learning Models with Integrated Gradients](https://towardsdatascience.com/understanding-deep-learning-models-with-integrated-gradients-24ddce643dbf) #
+
+## Introduction
+
+1. What is Integrated Gradient?
+
+    Integrated Gradient(IG) is an interpretability or explainability technique for deep neural networks which visualizes its input feature importance that contributes to the model's prediction
+    
+2. Can IG be applied to only a specific use case of deep learning or only to a specific neural network architecture?
+
+    Integrated Gradient(IG) coputes the gradient of the model's prediction output to its input features and requires no modification to the original deep neural network.
+    
+
+## IG can be used for:
+
+1. Understanding feature importance by extracting rules from the network
+2. Debugging deep learning models performance
+3. Identifying data skew by understanding the important features contributing to the prediction
+
+IG can be applied to any differentiable model like image, text, or structured data.
+
+How does Integrated Gradient work?
+1. Explaining IG using a deep learning model for image classification
+
+## Integrated Gradient is built on 2 axioms which need to be satisfied: sensitivity and implementation invariance
+
+1. sensitivity
+
+    This states that for any input and baseline that differs in one feature and the outputs vary for these two inputs, the differing feature must receive some attribution
+    To calculated the sensitivity, we establish a baseline image as a strting point. We then build a sequence of images which we interpolate from a baseline image to the actual image to calculate the integrated gradients.
+    
+    
+2. Implementation invariance
+
+    Two networks are functionally equivalent if their outpus are equal for all inputs, despite having very different implementations. Attribution methods should satisfy implementation invariance
+    
+    While integrated gradients satisfies the invariance, LRP and DeepLift doesn't
+    
+3. Completeness
+
+    completeness acts a good evaluation metric for a attribution. This essentially says that the sum of the attributions must be the difference between input and baseline output
+
+
+## Calculateing and visualizing Integrated Gradients(IG)
+
+1. start from the baseline where baseline can be a black image whose pixel values are all zero or an all-white image, or a random image. Baseline input is one where the prediction is neutral and is central to any explanation method and visualizing pixel feature importances.
+
+2. generate a linear interpolation between the baseline and the original image. Interpolated images are small steps(\alpha) in the feature space between your baseline and input image and consistently increases with each interpolated image's intensity.
+
+3. calculated gradients to measure the relationship between changes to a feature and changes in the model's predictions.
+   
+   The gradient informs which pixel has the strongest effect on the models predicted class probabilities.
+   
+   Varying variable changes the output, and the variable will receive some attribution to help calculate the feature importances for the input image. A variable that does not affect the output gets no attribution.
+   
+4. compute the numerical approximation through averaging gradients
+5. scale IG to the input image to ensure that the attribution values are accumulated across multiple interpolated images are all in the same units. Represent the IG on the input image with the pixel importances.
+
+
+## Impelement an Integrated Gradient using Tensorflow
+
+### importing required libraries
+
+import matplotlib.pylab as plt
+import numpy as np
+import tensorflow as tf
+import tensorflow_hub as hub
+from tensorflow.keras.appliactions.mobilenet_v2 import preprocess_input as mobilenet_v2_preprocess_input
+
+
+### Using MobileNetV2 as Transfer Learned model on Imagenet dataset
+
+model=tf.keras.applications.MobileNetV2(input_shape=(224, 224, 3), include_top=True, weights='imagenet')
+
+### Loading Imagenet labels
+
+def load_imagenet_labels(file_path):
+    lables_file=tf.keras.utils.get_file("ImageNetLabels.txt", file_path)
+    
+    with open(labels_file) as reader:
+        f=reader.read()
+        labels=f.splitLines()
+        
+    return np.array(labels)
+    
+imagenet_labels=load_imagenet_labels("https://storage.googleapis.com/download.tensorflow.org/data/ImageNetLabels.txt")
+
+### Load and Preprocess Images
+
+def read_image(file_name):
+
+    image=tf.io.read_file(file_name)
+    image=tf.image.decode_jpge(image, channels=3)
+    image=tf.image.convert_image_dtype(image, tf.float32)
+    image=tf.image.resize_with_pad(image, target_height=244, target_width=244)
+    return image
+    
+img={"Peacock": "Peacock.jpg"}
+img_name_tensors={}
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

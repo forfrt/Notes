@@ -1,0 +1,72 @@
+
+# [The How of Explainable AI: Pre-modelling Explainability](https://towardsdatascience.com/the-how-of-explainable-ai-pre-modelling-explainability-699150495fe4)
+
+In general, explainability can be applied throughout the entire AI development pipeline. Specifically, it can be applied : 1. before (pre-modelling explainability), 2. during (explainable modelling), and 3. after (post-modelling explainability) the modelling stage.
+
+![How of Explainable AI.jpg](./img/papers/XAI/How of Explainable AI.jpg)
+
+Pre-modelling explainability is a collection of diverse methods with a common goal of gaining a better understanding of **dataset** used for model development
+
+## Pre-modelling explainability
+
+The pre-modelling explainability literature can be divided into four main categories: 
+1. exploratory data analysis,
+2. dataset description standardization, 
+3. explainable feature engineering, and 
+4. dataset summarization methods.
+
+## Exploratory data analysis
+
+The goal of exploratory data analysis is to extract a summary of the main characteristics of a dataset. 
+
+1. This summary often includes *various statistical properties of the dataset such as its dimensionality, mean, standard deviation, range, missing samples, and so on*. 
+2. Data visualization methods make up a large portion of the exploratory data analysis machinery.
+3. Methods like parallel coordinate plots and dimensionality reduction methods could allow humans to perceive dimensions larger than three.
+
+
+## Dataset description standardization
+
+Standardization can ensure proper communication between dataset creators and users of datasets, and can help alleviate issues such as systemic bias in AI models or the misues of data.
+
+Some of these standardization recommendations include:
+1. datasheets for datasets, 
+2. data statements, and 
+3. dataset nutrition labels (including several modules of information in the dataset documentation that resemble the nutrition facts label for packaged food).
+
+
+## Explainable feature engineering
+
+
+# [The How of Explainable AI: Explainable Modelling](https://towardsdatascience.com/the-how-of-explainable-ai-explainable-modelling-55c8c43d7bed)
+
+
+
+
+# [The How of Explainable AI: Post-modelling Explainability](https://towardsdatascience.com/the-how-of-explainable-ai-post-modelling-explainability-8b4cbc7adf5f)
+
+In order to make sense of the post-hoc explainability methods, we propose a taxonomy or a way of breaking down these methods that shows their common structure, organized around four key aspects: 
+
+1. the target, what is to be explained about the model; 
+2. the drivers, what is causing the thing you want explained; 
+3. the explanation family, how the explanation information about the drivers causing the target is communicated to the user; 
+4. and the estimator, the computational process of actually obtaining the explanation.
+
+For instance, the popular Local Interpretable Model-agnostic Explanations (LIME) approach provides explanation for an instance prediction of a model, the target, in terms of input features, the drivers, using importance scores, the explanation family, computed through local perturbations of the model input, the estimator.
+
+![post-modelling explanation family.jpg](./img/papers/XAI/post-modelling explanation family.jpg)
+
+
+## Explanation targets
+
+
+
+
+
+
+
+
+
+
+
+
+

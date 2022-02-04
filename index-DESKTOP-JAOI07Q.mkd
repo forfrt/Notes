@@ -82,20 +82,10 @@
 16. [A Comprehensive Survey on Graph Neural Networks](A Comprehensive Survey on Graph Neural Networks)
 17. [Time Series Forecasting with LSTMs using TensorFlow 2 and Keras in Python](Time Series Forecasting with LSTMs using TensorFlow 2 and Keras in Python)
 18. [Foundations of Fuzzy Logic](Foundations of Fuzzy Logic)
-19. [Understanding Deep Learning Models with Integrated Gradients](Understanding Deep Learning Models with Integrated Gradients)
 
-## Papers
+## Essays
 
 1. [Perturbed Masking Parameter-free Probing for Analyzing and Interpreting BERT](Perturbed Masking Parameter-free Probing for Analyzing and Interpreting BERT)
-1. [On the Dangers of Stochastic Parrots: Can Language Models Be Too Big](On the Dangers of Stochastic Parrots: Can Language Models Be Too Big)
-2. [SLANGZY: a fuzzy logic-based algorithm for English slang meaning selection](SLANGZY: a fuzzy logic-based algorithm for English slang meaning selection)
-3. [Automatic detection of pharyngeal fricatives in cleft palate speech using acoustic features based on the vocal tract area specturm](Automatic detection of pharyngeal fricatives in cleft palate speech using acoustic features based on the vocal tract area specturm)
-4. [WaveTract: A hybrid generative model for speech synthesis](WaveTract: A hybrid generative model for speech synthesis)
-5. [Recent Advanced in Deep Learning Based Dialogue Systems: A Systematic Survey](Recent Advanced in Deep Learning Based Dialogue Systems: A Systematic Survey)
-6. [A Survey of Contrastive and Counterfactual Explanation Generation Methods for Explainable Artificial Intelligence](A Survey of Contrastive and Counterfactual Explanation Generation Methods for Explainable Artificial Intelligence)
-7. [GPT Understands, Too](GPT Understands, Too)
-8. [How of Explainable AI](How of Explainable AI)
-9. [A Unified Approach to Interpreting Model Predictions](A Unified Approach to Interpreting Model Predictions)
 
 
 ## Research Details
@@ -110,8 +100,8 @@
 ##Work
 
 1. [[password]]
-1. [investment](investment)
-2. [量化](量化)
+3. [investment](investment)
+4. [量化](量化)
 
 ##Course
 
@@ -128,7 +118,6 @@
 14. [Discrete Optimization by The University of Melbourne](Discrete Optimization by The University of Melbourne)
 15. [SJTU许志钦_最优化](SJTU许志钦_最优化)
 16. [机器学习-白板推导系列](机器学习-白板推导系列)
-17. [Machine Intelligence_Unversity of Waterloo](Machine Intelligence_Unversity of Waterloo)
 
 ##Tools
 
@@ -142,7 +131,6 @@
 ##Presentation
 
 1. [[CLOUD]]
-2. [XAI_interview](XAI_interview)
 
 ##Translation
 
@@ -187,7 +175,6 @@
 9. [2020-01-04](2020-01-04)
 9. [2020-01-18](2020-01-18)
 9. [2021-03](2021-03)
-10. [2021-07-22](2021-07-22)
 
 # Inspires
 

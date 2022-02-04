@@ -1,0 +1,127 @@
+
+#Lecture 17 Fuzzy logic, Fuzzy inference
+
+
+## computing with words 
+
+"... linguistic variables, that is, variables whhose values are not numbers but words or sentences in a natural or artificical language". L.A.Zadeh
+
+A linguistic variable is a collection of five thins:<X, T(X), U, G, M>
+
+1. a variable name X
+2. a set of terms T(X)
+3. a universe of discourse U
+4. a set of syntax rules G
+5. a set of semantic rules M
+
+Temperatures: 
+We use many linguistic hedges: 
+{ very cold, cold, cool, warm, hot }
+
+A temperature point like -20 in the range between -30 to 30 might be [0.6, 0.4, 0, 0, 0] representing [very cold, cold, cool, warm, hot]
+
+Fuzzy set: temperatures
+Set of terms: { very cold, cold, cool, warm, hot }
+Universe of discourse: -30 to 30
+
+## classical set and fuzzy set
+
+class set:
+
+A={x|x \in X and x is \Delta}, X is universe of discourse, \Delta is something and have some properties
+
+    e.g. x comes from a set of very old man and X is a very young man
+
+fuzzy set:
+
+A_{Fuzzy}={(x, \mu_{A}(x))| x \in X, \mu_{A}(x)\in [0, 1]}, \mu_{A}(x) is a membership function \mu of A, \mu of X in the se A 
+
+Membership function \mu_{A} quantifies the degree of belongingness of A
+Since A is now a linguistic variable, we can modify its meaning. ( In classical set, they are not linguistic variables, they are binary functions )
+
+
+## dilation and concentration
+
+\mu_{A}^{CON}(x) could be [\mu_{A}(x)]^2
+\mu_{A}^{DIL}(x) could be [\mu_{A}(x)]^1/2
+
+> Where do you get those numbers (exponential) ?
+
+\mu_{A} is known (e.g., bright, old , cold)
+
+- \mu_{very A} could be CON(A)=\mu_{A}^{CON}
+- \mu_{more or less A} could be DIL(A)=\mu_{A}^{DIL}
+- \mu_{very very A} could be CON(CON(A))
+- \mu_{not very A} could be 1-CON(A)
+
+## Modus Ponens
+
+Rule: If A is true, then B is true
+
+Observation: A is true
+
+Conclusion: B is true
+
+## Modus Tollens 
+
+Rule: If A is true, then B is true
+
+Observation: B is false
+
+Conclusion: A is false
+
+## AI is function approximation
+(mis)use decision trees for function approximation
+
+decision tree gives discret values and the actual function that describe the temperautures is a complicate function, a nonlinear function, a function with a lot of curves. 
+fuzzy logic is not discret
+
+> replace a scalar with a function
+
+## Fuzzy Inference
+
+Input -> coding(fuzzifiction) -> rule base(inference) -> decoding(defuzzification)
+
+- fuzzification:
+    
+    fuzzy systems with some sorts of membership function: you put the input through some membership fucntions
+    e.g. -22 = [0.75, 0.25, 0, 0, 0] representing [very cold, cold , cool, warm hot]
+- defuzzification:
+
+    You have multiple membership function. gives you a combined value of the output function
+
+## Examples: Inverted pendulum, PID controller
+
+Input: 
+1. error(diffence) in radium {negative medium, negative small, 0, positive small, positive medium}
+2. Omega (angular velocity) {negative medium, negative small, 0, positive small, positive medium}
+   
+Output:
+1. current(plus or minus) for direction {negative medium, negative small, 0, positive small, positive medium}
+
+Rules: (4 in 5^3)
+| Error           | Omega           | Current         |
+| 0               | 0               | 0               |
+| 0               | Negative medium | Positive medium |
+| 0               | Positive small  | Negative small  |
+| Positive medium | 0               | Negative medium |
+
+Question: error=27, oemga=-1.5/s, current=?
+
+    Find the membership value of first two condition, use minimum to model the logical "&". 
+    
+    Therefore, given `If error is PM & Omega is 0, then current is negative medium`, the belongingness for the rule=min(\mu_{error}(27), \mu_{omega}(-1.5/s))
+    After finding the region coresponding to the belongingness of negative medium.  we can use a defuzzification method to calcualte the center of gravity, it will give you -6.3A.
+    
+
+Fuzzy controllers can approximate the relationships between inputs and outputs via interpolation in a vague environment. 
+
+However, fuzzy logic has no capacity of learning, how do we get the rules?
+- from experts
+- from data via clustering/genetic algorithms
+
+Evolving Fuzzy Rules
+
+----
+
+

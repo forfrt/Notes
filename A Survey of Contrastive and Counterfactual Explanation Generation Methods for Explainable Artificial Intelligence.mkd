@@ -1,0 +1,17 @@
+
+# [A Survey of Contrastive and Counterfactual Explanation Generation Methods for Explainable Artificial Intelligence](https://ieeexplore.ieee.org/document/9321372)
+
+# Abstract
+
+A number of algorithms in the field of artificial intelligence offer poorly interpretable decisions. To disclose the reasoning behind such algorithms, their output can be explained by means of so-called evidence-based (or factual) explanations. Alternatively, contrastive and counterfactual explanations justify why the output of the algorithms is not any different and how it could be changed, respectively. It is of crucial importance to bridge the gap between theoretical approaches to contrastive and counterfactual explanation and the corresponding computational frameworks. In this work we conduct a systematic literature review which provides readers with a thorough and reproducible analysis of the interdisciplinary research field under study. We first examine theoretical foundations of contrastive and counterfactual accounts of explanation. Then, we report the state-of-the-art computational frameworks for contrastive and counterfactual explanation generation. In addition, we analyze how grounded such frameworks are on the insights from the inspected theoretical approaches. As a result, we highlight a variety of properties of the approaches under study and reveal a number of shortcomings thereof. Moreover, we define a taxonomy regarding both theoretical and practical approaches to contrastive and counterfactual explanation.
+
+
+# Introduction
+
+可解释性既可以满足解释模型决策原因的需求, 同时也能增强用户对输入做相应改变影响算法输出的能力, 从而提高对算法的潜在开发能力.
+
+the aim of this study is to fulfill the next three objectives: 
+
+1. to scrutinize theoretical works on the contrastive and counterfactual accounts of explanation; 
+2. 2. to summarize state-of-the-art methods in the field of automatic explanation generation thereof; 
+3. 3. to discuss a degree of synergy between the revised theories and their related up-to-date implementations.

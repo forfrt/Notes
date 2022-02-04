@@ -1,0 +1,61 @@
+
+# 长期任务
+
+1. [ ] [MIT Linear Algebra](https://www.bilibili.com/video/BV1ii4y187Dj), 已完成p1-p13
+1. [ ] [Standford CS224N](https://www.bilibili.com/video/BV1Wb411W7Nr), 已完成p1-p11
+1. [ ] [Standford CS520](https://www.bilibili.com/video/BV1D5411W7Ri), 已完成p1-p2
+2. [ ] 阅读数量金融, 暂时搁置
+3. [ ] [机器学习-白板推导系列](https://www.bilibili.com/video/BV1aE411o7qd), 已完成p9-p13
+5. [ ] 阅读[Causal Inference Course Lectures](https://www.youtube.com/watch?v=CfzO4IEMVUk&list=PLoazKTcS0Rzb6bb9L508cyJ1z-U9iWkA0)
+6. [ ] 阅读[因果推断入门](https://www.bilibili.com/video/BV1sJ41177sg), 已完成p1-p7
+8. [ ] 开发Note网站
+11. [ ] [数据降维算法](https://www.zhihu.com/column/c_1194552337170214912)
+12. [ ] [强化学习前沿](https://www.zhihu.com/column/reinforcementlearning)
+1. [ ] [2019年最全最新Vue、Vuejs教程，从入门到精通](https://www.bilibili.com/video/BV15741177Eh), 已完成p1-p23, p76-p99, 暂时搁置
+2. [ ] 阅读pinkTrombone源代码
+3. [ ] 编写一篇prompt tuning on VQA论文, 为ACL发表做准备
+
+
+# 2021-07-22 Weekly Schedule
+
+## TODO
+
+1. 阅读[PinkTrombone](https://github.com/zakaton/Pink-Trombone)代码
+2. 完成签合同所需的所有手续
+
+
+# 2021-07-21 
+
+1. 整理PinkTrombone代码结构(未完成)
+
+### Tomorrow
+
+1. 继续阅读PinkTrombone代码
+2. 快速阅读[SLANGZY: a fuzzy logic-based algorithm for English slang meaning selection](https://link.springer.com/article/10.1007/s13748-018-0159-3#:~:text=We%20aim%20to%20bridge%20this,Slang%20Dictionary%20on%20the%20Internet.)并整理简单笔记
+
+----
+
+## 2021-07-22 - 2021-07-29
+
+1. 快速阅读[SLANGZY: a fuzzy logic-based algorithm for English slang meaning selection](https://link.springer.com/article/10.1007/s13748-018-0159-3#:~:text=We%20aim%20to%20bridge%20this,Slang%20Dictionary%20on%20the%20Internet.)并整理简单笔记: 放弃, 与以后研究计划相关度不高
+1. 阅读dialogue相关文章
+2. 阅读Pink-Trombone相关代码
+3. 和导师讨论研究计划(VQA similiar)
+4. 和梁圣讨论研究计划(prompt learning on VQA)
+5. 完成入职后的剩余流程(申请计算资源, 申请vpn)
+
+### Tomorrow
+1. 阅读prompt learning论文
+2. 2021-08-03完成prompt learning on VQA的研究计划说明
+
+----
+
+## 2021-07-30
+
+1. 阅读[GPT Understands, Too](https://arxiv.org/abs/2103.10385)
+
+### Tomorrow
+1. 继续阅读prompt learning论文
+2. 周日与梁圣讨论prompt learning on VQA项目
+3. 2021-08-03完成prompt learning on VQA的研究计划说明
+

@@ -1,0 +1,140 @@
+
+# [GPT Understands, Too](https://arxiv.org/pdf/2103.10385.pdf)
+
+# Abstract
+
+GPTs可以使用P-tuning达到甚至超越同等大小BERTs
+
+1. On the knowledge probing (LAMA) benchmark, the best GPT recovers 64%, improves the privious best by 20+%; On the SuperGlue benchmark, GPTs达到了和BERT同样甚至更高的水平
+2. P-tuning大幅减少prompt engineering的情况下在few-shot和supervised settings同样也能提高BERT性能. 由此P-tuning超过了最前沿few-shot SuperGluebenchmark的方法
+
+# Introduction
+
+Evidences suggest that during the pre-training, notonly do language models learn contextualized text represen-tations, but also grammar, syntactic, commonsense, and even world knowledge
+
+1. undirectional language models like GPT for NLG
+2. bidirectional language models like BERT for NLU
+3. hybrid language models like XLNet, UniLM
+
+GPT在NLU上表现不如BERT
+
+然而最新GPT-3使用手工prompt在few-shot和0-shot的性能很强. 可能可以推出使用恰当人工prompt的unidirectional language models在NLU上同样有效. 但是手工找到最佳性能prompts就像大海捞针, 需要巨大验证集, 通常也意味着过拟合测试集. 创建adversarial prompts却可能导致性能大幅度下降. 许多工作敬重在找到离散prompts并证明其有效性. 但是由于神经网络是连续的, 离散的prompt可能是次优的.
+
+P-tuning在连续空间中自动搜索prompts. P-tuning 利用很少的连续自由参数来提供作为预训练语言模型输入的提示。然后我们使用梯度下降作为离散提示搜索的替代方法来优化连续提示。
+
+我们的发现打破了GPTs只会生成不会理解的刻板印象. 语言模型有比我们此前假设的多得多的world knowledge和先验task knowledge. P-tuning可以作为一个普遍方法为best下游任务调试LM
+
+1. GPTs使用p-tuning后和BERT在NLU上同样有竞争力. 揭示了GPTs架构在NLU上的潜力被低估了
+2. P-tuning在few-shot和fully-supervised setting情况下可以提高GPTs和BERT. P-tuning超出了LAMA和few-shot SuperGlue的其他前沿方法, 表明LM比我们之前预想的抓去了更多的world knowledge和prior task knwolege.
+
+# Motivation
+
+# Methods: P-tuning
+
+与离散提示类似，P-tuning 仅对输入应用非侵入性修改。  尽管如此，P-tuning 用其差分输出嵌入替换了预训练语言模型的输入嵌入
+
+Let $V$ refers to the vocabulary of a language model $M$ and $[P_i]$ refers to the $i^{th} prompt token in a template $T$. For simplicity, given a template $T={[P0:i],x,[Pi+1:m],y}$, com-pared to traditional discrete prompts which satisfy $[Pi] \in V$ and map the $T$ into 
+
+    ${\mathbb{e}([P_{0:i}]), \mathbb{e}(x), \mathbb{e}([P_{i+1:m}]), \mathbb{e}(y)}$
+    
+P-tuning instead regards the $[P_i]$ as pseudo tokens and mapthe template to
+
+    $ {h_0, ..., h_i, \matchbb{e}(x), h_{i+1}, ..., h_m, mathbb{e}(y)} $
+    
+where $h_i(0≤i<m)$ are trainable embedding tensors. This enables us to find a better continuous prompts beyond the original vocabulary $V$ of $\mathcal{M}$ could express. Finally, with thedownstream loss function $\mathcal{L}$, we can differentially optimizethe continuous prompt $h_i(0≤i < m)$ by
+
+    $\hat{h}_{0:m}= argmin_{h} \mathcal{L}(\mathcal{M}(x,y))$
+    
+![discret prompt vs p-tuning.png](./img/papers/discret prompt vs p-tuning.png)
+
+## Optimization
+
+1. Discreteness: The original word embedding \textbf{e} of \mathcal{M} has already become highly distribution and then optimized with SGD, which has been proved to only change the parameters in a small neighborhood, the optimizer would easily fall into local minima
+2. Association: we believe the values of prompt embeddings $h_i$ should be dependent on each other rather than independent. So need mechanism to associate prompt embeddings with each other.
+
+In the P-tuning we propose to also model the $h_i$ as a sequence using *a prompt encoder consists of a very lite neural network* that can solve the discretenessand association problems.
+
+Formally speaking, the real input embeddings $h^′_i$ to the language model $\mathcal{M} is derived from
+
+    $h_i= MLP([\overrightarrow{h_i}:\overleftarrow{h_i}]) \\ = MLP([LSTM(h_0:i) : LSTM(h_i:m)])$
+    
+虽然LSTM head的使用确实为连续提示的训练增加了一些参数，但LSTM head比预训练的模型小几个数量级。而且，在推理中，我们只需要output embeddinghand, 放弃LSTM head
+
+
+# Experiments
+
+## Knowledge Probing
+
+### Results
+
+P-tuning比Manual Prompting和Discrete Prompting效果都好很多
+
+P-tuning vs Fine-tuning
+
+1. Manual Prompting, MP
+2. Fine-tuning, FT
+3. Manual Prompting with Fine-tuning, MP+FT
+4. P-tuning
+
+P-tuning性能和Fine-tuning相当甚至更好, 但是P-tuning完全不改变LM参数而Fine-tuning会改变.可能是因为knowledge probing需要的facts都是硬编码在LM而不需要推理, Fine-tuning可能导致遗忘现象儿P-tuning通过连续prompt能很好找到储存的knowledge
+
+此外, 虽然MP+FT效果更好, 但是GPT像BERT从P-tuning中获益那样从使用MP+FT获益. 也就是说P-tuning对unidirectional language model更适用. 此外P-tuning训练成本更低.
+
+
+## SuperGlue
+
+SuperGlue:
+1. Question Answering & MultiRC
+2. textual entailment
+3. RTE
+4. co-reference resolution
+5. causal reasoning
+6. word sense disambiguation
+7. ReCoRD
+
+8. supervised setting, 使用全部训练与开发集来选择与微调超参数
+9. few-shot setting, few-shot version of SuperGLUE(FewGlue) is adopted.
+
+### Fully-supervised Learning
+
+
+### Few-shot learning
+
+### Finetuning vs MP Finetuning vs P-tuning
+
+
+## Related work
+
+### Pertrained lM
+
+### lM as KB
+
+### LM prompting
+
+The birth of GPT-3 (Brown et al., 2020) has blown peo-ple’s minds with its outstanding performance in multi-taskand few-shot learning.  However, GPT-3 is not designedfor fine-tuning, and it heavily relies on **handcraft prompts**(or thein-context learning(Liu et al., 2021; Zhao et al.,2021)) to transfer to downstream tasks.   
+
+recent automating the search of discrete prompts: 
+1. mining training corpus (Jianget al., 2020b)
+2. token-based gradient searching (Shin et al.,2020) 
+3. using separate model (Gao et al., 2020) such asT5 to generate prompts. 
+
+However, the search over discretespace is challenging to optimize and sub-optimal due to the continuous nature of neural networks.
+
+prefix-tuning和p-tuning很像, 也是用来训练continuous prompt
+
+1. prefix-tuning转为NLG和GPT设计, p-tuning适用于NLU和所有LM
+2. prefix-tuning只能在输入句子最前面加prompt token, p-tuning可以插在任意位置
+3. prefix-tuning侵入式地再transformer每一层都加上了prompt token, 因为只在输入层加没有效果, 而P-tuning只在输入层加了continuous prompts
+4. p-tuning同时探讨了未来提高使用anchor prompts.
+
+# Conclusion
+
+
+
+
+
+    
+    
+    
+    
+    

@@ -25,3 +25,14 @@
 
     可以通过该软件和附近人组成一个桌游小组, 从而更好一起约狼人杀
     自动推荐小区业主/租户群, 关心小区新闻
+    
+4. PinkTromBone， 基于发声模型的语言模型
+
+    2021/07/21开始
+    [PinkTromBone github](https://github.com/zakaton/Pink-Trombone)
+    
+    1. 读论文, 尤其是pinktrombone和晨曦论文中特地强调过的
+    2. 阅读pinktrombone源码
+    3. 找一个python的相关语音库， 使用python将pinktrombone实现
+    4. 阅读近期发表的相关论文
+    

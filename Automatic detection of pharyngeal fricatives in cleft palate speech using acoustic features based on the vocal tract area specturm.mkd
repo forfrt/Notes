@@ -1,0 +1,32 @@
+
+# [Automatic detection of pharyngeal fricatives in cleft palate speech using acoustic features based on the vocal tract area spectrum](https://www.sciencedirect.com/science/article/pii/S0885230821000103)
+
+# Highlights
+
+- An automatic pharyngeal fricative detection method is proposed.
+- A vocal tract area spectrum is proposed to represent the vocal tract using time-varying cascaded pipes.
+- Four acoustic features based on vocal tract area spectrum are extracted to identify the pharyngeal fricative.
+
+# Abstract
+
+The pharyngeal fricative is a typical compensatory articulation disorder in cleft palate speech. It is produced by retracting the root of the tongue to the posterior pharyngeal wall to substitute for the fricatives and affricates produced in the oral cavity. People who use the pharyngeal fricative have difficulties in daily communication. Research on automatic pharyngeal fricative detection can provide aids in diagnosis for speech-language pathologists and clinical doctors. This work proposes a vocal tract area spectrum (VTAS) to represent a vocal tract model using time-varying cascaded pipes. Four acoustic features based on the VTAS (the centroid and spread (CS), peak linear deviation (PLD), relative-normal entropy (RNE), mean of the ratios’ statistics (MRS)) are proposed to evaluate the differences between pharyngeal fricatives and normal speech. The CS feature is proposed to evaluate the overall shape of the vocal tract to detect whether there are abnormal gestures or movements of the articulators in speech production. The PLD and RNE features focus on the variation and complexity of each vocal tube's area during the whole pronunciation process. The MRS feature is proposed to describe the continuity of the vocal tract. To evaluate the effectiveness of these four features, pharyngeal fricative detection experiments are conducted using a pharyngeal fricative dataset. This dataset contains 1246 speech samples spoken by 50 cleft palate patients and 50 normal speakers, covering all types of initial consonants in which the pharyngeal fricative usually occurs. The detection accuracy of the pharyngeal fricative using the CS, PLD, RNE and MRS feature ranges from 80.66% to 90.21%. When using the proposed CS+PLD+RNE+MRS feature, an accuracy of 95.18% can be achieved on the pharyngeal fricative dataset.
+
+
+咽摩擦音是腭裂语音中一种典型的代偿性发音障碍。它是通过将舌根缩回咽后壁来代替口腔中产生的摩擦音和擦擦音而产生的。使用咽摩擦音的人在日常交流中有困难。咽摩擦音自动检测技术的研究可为语音病理学家和临床医生提供诊断依据。本文提出了一种声道面积谱(VTAS)来表示时变级联管声道模型。提出了基于VTAS的4个声学特征(质心与扩散(CS)、峰值线性偏差(PLD)、相对正态熵(RNE)、比值统计均值(MRS))来评价咽摩擦音与正常语音的差异。提出了CS特征来评估声道的整体形状，以检测语音产生过程中发音者是否有异常的手势或动作。PLD和RNE的特点是关注整个发音过程中每个声道区域的变化和复杂性。提出利用MRS特征来描述声道的连续性。为了评价这四种特征的有效性，利用咽部摩擦数据集进行了咽部摩擦检测实验。该数据集包含50名腭裂患者和50名正常说话者所讲的1246个语音样本，涵盖了通常会出现咽摩擦音的所有类型的声母。使用CS、PLD、RNE和MRS特征对咽摩擦音的检测准确率在80.66% ~ 90.21%之间。采用本文提出的CS+PLD+RNE+MRS特征，在咽摩擦数据集上的准确率达到95.18%。
+
+
+# Introduction
+
+本研究的主要贡献如下:
+
+1. 咽摩擦音与正常语音的区别在于声道的收缩和发音器官的灵活性。该**VTAS**方法利用时变级联管来描述单个声道区域序列的变化特征以及整个声道区域序列的分布特征。
+2. 提出了声道形状特征的**CS**特征。它评估VTAS的重心和平直度，以检测由异常手势和关节运动引起的差异。
+3. 提出了**PLD**特征来评估咽摩擦音和正常语音之间单个声管区域序列的发散分布。这个特征对发音的位置和方式的变化很敏感。
+4. **RNE**特征用来表示发音器在语音产生中的灵活性和运动。它可以通过计算单个声道面积序列的复杂性来评估这些特征。
+5. 提出利用**MRS**特征评价声道的连续性。这一特征对咽喉狭窄的通道和舌头缩回对发音器运动的限制非常敏感。
+
+下一节介绍处于声道面积频谱的咽摩擦音检测算法, 实验结果与分析放到了第3节, 第4节进行了讨论和总结.
+
+# Methods
+
+![Jia et al., 2021_Pharyngeal Fricative Detection.jpg](./img/Papers/Jia et al., 2021_Pharyngeal Fricative Detection.jpg)

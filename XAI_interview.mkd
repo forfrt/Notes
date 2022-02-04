@@ -1,0 +1,128 @@
+
+
+1. sensitivity
+
+    This states that for any input and baseline that differs in one feature and the outputs vary for these two inputs, the differing feature must receive some attribution
+2. Implementation invariance
+
+    Two networks are functionally equivalent if their outpus are equal for all inputs, despite having very different implementations. Attribution methods should satisfy implementation invariance
+    
+    While integrated gradients satisfies the invariance, LRP and DeepLift doesn't
+3. Completeness
+
+    completeness acts a good evaluation metric for a attribution. This essentially says that the sum of the attributions must be the difference between input and baseline output
+
+
+## Integrated gradients
+
+Path integrated gradients have been used in economics before estimating the cost of a project as a function of the demands of various participants
+
+Formally a point on a path is defined by:
+
+    \gamma(\alapha), \alpha \in [0, 1]
+    where \gamma(0)=x'(the baseline), and \gamma(1)=x
+    
+    PathIntegratedGrads_i^{\gamma}(x)=\int_{\alpha=0}^{1} \frac{\partial F(\gamma(\alpha))}{\partial \gamma_i{\alpha}} \frac{\partial \gamma_i{\alpha}}{\partial \alpha} d \alpha
+    
+    
+symmetry preseving
+axiom
+guided back propogation
+
+x_1>1
+x_1-1>x_2>0
+
+df/dz_2
+
+## Attention
+
+## LRP
+
+## DeepLift
+
+## Class Activation Maps (CAM)
+Learning Deep Features for Discriminative Localization, CVPR 2016
+
+global average pooling (GAP)
+ 
+- Advantages:
+ 
+    1. is class discriminative
+    2. doesn't require a backward pass unlike guided backprop or deconvolution
+
+- Disadvantages
+    1. need to retraining to explain trained models
+    2. model may trade off accuracy for interpretability
+    3. constraint on architecture is restrictive; may not be useful to explain complex tasks like image captioning or visual question answering (VQA)
+
+## Gradient-weighted CAM (Grad-CAM)
+
+Visual Explanations from Deep Networks via Gradient-based Localization, ICCV 2017
+
+guided grad-cam
+
+    w_k^c = \frac{1}{Z} \sum_{i} \sum_{j} \frac{\partial y^c}{\partial A_{ij}^k}
+
+
+### Counterfactual Explanations
+
+Negating the value of gradients used for calculation of importance weights (w_k^c) causes localization maps to show image pathces that adversarially affect classification output
+
+    w_k^c=\frac{1}{Z} \sum_{i} \sum_{j} - \frac{\partial y^c}{\partial A_{ij}^k}
+
+removing/suppressing features occurring in such patches can improve model confidence
+
+
+
+## Grad-CAM++
+
+Grad-CAM++: Improved Visual Explanations from Deep Convolutional Networks, WACV 2018
+
+Grad-CAM considers all pixel gradients equally when computing importance weights of activation maps
+
+    w_k^c = \frac{1}{Z} \sum_{i} \sum_{j} \frac{\partial y^c}{\partial A_{ij}^k}
+    
+    w_k^c  becomes the weight of the k-th feature map towards the c-th class
+    
+This can suppress activation maps with comparatively less spatial footprint
+
+This can be corrected by using weighted average of pixel-wise gradients
+
+    w_k^c = \sum_{i} \sum_{j} \alpha_{ij}^{kc} ReLU(\frac{\partial y^c}{\partial A_{ij}^k}) 
+    
+where \alpha is the pixel-wise weight, use ReLU to focus on positive gradients
+(i, j) corresponds to each (i, j)th location of a feature map. K corresponds to the kth feature map and c corresponds to the class which we want to maximize
+
+### Methodology
+
+For a particular class c and activation map k, the pixel-wise weight \alpha^{kc} at pixel position (ij) can be calculated as:
+
+    \alpha_{ij}^{kc} = \frac{ \frac{\partial^2 Y^c} {(\partial A_{ij}^{k})^2}} {2 \frac{\partial^2 Y^c} {(\partial A_{ij}^kk)^2} + \sum_a \sum_b A_{ab}^k {\frac{\partial^3 Y^c} {(\partial A_{ij}^k)^3} }}
+    
+    Both a, b and i, j are interators on the same  activation map. They are only used to avoid confusion.
+    
+    
+Find localization map L_{Grad-CAM++} (similar to that of GradCAM):
+
+    L_{Grad-CAM++}=ReLU(\sum_k w_k^c A^k)
+    where w_k^c=\sum_i \sum_j \alpha_{ij}^{kc} ReLU(\frac{\partial y^c} {\partial A_{ij}^k})
+
+
+### Limitations
+
+Inability to identify multiple instance of objects
+
+Unsatisfactory localization performance, especially under occlusion
+
+
+
+## back-propogation, data gradient
+
+## Guided back propagation
+
+## SmoothGrad
+
+The idea of SmoothGrad technique is to take an image of interest, sample similar images by adding a noise with Gaussian distribution to the original input, and then take the mean of the samapled images as output saliency.
+
+
+

@@ -1,0 +1,172 @@
+
+# A Unified Approach to Interpreting Model Predictions
+
+# Introduction #
+
+we present a novel unified approach to interpreting model predictions. Our approach leads to three potentially surprising results that bring clarity to the growing space of methods
+
+1. We introduce the perspective of viewing any explanation of a model’s prediction as a model itself, which we term the explanation model. This lets us **define the class of additive feature attribution methods** (Section 2), which unifies six current methods.
+2. We then show that **game theory results guaranteeing a unique solution apply to the entire class of additive feature attribution methods** (Section 3) and **propose SHAP values as a unified measure of feature importance that various methods approximate** (Section 4)
+3. We **propose new SHAP value estimation methods and demonstrate that they are better aligned with human intuition** as measured by user studies and more effectually discriminate among model output classes than several existing methods (Section 5)
+
+
+# Additive Feature Attribution Methods #
+
+We use simpler explanation model as any interpretable approximation of the original complex model
+
+Let f be the original prediction model to be explained and g the explanation model. Here we focus on local methods designed to explain the prediction f(x) based on a single input x, as proposed in LIME. 
+
+Explanation models often use simplified inputs x' that map to the original inputs through a mapping function x=h_x(x'). Local methods try to ensure $g(z') \approx f(h_x(z'))$ whenever $z' \approx x'$
+
+Definition 1 Additive feature attribution methods have an explanation model that is a linear function of binary variables:
+
+    $g(z')=\phi_0+\sum\limits_{i=1}^M \phi_i*z_i'$,
+    
+    where z' \in {0, 1}^M, M is the number of simplified input features, and $\phi_i \in \mathbb{R}$
+    
+## LIME 
+
+LIME refers to simplified inputs x′ as “interpretable inputs,” and the mapping x = h_x(x′) converts a binary vector of interpretable inputs into the original input space.
+
+## DeepLIFT
+
+DeepLIFT was recently proposed as a recursive prediction explanation method for deep learning. It attributes to each input x_i a value C_{∆xi∆y} that represents the effect of that input being set to a reference value as opposed to its original value.
+
+
+## Layer-Wise Relevance Propagation
+
+The layer-wise relevance propagation method interprets the predictions of deep network. This method is equivalent to DeepLIFT with the reference activations of all neurons fixe dto zero.
+
+
+## Classic Shapley Value Estimation
+
+Three previous methods use classic equations from cooperative game theory to compute explanations of model predictions: 
+
+1. Shapley regression values, 
+2. Shapley sampling values, and 
+3. Quantitative Input Influence
+
+### Shapley Regression Values
+
+This method requires retraining the model on all feature subsets S ⊆ F, where F is the set of all features.
+
+### Shapley Sampling Values
+
+1. applying sampling approximations to Equation 4, and 
+2. approximating the effect of removing a variable from the model by integrating over samples from the training dataset
+
+This eliminates the need to retrain the model and allows fewer than 2|F| differences to be computed.
+
+### Quantitative Input Influence
+
+Quantitative input influence is a broader framework that addresses more than feature attributions
+
+----
+
+# Simple Properties Uniquely Determine Additive Feature Attributions
+
+A surprising attribute of the class of additive feature attribution methods is the presence of a single unique solution in this class with three desirable properties
+
+1. Local Accuracy
+
+    When approximating the original model f for a specific input x, local accuracy requires the explanation model to at least match the output of f for the simplified input x′ (which corresponds to the original input x).
+    
+2. Missingness
+
+    If the simplified inputs represent feature presence, then missingness requires features missing in the original input to have no impact.
+    
+3. Consistency
+
+    Consistency states that if a model changes so that some simplified input's contribution increases or stays the same regardless of the other inputs, that input's attribution should not decrease.
+    
+
+Theorem 1:
+
+    Only one possible explanation model g follows Definition 1 and satisfies Properties 1, 2, and 3:
+    
+    $ \phi_i(f, x)=\sum\nolimits_{z' \subseteq x'} \frac{|z'|!(M-|z'|-1)!}{M!}[f_x(z')-f_x(z'\i)] $
+    
+    where z'\i denote setting z_i'=0, |z'| is the number of non-zero entries in z', and $z'\subseteq x'$ represents all z' vectors where the non-zero entries are a subset of the non-zero entries in x'
+    
+Young (1985) demonstrated that Shapley values are the only set of values that satisfy three axioms similar to Property 1, Property 3, and a final property that we show to be redundant in this setting (see Supplementary Material). Property 2 is required to adapt the Shapley proofs to the class of additive feature attribution methods.
+
+----
+
+# SHAP (SHapley Additive exPlanation) Values
+
+SHAP values as a unified measure of feature importance.
+
+The exact computation of SHAP values is challenging. We describe two model-agnostic approximation methods:
+1. Shapley sampling values
+2. Kernel SHAP
+
+We also describe four model-type-specific approximation methods, including MAX SHAP and Deep SHAP.
+
+Feature Independence and Model Linearity are two optional assumptions simplifying the computation of the expected values:
+
+    $f(h_x(z'))=E[f(z)|z_S]$, SHAP explanation model simplified input mapping
+    
+## Model-Agnostic Approximations
+
+    $f(h_x(z'))=E_{z_S}[f(z)]$, assume feature independence
+    
+If we assume feature independence when approximating conditional expectations, then SHAP values can be estimated directly using the Shapley sampling values method or equivalently the Quantitative Input Influence method.
+
+These methods use a sampling approximation of a permutation version of the classic Shapley value equations
+
+### Kernel SHAP (Linear LIME + Shapley Values)
+
+## Model-Specific Approximations
+
+A natural question to pose is whether the solution to Equation 2 recovers these values. The answer depends on the choice of loss function L, weighting kernel π_{x′}and regularization term Ω. The LIME choices for these parameters are made *heuristically*; using these choices, Equation 2 does not recover the Shapley values.
+
+Below we show how to avoid heuristically choosing the parameters in Equation 2 and how to find the loss function L, weighting kernel πx′, and regularization term Ω that recover the Shapley values
+
+    Thereom 2 (Shapley kernel) the specific forms of $\pi_{x'}, L, and \Omega$ that make solutions of Equation 2 consistent with Properties 1 through 3 are:
+    
+    \Omega(g)=0,
+    \pi_{x'}=\frac{M-1}{(M choose |z'|)|z'|(M-|z'|)}
+    L(f, g, \pi_{x'})=\sum\nolimits_{z' \in Z}[f(h_x(z'))-g(z')]^2 \pi_{x'}(z')
+    
+    where |z'| is the number of non-zero elements in z'
+    
+Since g(z′) in Theorem 2 is assumed to follow a linear form, and L is a squared loss, Equation 2 can still be solved using linear regression. As a consequence, the Shapley values from game theory can be computed using weighted linear regression.
+
+
+## Model-Specific Approximations
+
+### Linear SHAP
+
+For Linear models, if we assume input feature independence, SHAP values can be approximated directly from the model's weight coefficients.
+
+Corollary 1 (Linear SHAP) Given a linear model $f(x)=\sum\limits_{j=1}^M w_j x_j + b: \phi_0(f, x) = b$ and 
+
+    \phi_i (f, x) = w_j (x_j- E[x_j])
+    
+
+### Low-Order SHAP
+
+Since linear regression using Theorem 2 has complexity O(2^M + M^3), it is efficient for small values of M if we choose an approximation of the conditional expectations.
+
+### Max SHAP
+
+Using a permutation formulation of Shapley values, we can calculate the probability that each input will increase the maximum value over every other input. Doing this on a sorted order of input values lets us compute the Shapley values of a max function with M inputs in O(M^2) time instead of O(M2^M )
+
+### Deep SHAP (DeepLIFT + Shapley values)
+
+
+
+
+    
+
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
